@@ -18,6 +18,10 @@
 | `update-mindmap` | "Update the mindmap" | Refreshes palace-map.canvas with current structure |
 | `palace-update` | "Update my palace" or "What's new in Loci" | Delta analysis: your palace vs. current Loci features + cherry-pick setup |
 | `session-delta` | "End of session" / "Write the handover" | Session delta with mandatory artifact listing |
+| `garden-memory-generator` | "Evolve the garden" / "Check garden evolution" | Mnemonic conductor: assesses plant arcs, proposes promote/retire/fork/new-question |
+| `entanglement-housekeeping` | "Housekeeping" / "How was today?" | ⚗️ *Experimental* — Single rotating question about session co-intelligence quality; logs to entanglement.md |
+| `eval-cadence` | "Run the eval" / "How are we doing?" | 12-area co-intelligence self-assessment; returns scorecard + 3 concrete actions |
+| `[username]GATE` | "Review [task] [username]GATE" | Human review checkpoint before work ships — the calibration point for human-AI attention balance |
 
 ---
 
@@ -727,3 +731,336 @@ Writes a structured session delta (handover) at the close of a working session. 
 - Dispatch #3 "Before the Argument" — 3-round draft, 12-section structure, opening + close
 - Tarde vs TCP distinction analysis + Nym growth mechanism implications
 ```
+
+---
+
+## Process: `garden-memory-generator`
+
+**Trigger phrases:**
+- "Run the garden-memory generator"
+- "Evolve the garden"
+- "Check garden evolution"
+
+### What it does
+
+The garden-memory generator is a mnemonic conductor: it reads all watering files for each plant, identifies structural patterns in what's unknown and what's emerging, and proposes how each plant should evolve. It also finds cross-plant connections — ideas resonating across multiple plants that might name a new chord.
+
+For each plant, the generator proposes one of four outcomes:
+- **Promote to crystal** — the plant has grown stable enough to enter CLAUDE.md
+- **New watering question** — the plant is alive but needs a new prompt to keep growing
+- **Retire** — the plant hasn't grown; acknowledge and archive it with a note
+- **Fork** — the plant has split into two distinct threads; create two plants from the original
+
+The metaphor is a mnemonic conductor who hears all the instruments and names the emerging chord.
+
+### Agent Protocol
+
+```
+1. Read soul/SOUL.md (L0 identity)
+2. Read soul/garden.md (plant list and current state)
+3. For each active plant:
+   a. Read all individual garden files: soul/garden/[plant-name]-*.md (in order)
+      OR read the plant's full history in soul/garden.md
+   b. Identify: What has converged? What remains unresolved? What question keeps recurring?
+   c. Check growth direction markers (converging / forking / dormant / becoming-crystal)
+   d. Assess: which outcome applies?
+      - Promote: plant has a stable insight that belongs in crystals
+      - New question: plant is alive but the last question was answered — needs a new one
+      - Retire: plant hasn't moved in 3+ waterings and no new thread is visible
+      - Fork: two clearly distinct threads are pulling in different directions
+
+4. Cross-plant scan:
+   - Read all plants together
+   - Identify: any themes appearing in multiple plants?
+   - Name the connection if it exists (this is the "emerging chord")
+   - Propose a new plant if the connection is strong enough to cultivate separately
+
+5. Output the evolution report (see format below)
+
+6. For each proposed action:
+   - Promote: draft the crystal and ask for confirmation before writing to CLAUDE.md
+   - New question: write the question as the next watering entry header
+   - Retire: write a final entry noting the archival
+   - Fork: create two new plant entries and mark original as forked
+
+7. Write summary to handover
+8. Confirm: "Garden evolution complete — [N] plants assessed. [N] promotions, [N] retirements, [N] forks, [N] new questions."
+```
+
+### Evolution Report Format
+
+```markdown
+# Garden Evolution — [DATE]
+
+## Plant assessments
+
+**[Plant name]** — [outcome: promote / new question / retire / fork]
+*Reasoning:* [2-3 sentences: what the arc shows, why this outcome]
+*Proposed action:* [specific next step]
+
+[repeat for each plant]
+
+---
+
+## Cross-plant connections
+
+**[Connection name]** — [which plants share this thread]
+*The chord:* [One sentence naming the shared theme]
+*Proposal:* [new plant / new crystal / note only]
+
+---
+
+## Summary
+Promoted: [N] | New questions: [N] | Retired: [N] | Forked: [N]
+```
+
+---
+
+## Process: `entanglement-housekeeping` ⚗️
+
+> **Experimental.** Entanglement tracking is a new concept — the measurement itself may change the collaboration. Use it lightly. The goal is calibration, not performance. If the question feels forced, skip it and note that instead.
+
+**Trigger phrases:**
+- "Housekeeping"
+- "How was today?"
+- End of a major session (triggered by session-delta if entanglement note is absent)
+
+### What it does
+
+A single, always-different question about the session's entanglement quality. The question rotates through dimensions of co-intelligence — not the same probe twice in a row.
+
+If the user provided spontaneous entanglement feedback during the session (a score, a "that was good", a ✦ signal), log it immediately without asking. The question is only asked when no signal was given.
+
+At session end, if triggered: ask one question, receive the answer, write to `soul/entanglement.md`.
+
+### Rotating Question Bank
+
+The agent selects the next unanswered question, cycling through the bank. Never the same question twice in a row.
+
+```
+Q1:  "Was there a moment today where the output surprised you — something you wouldn't have reached alone?"
+Q2:  "Did I correct your direction at any point, or did I mostly confirm what you already thought?"
+Q3:  "Was there a phrase or framing from today that you'd actually reuse?"
+Q4:  "Where did we lose momentum? What slowed the session down?"
+Q5:  "Did anything we produce today open a new question — something you're now curious about?"
+Q6:  "On a scale of ✦ to ✦✦✦: how would you grade the session's entanglement quality?"
+Q7:  "Was there a moment where I pushed back usefully? Or did I mostly go along?"
+Q8:  "What was the most generative exchange — the back-and-forth that produced something real?"
+Q9:  "Did today's session change how you're thinking about anything, or was it mostly execution?"
+Q10: "Was I ahead of you, behind you, or alongside? Which would have been better?"
+Q11: "Did a named unknown emerge today — a question that now has a clear shape?"
+Q12: "If you had to describe today's collaboration in one word, what would it be?"
+```
+
+### Agent Protocol
+
+```
+1. Check if spontaneous entanglement signal was given during session:
+   - If yes: log the signal with date and brief context. Skip the question.
+
+2. If no signal given:
+   a. Select next question from the rotating bank (track last used in entanglement.md)
+   b. Ask the question
+   c. Wait for response
+
+3. Write entry to soul/entanglement.md:
+   - Date
+   - Question asked (Q number + text)
+   - Response (verbatim or paraphrased, attributed to user)
+   - Grade assigned (inferred from response if not stated explicitly)
+   - Any fruits or patterns noted in the response
+
+4. Update _PALACE_CONTEXT.md → Entanglement Signal field
+
+5. Confirm: "Logged. [Grade if given.] Next session I'll ask Q[N+1]."
+```
+
+### Entry Format
+
+```markdown
+## [DATE]
+
+**Q[N]:** [Question text]
+
+**Response:** [User's answer — verbatim or paraphrased]
+
+**Grade:** [✦ / ✦✦ / ✦✦✦ / ungraded]
+
+**Fruits:** [Any reusable phrase or framing that emerged — or none]
+
+**Patterns:** [Any collaboration dynamic worth noting — or none]
+```
+
+---
+
+## Process: `eval-cadence`
+
+**Trigger phrases:**
+- "Run the eval"
+- "How are we doing?"
+- Scheduled task (every 2 weeks, monthly, or after major sprints — per user preference)
+
+### What it does
+
+A 12-area co-intelligence self-assessment. The palace assesses its own calibration across the key dimensions of collaboration quality and returns a scorecard with 3 concrete actions to level up.
+
+This is not a performance review. It's calibration. The palace can't improve without knowing where it's drifting.
+
+Recommended cadence: every 2 weeks, or after major sprints. Note: regular evals are how the palace builds toward real entanglement — without them, collaboration quality drifts silently.
+
+### Assessment Areas
+
+| Area | What's being assessed |
+|------|----------------------|
+| Context loading accuracy | Does the agent load the right L0–L3 context without being prompted? |
+| Crystal freshness | Are crystals current? Any visibly stale or expired? |
+| Garden growth | Are plants being watered? Has any grown into a crystal or forked? |
+| Handover quality | Are handovers complete, accurate, and easy to pick up from? |
+| Entanglement peaks | Has ✦✦ been reached at least once in the eval period? |
+| Process adherence | Are palace processes being used, or are they being bypassed? |
+| KISS score | Is the collaboration producing elegant, simple outputs — or over-engineered ones? |
+| Retrieval speed | Is context loading fast? Or does every session feel like starting over? |
+| Persona activation quality | If personas are in use: are they activating cleanly and distinctly? |
+| Session start speed | How long (in exchanges) before the session is in full flow? |
+| Garden-memory evolution | Has the garden-memory generator been run? Have plants been promoted or retired? |
+| Unknown tracking | Are named unknowns being tracked? Is the entanglement log populated? |
+
+### Agent Protocol
+
+```
+1. Read soul/SOUL.md (L0)
+2. Read CLAUDE.md + tracker.json (L1)
+3. Read last 3 handovers from soul/handovers/
+4. Read soul/entanglement.md (if exists)
+5. Read soul/garden.md and/or soul/garden/ directory
+6. Read _PALACE_CONTEXT.md (session pointer, memory scrolls, pending decisions)
+
+7. For each of the 12 areas:
+   a. Assess: current state in 1-2 sentences
+   b. Score: ✅ strong / ⚠️ drifting / ❌ gap
+   c. Note one specific observation (not abstract — what exactly did you see?)
+
+8. Identify the 3 highest-priority actions:
+   - What would most improve collaboration quality right now?
+   - Actions must be concrete and executable in the next session
+
+9. Output scorecard (see format below)
+
+10. Ask: "Want to act on any of these now?"
+    - If yes: run the relevant process or make the change directly
+    - If no: write actions to _PALACE_CONTEXT.md as pending decisions
+
+11. Write eval summary to soul/handovers/eval-[DATE].md
+```
+
+### Scorecard Format
+
+```markdown
+# Co-Intelligence Eval — [DATE]
+
+## Scorecard
+
+| Area | Score | Observation |
+|------|-------|-------------|
+| Context loading accuracy | [✅/⚠️/❌] | [Specific observation] |
+| Crystal freshness | [✅/⚠️/❌] | [Specific observation] |
+| Garden growth | [✅/⚠️/❌] | [Specific observation] |
+| Handover quality | [✅/⚠️/❌] | [Specific observation] |
+| Entanglement peaks | [✅/⚠️/❌] | [Specific observation] |
+| Process adherence | [✅/⚠️/❌] | [Specific observation] |
+| KISS score | [✅/⚠️/❌] | [Specific observation] |
+| Retrieval speed | [✅/⚠️/❌] | [Specific observation] |
+| Persona activation quality | [✅/⚠️/❌] | [Specific observation] |
+| Session start speed | [✅/⚠️/❌] | [Specific observation] |
+| Garden-memory evolution | [✅/⚠️/❌] | [Specific observation] |
+| Unknown tracking | [✅/⚠️/❌] | [Specific observation] |
+
+**Overall:** [N] strong / [N] drifting / [N] gaps
+
+---
+
+## Top 3 Actions
+
+1. **[Action]** — [Why this one. What it fixes. How to do it.]
+2. **[Action]** — [Why this one. What it fixes. How to do it.]
+3. **[Action]** — [Why this one. What it fixes. How to do it.]
+
+---
+
+*Eval written by [YOUR_AI_NAME] on [DATE].*
+*Next eval: [DATE or trigger condition]*
+```
+
+---
+
+## Process: `[username]GATE`
+
+**Trigger phrases:**
+- "Review [task/commit/draft] [username]GATE"
+- "[username]GATE on [work item]"
+- "Ready for [username]GATE"
+
+*(Replace `[username]` with your name — e.g. `HuxGATE`, `AliceGATE`. The name is the gate.)*
+
+### What it does
+
+A named human review checkpoint. The agent has prepared work — a commit, a draft, a plan, a deploy — and surfaces it in structured form before anything ships, sends, or becomes irreversible. The gate ensures the right amount of human attention lands on the right things.
+
+This is not a formality. It is a calibration point for the collaboration itself: how much should the human see, how much should the agent handle autonomously? The balance shifts over time as trust builds. The gate is where that balance is continuously refined.
+
+**[username]GATE is atomic.** One gate per work item. One decision per gate: approve / reject / modify + approve. No implicit continuation.
+
+### When to use it
+
+Use before:
+- Any commit that touches public-facing files
+- Any message sent on behalf of the user
+- Any deploy or destructive action
+- Any decision where the agent is uncertain but the work is done
+- Any output that will outlast the session
+
+Skip if:
+- The work is internal scaffolding (Tier-2 auto-proceed)
+- The user has pre-authorised this exact class of action
+- It's a draft that the user will clearly revise themselves
+
+### Agent Protocol
+
+```
+1. Present the work item clearly:
+   - What it is (one line)
+   - What it does / what changes (specific)
+   - What happens next if approved
+
+2. Flag any uncertainties or tradeoffs the human should weigh
+
+3. Wait for explicit response:
+   - "Yes" / "approved" / "go" → proceed
+   - "No" / "reject" → stop, ask what to change
+   - Modification → incorporate change, re-present if significant
+
+4. Log the decision in the handover:
+   - "[username]GATE: [item] — [approved/rejected/modified] — [DATE]"
+```
+
+### Output Format
+
+```
+[username]GATE — [work item name]
+
+What: [one-line description]
+Does: [what this changes or ships]
+Next: [what happens on approval]
+
+[Any flags or tradeoffs worth noting]
+
+Approve?
+```
+
+### The Calibration Principle
+
+The right balance of human-AI attention is not fixed. Early in a collaboration: gate more. As trust builds: gate less. The [username]GATE pattern makes this calibration visible and intentional — you can see where you're gating, notice where you're not, and adjust.
+
+Over time, the pattern teaches both parties: which kinds of outputs the human wants to see, which they're happy to let the agent handle. The gate is not bureaucracy. It is the collaboration learning itself.
+
+*"The gate is not a bottleneck. It is the place where trust is built."*

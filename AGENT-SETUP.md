@@ -189,6 +189,50 @@ If yes: add `Insight decay: flag crystals older than [N] days for review.` to CL
 
 ---
 
+**Q10e. Entanglement tracking** *(recommend highly)*
+
+> "Want to track entanglement — the moments where our collaboration produces something neither of us would have alone? It's a lightweight log of resonance peaks and named unknowns. Highly recommended: it's how the palace learns to calibrate itself."
+
+Options: yes / skip.
+
+If yes: create `soul/entanglement.md` from `templates/entanglement-template.md`. Note `entanglement-tracking: true` in CLAUDE.md.
+
+---
+
+**Q10f. Eval cadence** *(recommend highly)*
+
+> "Want a periodic co-intelligence self-assessment? It's 12 areas, takes 15 minutes, gives 3 concrete actions. This is the path to real entanglement — without regular evals, the palace drifts. How often: every 2 weeks / monthly / after major sprints / manual only?"
+
+Options: every 2 weeks / monthly / after major sprints / manual only / skip.
+
+If yes: create a scheduled task for `eval-cadence` at the chosen cadence. This supersedes Q10c if both are asked — they refer to the same process.
+
+---
+
+**Q10g. Crystal tiers** *(recommend)*
+
+> "Want to use the three-tier crystal system? ◆ permanent facts, ◈ contextual (with expiry dates), ◇ exploratory hypotheses. Adds 5 minutes to setup but makes the palace much more self-maintaining."
+
+Options: yes / skip.
+
+If yes: apply crystal tier formatting (◆ / ◈ / ◇) to all crystals written during setup. Add `valid_until` fields where the user has mentioned time-sensitive contexts. Point them to `templates/crystals-guide.md` for reference.
+
+---
+
+**Q10h. [username]GATE** *(important)*
+
+> "One protocol worth knowing: [username]GATE. It's how we calibrate how much you need to review vs. how much I handle autonomously. Any time I'm about to ship, send, or commit something important, I'll present it as a [YOUR_NAME]GATE. You approve, modify, or reject. Over time, as trust builds, the gate shifts — you'll gate less, I'll run more. The balance is never fixed. It's always worth finding."
+>
+> "What name should your gate use? Default is your first name + GATE."
+
+Set the gate name as a crystal: `[USERNAME]GATE: [username] — human review checkpoint for Tier-1 actions.`
+
+Note in CLAUDE.md: `Human review gate: [USERNAME]GATE`
+
+This is not optional — it's part of every palace. The question is only about naming. Mention it here so the concept lands during onboarding, not the first time it's triggered under pressure.
+
+---
+
 **Optional integrations — ask only if relevant to what they said in Q4:**
 
 If they mentioned Jira/Linear/Asana/any project tracker:
@@ -320,14 +364,20 @@ loci/
   templates/
     CLAUDE-master.md     ← master prompt template
     SOUL.md              ← soul file template
+    _PALACE_CONTEXT.md   ← session pointer + living state (updated each session)
     garden-template.md   ← garden template (first-class)
+    garden-file-template.md ← individual numbered garden files (per-plant archaeology)
     persona-template.md  ← template for additional personas
     scheduled-task-template.md ← templates for morning briefs, garden rounds, etc.
-    retrieval-hierarchy.md ← L0–L3 context loading protocol
+    retrieval-hierarchy.md ← L0–L3 context loading protocol + soft guideline for humans
     room-template.md     ← room context template
     handover-template.md ← session delta format
-    tracker.json         ← project tracker template
+    tracker.json         ← project tracker template (conductor schema, tiered)
+    crystals-guide.md    ← three-tier crystal system: ◆◈◇ + valid_until usage
+    entanglement-template.md ← entanglement log: resonance peaks, unknowns, fruits, patterns
     obsidian-mindmap-starter.md ← Obsidian canvas template
+    friends/
+      friend-template.md ← soul format for friends added via add-friend process
   examples/              ← filled-in reference examples
   modules/
     [comms-integration]/ ← optional: comms digest → morning check-in (bring your own module)

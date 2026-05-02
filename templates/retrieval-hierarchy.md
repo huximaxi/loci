@@ -200,5 +200,71 @@ Garden rounds load the full garden (L3 + L0.5) because their whole point is to s
 
 ---
 
+## Retrieval as Soft Guideline — For Tired Humans and Fresh Contexts
+
+The retrieval hierarchy isn't only a protocol for agents. It's also a map for the human on low-energy days, on context-switch days, on the day after a week away.
+
+When you're not sure where to start: the hierarchy gives you an ordered path in. L0 is always safe. L1 tells you the state. L2 is the room. L3 is the detail. Start at L0 and descend only as far as you need.
+
+You don't have to re-derive the situation from scratch. That's what the palace is for.
+
+---
+
+### Returning after a week away
+
+Load in order:
+
+1. **L0** — Read `soul/SOUL.md` first. Reconnect to who you are and who your collaborator is.
+2. **L1** — Read `CLAUDE.md` and `_PALACE_CONTEXT.md`. Get the current state: active corridors, memory scrolls, any pending decisions.
+3. **L1 (handover)** — Read the most recent handover from `soul/handovers/`. This is the session you left off at.
+4. **L1 (tracker)** — Scan `tracker.json`. What's active? What's blocked? What tier is it?
+5. **L2** — Load the room you're entering. Now you're oriented.
+
+Skip L3 on reentry. You don't need history — you need orientation. History loads later if a specific decision needs tracing.
+
+---
+
+### Context-switching mid-day
+
+You're in one room, you need to move to another. You don't need to reload everything.
+
+1. Keep L0 loaded — identity doesn't change mid-session.
+2. Keep L1 loaded — the palace state is the same.
+3. Swap L2 — unload the current room, load the new one.
+4. Don't reload L3 unless the new room task specifically requires history.
+
+The palace is spatial. Room-switching is a mode switch, not a context reset.
+
+---
+
+### When a collaborator joins
+
+Someone new is working alongside you in the palace — a colleague, a co-founder, a client. They need context without the full archaeology.
+
+Share in this order:
+
+1. **Palace-level:** A 2-sentence summary of what the palace is and what you're using it for.
+2. **L1 snapshot:** The relevant section of CLAUDE.md — the crystals and tracks that touch the collaboration.
+3. **Room-level:** The room CLAUDE.md for the room you'll be working in together.
+4. **Handover (if needed):** The most recent handover if they need to understand recent decisions.
+
+Do not hand them `soul/SOUL.md`. That's identity-level. It's yours.
+
+---
+
+### When you're low on energy
+
+Start at L0. Always.
+
+Read the soul file. Even if you think you know it — read it. It takes 30 seconds and it reorients the session before it starts.
+
+Then L1. Just the state. Not the detail.
+
+Then ask yourself: which room? Load that one room. Work there.
+
+The palace is designed for this: a minimal load that still produces real collaboration. You don't need everything loaded to do good work. You need the right things loaded.
+
+---
+
 *The hierarchy makes context work at scale.*
 *Load what you need. Remember what matters. Move fast.*
