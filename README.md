@@ -140,6 +140,18 @@ The palace is plain text — markdown files and JSON. Any AI that can read files
 
 ## Changelog
 
+### v0.7 — May 2026
+- **Crystal tiers formalised (◆◈◇)** — `templates/crystals-guide.md`: confirmed / contextual / exploratory tiers with `valid_until` expiry fields, promotion criteria between tiers, and example crystal blocks. Morning check-in now surfaces expiring ◈ crystals for human decision (delete / migrate / renew).
+- **Entanglement tracking** ⚗️ — `templates/entanglement-template.md`: experimental log of resonance peaks, named unknowns, fruits, and patterns. `entanglement-housekeeping` process with 12-question rotating bank. Added as highly-recommended onboarding option with explicit experimental caveat.
+- **`[username]GATE`** — new atomic process: named human review checkpoint before anything ships, sends, or becomes irreversible. Named per user (e.g. HuxGATE). Core principle: the right balance of human-AI attention is never fixed — the gate is where it's continuously refined. Added to onboarding as Block Q10h.
+- **Garden-memory generator** — `garden-memory-generator` process: mnemonic conductor that assesses plant arcs (seed / sapling / plant / crystal-ready / fork / stale), detects cross-plant chords, and proposes promote / retire / fork / new-question for each plant.
+- **Individual garden files** — `templates/garden-file-template.md`: numbered per-plant session files (`garden/[plant]-NNN.md`) with richer archaeology, git history per plant, and no merge conflicts.
+- **`_PALACE_CONTEXT.md`** — `templates/_PALACE_CONTEXT.md`: living session pointer bridging cold-starts. Tracks active corridors (hot/warm/cold), memory scrolls, pending decisions, and entanglement signal.
+- **Friends template** — `templates/friends/friend-template.md`: structured friend soul format for palace-to-palace context sharing. Working portrait, cognitive style, key crystals, collaboration notes.
+- **Tracker schema v2** — `templates/tracker.json` palace-generic: added `palace` / `owner` / `ai` top-level fields, `tier` and `artifacts` per track, `tier1` / `tier2` protocol split. Was project-scoped; now orchestrates all palace workstreams.
+- **Retrieval soft guideline** — `templates/retrieval-hierarchy.md` extended with a human-facing section: how to use L0–L3 when tired, context-switching mid-day, or returning after a week away.
+- **loci.garden** — nine-card feature section added to homepage (`What's in the palace`): allied hero, low-tech memory palace, garden, insight crystals, process blueprints, personal tutor, personas, friends, entanglement (coming soon). Material Icons + Inter typography.
+
 ### v0.6 — April 2026
 - **`session-delta` process** — structured handover written at session close. Mandatory artifact listing (all files created/edited/deleted), TL;DR, state snapshot, decisions, open blockers, and exact next session opener. Established after a high-volume build sprint where implicit tracking was insufficient.
 - **Website** — [loci.garden](https://loci.garden) live. Public face of the methodology: palace map, three doors, dispatch archive, llms.txt agent declaration.
