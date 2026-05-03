@@ -2,7 +2,7 @@
 
 ```
 ┌───────┬───────┬───────┬───────┐
-│       │  ┌─┐  │  ┌──  │  ───  │
+│  │    │  ┌─┐  │  ┌──  │  ───  │
 │  │    │  │ │  │  │    │   │   │
 │  │    │  │ │  │  │    │   │   │
 │  └──  │  └─┘  │  └──  │  ───  │
@@ -10,20 +10,6 @@
 ```
 
 **Local-first AI memory. Searchable, private, yours.**
-
-```
-              [ THE GARDEN ]
-                    |
-    +───────────────+───────────────+
-    |               |               |
-[ DEV ROOM ]  [ GREAT HALL ]  [ DESIGN ROOM ]
-  terminal     amber lantern    candlelit
-    |               |               |
-    +───────+────────+────────+──────+
-            |                 |
-      [ RESEARCH ]      [ HATCHERY ]
-       forest green       earthy amber
-```
 
 loci is a context persistence layer for people who work with AI.
 Index conversations locally, organise them into rooms, search anything.
@@ -58,22 +44,34 @@ cd Loci/extension && npm install && npm run build
 ## Changelog
 
 ### v1.2.0 — 2026-05-03
-- Content sanitization in extension (THREAT-01 mitigation)
-- Message sender validation (THREAT-04)
-- Search rate limiting
-- INSTALL.md for regular users
-- Security notes in README
+Security hardening: content sanitization, sender validation, rate limiting, INSTALL.md guide.
+
+### v1.1.0 — 2026-05-03
+Design refactor: wizard hero left-bleed, palace map full-width, navbar polish, LLMAGE contrast fix.
 
 ### v1.0.0 — 2026-05-03
-- Chrome MV3 extension: search + tagging for Claude.ai + ChatGPT
-- Three-tier landing page (Scholar / Wizard / LLMAGE)
-- 9 wizard feature cards with RPG tone
-- Monorepo structure
-- VitePress docs skeleton
+Chrome MV3 extension with search + tagging. Three-tier landing (Scholar/Wizard/LLMAGE). Monorepo.
 
-### v0.0.1 — 2026 (prior)
-- loci methodology: palace, rooms, crystals, garden, soul files
-- loci.garden live, llms.txt, original wizard landing
+### v0.7.0 — 2026-05-02
+Palace v2: entanglement index, crystal tiers, garden-memory pattern, friends system, eval cadence.
+
+### v0.6.0 — 2026-04
+Session-delta handover process. loci.garden website live. Comms modules generalised.
+
+### v0.5.0 — 2026-04
+Palace-update process. Cherry-pick onboarding flow.
+
+### v0.4.0 — 2026-03
+Autodream, naming ceremony, daily routine, Zulip integration, engine-agnostic refactor.
+
+### v0.3.0 — 2026-03
+Rename to Loci. Garden metaphor. Persona system. Retrieval hierarchy.
+
+### v0.2.0 — 2026-02
+Obsidian mindmap integration. Add-friend process. Dynamic paths. Soul-first scheduled tasks.
+
+### v0.1.0 — 2026-01
+Initial palace-starter. Agent-first repo structure. Room templates. Crystal system.
 
 ## License
 
