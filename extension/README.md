@@ -26,4 +26,12 @@ See [architecture docs](https://docs.loci.garden/architecture).
 
 ## Security
 
-See [Cipher security analysis](../../loci-cipher-security-analysis.md).
+loci is designed with privacy-first principles:
+
+- **Zero network calls** — the extension makes no external requests
+- **Local storage only** — all conversation data stays in your browser (IndexedDB)
+- **Content sanitization** — indexed text is sanitized before storage
+- **Sender validation** — internal messages are validated to prevent injection
+- **Open source** — verify the build yourself: `npm run build` from source
+
+For security concerns: hux@nymtech.net

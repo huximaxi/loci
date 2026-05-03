@@ -63,23 +63,43 @@ async function patchIndex(conv: Conversation): Promise<void> {
   await saveIndex(index);
 }
 
+// ─── Rate limiting ────────────────────────────────────────────────────────────
+
+const searchRateLimiter = new Map<string, number[]>();
+
+function isRateLimited(tabId: string): boolean {
+  const now = Date.now();
+  const requests = searchRateLimiter.get(tabId) ?? [];
+  const recent = requests.filter(t => now - t < 1000); // 1 second window
+  if (recent.length >= 10) return true; // max 10 searches/second
+  searchRateLimiter.set(tabId, [...recent, now]);
+  return false;
+}
+
 // ─── Message handler ──────────────────────────────────────────────────────────
 
 chrome.runtime.onMessage.addListener(
   (
     message: ExtensionMessage,
-    _sender: chrome.runtime.MessageSender,
+    sender: chrome.runtime.MessageSender,
     sendResponse: (response: unknown) => void
   ) => {
+    // Validate sender is from this extension only (THREAT-04)
+    if (sender.id !== chrome.runtime.id) {
+      console.warn('[loci] Rejected message from unknown sender:', sender.id);
+      return false;
+    }
+
     // We need to return `true` to signal that sendResponse will be called
     // asynchronously (standard Chrome MV3 pattern).
-    handleMessage(message, sendResponse);
+    handleMessage(message, sender, sendResponse);
     return true;
   }
 );
 
 async function handleMessage(
   message: ExtensionMessage,
+  sender: chrome.runtime.MessageSender,
   sendResponse: (response: unknown) => void
 ): Promise<void> {
   switch (message.type) {
@@ -105,6 +125,13 @@ async function handleMessage(
     // Empty query returns the 20 most recent conversations instead of running
     // MiniSearch (which would return nothing for an empty string).
     case 'SEARCH': {
+      // Rate limit: max 10 searches/second per tab (THREAT-04)
+      const tabId = String(sender.tab?.id ?? 'unknown');
+      if (isRateLimited(tabId)) {
+        sendResponse({ type: 'SEARCH_RESULTS', results: [] });
+        break;
+      }
+
       try {
         if (!message.query || message.query.trim() === '') {
           const allConvs = await getAllConversations();

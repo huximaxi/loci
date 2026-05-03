@@ -21,6 +21,7 @@ export interface Conversation {
   createdAt: number;
   updatedAt: number;
   indexed: boolean;
+  sanitized?: boolean;  // Content has been sanitized for prompt injection
 }
 
 export interface SearchResult {

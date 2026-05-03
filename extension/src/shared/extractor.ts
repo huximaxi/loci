@@ -7,6 +7,20 @@
 import type { Turn, TurnRole, Conversation, Platform } from '@loci/core/types';
 import type { PlatformConfig } from '../platforms/platforms.config';
 
+// ─── Content sanitization ─────────────────────────────────────────────────────
+
+/**
+ * Sanitizes extracted text to mitigate prompt injection risks.
+ * Strips residual HTML and neutralizes patterns that could confuse downstream LLMs.
+ */
+function sanitizeText(raw: string): string {
+  return raw
+    .replace(/<[^>]*>/g, '')                    // strip any HTML tags
+    .replace(/\[IGNORE\s/gi, '[')               // defang injection attempts
+    .replace(/\bSYSTEM\s*:/gi, 'SYSTEM_MSG:')   // neutralize system prompts
+    .trim();
+}
+
 // ─── extractTurns ─────────────────────────────────────────────────────────────
 
 /**
@@ -62,10 +76,13 @@ export function extractTurns(container: Element, config: PlatformConfig): Turn[]
       continue;
     }
 
-    const text = (el as HTMLElement).innerText?.trim() ?? '';
+    const rawText = (el as HTMLElement).innerText?.trim() ?? '';
 
     // Skip empty turns (collapsed, loading, or hidden elements).
-    if (!text) continue;
+    if (!rawText) continue;
+
+    // Sanitize to mitigate prompt injection risks
+    const text = sanitizeText(rawText);
 
     // Deduplication: skip if last accumulated turn has the same text.
     // This handles streaming — the same element fires multiple mutations while
@@ -138,6 +155,7 @@ export function buildConversation(
     turns,
     tags: [],
     indexed: false,
+    sanitized: true,
     createdAt: now,
     updatedAt: now,
   };
