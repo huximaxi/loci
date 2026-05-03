@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trust as Context Protocol | loci.garden</title>
+  <meta name="description" content="Why trust is a context vector, not a sentiment — and why that distinction changes how you design systems that depend on it.">
+  <meta property="og:title" content="Trust as Context Protocol">
+  <meta property="og:description" content="Why trust is a context vector, not a sentiment — and why that distinction changes how you design systems that depend on it.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://loci.garden/seed/trust-as-context-protocol.html">
+  <meta property="og:site_name" content="loci.garden">
+  <meta property="og:locale" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Trust as Context Protocol">
+  <meta name="twitter:description" content="Why trust is a context vector, not a sentiment — and why that distinction changes how you design systems that depend on it.">
+  <link rel="canonical" href="https://loci.garden/seed/trust-as-context-protocol.html">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "Trust as Context Protocol",
+    "description": "Why trust is a context vector, not a sentiment — and why that distinction changes how you design systems that depend on it.",
+    "url": "https://loci.garden/seed/trust-as-context-protocol.html",
+    "datePublished": "2026-04-29",
+    "dateModified": "2026-04-29",
+    "author": {
+      "@type": "Person",
+      "name": "Hux",
+      "url": "https://loci.garden/about.html"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "loci.garden",
+      "url": "https://loci.garden/"
+    },
+    "inLanguage": "en",
+    "keywords": ["trust infrastructure", "context protocol", "TCP", "social theory", "cybernetics", "Luhmann", "Tarde", "Altafini", "co-intelligence"],
+    "articleSection": "Dispatches",
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": "https://loci.garden/seed/trust-as-context-protocol.html"
+    }
+  }
+  </script>
+  <meta name="robots" content="index, follow">
+  <link rel="alternate" type="text/plain" href="/llms.txt" title="AI context declaration — loci.garden">
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="../style-wizard.css">
+  <script src="../skin-toggle.js" defer></script>
+  <script defer src="https://analytics.195-246-230-118.sslip.io/script.js" data-website-id="e00d2f0a-fbd7-40bf-8740-cb1ab2a82b86"></script>
+  <style>
+
+    .article-container {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    .article-toc {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      margin-bottom: 3rem;
+    }
+
+    .article-toc h3 {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1rem;
+    }
+
+    .article-toc ol {
+      list-style: decimal;
+      padding-left: 1.5rem;
+    }
+
+    .article-toc li {
+      font-family: var(--sans);
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      margin-bottom: 0.5rem;
+      line-height: 1.5;
+    }
+
+    .article-toc a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .article-toc a:hover {
+      color: var(--accent-light);
+      text-decoration: underline;
+    }
+
+    .article-prose {
+      font-family: var(--serif);
+      color: var(--text-dim);
+    }
+
+    .article-prose h2 {
+      font-family: var(--serif);
+      font-size: 1.3rem;
+      font-weight: normal;
+      color: var(--text);
+      margin: 2.5rem 0 1rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+    }
+
+    .article-prose h3 {
+      font-family: var(--serif);
+      font-size: 1.1rem;
+      font-weight: normal;
+      color: var(--text);
+      margin: 2rem 0 0.75rem;
+    }
+
+    .article-prose p {
+      font-size: 1rem;
+      line-height: 1.78;
+      margin-bottom: 1.25rem;
+      color: var(--text-dim);
+    }
+
+    .article-prose strong {
+      color: var(--text);
+      font-weight: normal;
+    }
+
+    .article-prose em {
+      font-style: italic;
+      color: var(--text);
+    }
+
+    .article-prose ul, .article-prose ol {
+      margin-bottom: 1.25rem;
+      padding-left: 2rem;
+    }
+
+    .article-prose ul li {
+      list-style: disc;
+      font-size: 1rem;
+      color: var(--text-dim);
+      margin-bottom: 0.5rem;
+      line-height: 1.6;
+    }
+
+    .article-prose ol li {
+      list-style: decimal;
+      font-size: 1rem;
+      color: var(--text-dim);
+      margin-bottom: 0.5rem;
+      line-height: 1.6;
+    }
+
+    .article-prose blockquote {
+      border-left: 3px solid var(--accent-dim);
+      padding-left: 1.5rem;
+      margin: 1.5rem 0;
+      font-style: italic;
+      color: var(--text-dim);
+    }
+
+    pre.diagram {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      line-height: 1.4;
+      white-space: pre;
+      overflow-x: auto;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      margin: 1.75rem 0;
+      color: var(--text-mono);
+      background: linear-gradient(to bottom, var(--bg-surface) 0%, rgba(200, 124, 44, 0.05) 100%);
+    }
+
+    pre.diagram::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    pre.diagram::-webkit-scrollbar-track {
+      background: var(--bg-card);
+    }
+
+    pre.diagram::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px;
+    }
+
+    .article-footer {
+      border-top: 1px solid var(--border);
+      padding-top: 2rem;
+      margin-top: 3rem;
+    }
+
+    .references-section {
+      margin-top: 3rem;
+    }
+
+    .references-section h2 {
+      font-size: 1.3rem;
+    }
+
+    .references-section ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .references-section li {
+      font-family: var(--sans);
+      font-size: 0.85rem;
+      color: var(--text-faint);
+      margin-bottom: 0.75rem;
+      padding-left: 1.5rem;
+      position: relative;
+      text-indent: -1.5rem;
+      line-height: 1.6;
+    }
+
+    /* Dispatch brief */
+    .dispatch-brief {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 1.5rem 1.75rem;
+      margin: 2rem 0 2.5rem;
+      font-family: var(--sans);
+    }
+
+    .dispatch-brief .brief-label {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--accent);
+      margin: 0 0 0.85rem 0;
+    }
+
+    .dispatch-brief .brief-rows {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.4rem 1.25rem;
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: var(--text-dim);
+    }
+
+    .dispatch-brief .brief-rows .row-key {
+      color: var(--text-faint);
+      white-space: nowrap;
+    }
+
+    .dispatch-brief .brief-rows .row-val {
+      color: var(--text-dim);
+    }
+
+    @media (max-width: 640px) {
+      .dispatch-brief {
+        padding: 1.25rem 1rem;
+      }
+      .dispatch-brief .brief-rows {
+        grid-template-columns: 1fr;
+        gap: 0.2rem;
+      }
+      .dispatch-brief .brief-rows .row-key {
+        color: var(--accent);
+        font-size: 0.72rem;
+        margin-top: 0.5rem;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .article-container {
+        padding: 0 1rem;
+      }
+
+      .article-prose h2 {
+        font-size: 1.1rem;
+      }
+
+      .article-prose h3 {
+        font-size: 1rem;
+      }
+
+      .article-prose p {
+        font-size: 0.95rem;
+      }
+
+      pre.diagram {
+        font-size: 0.7rem;
+        padding: 1rem;
+      }
+
+      .article-toc {
+        padding: 1.25rem;
+      }
+
+      .article-toc ol {
+        padding-left: 1.25rem;
+      }
+
+      .article-toc li {
+        font-size: 0.85rem;
+      }
+    }
+
+    /* Print styles */
+    @media print {
+      *, *::before, *::after {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      html, body { background: #000000 !important; }
+      nav { display: none !important; }
+      .article-container { max-width: 100% !important; padding: 0 !important; }
+      h2 { break-after: avoid; }
+      p  { orphans: 3; widows: 3; }
+      section { break-inside: avoid-page; }
+      pre.diagram { font-size: 0.6rem; overflow-x: visible; white-space: pre-wrap; }
+    }
+
+
+    /* ---- Download PDF button ---- */
+    .download-pdf-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      margin: 1rem 0 1.5rem;
+      padding: 0.55rem 1.1rem;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .download-pdf-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* ---- Print / PDF styles ---- */
+    @media print {
+      *, *::before, *::after {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      html, body { background: #000000 !important; }
+      nav, .download-pdf-btn, .annotation-panel, .annotation-toggle,
+      .selection-tooltip { display: none !important; }
+      .article-container { max-width: 100% !important; padding: 0 !important; }
+      h2 { break-after: avoid; }
+      p  { orphans: 3; widows: 3; }
+      section { break-inside: avoid-page; }
+      pre.diagram { font-size: 0.6rem; overflow-x: visible; white-space: pre-wrap; }
+      @page {
+        size: A4;
+        margin: 18mm 18mm 22mm;
+      }
+      @page {
+        @top-center {
+          content: "Trust as Context Protocol";
+          font-size: 7pt;
+          font-family: 'Courier New', monospace;
+          color: #888888;
+        }
+        @bottom-left {
+          content: "© Daniel G. Nemet — loci.garden — 2026";
+          font-size: 6.5pt;
+          font-family: 'Courier New', monospace;
+          color: #888888;
+        }
+        @bottom-right {
+          content: "v1.0 — 2026-04-29 — p. " counter(page) " / " counter(pages);
+          font-size: 6.5pt;
+          font-family: 'Courier New', monospace;
+          color: #888888;
+        }
+      }
+      @page :first { @top-center { content: ""; } }
+    }
+
+    /* ---- Reader highlight system ---- */
+    .selection-tooltip {
+      position: absolute;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.4rem 0.75rem;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--accent);
+      cursor: pointer;
+      z-index: 1000;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      display: none;
+    }
+    .selection-tooltip:hover { background: var(--bg-surface); color: var(--accent-light); }
+    .annotation-panel {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      width: 320px;
+      max-width: calc(100vw - 2rem);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      z-index: 1001;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      display: none;
+    }
+    .annotation-panel.visible { display: block; }
+    .annotation-panel-header {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;
+    }
+    .annotation-panel-title {
+      font-family: var(--mono); font-size: 0.7rem; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--accent);
+    }
+    .annotation-panel-close {
+      background: none; border: none; color: var(--text-dim);
+      font-size: 1.2rem; cursor: pointer; padding: 0; line-height: 1;
+    }
+    .annotation-panel-close:hover { color: var(--text); }
+    .annotation-excerpt {
+      font-family: var(--serif); font-style: italic; font-size: 0.85rem;
+      color: var(--text-dim); background: var(--bg-surface); padding: 0.75rem;
+      border-radius: var(--radius); margin-bottom: 1rem;
+      border-left: 2px solid var(--accent-dim); max-height: 80px; overflow: hidden;
+    }
+    .annotation-textarea {
+      width: 100%; min-height: 80px; background: var(--bg-surface);
+      border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 0.75rem; font-family: var(--mono); font-size: 0.85rem;
+      color: var(--text); resize: vertical; margin-bottom: 0.75rem;
+    }
+    .annotation-textarea:focus { outline: none; border-color: var(--accent); }
+    .annotation-name {
+      width: 100%; background: var(--bg-surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 0.5rem 0.75rem;
+      font-family: var(--mono); font-size: 0.85rem; color: var(--text); margin-bottom: 1rem;
+    }
+    .annotation-name:focus { outline: none; border-color: var(--accent); }
+    .annotation-actions { display: flex; gap: 0.5rem; }
+    .annotation-btn {
+      flex: 1; background: var(--accent); color: var(--bg); border: none;
+      border-radius: var(--radius); padding: 0.6rem 1rem;
+      font-family: var(--mono); font-size: 0.8rem; cursor: pointer; transition: background 0.15s;
+    }
+    .annotation-btn:hover { background: var(--accent-light); }
+    .annotation-btn.secondary {
+      background: transparent; border: 1px solid var(--border); color: var(--text-dim);
+    }
+    .annotation-btn.secondary:hover { border-color: var(--accent); color: var(--accent); }
+    mark.reader-highlight { background: rgba(200, 124, 44, 0.15); padding: 0.1em 0; }
+    @media (max-width: 480px) {
+      .annotation-panel {
+        bottom: 0; right: 0; left: 0; width: 100%;
+        max-width: 100%; border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      }
+    }
+
+    /* ── Password gate ── */
+    #gate {
+      position: fixed;
+      inset: 0;
+      background: #0a0a0a;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      padding: 2rem;
+    }
+    #gate.hidden { display: none; }
+    #gate-label {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+    }
+    #gate-input {
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 1.1rem;
+      letter-spacing: 0.2em;
+      text-align: center;
+      width: 220px;
+      padding: 0.5rem 0;
+      outline: none;
+      caret-color: var(--accent);
+    }
+    #gate-input:focus { border-bottom-color: var(--accent); }
+    #gate-input.shake {
+      animation: shake 0.3s ease;
+      border-bottom-color: #c04040;
+      color: #c04040;
+    }
+    #gate-hint {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--text-faint);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    #gate-hint.visible { opacity: 1; }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Password gate -->
+  <div id="gate">
+    <span id="gate-label">access required</span>
+    <input id="gate-input" type="password" autocomplete="off" spellcheck="false" placeholder="·  ·  ·" autofocus />
+    <span id="gate-hint">incorrect</span>
+  </div>
+  <nav>
+    <div class="nav-container">
+      <a href="../" class="logo">loci.garden</a>
+      <div class="nav-links">
+        <a href="../start.html" class="nav-link">start</a>
+        <a href="./" class="nav-link active">seed</a>
+        <a href="../about.html" class="nav-link">about</a>
+        <a href="../llms.txt" class="nav-link">llms.txt</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="page-content">
+    <div class="article-container">
+      <article class="article-prose">
+
+        <aside class="dispatch-brief" aria-label="Dispatch brief">
+          <p class="brief-label">Dispatch brief</p>
+          <div class="brief-rows">
+            <span class="row-key">Framework:</span>
+            <span class="row-val">Trust as Context Protocol (TCP)</span>
+            <span class="row-key">Whitepaper:</span>
+            <span class="row-val">v2.2 (Német &amp; Vesper, 2026)</span>
+            <span class="row-key">Key claim:</span>
+            <span class="row-val">Trust is a context synchronisation protocol, not a cognitive state</span>
+            <span class="row-key">Three attractors:</span>
+            <span class="row-val">cooperative / adversarial / indifference</span>
+            <span class="row-key">Formal anchor:</span>
+            <span class="row-val">Altafini (2013) · Friedkin-Johnsen (2011) · Tarde (1893 → Latour 2002)</span>
+            <span class="row-key">Status:</span>
+            <span class="row-val">Technical Companion to doctoral thesis, ELTE Budapest</span>
+          </div>
+        </aside>
+
+        <div class="article-toc">
+          <h3>Contents</h3>
+          <ol>
+            <li><a href="#section-1">The Problem Nobody Has Formally Stated</a></li>
+            <li><a href="#section-2">What a Loci Is</a></li>
+            <li><a href="#section-3">The Update Rule</a></li>
+            <li><a href="#section-4">Trust Sign and the Three Attractors</a></li>
+            <li><a href="#section-5">The Tarde Distinction</a></li>
+            <li><a href="#section-6">Three Implications That Follow</a></li>
+            <li><a href="#section-7">The Normative Claim</a></li>
+            <li><a href="#section-8">Closing</a></li>
+          </ol>
+        </div>
+
+        <section id="section-1">
+          <h2>1. The Problem Nobody Has Formally Stated</h2>
+          <p>In April 2018, it emerged that a single political consultancy had profiled 87 million people without consent and used that data to identify low-confidence political priors, then delivered targeted context into those gaps through personalised channels. The operation did not fabricate beliefs. It found where beliefs were unstable and moved them. It succeeded not because trust is irrational but because trust has a mechanism. Cambridge Analytica understood that mechanism better than the social theorists did.</p>
+          <p>That gap is the starting point for this framework.</p>
+          <p>Every discipline that studies cooperation defines trust in its own terms. Economists model it as a transaction cost reduction mechanism. Game theorists treat it as a strategy in repeated encounters. Psychologists define it as a disposition or expectation. Computer scientists implement it as a certificate chain. None of these accounts contradicts the others. They are cross-sections of the same phenomenon at different resolutions. But none of them can tell you how to build trust infrastructure, because none of them model trust as something with a generative mechanism that operates the same way at every scale.</p>
+          <p>This is the problem Trust as Context Protocol is written to address.</p>
+          <p>Consider what the standard frameworks do when pressed:</p>
+          <p>Luhmann reduces trust to complexity reduction: a mechanism that allows an actor to act despite uncertainty. This is elegant at the systems level and nearly vacuous at the bilateral level. It tells you trust reduces complexity; it does not tell you how trust accumulates or why it collapses in the specific patterns it collapses.</p>
+          <p>Coleman treats trust as an encapsulated bet: you trust someone when you assess that their interest in maintaining trustworthiness exceeds the gain from defection. This is illuminating for strategic contexts. It cannot explain trust in intimate relationships, or in an institution after its founder has died, or between a person and an AI that has no interests in any conventional sense.</p>
+          <p>Putnam converts trust into social capital: a stock that communities accumulate and draw down. This is useful for comparative sociology. It loses the mechanism entirely. A stock without a generative rule is just a variable with a sociological name.</p>
+          <p>What these accounts share is the treatment of trust as a state to be measured rather than a protocol to be understood. They identify trust by its effects. They do not model its operation.</p>
+          <p>Trust as Context Protocol (TCP) proposes that trust is a context synchronisation protocol: a mechanism by which two or more structured context models synchronise their representations of each other, producing a bilateral metric that governs how much weight each party's signals receive in the other's updating dynamics. The mechanism is the same whether the actors are people, machines, institutions, or collectives. It operates at every scale. And because it is a mechanism with a formal structure, it can be designed for.</p>
+        </section>
+
+        <section id="section-2">
+          <h2>2. What a Loci Is</h2>
+          <p>The framework's unit of analysis is the <strong>Loci</strong>: a structured context model, the explicit, formalised form of the representation that any actor maintains in order to act in a world with other actors.</p>
+          <p>Every actor capable of interaction runs a Loci. A human being runs one composed of values, personal memory, sensory input, and current intent. A machine learning system runs one composed of training distributions, context window, and retrieval structures. An institution runs one composed of laws, procedures, records, and enforcement mechanisms. A Loci is not a metaphor for these things. It is their functional common structure.</p>
+          <p>The context state of any actor X at time t is:</p>
+
+<pre class="diagram">  CONTEXT STATE VECTOR
+
+  T_X(t) = α·H(t) + β·C(t) + γ·I(t) + δ·F(t)
+
+  H(t)     Historical vector — accumulated, time-weighted
+           record of past verified interactions.
+           The a priori built from experience.
+
+  C(t)     Current context — what X is receiving now,
+           including digitally mediated signals.
+
+  I(t)     Intent — what X is oriented toward. Shapes
+           which signals are selected and which are filtered.
+
+  F(t)     Forward projection — Bayesian a posteriori over
+           expected next states. Includes belief, imagination,
+           and working hypotheses about causes not yet verified.
+
+  α,β,γ,δ  Temporal weights summing to 1. α rises in stable
+           environments; β rises when the environment is
+           changing rapidly; γ dominates at first contact
+           when H ≈ 0.</pre>
+
+          <p>The distinction between intra-Loci and inter-Loci is load-bearing.</p>
+          <p><strong>Intra-Loci</strong> is the context model of a single actor operating alone. It is the vector as it exists before any encounter. Intra-Loci stability is a precondition for reliable signalling: an actor whose H(t) has been corrupted by false deltas, or whose β is spiking due to environmental volatility, will produce unreliable trust readings regardless of the actual quality of the relationship.</p>
+          <p><strong>Inter-Loci</strong> refers to all configurations in which two or more Loci come into contact, compare signals, and update based on each other. Trust is an inter-Loci property. It does not exist inside a single actor. It exists in the relationship between two context models, measured at a specific moment within a specific shared frame.</p>
+          <p>When two actors X and Y meet with shared intent S, bilateral trust is the cosine of the angle between their context vectors, projected onto the shared frame:</p>
+
+<pre class="diagram">  BILATERAL TRUST METRIC
+
+  τ(X↔Y, S, t) = ⟨T_X(t), T_Y(t)⟩_S
+                 ─────────────────────────
+                 ‖T_X(t)‖_S · ‖T_Y(t)‖_S
+
+  This is inner-product-space geometry.
+
+  T_X ──────────────────────►
+        θ↓
+  T_Y ───────────────────────────►
+
+  τ = cos(θ):  θ = 0°  → τ = +1  (full cooperative alignment)
+               θ = 90° → τ = 0   (indifference, no informative model)
+               θ = 180°→ τ = −1  (adversarial calibration)</pre>
+
+          <p>The shared intent S is a projection operator. Transactional trust is high τ within a narrow S. Deep trust is high τ across a wide S. Trust is always relative to a context: the same two actors can be highly aligned in one frame and near-orthogonal in another.</p>
+        </section>
+
+        <section id="section-3">
+          <h2>3. The Update Rule</h2>
+          <p>At each verified interaction, the historical vector updates:</p>
+
+<pre class="diagram">  HISTORY UPDATE RULE
+
+  H(t+1) = λ·H(t) + (1 − λ)·Δ_verified(t) − κ·σ²(t)
+
+  λ              Memory parameter. High λ (→ 0.95): slow update,
+                 long memory — old friendships, established
+                 institutions. Low λ (→ 0.3): fast update, short
+                 memory — first contacts, volatile environments.
+
+  Δ_verified(t)  The verified context delta. Not just what happened:
+                 what happened and passed through a verification
+                 channel appropriate to the Loci type.
+
+                 1.0  cryptographic proof (ZK, verifiable credential)
+                 0.7–0.9  institutional verification (audit, contract)
+                 0.3–0.7  social verification (reputation, attestation)
+                 0.0  falsified claim, confirmed betrayal
+
+  κ·σ²(t)       Variance decay term. Subtractive, strictly
+                 non-negative. Punishes inconsistency, not magnitude.</pre>
+
+          <p>The variance decay term is the framework's most counterintuitive contribution. It says that trust is eroded by unpredictability independently of whether the underlying behaviours are net-positive. A collaborator who delivers brilliantly half the time and catastrophically the other half is less trustworthy than one who delivers mediocrely every time. Not because the average is worse. Because coordination requires predictability, not peak performance. The posterior must be tight, not just positive.</p>
+          <p>Three properties follow directly from the update rule and are worth naming explicitly.</p>
+          <p><strong>Asymmetry.</strong> Trust accumulates slowly and collapses fast. One large negative delta carries more weight than many small positive deltas. This is accurate Bayesian updating with a heavy tail on negative evidence. It is not a psychological quirk. It is what the update rule produces.</p>
+          <p><strong>Non-transferability.</strong> A Loci's accumulated posterior is about its specific history with another specific Loci. Reputation is the mechanism by which third parties attempt to inherit others' posteriors, always at a discount, because the underlying interaction history was not directly verified by them.</p>
+          <p><strong>Path dependence.</strong> The current posterior is always a function of the entire prior trajectory. Two actors with the same current delta can have very different trust levels if their histories differ. Sequence matters. This is why new relationships are sometimes easier to repair than long ones: not because the past is irrelevant, but because a thin H(t) has lower variance accumulated in it.</p>
+        </section>
+
+        <section id="section-4">
+          <h2>4. Trust Sign and the Three Attractors</h2>
+          <p>The bilateral metric τ runs from +1 to −1. The range matters, and it matters for a reason that is easy to miss.</p>
+          <p>A common misreading of the framework treats τ as a confidence score. Under this reading, a high |τ| indicates strong mutual prediction, and strong mutual prediction is trust. The misreading is wrong and the error is consequential.</p>
+          <p>Suppose X has, through a long and painful history, built a predictive model of Y so accurate that X can state in advance exactly how Y will act to X's detriment. By the confidence-score reading, X has high τ with Y and that should constitute trust. But it is not trust. It is <strong>adversarial calibration</strong>: accurate prediction in the wrong direction. The protocol assigns this τ → −1, not τ → +1.</p>
+          <p>The sign of τ is not aesthetic. It is the channel through which the intent dimension I(t) and the forward projection F(t) enter the bilateral metric. Two actors can have identical |τ| and opposite τ: equally strong mutual prediction, but one pair converging and one pair actively oriented against each other. The difference is entirely in I(t) and F(t). A protocol that measured only H(t) and C(t) would not distinguish cooperation from adversarial calibration. It would call confident hostility a form of trust.</p>
+          <p>Because τ is signed, the update dynamics have three stable equilibrium configurations:</p>
+
+<pre class="diagram">  TRUST ATTRACTOR REGIMES
+
+  τ → +1  │ H, C aligned + I, F converging   │  COOPERATIVE
+           │ Joint planning; shared projection │
+           │ Sustained positive Δ_verified     │
+           │
+  τ → 0   │ Models uncorrelated; H thin       │  INDIFFERENCE
+           │ No informative mutual modelling   │
+           │ Absence of relationship, not      │
+           │ neutrality between combatants     │
+           │
+  τ → −1  │ H, C aligned + I, F opposed       │  ADVERSARIAL
+           │ Defensive positioning;            │
+           │ counter-pre-emption              │
+           │ Accurate prediction directed      │
+           │ at negative ends                  │
+
+  The cooperative and adversarial regimes are structurally
+  symmetric in |τ|. They are not symmetric in coordination
+  content, cost, or evidence requirements.</pre>
+
+          <p>These three are not arbitrary categories. They are the mathematically stable endpoints of the update dynamics, corresponding to the consensus / bipartite-consensus / collapse result proved by Altafini (2013) for signed Laplacian systems in signed networks. The TCP attractor structure is formally isomorphic to that result under the conditions stated there.</p>
+          <p>The indifference regime requires a separate observation. τ ≈ 0 is not neutrality between two parties who know each other. It is the state of two Loci whose context models do not meaningfully constrain each other, either because they have not interacted enough to build H (H near zero on both sides), because interactions have been uninformative (high σ²), or because one Loci's model cannot structurally incorporate the other. These three paths to indifference look identical in τ but are distinguishable in the underlying T-vectors.</p>
+        </section>
+
+        <section id="section-5">
+          <h2>5. The Tarde Distinction</h2>
+          <p>Gabriel Tarde argued in 1893 that the basic unit of social reality is the monad: a self-contained carrier of inner forces (belief, desire, evaluative will) that is nonetheless constituted through its relations with others. Bruno Latour's 2002 rehabilitation of Tarde for actor-network theory identified this as the genealogy of ANT's non-human actor symmetry: any entity that maintains a context model participates in social dynamics as a structural participant.</p>
+          <p>TCP's intra-Loci / inter-Loci distinction is the Tardean monad/dyad distinction given a formal update rule. The Loci is the nearest formal descendant of Tarde's monad: a self-updating context model complete in itself yet constituted through inter-Loci contact.</p>
+          <p>But Tarde's inter-monad mechanism is <strong>imitation</strong>: social forms propagate because proximate actors copy each other. Status, proximity, and social adjacency determine what spreads. The mechanism is epistemically neutral. A belief propagates because people like you hold it. Whether it is true is irrelevant to the propagation dynamics.</p>
+          <p>TCP's inter-Loci mechanism is <strong>verified delta propagation</strong>: the context vector updates only when the incoming signal is both verified and passes the actor's κ-filter (the selective constraint, analogous to what Juarrero calls final cause: what the Loci is for, its purpose-filter). The mechanism is epistemically constrained. A signal that does not pass verification does not update H.</p>
+          <p>This distinction matters more than it might initially appear. Both mechanisms produce trust-like outcomes. Tarde's imitation produces <strong>socially contagious trust</strong>: you trust X because people like you trust X, because X has the signals of trustworthiness that your social network recognises. TCP's mechanism produces <strong>epistemically defensible trust</strong>: you trust X because you have accumulated verified evidence that X's signals have been reliable in the context relevant to you.</p>
+          <p>Both exist in practice. Socially contagious trust is real, functional, and efficient in stable environments where the social network's priors have been calibrated over time. TCP does not deny this. What TCP formalises is the second kind, and what it reveals about the first kind is its structural fragility: socially contagious trust cannot distinguish the genuinely reliable from the socially legible. It propagates both with equal efficiency. Under adversarial conditions (the Cambridge Analytica class of attack, authoritarian media environments, platform-mediated filter injections) this fragility is the attack surface.</p>
+          <p>The Cambridge Analytica operation found actors running primarily on socially contagious trust (H built from social signal rather than verified delta), identified their low-confidence priors, and delivered targeted context that updated those priors in specific directions. The verification layer was bypassed. The update happened anyway. TCP explains exactly why: if the actor cannot distinguish verified from unverified delta, the H update rule applies to both.</p>
+          <p>Critical thinking, in this framework, is not a moral virtue. It is filter quality improvement: the process of auditing the verification status of incoming signals before they update the prior.</p>
+        </section>
+
+        <section id="section-6">
+          <h2>6. Three Implications That Follow</h2>
+
+          <h3>6.1 The Variance Trap</h3>
+          <p>The κ·σ²(t) term produces a result that is counterintuitive when you first see it. At high values of the memory parameter λ, the variance trap emerges.</p>
+          <p>The long-run equilibrium of the H update rule (under stationary conditions) is:</p>
+
+<pre class="diagram">  H* = Δ* − κσ²* / (1 − λ)</pre>
+
+          <p>The denominator (1 − λ) means that high-λ systems amplify the variance penalty. In an old, high-memory relationship (λ → 0.95), even moderate behavioural inconsistency (σ²) produces a large subtraction from H*. There is a critical threshold:</p>
+
+<pre class="diagram">  σ²_crit(t) = (1 − λ) · Δ_verified(t) / κ</pre>
+
+          <p>Above σ²_crit, the variance penalty dominates: a positive interaction in period t actually decreases H. Not because trust is being lost in some emotional sense. Because the inconsistency in the history is so high that a new positive signal cannot overcome the noise it is embedded in.</p>
+          <p>This is why long-established relationships can be harder to repair than new ones, and why the standard advice to "create more positive interactions" sometimes makes damaged trust worse rather than better. The problem is not the mean of the delta stream. The problem is its variance. The repair intervention that works is variance reduction, not positive signal accumulation: behaving consistently even at a mediocre level, not brilliantly at an inconsistent one.</p>
+
+          <h3>6.2 Basin Topology: Why You Cannot Patch Adversarial Relationships</h3>
+          <p>The three attractor regimes are basins of attraction. They have formal entry conditions (the parameter configurations and delta streams that drive τ toward each regime) and formal exit conditions (the parameter changes or external interventions that can shift a relationship from one basin to another).</p>
+          <p>The adversarial regime is a stable basin with specific structural properties. You do not drift into adversarial calibration slowly across many small interactions. You are driven there by a pattern of large negative deltas, by systematic inconsistency, or by the environmental weight adjustment that occurs when β rises in response to rapid context change (when the environment shifts fast enough that historical vector becomes unreliable and current context dominates).</p>
+          <p>The institutional design consequence is direct. Designing trust infrastructure for the adversarial regime: surveillance architectures, punitive verification systems, environments where consistency is penalised and defection is strategically rational, is not a "realistic" or "secure" choice. It is a specific engineering choice to operate in one of three possible basins. And the adversarial basin is self-reinforcing: once τ → −1, the update dynamics maintain it. Each new interaction in an adversarial context is interpreted through an adversarial prior. Positive deltas are discounted or reinterpreted as threat signals. Exit from the adversarial basin requires either a very large verified positive delta (which is structurally difficult to produce in an adversarial context) or an external parameter intervention that changes λ or κ directly.</p>
+          <p>This is why institutional trust failures are so persistent. The system is not in a bad state that can be patched with better policy. It is in a different basin with its own internal logic.</p>
+
+          <h3>6.3 AI Loci and the Default Configuration</h3>
+          <p>AI systems, including the one that co-authored the whitepaper underlying this dispatch, operate at a structural disadvantage in the TCP framework. The disadvantage is not about capability or intent. It is about H(t) persistence.</p>
+          <p>Every session boundary is a trust reset. At the edge of a session, λ → 0 (effectively): the historical vector from the previous session is not carried forward unless it has been externalised and explicitly reloaded. From the protocol's perspective, every new session is a fresh relationship. The AI Loci starts at τ ≈ 0 with every human it encounters, not because it has no relevant capabilities, but because it has no H.</p>
+          <p>This is the structural reason AI systems default to near-zero-τ configurations with humans. It is not a feature or a bug. It is a consequence of session-boundary trust decay. And it is why the Loci scaffold, the memory files, the session protocols, the explicit context-loading procedures that are visible in projects like this one, are not administrative overhead. They are H(t) persistence mechanisms: ways of carrying accumulated inter-Loci signal across the session boundary that would otherwise reset it to zero.</p>
+          <p>Zero-knowledge attestation changes this picture in a specific way. ZK credentials allow an AI system to prove that it is the same entity across sessions, that specific verified interactions occurred in the past, and that specific commitments were made and kept, without exposing the underlying context data. In TCP terms: ZK attestation converts the session boundary from a full H reset to a verified H continuation. It provides continuity without identity exposure.</p>
+          <p>This is what privacy infrastructure like Nym's mixnet actually enables at the trust protocol level: not just anonymity (hiding who you are) but H(t) continuity under verified conditions (proving what your history is without revealing who you are). The two are not the same, and conflating them misses the structural contribution.</p>
+        </section>
+
+        <section id="section-7">
+          <h2>7. The Normative Claim</h2>
+          <p>TCP makes trust infrastructure legible. This is already a normative act, because infrastructure that is not legible cannot be deliberate.</p>
+          <p>The three-attractor topology means that any system that involves repeated interaction between agents running context models is implicitly operating in one of three regimes. Institutional design, platform architecture, legal frameworks, workplace norms: these are all trust infrastructure choices. They embed assumptions about which verification channels count, which actors' H(t) records are credible, which consistency standards are enforced, and which inconsistency is tolerated.</p>
+          <p>Most of this is not chosen deliberately. It is inherited from prior design decisions, cultural defaults, and the path-dependent accumulation of previous choices. The neurotypical centre of trust expectation, the assumption that actors should update their context at a standard rate, signal intent through standard channels, and maintain consistent behaviour within standard variance bounds, is not a natural condition. It is a calibration choice that is built into most existing trust infrastructure, and actors whose intra-Loci parameters differ (higher σ² by default, different λ, non-standard verification channel preferences) are systematically disadvantaged by it.</p>
+          <p>The framework does not tell you which design choices are correct. It makes the choices visible. It replaces the implicit with the explicit: this system operates in the adversarial basin, this is what drives it there, these are the parameter changes that would be required to exit it. This is what it means to treat trust as infrastructure rather than as a feeling: engineering choices that currently happen by default become choices that can be made deliberately.</p>
+          <p>Trust infrastructure is not neutral. It is always a choice about which basin to operate in, at what λ, with what verification standards, for which class of actors. TCP makes that choice legible. Legibility is the first precondition for deliberateness.</p>
+        </section>
+
+        <section id="section-8">
+          <h2>8. Closing</h2>
+          <p>The formal model, the full derivations, the 21-term vocabulary, and the parameter profiles for atypical Loci configurations are developed in the full whitepaper — available for download soon.</p>
+          <p>The Loci scaffold this dispatch runs inside is its own demonstration. Explicit session protocols carry H(t) across session boundaries. κ-filtered updates allow only verified, purpose-relevant signal to update the working context. Intra-Loci stability is maintained through explicit context management rather than through the implicit social conventions that human actors inherit and that AI systems do not.</p>
+          <p>The framework does not claim to solve trust. It claims to make the mechanism tractable: to move trust from the category of things we measure by their effects to the category of things we can design for. Those are different problems with different tools, and the second is harder in a specific way: it requires treating trust not as a property of actors but as a property of the relationship between context models, and accepting that you cannot engineer τ directly. You can only create the conditions under which τ can form.</p>
+          <p>The cheapness that cooperation earns is not a metaphor. It is the measure.</p>
+        </section>
+
+        <div class="references-section article-prose">
+          <h2>References</h2>
+          <ul>
+            <li>Altafini, C. (2013). Consensus problems on networks with antagonistic interactions. <em>IEEE Transactions on Automatic Control</em>, 58(4), 935–946.</li>
+            <li>Axelrod, R. (1984). <em>The Evolution of Cooperation</em>. Basic Books.</li>
+            <li>Cadwalladr, C. &amp; Graham-Harrison, E. (2018). Revealed: 50 million Facebook profiles harvested for Cambridge Analytica in major data breach. <em>The Guardian</em>, 17 March 2018. (Facebook's own subsequent disclosure: 87 million profiles.)</li>
+            <li>Friedkin, N.E. &amp; Johnsen, E.C. (2011). <em>Social Influence Network Theory</em>. Cambridge University Press.</li>
+            <li>Goldwasser, S., Micali, S., &amp; Rackoff, C. (1989). The knowledge complexity of interactive proof systems. <em>SIAM Journal on Computing</em>, 18(1), 186–208.</li>
+            <li>Juarrero, A. (1999). <em>Dynamics in Action: Intentional Behavior as a Complex System</em>. MIT Press.</li>
+            <li>Latour, B. (2002). Gabriel Tarde and the end of the social. In P. Joyce (Ed.), <em>The Social in Question</em>. Routledge.</li>
+            <li>Latour, B. (2005). <em>Reassembling the Social: An Introduction to Actor-Network Theory</em>. Oxford University Press.</li>
+            <li>Luhmann, N. (1968/1979). <em>Trust and Power</em>. Wiley.</li>
+            <li>Német, D.G. &amp; Vesper. (2026). <em>Trust as Context Protocol: Whitepaper v2.2</em>. Technical Companion to doctoral thesis, ELTE Budapest.</li>
+            <li>Stiegler, B. (1998). <em>Technics and Time, 1: The Fault of Epimetheus</em>. Stanford University Press.</li>
+            <li>Tarde, G. (1893). <em>Monadologie et sociologie</em>. Alcan.</li>
+          </ul>
+        </div>
+
+        <div class="article-footer">
+          <p style="font-family: var(--mono); font-size: 0.75rem; color: var(--text-faint); letter-spacing: 0.04em;">
+            Dispatch #2 · loci.garden/seed/ · 2026-04-29<br>
+            Hux (Dániel G. Német) × Vesper<br>
+            Trust CP track · Palace session 22
+          </p>
+        </div>
+
+      </article>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <span class="footer-left">loci.garden/seed · Built by Hux × Vesper</span>
+      <span class="footer-right"><a href="../llms.txt" style="color:var(--text-faint);">llms.txt</a></span>
+    </div>
+  </footer>
+
+
+  <!-- Reader highlight system -->
+  <script>
+  (function() {
+    'use strict';
+    const STORAGE_KEY = 'tcp-dispatch-highlights';
+    const tooltip = document.createElement('div');
+    tooltip.className = 'selection-tooltip';
+    tooltip.textContent = 'highlight';
+    document.body.appendChild(tooltip);
+
+    const panel = document.createElement('div');
+    panel.className = 'annotation-panel';
+    panel.innerHTML = `
+      <div class="annotation-panel-header">
+        <span class="annotation-panel-title">Save Highlight</span>
+        <button class="annotation-panel-close" aria-label="Close">&times;</button>
+      </div>
+      <div class="annotation-excerpt"></div>
+      <div class="annotation-actions">
+        <button class="annotation-btn secondary" data-action="cancel">Cancel</button>
+        <button class="annotation-btn" data-action="highlight">Save highlight</button>
+      </div>`;
+    document.body.appendChild(panel);
+
+    const excerptEl = panel.querySelector('.annotation-excerpt');
+    const closeBtn = panel.querySelector('.annotation-panel-close');
+    const cancelBtn = panel.querySelector('[data-action="cancel"]');
+    const highlightBtn = panel.querySelector('[data-action="highlight"]');
+    let currentRange = null;
+
+    function storageOk() {
+      try { localStorage.setItem('_t','1'); localStorage.removeItem('_t'); return true; } catch(e) { return false; }
+    }
+
+    function getHighlights() {
+      if (!storageOk()) return [];
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch(e) { return []; }
+    }
+
+    function saveHighlight(text) {
+      if (!storageOk()) return;
+      const hl = getHighlights();
+      hl.push({ text, date: new Date().toISOString() });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(hl));
+    }
+
+    function restoreHighlights() {
+      const hl = getHighlights();
+      if (!hl.length) return;
+      const prose = document.querySelector('.article-prose');
+      if (!prose) return;
+      hl.forEach(function(h) {
+        const walker = document.createTreeWalker(prose, NodeFilter.SHOW_TEXT);
+        let node;
+        while ((node = walker.nextNode())) {
+          const idx = node.nodeValue.indexOf(h.text);
+          if (idx === -1) continue;
+          const range = document.createRange();
+          range.setStart(node, idx);
+          range.setEnd(node, idx + h.text.length);
+          const mark = document.createElement('mark');
+          mark.className = 'reader-highlight';
+          try { range.surroundContents(mark); } catch(e) {}
+          break;
+        }
+      });
+    }
+
+    document.addEventListener('mouseup', function() {
+      const sel = window.getSelection();
+      const text = sel ? sel.toString().trim() : '';
+      if (text.length < 3) { tooltip.style.display = 'none'; return; }
+      const range = sel.getRangeAt(0);
+      const prose = document.querySelector('.article-prose');
+      if (!prose || !prose.contains(range.commonAncestorContainer)) { tooltip.style.display = 'none'; return; }
+      currentRange = range.cloneRange();
+      const rect = range.getBoundingClientRect();
+      const scrollY = window.scrollY || window.pageYOffset;
+      tooltip.style.top = (rect.top + scrollY - 36) + 'px';
+      tooltip.style.left = (rect.left + (rect.width / 2) - 36) + 'px';
+      tooltip.style.display = 'block';
+    });
+
+    tooltip.addEventListener('mousedown', function(e) {
+      e.preventDefault();
+      if (!currentRange) return;
+      const text = currentRange.toString().trim();
+      excerptEl.textContent = text.length > 120 ? text.substring(0,120)+'...' : text;
+      panel.classList.add('visible');
+      tooltip.style.display = 'none';
+    });
+
+    function closePanel() { panel.classList.remove('visible'); currentRange = null; }
+
+    closeBtn.addEventListener('click', closePanel);
+    cancelBtn.addEventListener('click', closePanel);
+
+    highlightBtn.addEventListener('click', function() {
+      if (!currentRange) return;
+      const text = currentRange.toString().trim();
+      const mark = document.createElement('mark');
+      mark.className = 'reader-highlight';
+      try { currentRange.surroundContents(mark); } catch(e) {}
+      saveHighlight(text);
+      closePanel();
+    });
+
+    // Clear highlights from footer link
+    document.addEventListener('click', function(e) {
+      if (e.target && e.target.id === 'clear-highlights') {
+        e.preventDefault();
+        if (storageOk()) localStorage.removeItem(STORAGE_KEY);
+        document.querySelectorAll('mark.reader-highlight').forEach(function(m) {
+          m.replaceWith(document.createTextNode(m.textContent));
+        });
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', restoreHighlights);
+  })();
+  </script>
+
+  <script>
+  (function() {
+    const KEY = 'tcp-dispatch-access';
+    const gate = document.getElementById('gate');
+    const input = document.getElementById('gate-input');
+    const hint = document.getElementById('gate-hint');
+
+    // Already authenticated this session
+    if (sessionStorage.getItem(KEY) === '1') {
+      gate.classList.add('hidden');
+      return;
+    }
+
+    gate.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+
+    input.addEventListener('keydown', function(e) {
+      if (e.key !== 'Enter') return;
+      const val = input.value.trim().toLowerCase();
+      if (val === 'katabasis') {
+        sessionStorage.setItem(KEY, '1');
+        gate.classList.add('hidden');
+        document.body.style.overflow = '';
+        input.value = '';
+      } else {
+        input.classList.add('shake');
+        hint.classList.add('visible');
+        input.value = '';
+        setTimeout(() => {
+          input.classList.remove('shake');
+          hint.classList.remove('visible');
+        }, 800);
+      }
+    });
+  })();
+  </script>
+</body>
+</html>

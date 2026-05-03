@@ -1,0 +1,2231 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="scholar">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>loci.garden — local-first AI memory</title>
+<meta name="description" content="loci keeps your AI conversations close. Search everything across Claude, ChatGPT and more — locally, privately, without a cloud. Your AI memory, finally yours." />
+<meta name="keywords" content="AI memory, Claude memory, ChatGPT history, local AI, MCP, context persistence, AI conversation search" />
+<link rel="canonical" href="https://loci.garden/" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://loci.garden/" />
+<meta property="og:title" content="loci.garden — local-first AI memory" />
+<meta property="og:description" content="Search every AI conversation you've ever had. Local-first, private, no cloud required." />
+<meta property="og:image" content="https://loci.garden/assets/og-image.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="loci.garden — local-first AI memory" />
+<meta name="twitter:description" content="Search every AI conversation you've ever had. Local-first, private, no cloud required." />
+<meta name="twitter:image" content="https://loci.garden/assets/og-image.png" />
+<meta name="theme-color" content="#3B6D11" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#0d0d0e" media="(prefers-color-scheme: dark)" />
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"loci.garden","description":"Local-first AI conversation memory. Search, organise, and persist your AI context — private by default.","url":"https://loci.garden","applicationCategory":"ProductivityApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Hux","url":"https://loci.garden"}}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+
+<style>
+/* ═══════════════════════════════════════════════════════
+   LIVE SITE CSS — wizard theme uses these tokens
+═══════════════════════════════════════════════════════ */
+/* Applied only in wizard mode via data-theme scoping below */
+
+/* ═══════════════════════════════════════════════════════
+   RESET
+═══════════════════════════════════════════════════════ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+/* ═══════════════════════════════════════════════════════
+   SCHOLAR TOKENS  (default)
+═══════════════════════════════════════════════════════ */
+[data-theme="scholar"] {
+  --bg:           #F7F5F0;
+  --bg-2:         #EEEAE1;
+  --surface:      #FFFFFF;
+  --border:       rgba(59,109,17,0.15);
+  --border-2:     rgba(59,109,17,0.25);
+  --text:         #1A2A0A;
+  --text-2:       #4A6020;
+  --text-3:       #8AAA60;
+  --accent:       #3B6D11;
+  --accent-light: #97C459;
+  --accent-xlight:#C0DD97;
+  --accent-soft:  rgba(59,109,17,0.08);
+  --accent-glow:  rgba(151,196,89,0.3);
+  --nav-bg:       rgba(247,245,240,0.92);
+  --card-bg:      #FFFFFF;
+  --tag-bg:       rgba(59,109,17,0.08);
+  --tag-text:     #3B6D11;
+  --btn-bg:       #3B6D11;
+  --btn-text:     #FFFFFF;
+  --btn-hover:    #2d5408;
+  --switcher-bg:  #E8E3D8;
+  --switcher-pill:#FFFFFF;
+  --switcher-text:#3B6D11;
+  --switcher-inactive: #8AAA60;
+  --font-main:    'Inter', system-ui, sans-serif;
+  --font-display: 'Inter', system-ui, sans-serif;
+  --radius:       12px;
+  --radius-sm:    8px;
+  --logo-filter:  none;
+}
+
+/* ═══════════════════════════════════════════════════════
+   WIZARD TOKENS
+═══════════════════════════════════════════════════════ */
+[data-theme="wizard"] {
+  --bg:           #0d0d0e;
+  --bg-2:         #131315;
+  --surface:      #14141c;
+  --border:       #252530;
+  --border-2:     #353540;
+  --text:         #e8e4dd;
+  --text-2:       #a09880;
+  --text-3:       #5a5a6a;
+  --accent:       #c87c2c;
+  --accent-light: #e8974a;
+  --accent-xlight:#ffdd88;
+  --accent-soft:  rgba(200,124,44,0.10);
+  --accent-glow:  rgba(200,124,44,0.35);
+  --nav-bg:       rgba(13,13,14,0.92);
+  --card-bg:      #14141c;
+  --tag-bg:       rgba(200,124,44,0.12);
+  --tag-text:     #e8974a;
+  --btn-bg:       #c87c2c;
+  --btn-text:     #0d0d0e;
+  --btn-hover:    #e8974a;
+  --switcher-bg:  #252530;
+  --switcher-pill:#353540;
+  --switcher-text:#e8974a;
+  --switcher-inactive: #5a5a6a;
+  --font-main:    'Inter', system-ui, sans-serif;
+  --font-display: 'Press Start 2P', monospace;
+  --radius:       4px;
+  --radius-sm:    2px;
+  --logo-filter:  none;
+}
+
+/* ═══════════════════════════════════════════════════════
+   LLMAGE TOKENS
+═══════════════════════════════════════════════════════ */
+[data-theme="llmage"] {
+  --bg:           #080808;
+  --bg-2:         #0f0f0f;
+  --surface:      #111111;
+  --border:       rgba(255,255,255,0.07);
+  --border-2:     rgba(255,255,255,0.12);
+  --text:         #F0F0F0;
+  --text-2:       #9C9C9C;
+  --text-3:       #4A4A4A;
+  --accent:       #EBEBEB;
+  --accent-light: #FFFFFF;
+  --accent-xlight:#FFFFFF;
+  --accent-soft:  rgba(255,255,255,0.05);
+  --accent-glow:  rgba(255,255,255,0.08);
+  --nav-bg:       rgba(8,8,8,0.95);
+  --card-bg:      #111111;
+  --tag-bg:       rgba(255,255,255,0.05);
+  --tag-text:     #9C9C9C;
+  --btn-bg:       #F0F0F0;
+  --btn-text:     #080808;
+  --btn-hover:    #FFFFFF;
+  --switcher-bg:  #1a1a1a;
+  --switcher-pill:#2a2a2a;
+  --switcher-text:#F0F0F0;
+  --switcher-inactive: #4A4A4A;
+  --font-main:    'Helvetica Neue', 'Arial', system-ui, sans-serif;
+  --font-display: 'Helvetica Neue', 'Arial', system-ui, sans-serif;
+  --radius:       2px;
+  --radius-sm:    1px;
+  --logo-filter:  none;
+}
+
+/* ═══════════════════════════════════════════════════════
+   BASE
+═══════════════════════════════════════════════════════ */
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-main);
+  font-size: 16px;
+  line-height: 1.6;
+  transition: background 0.35s ease, color 0.35s ease;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+/* ═══════════════════════════════════════════════════════
+   WIZARD STONE TEXTURE (only in wizard mode)
+═══════════════════════════════════════════════════════ */
+[data-theme="wizard"] body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='16'%3E%3Crect width='32' height='16' fill='%23252530'/%3E%3Crect x='0' y='0' width='14' height='7' fill='%232e2e3c'/%3E%3Crect x='16' y='0' width='16' height='7' fill='%23292938'/%3E%3Crect x='1' y='1' width='12' height='5' fill='%23313145'/%3E%3Crect x='17' y='1' width='14' height='5' fill='%232c2c3e'/%3E%3Crect x='0' y='9' width='8' height='7' fill='%232a2a3a'/%3E%3Crect x='10' y='9' width='22' height='7' fill='%23303046'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  opacity: 0.45;
+  image-rendering: pixelated;
+}
+
+[data-theme="wizard"] body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(ellipse at 50% 50%, transparent 52%, rgba(0,0,0,0.70) 100%);
+}
+
+/* LLMAGE scanline overlay */
+[data-theme="llmage"] body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0,0,0,0.18) 3px,
+    rgba(0,0,0,0.18) 4px
+  );
+}
+
+/* ═══════════════════════════════════════════════════════
+   NAV
+═══════════════════════════════════════════════════════ */
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  background: var(--nav-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 32px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background 0.35s, border-color 0.35s;
+}
+
+[data-theme="wizard"] .nav {
+  background: rgba(13,13,14,0.94);
+  border-bottom: 2px solid #252530;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='8'%3E%3Crect width='32' height='8' fill='%23252530'/%3E%3Crect x='0' y='0' width='14' height='7' fill='%232e2e3c'/%3E%3Crect x='16' y='0' width='16' height='7' fill='%23292938'/%3E%3C/svg%3E");
+  image-rendering: pixelated;
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  gap: 0;
+}
+
+.nav-logo svg { transition: all 0.35s; }
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.nav-link {
+  font-size: 14px;
+  color: var(--text-2);
+  text-decoration: none;
+  letter-spacing: 0.01em;
+  transition: color 0.2s;
+}
+.nav-link:hover { color: var(--text); }
+
+[data-theme="wizard"] .nav-link {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  color: var(--text-2);
+  letter-spacing: 0.06em;
+}
+
+[data-theme="llmage"] .nav-link {
+  font-family: 'Helvetica Neue', monospace;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ═══════════════════════════════════════════════════════
+   THEME SWITCHER
+═══════════════════════════════════════════════════════ */
+.theme-switcher {
+  display: flex;
+  align-items: center;
+  background: var(--switcher-bg);
+  border-radius: 100px;
+  padding: 3px;
+  gap: 0;
+  border: 1px solid var(--border);
+  transition: background 0.35s, border-color 0.35s;
+  position: relative;
+}
+
+[data-theme="wizard"] .theme-switcher {
+  border-radius: var(--radius);
+  border: 2px solid var(--border);
+  background: var(--switcher-bg);
+}
+
+[data-theme="llmage"] .theme-switcher {
+  border-radius: 0;
+  border: 1px solid var(--border-2);
+  background: var(--switcher-bg);
+}
+
+.theme-btn {
+  padding: 5px 14px;
+  border-radius: 100px;
+  border: none;
+  background: transparent;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  color: var(--switcher-inactive);
+  font-family: var(--font-main);
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  z-index: 1;
+  white-space: nowrap;
+}
+
+[data-theme="wizard"] .theme-btn {
+  border-radius: var(--radius-sm);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  letter-spacing: 0.05em;
+  padding: 6px 10px;
+}
+
+[data-theme="llmage"] .theme-btn {
+  border-radius: 0;
+  font-family: 'Helvetica Neue', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 5px 12px;
+}
+
+.theme-btn.active {
+  background: var(--switcher-pill);
+  color: var(--switcher-text);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+}
+
+[data-theme="wizard"] .theme-btn.active {
+  background: var(--switcher-pill);
+  box-shadow: 0 0 8px 2px rgba(200,124,44,0.18), inset 0 1px 0 rgba(255,220,100,0.08);
+  color: var(--accent-light);
+}
+
+[data-theme="llmage"] .theme-btn.active {
+  background: var(--switcher-pill);
+  color: var(--text);
+  box-shadow: none;
+  border-left: 1px solid var(--border-2);
+  border-right: 1px solid var(--border-2);
+}
+
+/* ═══════════════════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════════════════ */
+main {
+  padding-top: 60px;
+  position: relative;
+  z-index: 1;
+}
+
+section {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 80px 32px;
+}
+
+section.hero-section {
+  padding-top: 100px;
+  padding-bottom: 80px;
+  text-align: center;
+}
+
+/* ═══════════════════════════════════════════════════════
+   HERO CRYSTAL
+═══════════════════════════════════════════════════════ */
+.hero-crystal {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 40px;
+  transition: all 0.4s;
+}
+
+/* Scholar: green crystal */
+[data-theme="scholar"] .hero-crystal .crystal-scholar { display: block; }
+[data-theme="scholar"] .hero-crystal .crystal-wizard  { display: none; }
+[data-theme="scholar"] .hero-crystal .crystal-llmage  { display: none; }
+
+/* Wizard: glowing amber crystal */
+[data-theme="wizard"] .hero-crystal .crystal-scholar { display: none; }
+[data-theme="wizard"] .hero-crystal .crystal-wizard  { display: block; }
+[data-theme="wizard"] .hero-crystal .crystal-llmage  { display: none; }
+
+/* LLMAGE: mono node crystal */
+[data-theme="llmage"] .hero-crystal .crystal-scholar { display: none; }
+[data-theme="llmage"] .hero-crystal .crystal-wizard  { display: none; }
+[data-theme="llmage"] .hero-crystal .crystal-llmage  { display: block; }
+
+@keyframes wizard-crystal-pulse {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(255,200,80,0.6)) drop-shadow(0 0 18px rgba(200,124,44,0.4)); }
+  50% { filter: drop-shadow(0 0 14px rgba(255,238,153,0.9)) drop-shadow(0 0 32px rgba(200,124,44,0.7)) drop-shadow(0 0 52px rgba(232,134,26,0.35)); }
+}
+
+@keyframes scholar-crystal-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes llmage-crystal-rotate {
+  0%, 100% { opacity: 0.85; }
+  50% { opacity: 1; }
+}
+
+[data-theme="wizard"] .crystal-wizard {
+  animation: wizard-crystal-pulse 2.4s ease-in-out infinite;
+}
+
+[data-theme="scholar"] .crystal-scholar {
+  animation: scholar-crystal-float 3.5s ease-in-out infinite;
+}
+
+[data-theme="llmage"] .crystal-llmage {
+  animation: llmage-crystal-rotate 4s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════════════════════
+   HERO TEXT
+═══════════════════════════════════════════════════════ */
+.hero-tag {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 100px;
+  background: var(--tag-bg);
+  color: var(--tag-text);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  border: 1px solid var(--border);
+  transition: all 0.35s;
+}
+
+[data-theme="wizard"] .hero-tag {
+  border-radius: 0;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  border: 2px solid var(--accent);
+  padding: 5px 12px;
+}
+
+[data-theme="llmage"] .hero-tag {
+  border-radius: 0;
+  font-family: 'Helvetica Neue', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  background: transparent;
+  border: 1px solid var(--border-2);
+  color: var(--text-3);
+}
+
+.hero-title {
+  font-size: clamp(36px, 6vw, 64px);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 20px;
+  transition: all 0.35s;
+  font-family: var(--font-display);
+}
+
+[data-theme="wizard"] .hero-title {
+  font-size: clamp(20px, 3vw, 32px);
+  letter-spacing: 0.02em;
+  line-height: 1.6;
+  color: var(--accent-xlight);
+  text-shadow:
+    0 0 6px rgba(255,200,80,0.4),
+    0 0 20px rgba(200,124,44,0.25);
+}
+
+[data-theme="llmage"] .hero-title {
+  font-size: clamp(28px, 4.5vw, 52px);
+  font-weight: 300;
+  letter-spacing: -0.04em;
+  color: var(--text);
+}
+
+.hero-sub {
+  font-size: clamp(16px, 2vw, 20px);
+  font-weight: 400;
+  color: var(--text-2);
+  max-width: 560px;
+  margin: 0 auto 36px;
+  line-height: 1.65;
+  transition: all 0.35s;
+}
+
+[data-theme="wizard"] .hero-sub {
+  font-size: 14px;
+  line-height: 1.8;
+  max-width: 500px;
+}
+
+[data-theme="llmage"] .hero-sub {
+  font-size: 15px;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  max-width: 480px;
+  color: var(--text-3);
+  line-height: 1.7;
+}
+
+/* ═══════════════════════════════════════════════════════
+   CTA BUTTONS
+═══════════════════════════════════════════════════════ */
+.hero-cta {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 13px 28px;
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: var(--font-main);
+  letter-spacing: 0.01em;
+}
+.btn-primary:hover {
+  background: var(--btn-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px var(--accent-glow);
+}
+
+[data-theme="wizard"] .btn-primary {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  letter-spacing: 0.05em;
+  padding: 14px 20px;
+  border: 2px solid var(--accent);
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,200,80,0.1);
+}
+[data-theme="wizard"] .btn-primary:hover {
+  box-shadow: 0 0 16px rgba(200,124,44,0.5), 3px 3px 0 rgba(0,0,0,0.8);
+  transform: none;
+}
+
+[data-theme="llmage"] .btn-primary {
+  border-radius: 0;
+  font-weight: 400;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  border: 1px solid var(--text);
+  padding: 11px 24px;
+}
+[data-theme="llmage"] .btn-primary:hover {
+  transform: none;
+  box-shadow: none;
+  background: var(--btn-hover);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 13px 28px;
+  background: transparent;
+  color: var(--text-2);
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-2);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: var(--font-main);
+}
+.btn-secondary:hover {
+  color: var(--text);
+  border-color: var(--text-3);
+}
+
+[data-theme="wizard"] .btn-secondary {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  letter-spacing: 0.05em;
+  padding: 13px 18px;
+  border: 2px solid var(--border-2);
+}
+
+[data-theme="llmage"] .btn-secondary {
+  border-radius: 0;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid var(--border);
+  color: var(--text-3);
+}
+
+/* ═══════════════════════════════════════════════════════
+   SECTION DIVIDER
+═══════════════════════════════════════════════════════ */
+.section-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 0 32px;
+  transition: border-color 0.35s;
+}
+
+[data-theme="wizard"] .section-divider {
+  border-top: 2px solid var(--border);
+  background: none;
+}
+
+/* ═══════════════════════════════════════════════════════
+   SECTION LABEL
+═══════════════════════════════════════════════════════ */
+.section-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 32px;
+  display: block;
+  transition: all 0.35s;
+}
+
+[data-theme="wizard"] .section-label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: var(--accent);
+  border-left: 3px solid var(--accent);
+  padding-left: 12px;
+  background: linear-gradient(to right, rgba(200,124,44,0.1), transparent);
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+[data-theme="llmage"] .section-label {
+  font-family: 'Helvetica Neue', monospace;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--text-3);
+}
+
+/* ═══════════════════════════════════════════════════════
+   FEATURES GRID
+═══════════════════════════════════════════════════════ */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  transition: gap 0.35s;
+}
+
+.feature-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px 24px;
+  transition: all 0.25s;
+  position: relative;
+  overflow: hidden;
+}
+
+.feature-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px var(--accent-soft);
+}
+
+[data-theme="wizard"] .feature-card {
+  border: 2px solid var(--border);
+  background: var(--surface);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='16'%3E%3Crect width='32' height='16' fill='%23252530'/%3E%3Crect x='0' y='0' width='14' height='7' fill='%232e2e3c'/%3E%3Crect x='16' y='0' width='16' height='7' fill='%23292938'/%3E%3C/svg%3E");
+  image-rendering: pixelated;
+}
+[data-theme="wizard"] .feature-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 16px rgba(200,124,44,0.2), inset 0 0 24px rgba(200,124,44,0.03);
+  transform: none;
+}
+
+[data-theme="llmage"] .feature-card {
+  border: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+  border-left: 2px solid var(--border-2);
+  padding: 24px 20px;
+}
+[data-theme="llmage"] .feature-card:hover {
+  border-left-color: var(--text-2);
+  box-shadow: none;
+  transform: none;
+  background: var(--accent-soft);
+}
+
+.feature-icon {
+  width: 36px;
+  height: 36px;
+  margin-bottom: 16px;
+  color: var(--accent-light);
+}
+
+[data-theme="llmage"] .feature-icon {
+  color: var(--text-3);
+}
+
+.feature-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 8px;
+  transition: all 0.35s;
+}
+
+[data-theme="wizard"] .feature-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  line-height: 1.6;
+  color: var(--accent-light);
+}
+
+[data-theme="llmage"] .feature-title {
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--text-2);
+  font-family: 'Helvetica Neue', monospace;
+  text-transform: lowercase;
+}
+
+.feature-desc {
+  font-size: 14px;
+  color: var(--text-2);
+  line-height: 1.6;
+  transition: all 0.35s;
+}
+
+[data-theme="wizard"] .feature-desc {
+  font-size: 12px;
+  line-height: 1.75;
+}
+
+[data-theme="llmage"] .feature-desc {
+  font-size: 13px;
+  font-weight: 300;
+  letter-spacing: 0.01em;
+  color: var(--text-3);
+  line-height: 1.7;
+}
+
+/* ═══════════════════════════════════════════════════════
+   GETTING STARTED
+═══════════════════════════════════════════════════════ */
+.steps-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border);
+  transition: all 0.35s;
+}
+.step-item:last-child { border-bottom: none; }
+
+.step-num {
+  min-width: 32px;
+  height: 32px;
+  background: var(--accent-soft);
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  flex-shrink: 0;
+  transition: all 0.35s;
+}
+
+[data-theme="wizard"] .step-num {
+  border-radius: 0;
+  border: 2px solid var(--accent);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  background: rgba(200,124,44,0.08);
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.8);
+}
+
+[data-theme="llmage"] .step-num {
+  border-radius: 0;
+  border: 1px solid var(--border-2);
+  background: transparent;
+  font-size: 11px;
+  font-weight: 300;
+  color: var(--text-3);
+  font-family: 'Helvetica Neue', monospace;
+}
+
+.step-body h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+  transition: all 0.35s;
+}
+
+[data-theme="wizard"] .step-body h4 {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  line-height: 1.7;
+  color: var(--accent-light);
+}
+
+[data-theme="llmage"] .step-body h4 {
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--text-2);
+  font-family: 'Helvetica Neue', monospace;
+}
+
+.step-body p {
+  font-size: 14px;
+  color: var(--text-2);
+  line-height: 1.6;
+}
+
+[data-theme="llmage"] .step-body p {
+  font-size: 12px;
+  font-weight: 300;
+  color: var(--text-3);
+  letter-spacing: 0.01em;
+  font-family: 'Courier New', monospace;
+}
+
+/* ═══════════════════════════════════════════════════════
+   LLMAGE CODE BLOCK STYLE
+═══════════════════════════════════════════════════════ */
+.code-block {
+  display: none;
+  background: #0d0d0d;
+  border: 1px solid var(--border-2);
+  border-radius: 0;
+  padding: 16px 20px;
+  margin-top: 24px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: #9C9C9C;
+  line-height: 1.8;
+  overflow-x: auto;
+}
+[data-theme="llmage"] .code-block { display: block; }
+.code-block .comment { color: #4A4A4A; }
+.code-block .keyword { color: #F0F0F0; }
+.code-block .string  { color: #787878; }
+
+/* ═══════════════════════════════════════════════════════
+   REQUIREMENTS BLOCK (Scholar only)
+═══════════════════════════════════════════════════════ */
+.req-block {
+  background: var(--accent-soft);
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-top: 24px;
+  transition: all 0.35s;
+}
+
+[data-theme="wizard"] .req-block {
+  border-radius: 0;
+  border: 2px solid var(--border-2);
+  background: rgba(200,124,44,0.05);
+}
+
+[data-theme="llmage"] .req-block {
+  border-radius: 0;
+  border: 1px solid var(--border);
+  background: transparent;
+}
+
+.req-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 12px;
+  transition: all 0.35s;
+}
+
+[data-theme="wizard"] .req-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+}
+
+[data-theme="llmage"] .req-title {
+  font-family: 'Helvetica Neue', monospace;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  color: var(--text-3);
+}
+
+.req-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.req-list li {
+  font-size: 14px;
+  color: var(--text-2);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.35s;
+}
+
+.req-list li::before {
+  content: '◆';
+  color: var(--accent);
+  font-size: 8px;
+  flex-shrink: 0;
+}
+
+[data-theme="wizard"] .req-list li::before {
+  content: '▸';
+  font-size: 10px;
+  color: var(--accent-light);
+}
+
+[data-theme="llmage"] .req-list li::before {
+  content: '—';
+  color: var(--text-3);
+  font-size: 10px;
+}
+
+[data-theme="llmage"] .req-list li {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+/* ═══════════════════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════════════════ */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  max-width: 900px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+  transition: border-color 0.35s;
+}
+
+[data-theme="wizard"] footer {
+  border-top: 2px solid var(--border);
+}
+
+.footer-text {
+  font-size: 13px;
+  color: var(--text-3);
+  transition: all 0.35s;
+}
+
+[data-theme="wizard"] .footer-text {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  line-height: 1.8;
+}
+
+[data-theme="llmage"] .footer-text {
+  font-family: 'Helvetica Neue', monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+
+/* ═══════════════════════════════════════════════════════
+   CONTENT SWITCHING
+   .t-scholar, .t-wizard, .t-llmage — show only in theme
+═══════════════════════════════════════════════════════ */
+.t-scholar, .t-wizard, .t-llmage { display: none; }
+[data-theme="scholar"] .t-scholar { display: inline; }
+[data-theme="wizard"]  .t-wizard  { display: inline; }
+[data-theme="llmage"]  .t-llmage  { display: inline; }
+
+/* For block-level content switching */
+.tb-scholar, .tb-wizard, .tb-llmage { display: none; }
+[data-theme="scholar"] .tb-scholar { display: block; }
+[data-theme="wizard"]  .tb-wizard  { display: block; }
+[data-theme="llmage"]  .tb-llmage  { display: block; }
+
+/* ═══════════════════════════════════════════════════════
+   ABOUT SECTION
+═══════════════════════════════════════════════════════ */
+.about-prose {
+  font-size: 17px;
+  line-height: 1.85;
+  color: var(--text-2);
+  max-width: 660px;
+  margin-bottom: 0;
+}
+
+[data-theme="wizard"] .about-prose {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  line-height: 2.2;
+  color: var(--text-2);
+  max-width: 580px;
+  margin-bottom: 32px;
+}
+
+[data-theme="llmage"] .about-prose {
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--text-3);
+  letter-spacing: 0.015em;
+  max-width: 560px;
+}
+
+.palace-map-wrap {
+  width: 100%;
+  height: 500px;
+  overflow: hidden;
+  position: relative;
+  background: #0d0d0e;
+  margin: 32px -32px 0;
+}
+.palace-map-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 65%, rgba(13,13,14,0.6) 82%, #0d0d0e 96%);
+  pointer-events: none;
+  z-index: 2;
+}
+.palace-map-wrap img {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+  width: 720px;
+  height: auto;
+  display: block;
+  filter: contrast(1.0) saturate(0.82) brightness(0.88);
+  -webkit-mask-image: radial-gradient(ellipse 78% 80% at 50% 32%, black 18%, rgba(0,0,0,0.9) 40%, rgba(0,0,0,0.45) 62%, transparent 80%);
+  mask-image: radial-gradient(ellipse 78% 80% at 50% 32%, black 18%, rgba(0,0,0,0.9) 40%, rgba(0,0,0,0.45) 62%, transparent 80%);
+}
+@media (max-width: 700px) {
+  .palace-map-wrap { height: 320px; }
+  .palace-map-wrap img { width: 100%; position: static; transform: none; margin: 0 auto; }
+}
+
+.llmage-principles {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.llmage-principle {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: var(--text-3);
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  letter-spacing: 0.02em;
+}
+.llmage-principle::before {
+  content: '→ ';
+  color: var(--border-2);
+}
+
+/* ═══════════════════════════════════════════════════════
+   FEATURE CARD: WIZARD-ONLY (6th card)
+═══════════════════════════════════════════════════════ */
+.card-wizard-only { display: none; }
+[data-theme="wizard"] .card-wizard-only { display: block; }
+
+/* ═══════════════════════════════════════════════════════
+   TRANSITION SMOOTHING
+═══════════════════════════════════════════════════════ */
+.hero-title, .hero-sub, .hero-tag, .section-label,
+.feature-title, .feature-desc, .step-body h4, .step-body p,
+.feature-card, .step-num, .step-item, .req-block {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ═══════════════════════════════════════════════════════
+   RESOURCES DROPDOWN
+═══════════════════════════════════════════════════════ */
+.nav-dropdown-wrap { position: relative; }
+.nav-dropdown-trigger {
+  background: none; border: none; cursor: pointer; padding: 0;
+  display: flex; align-items: center; gap: 4px;
+}
+.dropdown-arrow { font-size: 9px; opacity: 0.7; transition: transform 0.2s; display: inline-block; }
+.nav-dropdown-wrap.open .dropdown-arrow { transform: rotate(180deg); }
+.nav-dropdown-menu {
+  position: absolute; top: calc(100% + 10px); right: 0; min-width: 168px;
+  background: var(--surface); border: 1px solid var(--border-2);
+  border-radius: var(--radius-sm); padding: 6px 0;
+  opacity: 0; visibility: hidden; transform: translateY(-6px);
+  transition: all 0.18s ease; z-index: 200;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.14);
+}
+.nav-dropdown-wrap.open .nav-dropdown-menu {
+  opacity: 1; visibility: visible; transform: translateY(0);
+}
+.dropdown-item {
+  display: block; width: 100%; padding: 9px 16px; font-size: 13px;
+  color: var(--text-2); text-decoration: none; background: none;
+  border: none; cursor: pointer; text-align: left;
+  font-family: var(--font-main); transition: color 0.15s, background 0.15s;
+}
+.dropdown-item:hover { color: var(--text); background: var(--accent-soft); }
+[data-theme="wizard"] .nav-dropdown-menu {
+  border-radius: 0; border: 2px solid var(--border); background: var(--surface);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='16'%3E%3Crect width='32' height='16' fill='%23252530'/%3E%3Crect x='0' y='0' width='14' height='7' fill='%232e2e3c'/%3E%3Crect x='16' y='0' width='16' height='7' fill='%23292938'/%3E%3C/svg%3E");
+  image-rendering: pixelated;
+}
+[data-theme="wizard"] .dropdown-item {
+  font-family: 'Press Start 2P', monospace; font-size: 8px; padding: 10px 14px; letter-spacing: 0.05em;
+}
+[data-theme="llmage"] .nav-dropdown-menu {
+  border-radius: 0; border: 1px solid var(--border-2); background: var(--bg-2);
+}
+[data-theme="llmage"] .dropdown-item {
+  font-family: 'Helvetica Neue', monospace; font-size: 11px; letter-spacing: 0.07em; text-transform: uppercase;
+}
+
+/* ═══════════════════════════════════════════════════════
+   CONTACT MODAL
+═══════════════════════════════════════════════════════ */
+.contact-modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.52); z-index: 1000;
+  display: none; align-items: center; justify-content: center;
+  backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+}
+.contact-modal-overlay.open { display: flex; }
+@keyframes modal-in {
+  from { opacity: 0; transform: scale(0.93) translateY(10px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.contact-modal-box {
+  background: var(--surface); border: 1px solid var(--border-2);
+  border-radius: var(--radius); padding: 36px; max-width: 440px; width: 90vw;
+  position: relative; animation: modal-in 0.22s cubic-bezier(0.4,0,0.2,1);
+}
+[data-theme="wizard"] .contact-modal-box {
+  border: 2px solid var(--border-2); border-radius: 0; background: var(--card-bg);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='16'%3E%3Crect width='32' height='16' fill='%23252530'/%3E%3Crect x='0' y='0' width='14' height='7' fill='%232e2e3c'/%3E%3Crect x='16' y='0' width='16' height='7' fill='%23292938'/%3E%3C/svg%3E");
+  image-rendering: pixelated;
+}
+[data-theme="llmage"] .contact-modal-box { border-radius: 0; border: 1px solid var(--border-2); background: var(--bg-2); }
+.contact-modal-close {
+  position: absolute; top: 14px; right: 16px; background: none; border: none;
+  font-size: 16px; cursor: pointer; color: var(--text-3); padding: 4px; transition: color 0.15s;
+}
+.contact-modal-close:hover { color: var(--text); }
+.contact-modal-title {
+  font-size: 20px; font-weight: 600; color: var(--text); margin-bottom: 8px;
+}
+[data-theme="wizard"] .contact-modal-title {
+  font-family: 'Press Start 2P', monospace; font-size: 11px; line-height: 1.8; color: var(--accent-xlight);
+}
+[data-theme="llmage"] .contact-modal-title {
+  font-family: 'Helvetica Neue', monospace; font-size: 16px; font-weight: 300; letter-spacing: -0.02em;
+}
+.contact-modal-sub {
+  font-size: 14px; color: var(--text-2); line-height: 1.65; margin-bottom: 24px;
+}
+[data-theme="wizard"] .contact-modal-sub { font-size: 12px; line-height: 1.9; }
+[data-theme="llmage"] .contact-modal-sub { font-size: 12px; font-weight: 300; color: var(--text-3); letter-spacing: 0.01em; }
+.contact-modal-email {
+  display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px;
+  background: var(--btn-bg); color: var(--btn-text); border-radius: var(--radius-sm);
+  text-decoration: none; font-size: 14px; font-weight: 600; transition: all 0.18s;
+}
+.contact-modal-email:hover { background: var(--btn-hover); transform: translateY(-1px); }
+[data-theme="wizard"] .contact-modal-email {
+  border-radius: 0; font-family: 'Press Start 2P', monospace; font-size: 8px;
+  border: 2px solid var(--accent); padding: 12px 16px; box-shadow: 3px 3px 0 rgba(0,0,0,0.8);
+}
+[data-theme="llmage"] .contact-modal-email { border-radius: 0; font-weight: 400; font-size: 13px; border: 1px solid var(--text); }
+
+/* ═══════════════════════════════════════════════════════
+   WIZARD 9-CARD GRID
+═══════════════════════════════════════════════════════ */
+.wizard-features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.non-wizard-grid { display: grid; } /* shown by default, hidden in wizard mode below */
+[data-theme="wizard"] .non-wizard-grid { display: none; }
+[data-theme="wizard"] .wizard-features-grid { display: grid; }
+[data-theme="scholar"] .wizard-features-grid,
+[data-theme="llmage"]  .wizard-features-grid { display: none; }
+
+.card-group-divider {
+  grid-column: 1 / -1;
+  display: flex; align-items: center; gap: 16px;
+  margin: 8px 0 0; padding-top: 20px;
+  border-top: 2px solid var(--border);
+}
+.card-group-label {
+  font-family: 'Press Start 2P', monospace; font-size: 7px;
+  letter-spacing: 0.14em; color: var(--accent); white-space: nowrap;
+  padding: 4px 12px;
+  background: linear-gradient(to right, rgba(200,124,44,0.12), transparent);
+  border-left: 3px solid var(--accent);
+}
+
+@media (max-width: 700px) {
+  .wizard-features-grid { grid-template-columns: 1fr; }
+}
+
+/* ═══════════════════════════════════════════════════════
+   WIZARD+ GATING (shows in wizard AND llmage)
+═══════════════════════════════════════════════════════ */
+.t-wizard-up { display: none; }
+[data-theme="wizard"] .t-wizard-up { display: inline; }
+[data-theme="llmage"] .t-wizard-up { display: inline; }
+.tb-wizard-up { display: none; }
+[data-theme="wizard"] .tb-wizard-up { display: block; }
+[data-theme="llmage"] .tb-wizard-up { display: block; }
+.github-footer-link { display: none; }
+[data-theme="wizard"] .github-footer-link { display: inline-flex; }
+[data-theme="llmage"] .github-footer-link { display: inline-flex; }
+
+/* ═══════════════════════════════════════════════════════
+   SCHOLAR ILLUSTRATION
+═══════════════════════════════════════════════════════ */
+.scholar-illustration {
+  max-width: 900px;
+  margin: 40px auto -8px;
+  padding: 0 32px;
+  line-height: 0;
+}
+.scholar-illustration svg { width: 100%; height: auto; display: block; }
+
+/* ═══════════════════════════════════════════════════════
+   COMING SOON — blurred disabled state for unbuilt features
+═══════════════════════════════════════════════════════ */
+.coming-soon-wrap {
+  position: relative;
+  display: inline-flex;
+}
+.coming-soon-wrap::after {
+  content: 'coming soon';
+  position: absolute;
+  inset: 0;
+  background: rgba(247,245,240,0.72);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+[data-theme="wizard"] .coming-soon-wrap::after {
+  background: rgba(13,13,14,0.75);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  color: var(--text-3);
+  border: 1px solid var(--border);
+}
+[data-theme="llmage"] .coming-soon-wrap::after {
+  background: rgba(8,8,8,0.78);
+  font-family: 'Helvetica Neue', monospace;
+  letter-spacing: 0.14em;
+  color: var(--text-3);
+  border: 1px solid var(--border);
+}
+/* Block click on the wrapped element */
+.coming-soon-wrap > * { pointer-events: none; }
+
+/* ═══════════════════════════════════════════════════════
+   INSTALL DUAL-CTA (Scholar)
+═══════════════════════════════════════════════════════ */
+.install-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+.install-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 100px;
+  border: 1px solid var(--border-2);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--accent);
+  background: var(--accent-soft);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.install-pill:hover {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+/* ═══════════════════════════════════════════════════════
+   WIZARD AUTOINSTALLER BLOCK
+═══════════════════════════════════════════════════════ */
+.wizard-install-block {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  margin-top: 24px;
+  font-family: 'Courier New', 'Courier', monospace;
+  font-size: 12px;
+  color: var(--accent-light);
+  line-height: 1.9;
+}
+.wizard-install-block .wi-comment { color: var(--text-3); font-family: 'Press Start 2P', monospace; font-size: 8px; }
+.wizard-install-block .wi-cmd { color: var(--accent-xlight); }
+.wizard-install-block .wi-sep { color: var(--text-3); margin: 4px 0; display: block; }
+
+/* ═══════════════════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  .nav { padding: 0 16px; }
+  section { padding: 60px 20px; }
+  .theme-btn { padding: 5px 8px; font-size: 10px; }
+  [data-theme="wizard"] .theme-btn { font-size: 6px; padding: 6px 7px; }
+  .features-grid { grid-template-columns: 1fr; }
+  footer { flex-direction: column; align-items: flex-start; }
+  .hero-cta { flex-direction: column; align-items: center; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ═══════════════════ NAV ═══════════════════════════ -->
+<nav class="nav">
+
+  <!-- Logo -->
+  <a href="/" class="nav-logo" aria-label="loci.garden home">
+    <!-- Scholar: green facet crystal -->
+    <span class="t-scholar">
+      <svg width="140" height="42" viewBox="0 0 400 120" role="img" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="68,12 32,60 68,60" fill="#C0DD97"/>
+        <polygon points="68,12 104,60 68,60" fill="#97C459"/>
+        <polygon points="32,60 68,108 68,60" fill="#639922"/>
+        <polygon points="104,60 68,108 68,60" fill="#3B6D11"/>
+        <polygon points="68,12 32,60 68,108 104,60" fill="none" stroke="#ffffff" stroke-width="0.8" opacity="0.4"/>
+        <line x1="68" y1="12" x2="68" y2="108" stroke="#ffffff" stroke-width="0.5" opacity="0.2"/>
+        <line x1="32" y1="60" x2="104" y2="60" stroke="#ffffff" stroke-width="0.5" opacity="0.2"/>
+        <text x="122" y="72" font-family="'Helvetica Neue','Arial',sans-serif" font-size="34" letter-spacing="-0.5">
+          <tspan font-weight="600" fill="#173404">loci</tspan><tspan font-weight="300" fill="#3B6D11">.garden</tspan>
+        </text>
+      </svg>
+    </span>
+    <!-- Wizard: amber crystal logotype -->
+    <span class="t-wizard">
+      <svg width="140" height="42" viewBox="0 0 400 120" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="68,12 32,60 68,60" fill="#ffcc44"/>
+        <polygon points="68,12 104,60 68,60" fill="#e8861a"/>
+        <polygon points="32,60 68,108 68,60" fill="#c87c2c"/>
+        <polygon points="104,60 68,108 68,60" fill="#7a3a08"/>
+        <polygon points="68,12 32,60 68,108 104,60" fill="none" stroke="rgba(255,220,100,0.4)" stroke-width="0.8"/>
+        <line x1="68" y1="12" x2="68" y2="108" stroke="rgba(255,220,100,0.2)" stroke-width="0.5"/>
+        <line x1="32" y1="60" x2="104" y2="60" stroke="rgba(255,220,100,0.2)" stroke-width="0.5"/>
+        <text x="122" y="72" font-family="'Helvetica Neue','Arial',sans-serif" font-size="34" letter-spacing="-0.5">
+          <tspan font-weight="600" fill="#ffcc44">loci</tspan><tspan font-weight="300" fill="#c87c2c">.garden</tspan>
+        </text>
+      </svg>
+    </span>
+    <!-- LLMAGE: mono node crystal -->
+    <span class="t-llmage">
+      <svg width="130" height="42" viewBox="0 0 375 116" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="68,13 28,57 68,57" fill="#CACACA"/>
+        <polygon points="68,13 108,57 68,57" fill="#9A9A9A"/>
+        <polygon points="28,57 68,101 68,57" fill="#686868"/>
+        <polygon points="108,57 68,101 68,57" fill="#3C3C3C"/>
+        <polygon points="68,13 28,57 68,101 108,57" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="0.8"/>
+        <line x1="68" y1="13" x2="68" y2="101" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/>
+        <line x1="28" y1="57" x2="108" y2="57" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/>
+        <circle cx="68" cy="13" r="3.5" fill="#EBEBEB"/>
+        <circle cx="68" cy="13" r="7" fill="none" stroke="#777777" stroke-width="0.8" stroke-dasharray="2.2 1.8"/>
+        <circle cx="28" cy="57" r="3.5" fill="#EBEBEB"/>
+        <circle cx="28" cy="57" r="7" fill="none" stroke="#777777" stroke-width="0.8" stroke-dasharray="2.2 1.8"/>
+        <circle cx="68" cy="101" r="3.5" fill="#EBEBEB"/>
+        <circle cx="68" cy="101" r="7" fill="none" stroke="#777777" stroke-width="0.8" stroke-dasharray="2.2 1.8"/>
+        <circle cx="108" cy="57" r="3.5" fill="#EBEBEB"/>
+        <circle cx="108" cy="57" r="7" fill="none" stroke="#777777" stroke-width="0.8" stroke-dasharray="2.2 1.8"/>
+        <text x="130" y="71" font-family="'Helvetica Neue',Arial,sans-serif" font-size="40" letter-spacing="-0.5">
+          <tspan font-weight="600" fill="#F0F0F0">loci</tspan><tspan font-weight="300" fill="#9C9C9C">.garden</tspan>
+        </text>
+      </svg>
+    </span>
+  </a>
+
+  <div class="nav-right">
+    <a href="#features" class="nav-link">
+      <span class="t-scholar">Features</span>
+      <span class="t-wizard">Rooms</span>
+      <span class="t-llmage">Spec</span>
+    </a>
+    <a href="#start" class="nav-link">
+      <span class="t-scholar">Get Started</span>
+      <span class="t-wizard">Enter</span>
+      <span class="t-llmage">Install</span>
+    </a>
+
+    <!-- Resources dropdown -->
+    <div class="nav-dropdown-wrap" id="resources-wrap">
+      <button class="nav-link nav-dropdown-trigger" onclick="toggleDropdown('resources')">
+        <span class="t-scholar">Resources</span>
+        <span class="t-wizard">Archive</span>
+        <span class="t-llmage">More</span>
+        <span class="dropdown-arrow">▾</span>
+      </button>
+      <div class="nav-dropdown-menu">
+        <a href="#about" class="dropdown-item" onclick="closeAllDropdowns()">
+          <span class="t-scholar">About</span>
+          <span class="t-wizard">The Origin</span>
+          <span class="t-llmage">About</span>
+        </a>
+        <a href="https://loci.garden/seed/" class="dropdown-item" target="_blank" rel="noopener">
+          <span class="t-scholar">Seed guide ↗</span>
+          <span class="t-wizard">The Seed ↗</span>
+          <span class="t-llmage">Seed ↗</span>
+        </a>
+        <button class="dropdown-item" onclick="openContactModal()">
+          <span class="t-scholar">Get in touch</span>
+          <span class="t-wizard">Send a raven</span>
+          <span class="t-llmage">Contact</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Theme Switcher -->
+    <div class="theme-switcher" role="group" aria-label="Choose experience mode">
+      <button class="theme-btn" id="btn-scholar" onclick="setTheme('scholar')" aria-pressed="true">◆ Scholar</button>
+      <button class="theme-btn" id="btn-wizard"  onclick="setTheme('wizard')"  aria-pressed="false">⚔ Wizard</button>
+      <button class="theme-btn" id="btn-llmage"  onclick="setTheme('llmage')"  aria-pressed="false">◈ LLMAGE</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════════════ MAIN ══════════════════════════ -->
+<main>
+
+  <!-- ── HERO ────────────────────────────────────────── -->
+  <section class="hero-section">
+
+    <!-- Hero crystal -->
+    <div class="hero-crystal">
+      <!-- Scholar crystal -->
+      <svg class="crystal-scholar" width="80" height="80" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="150,30 60,150 150,150" fill="#C0DD97"/>
+        <polygon points="150,30 240,150 150,150" fill="#97C459"/>
+        <polygon points="60,150 150,270 150,150" fill="#639922"/>
+        <polygon points="240,150 150,270 150,150" fill="#3B6D11"/>
+        <polygon points="150,30 60,150 150,270 240,150" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"/>
+        <line x1="150" y1="30" x2="150" y2="270" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+        <line x1="60" y1="150" x2="240" y2="150" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+      </svg>
+      <!-- Wizard crystal (amber glowing) -->
+      <svg class="crystal-wizard" width="80" height="80" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="ambGrad" cx="50%" cy="35%" r="60%">
+            <stop offset="0%" stop-color="#ffee99"/>
+            <stop offset="50%" stop-color="#ffcc44"/>
+            <stop offset="100%" stop-color="#c87c2c"/>
+          </radialGradient>
+        </defs>
+        <polygon points="150,30 60,150 150,150" fill="#ffee99"/>
+        <polygon points="150,30 240,150 150,150" fill="url(#ambGrad)"/>
+        <polygon points="60,150 150,270 150,150" fill="#c87c2c"/>
+        <polygon points="240,150 150,270 150,150" fill="#7a3a08"/>
+        <polygon points="150,30 60,150 150,270 240,150" fill="none" stroke="rgba(255,220,100,0.5)" stroke-width="1.5"/>
+        <line x1="150" y1="30" x2="150" y2="270" stroke="rgba(255,220,100,0.3)" stroke-width="1"/>
+        <line x1="60" y1="150" x2="240" y2="150" stroke="rgba(255,220,100,0.3)" stroke-width="1"/>
+        <circle cx="150" cy="30" r="5" fill="#ffee99" opacity="0.9"/>
+      </svg>
+      <!-- LLMAGE crystal (mono node) -->
+      <svg class="crystal-llmage" width="96" height="96" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="150,48 72,150 150,150" fill="#CACACA"/>
+        <polygon points="150,48 228,150 150,150" fill="#9A9A9A"/>
+        <polygon points="72,150 150,252 150,150" fill="#686868"/>
+        <polygon points="228,150 150,252 150,150" fill="#3C3C3C"/>
+        <polygon points="150,48 72,150 150,252 228,150" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="2"/>
+        <line x1="150" y1="48" x2="150" y2="252" stroke="rgba(255,255,255,0.1)" stroke-width="1.2"/>
+        <line x1="72" y1="150" x2="228" y2="150" stroke="rgba(255,255,255,0.1)" stroke-width="1.2"/>
+        <circle cx="150" cy="48" r="8" fill="#EBEBEB"/>
+        <circle cx="150" cy="48" r="16" fill="none" stroke="#777777" stroke-width="2" stroke-dasharray="5 4"/>
+        <circle cx="72" cy="150" r="8" fill="#EBEBEB"/>
+        <circle cx="72" cy="150" r="16" fill="none" stroke="#777777" stroke-width="2" stroke-dasharray="5 4"/>
+        <circle cx="150" cy="252" r="8" fill="#EBEBEB"/>
+        <circle cx="150" cy="252" r="16" fill="none" stroke="#777777" stroke-width="2" stroke-dasharray="5 4"/>
+        <circle cx="228" cy="150" r="8" fill="#EBEBEB"/>
+        <circle cx="228" cy="150" r="16" fill="none" stroke="#777777" stroke-width="2" stroke-dasharray="5 4"/>
+      </svg>
+    </div>
+
+    <!-- Tag / badge -->
+    <span class="hero-tag">
+      <span class="t-scholar">Free · Open · Local-first</span>
+      <span class="t-wizard">✦ The Palace Awaits ✦</span>
+      <span class="t-llmage">v0.1 · local context layer</span>
+    </span>
+
+    <!-- Title -->
+    <h1 class="hero-title">
+      <span class="t-scholar">Your cosy<br>second brain.</span>
+      <span class="t-wizard">Your Palace of Co-Intelligence<br><span style="font-size:0.58em;opacity:0.7;letter-spacing:0.02em;">& Hero AI Companion</span></span>
+      <span class="t-llmage">The context<br>layer.</span>
+    </h1>
+
+    <!-- Sub -->
+    <p class="hero-sub">
+      <span class="t-scholar">Keep everything you've learned from AI within reach. Search any conversation across Claude, ChatGPT, and more — in seconds. Your AI memory, finally yours.</span>
+      <span class="t-wizard">A memory-mapped workspace for AI agents, MCP rooms, and local LLMs. The palace grows as you work — every room a locus, every locus a tool.</span>
+      <span class="t-llmage">Local-first. MCP-native. Zero cloud dependency. A lightweight persistence primitive that composes freely across any LLM backend or IDE.</span>
+    </p>
+
+    <!-- CTAs -->
+    <div class="hero-cta">
+      <a href="#start" class="btn-primary">
+        <span class="t-scholar">Try it free →</span>
+        <span class="t-wizard">Enter the Palace →</span>
+        <span class="t-llmage">Install →</span>
+      </a>
+      <a href="#features" class="btn-secondary">
+        <span class="t-scholar">See how it works</span>
+        <span class="t-wizard">Explore the Rooms</span>
+        <span class="t-llmage">Read the spec</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ── SCHOLAR ILLUSTRATION ─────────────────────────── -->
+  <div class="tb-scholar scholar-illustration" aria-hidden="true">
+    <svg viewBox="0 0 800 240" xmlns="http://www.w3.org/2000/svg">
+      <!-- BUBBLE 1: warm orange (Claude-adjacent) -->
+      <rect x="16" y="22" width="108" height="46" rx="14" fill="rgba(232,144,106,0.06)" stroke="#e8906a" stroke-width="1.2"/>
+      <line x1="32" y1="36" x2="94" y2="36" stroke="#e8906a" stroke-width="1.8" stroke-linecap="round" opacity="0.65"/>
+      <line x1="32" y1="47" x2="108" y2="47" stroke="#e8906a" stroke-width="1.2" stroke-linecap="round" opacity="0.45"/>
+      <line x1="32" y1="57" x2="70" y2="57" stroke="#e8906a" stroke-width="1.2" stroke-linecap="round" opacity="0.35"/>
+      <!-- BUBBLE 2: teal (ChatGPT-adjacent) -->
+      <rect x="160" y="64" width="116" height="44" rx="14" fill="rgba(74,170,136,0.06)" stroke="#4aaa88" stroke-width="1.2"/>
+      <line x1="176" y1="78" x2="250" y2="78" stroke="#4aaa88" stroke-width="1.8" stroke-linecap="round" opacity="0.65"/>
+      <line x1="176" y1="89" x2="265" y2="89" stroke="#4aaa88" stroke-width="1.2" stroke-linecap="round" opacity="0.45"/>
+      <line x1="176" y1="100" x2="220" y2="100" stroke="#4aaa88" stroke-width="1.2" stroke-linecap="round" opacity="0.35"/>
+      <!-- BUBBLE 3: blue (Gemini-adjacent) -->
+      <rect x="8" y="122" width="104" height="44" rx="14" fill="rgba(88,144,216,0.06)" stroke="#5890d8" stroke-width="1.2"/>
+      <line x1="24" y1="136" x2="90" y2="136" stroke="#5890d8" stroke-width="1.8" stroke-linecap="round" opacity="0.65"/>
+      <line x1="24" y1="147" x2="100" y2="147" stroke="#5890d8" stroke-width="1.2" stroke-linecap="round" opacity="0.45"/>
+      <line x1="24" y1="157" x2="62" y2="157" stroke="#5890d8" stroke-width="1.2" stroke-linecap="round" opacity="0.35"/>
+      <!-- BUBBLE 4: purple (generic) -->
+      <rect x="154" y="166" width="112" height="42" rx="14" fill="rgba(152,128,208,0.06)" stroke="#9880d0" stroke-width="1.2"/>
+      <line x1="170" y1="180" x2="246" y2="180" stroke="#9880d0" stroke-width="1.8" stroke-linecap="round" opacity="0.65"/>
+      <line x1="170" y1="191" x2="256" y2="191" stroke="#9880d0" stroke-width="1.2" stroke-linecap="round" opacity="0.45"/>
+      <line x1="170" y1="201" x2="208" y2="201" stroke="#9880d0" stroke-width="1.2" stroke-linecap="round" opacity="0.35"/>
+      <!-- TANGLED → CONVERGING PATHS -->
+      <path d="M 124,45 C 152,45 148,72 172,76 C 198,80 212,105 248,110 C 274,113 305,113 330,115" fill="none" stroke="#e8906a" stroke-width="0.85" opacity="0.38" stroke-dasharray="5 3.5"/>
+      <path d="M 160,86 C 146,86 136,98 142,108 C 148,116 192,114 228,115 C 268,116 300,115 330,115" fill="none" stroke="#4aaa88" stroke-width="0.85" opacity="0.38"/>
+      <path d="M 112,144 C 148,144 155,126 182,122 C 210,118 258,116 290,115 C 310,115 322,115 330,115" fill="none" stroke="#5890d8" stroke-width="0.85" opacity="0.38" stroke-dasharray="5 3.5"/>
+      <path d="M 154,187 C 136,187 128,168 140,152 C 152,136 200,124 240,120 C 278,116 308,115 330,115" fill="none" stroke="#9880d0" stroke-width="0.85" opacity="0.38"/>
+      <!-- Convergence node -->
+      <circle cx="342" cy="115" r="5" fill="rgba(151,196,89,0.18)" stroke="#97C459" stroke-width="1.1"/>
+      <circle cx="342" cy="115" r="2.5" fill="#97C459" opacity="0.72"/>
+      <!-- Bridge to crystal -->
+      <path d="M 347,115 L 372,115" fill="none" stroke="#639922" stroke-width="1.3" opacity="0.82"/>
+      <!-- THE CRYSTAL: top(420,48) left(372,116) bottom(420,184) right(468,116) -->
+      <polygon points="420,48 372,116 420,116" fill="rgba(192,221,151,0.28)"/>
+      <polygon points="420,48 468,116 420,116" fill="rgba(151,196,89,0.36)"/>
+      <polygon points="372,116 420,184 420,116" fill="rgba(99,153,34,0.22)"/>
+      <polygon points="468,116 420,184 420,116" fill="rgba(59,109,17,0.32)"/>
+      <polygon points="420,48 372,116 420,184 468,116" fill="none" stroke="#97C459" stroke-width="1.1"/>
+      <line x1="420" y1="48" x2="420" y2="184" stroke="rgba(99,153,34,0.28)" stroke-width="0.7"/>
+      <line x1="372" y1="116" x2="468" y2="116" stroke="rgba(99,153,34,0.28)" stroke-width="0.7"/>
+      <circle cx="420" cy="48" r="4.5" fill="#C0DD97"/>
+      <circle cx="420" cy="48" r="9" fill="none" stroke="#97C459" stroke-width="0.9" stroke-dasharray="2.5 2" opacity="0.75"/>
+      <!-- BOTANICAL: upper branch -->
+      <path d="M 468,116 C 492,103 520,92 550,84" fill="none" stroke="#3B6D11" stroke-width="1.5" stroke-linecap="round"/>
+      <!-- Lower branch -->
+      <path d="M 468,116 C 492,129 520,140 550,148" fill="none" stroke="#3B6D11" stroke-width="1.5" stroke-linecap="round"/>
+      <!-- Secondary upper -->
+      <path d="M 550,84 C 574,76 600,70 628,66" fill="none" stroke="#639922" stroke-width="1.2" stroke-linecap="round"/>
+      <!-- Secondary lower -->
+      <path d="M 550,148 C 574,156 600,160 628,162" fill="none" stroke="#639922" stroke-width="1.2" stroke-linecap="round"/>
+      <!-- Leaf A: upper mid -->
+      <path d="M 512,90 C 518,80 530,80 530,89 C 530,98 518,98 512,90" fill="rgba(192,221,151,0.4)" stroke="#97C459" stroke-width="1"/>
+      <line x1="512" y1="90" x2="526" y2="89" stroke="#97C459" stroke-width="0.6" opacity="0.55"/>
+      <!-- Leaf B: lower mid -->
+      <path d="M 514,142 C 520,152 532,150 530,142 C 528,133 516,133 514,142" fill="rgba(151,196,89,0.35)" stroke="#639922" stroke-width="1"/>
+      <line x1="514" y1="142" x2="527" y2="142" stroke="#639922" stroke-width="0.6" opacity="0.55"/>
+      <!-- Leaf C: upper far -->
+      <path d="M 590,70 C 596,61 608,62 607,71 C 606,79 593,80 590,70" fill="rgba(192,221,151,0.32)" stroke="#97C459" stroke-width="0.9"/>
+      <line x1="590" y1="70" x2="604" y2="70" stroke="#97C459" stroke-width="0.5" opacity="0.5"/>
+      <!-- Leaf D: lower far -->
+      <path d="M 590,158 C 596,167 608,165 606,157 C 605,148 592,148 590,158" fill="rgba(99,153,34,0.28)" stroke="#639922" stroke-width="0.9"/>
+      <line x1="590" y1="158" x2="604" y2="158" stroke="#639922" stroke-width="0.5" opacity="0.5"/>
+      <!-- Terminal tips upper -->
+      <path d="M 628,66 C 648,60 668,57 686,56" fill="none" stroke="#97C459" stroke-width="1" stroke-linecap="round"/>
+      <path d="M 660,57 C 666,50 676,51 675,58 C 674,65 663,66 660,57" fill="rgba(192,221,151,0.28)" stroke="#97C459" stroke-width="0.8"/>
+      <!-- Terminal tips lower -->
+      <path d="M 628,162 C 648,166 668,167 686,166" fill="none" stroke="#97C459" stroke-width="1" stroke-linecap="round"/>
+      <path d="M 660,165 C 666,172 676,170 675,163 C 674,156 663,156 660,165" fill="rgba(151,196,89,0.24)" stroke="#639922" stroke-width="0.8"/>
+      <!-- Upward tendril from crystal apex -->
+      <path d="M 420,48 C 419,36 418,24 417,16" fill="none" stroke="#97C459" stroke-width="0.9" stroke-linecap="round" opacity="0.52"/>
+      <path d="M 417,16 C 415,10 411,9 410,13 C 409,17 413,20 417,16" fill="none" stroke="#97C459" stroke-width="0.7" opacity="0.42"/>
+      <!-- Small lateral leaf on tendril -->
+      <path d="M 420,40 C 428,33 436,34 434,41 C 432,48 423,47 420,40" fill="rgba(192,221,151,0.18)" stroke="#97C459" stroke-width="0.7" opacity="0.58"/>
+    </svg>
+  </div>
+
+  <!-- ── FEATURES ─────────────────────────────────────── -->
+  <hr class="section-divider" />
+  <section id="features">
+    <span class="section-label">
+      <span class="t-scholar">What it does</span>
+      <span class="t-wizard">The Rooms</span>
+      <span class="t-llmage">CAPABILITIES</span>
+    </span>
+
+    <!-- ── WIZARD 9-CARD GRID (RPG tone, 3 groups + dividers) ── -->
+    <div class="wizard-features-grid">
+
+      <!-- Group 1: THE COMPANION -->
+      <div class="feature-card">
+        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2a5 5 0 1 0 5 5A5 5 0 0 0 12 2zm0 8a3 3 0 1 1 3-3 3 3 0 0 1-3 3zm9 11v-1a7 7 0 0 0-14 0v1"/></svg>
+        <div class="feature-title">Your Hero AI Companion</div>
+        <p class="feature-desc">The palace turns your AI from a tool into something that stays with you. Reads your rooms. Knows your crystals. Every session starts exactly where the last ended — no re-explaining, no rebuilding from scratch. Your AI grows wiser as the palace does.</p>
+      </div>
+
+      <div class="feature-card">
+        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <div class="feature-title">Rooms</div>
+        <p class="feature-desc">A room is a named context space — Dev, Design, Research. Each has a soul file your AI reads before it speaks. The room holds what happened here before: the decisions, the patterns, the things that should never need explaining again.</p>
+      </div>
+
+      <div class="feature-card">
+        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10,9 9,9 8,9"/></svg>
+        <div class="feature-title">The Soul Layer</div>
+        <p class="feature-desc">Every room has a CLAUDE.md — the briefing file your AI reads at the start of every session. Two sentences or twenty. It answers: what is this room for, and what must never be forgotten here? Write it once. Let it grow.</p>
+      </div>
+
+      <!-- Divider: THE KNOWLEDGE -->
+      <div class="card-group-divider">
+        <span class="card-group-label">THE KNOWLEDGE</span>
+      </div>
+
+      <!-- Group 2: THE KNOWLEDGE -->
+      <div class="feature-card">
+        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+        <div class="feature-title">Crystals</div>
+        <p class="feature-desc">A crystal is a fact established once, never re-derived. The decision you keep explaining from scratch every session. Write it in the room's soul file — it becomes part of the palace. Your AI never asks again.</p>
+      </div>
+
+      <div class="feature-card">
+        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22V12m0 0C12 7 7 4 3 6m9 6c0-5 5-8 9-6"/></svg>
+        <div class="feature-title">The Garden</div>
+        <p class="feature-desc">The garden holds open questions growing across sessions. Not tasks, not features — genuine inquiries you're moving toward slowly, across many sessions. A garden plant is something you tend. The garden remembers.</p>
+      </div>
+
+      <div class="feature-card">
+        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48 2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48 2.83-2.83"/></svg>
+        <div class="feature-title">The Hatchery</div>
+        <p class="feature-desc">New projects are fragile. The hatchery is the palace's incubator — a room without pressure, for ideas that aren't ready to be named. Prototype. Explore. Fail fast in the dark. When something matures, graduate it to the palace proper.</p>
+      </div>
+
+      <!-- Divider: THE ARCHITECTURE -->
+      <div class="card-group-divider">
+        <span class="card-group-label">THE ARCHITECTURE</span>
+      </div>
+
+      <!-- Group 3: THE ARCHITECTURE -->
+      <div class="feature-card">
+        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        <div class="feature-title">Agent Architecture</div>
+        <p class="feature-desc">Local LLMs, MCP-native rooms, remote agents. The palace exposes your rooms as tools your IDE can call. Every room becomes a live context source for any agent in your stack. The palace serves every conjuration.</p>
+      </div>
+
+      <div class="feature-card">
+        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <div class="feature-title">Team Palace</div>
+        <p class="feature-desc">Shared rooms. Shared crystals. When a teammate opens the Design room they inherit the same accumulated context — not just your notes, but the living memory of every session held there. Co-intelligence that travels between minds.</p>
+      </div>
+
+      <div class="feature-card">
+        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        <div class="feature-title">The Chronicle</div>
+        <p class="feature-desc">Every session logged. Every decision preserved. The chronicle is the palace's long memory — not just what you know now, but how you came to know it. Navigate back through your thinking. The palace remembers what you forget.</p>
+      </div>
+
+    </div>
+
+    <!-- ── SHARED FEATURES GRID (scholar + llmage only) ── -->
+    <div class="features-grid non-wizard-grid">
+
+      <!-- Feature 1 -->
+      <div class="feature-card">
+        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <div class="feature-title">
+          <span class="t-scholar">Search everything</span>
+          <span class="t-wizard">Memory Loci</span>
+          <span class="t-llmage">context_persistence</span>
+        </div>
+        <p class="feature-desc">
+          <span class="t-scholar">Full-text search across all your AI chat history. Find that conversation from six months ago in seconds.</span>
+          <span class="t-wizard">Every conversation anchored in spatial memory. Navigate your knowledge like rooms in a palace — each locus a persistent node of thought.</span>
+          <span class="t-llmage">Persistent context across sessions. Retrieval is O(log n). Semantic indexing optional.</span>
+        </p>
+      </div>
+
+      <!-- Feature 2 -->
+      <div class="feature-card">
+        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+        <div class="feature-title">
+          <span class="t-scholar">Organize by topic</span>
+          <span class="t-wizard">MCP-Native Rooms</span>
+          <span class="t-llmage">mcp_integration</span>
+        </div>
+        <p class="feature-desc">
+          <span class="t-scholar">Automatically group conversations by topic, project, or date. Your ideas stay connected — even across different AI tools.</span>
+          <span class="t-wizard">Each room is a fully configured MCP workspace. Dev room, Design room, Research room — each with its own tools, memory, and agent context.</span>
+          <span class="t-llmage">First-class MCP server support. Compose rooms as namespaced tool collections. Expose or isolate contexts as needed.</span>
+        </p>
+      </div>
+
+      <!-- Feature 3 -->
+      <div class="feature-card">
+        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+        </svg>
+        <div class="feature-title">
+          <span class="t-scholar">Works with any AI</span>
+          <span class="t-wizard">Agent Architecture</span>
+          <span class="t-llmage">zero_vendor_lock</span>
+        </div>
+        <p class="feature-desc">
+          <span class="t-scholar">Claude, ChatGPT, Gemini, local models — loci works alongside all of them. Switch tools without losing your history.</span>
+          <span class="t-wizard">Runs local LLMs, connects remote agents, orchestrates multi-step workflows. The palace serves every conjuration.</span>
+          <span class="t-llmage">Provider-agnostic. Swap LLM backends via config. Local-first, cloud-optional. Your data stays yours.</span>
+        </p>
+      </div>
+
+      <!-- Feature 4 -->
+      <div class="feature-card">
+        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M3 12h18M3 6h18M3 18h18"/><path d="M8 6V4m0 16v-2M16 6V4m0 16v-2"/>
+        </svg>
+        <div class="feature-title">
+          <span class="t-scholar">Never re-explain yourself</span>
+          <span class="t-wizard">The Garden</span>
+          <span class="t-llmage">namespace_isolation</span>
+        </div>
+        <p class="feature-desc">
+          <span class="t-scholar">loci remembers what you already figured out. Link back to past insights instead of rebuilding context from scratch every session.</span>
+          <span class="t-wizard">A living room for growing ideas. Seeds become concepts, concepts become loci. The garden grows quietly between sessions — return to find it richer than you left it.</span>
+          <span class="t-llmage">Rooms are namespaced scopes. Dev context stays in Dev. Research stays in Research. Explicit boundary control per session.</span>
+        </p>
+      </div>
+
+      <!-- Feature 5 -->
+      <div class="feature-card">
+        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        <div class="feature-title">
+          <span class="t-scholar">Private by default</span>
+          <span class="t-wizard">The Hatchery</span>
+          <span class="t-llmage">snapshot_export</span>
+        </div>
+        <p class="feature-desc">
+          <span class="t-scholar">Everything runs in your browser. Your conversations never touch a server. No account, no telemetry, no cloud. Your memory, yours.</span>
+          <span class="t-wizard">Where new projects incubate. Prototype, experiment, fail fast in an isolated room. When an idea matures, promote it to the palace proper.</span>
+          <span class="t-llmage">Export context as portable JSON. Version-controlled. Diff-able across time. Composable into larger pipelines.</span>
+        </p>
+      </div>
+
+      <!-- Feature 6: Wizard only -->
+      <div class="feature-card card-wizard-only">
+        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+        <div class="feature-title">
+          <span class="t-wizard">Crystal Extraction</span>
+        </div>
+        <p class="feature-desc">
+          <span class="t-wizard">The palace distils your best thinking into crystals — reusable, quotable, linkable knowledge nodes. Extract once, reference everywhere.</span>
+        </p>
+      </div>
+
+    </div> <!-- end non-wizard-grid -->
+  </section>
+
+  <!-- ── ABOUT / SEED ──────────────────────────────────── -->
+  <hr class="section-divider" />
+  <section id="about">
+    <span class="section-label">
+      <span class="t-scholar">Why we built this</span>
+      <span class="t-wizard">The Origin · The Seed</span>
+      <span class="t-llmage">ABOUT</span>
+    </span>
+
+    <!-- Scholar: plain human -->
+    <div class="tb-scholar">
+      <p class="about-prose">We built loci because the best AI conversations kept vanishing. A breakthrough insight at 2am, searched for a week later — gone. Re-explaining the same context to the same AI, session after session. Your thinking was happening, just nowhere permanent. loci is the fix: a local memory layer that makes your AI conversations actually yours, fully searchable, never leaving your device.</p>
+    </div>
+
+    <!-- Wizard: palace origin + palace map -->
+    <div class="tb-wizard">
+      <p class="about-prose">The memory palace is one of the oldest techniques for thought: a place for everything, everything in its place. loci applies this to co-intelligence. A room is a persistent workspace — Dev, Design, Research — not a single conversation. Conversations happen inside rooms, accumulating context over time. What crystallises from that work becomes a locus: a fixed point in the palace, a node your memory navigates back to. The palace grows as you build inside it. Your thinking becomes architecture.</p>
+      <div class="palace-map-wrap">
+        <!-- Using the real palace map illustration from loci.garden -->
+        <img src="https://loci.garden/assets/palace-map-v2.png"
+             alt="Palace map — rooms of the co-intelligence system"
+             style="width:100%;height:auto;display:block;border-radius:var(--radius);border:2px solid var(--border);image-rendering:pixelated;"
+             loading="lazy" />
+        <!-- SVG fallback (hidden — kept for offline/local reference) -->
+        <svg viewBox="0 0 700 360" xmlns="http://www.w3.org/2000/svg" style="display:none;image-rendering:pixelated;">
+          <rect width="700" height="360" fill="#0a0a0c"/>
+          <defs>
+            <pattern id="pstone" width="32" height="16" patternUnits="userSpaceOnUse">
+              <rect width="32" height="16" fill="#252530"/>
+              <rect x="0" y="0" width="13" height="7" fill="#2a2a38"/>
+              <rect x="15" y="0" width="17" height="7" fill="#262634"/>
+              <rect x="0" y="9" width="8" height="7" fill="#28283a"/>
+              <rect x="10" y="9" width="22" height="7" fill="#2e2e44"/>
+              <rect x="8" y="8" width="2" height="8" fill="#1c1c26"/>
+              <rect x="0" y="7" width="32" height="2" fill="#1c1c26"/>
+              <rect x="14" y="0" width="2" height="8" fill="#1c1c26"/>
+            </pattern>
+          </defs>
+          <!-- Stone wall backdrop -->
+          <rect width="700" height="360" fill="url(#pstone)" opacity="0.55"/>
+          <!-- ── CASTLE OUTER WALL ── -->
+          <rect x="8" y="8" width="684" height="344" fill="none" stroke="#353540" stroke-width="6"/>
+          <rect x="12" y="12" width="676" height="336" fill="none" stroke="#1c1c26" stroke-width="2" stroke-dasharray="6 5" opacity="0.4"/>
+          <!-- Corner towers -->
+          <rect x="8" y="8" width="16" height="16" fill="#353540"/><rect x="676" y="8" width="16" height="16" fill="#353540"/>
+          <rect x="8" y="336" width="16" height="16" fill="#353540"/><rect x="676" y="336" width="16" height="16" fill="#353540"/>
+          <!-- ── ROOMS ROW 1 ── -->
+          <!-- GARDEN (teal, top-left) -->
+          <rect x="18" y="18" width="170" height="148" fill="#04080f" stroke="#1a3a5a" stroke-width="3"/>
+          <rect x="22" y="22" width="162" height="140" fill="rgba(26,58,90,0.55)"/>
+          <rect x="25" y="25" width="156" height="134" fill="none" stroke="#4a9ab8" stroke-width="1.2" opacity="0.5"/>
+          <!-- Window glow -->
+          <rect x="68" y="52" width="22" height="22" fill="rgba(74,154,184,0.15)" stroke="#4a9ab8" stroke-width="1"/>
+          <rect x="70" y="54" width="8" height="18" fill="rgba(170,221,255,0.2)"/>
+          <text x="103" y="104" font-family="'Press Start 2P',monospace" font-size="7" fill="#4a9ab8" text-anchor="middle" opacity="0.9">THE</text>
+          <text x="103" y="117" font-family="'Press Start 2P',monospace" font-size="7" fill="#4a9ab8" text-anchor="middle" opacity="0.9">GARDEN</text>
+          <text x="103" y="136" font-family="'Press Start 2P',monospace" font-size="5.5" fill="#1a3a5a" text-anchor="middle" opacity="0.7">growing ideas</text>
+          <!-- Doorway east -->
+          <rect x="188" y="75" width="14" height="40" fill="#0a0a0c"/>
+
+          <!-- GREAT HALL (amber, top-center — taller) -->
+          <rect x="210" y="18" width="280" height="168" fill="#100804" stroke="#5a3010" stroke-width="3"/>
+          <rect x="214" y="22" width="272" height="160" fill="rgba(50,24,4,0.65)"/>
+          <rect x="218" y="26" width="264" height="152" fill="none" stroke="#c87c2c" stroke-width="1.5" opacity="0.55"/>
+          <!-- Central lantern -->
+          <rect x="322" y="68" width="56" height="46" fill="none" stroke="#c87c2c" stroke-width="1" opacity="0.4"/>
+          <rect x="332" y="78" width="36" height="26" fill="rgba(200,124,44,0.12)"/>
+          <rect x="346" y="86" width="8" height="8" fill="#ffcc44" opacity="0.75"/>
+          <rect x="342" y="82" width="16" height="16" fill="none" stroke="rgba(255,200,80,0.35)" stroke-width="1"/>
+          <text x="350" y="142" font-family="'Press Start 2P',monospace" font-size="9" fill="#e8974a" text-anchor="middle" opacity="0.95">GREAT HALL</text>
+          <text x="350" y="160" font-family="'Press Start 2P',monospace" font-size="5.5" fill="#c87c2c" text-anchor="middle" opacity="0.55">✦ THE PALACE ✦</text>
+          <!-- Doorways: west, east, south -->
+          <rect x="202" y="75" width="14" height="40" fill="#0a0a0c"/>
+          <rect x="486" y="75" width="14" height="40" fill="#0a0a0c"/>
+          <rect x="322" y="186" width="56" height="14" fill="#0a0a0c"/>
+
+          <!-- DEV ROOM (blue, top-right) -->
+          <rect x="512" y="18" width="170" height="148" fill="#040810" stroke="#1e3a7a" stroke-width="3"/>
+          <rect x="516" y="22" width="162" height="140" fill="rgba(6,11,26,0.6)"/>
+          <rect x="519" y="25" width="156" height="134" fill="none" stroke="#4477dd" stroke-width="1.2" opacity="0.5"/>
+          <!-- Monitor -->
+          <rect x="566" y="54" width="28" height="20" fill="none" stroke="#4477dd" stroke-width="1.2"/>
+          <rect x="568" y="56" width="24" height="16" fill="rgba(68,119,221,0.18)"/>
+          <rect x="570" y="58" width="12" height="1.5" fill="#5588ff" opacity="0.7"/>
+          <rect x="570" y="61" width="16" height="1.5" fill="#5588ff" opacity="0.5"/>
+          <rect x="570" y="64" width="8" height="1.5" fill="#5588ff" opacity="0.4"/>
+          <text x="597" y="104" font-family="'Press Start 2P',monospace" font-size="7" fill="#4477dd" text-anchor="middle" opacity="0.9">DEV</text>
+          <text x="597" y="117" font-family="'Press Start 2P',monospace" font-size="7" fill="#4477dd" text-anchor="middle" opacity="0.9">ROOM</text>
+          <text x="597" y="136" font-family="'Press Start 2P',monospace" font-size="5.5" fill="#1e3a7a" text-anchor="middle" opacity="0.7">forge &amp; build</text>
+          <!-- Doorway west -->
+          <rect x="498" y="75" width="14" height="40" fill="#0a0a0c"/>
+
+          <!-- ── ROOMS ROW 2 ── -->
+          <!-- DESIGN ROOM (warm amber, bottom-left) -->
+          <rect x="18" y="200" width="170" height="148" fill="#0e0804" stroke="#5a3a18" stroke-width="3"/>
+          <rect x="22" y="204" width="162" height="140" fill="rgba(40,18,4,0.6)"/>
+          <rect x="25" y="207" width="156" height="134" fill="none" stroke="#e8a84a" stroke-width="1.2" opacity="0.5"/>
+          <!-- Candle -->
+          <rect x="96" y="238" width="8" height="22" fill="rgba(200,124,44,0.25)" stroke="#e8a84a" stroke-width="1"/>
+          <rect x="98" y="234" width="4" height="8" fill="#ffcc66" opacity="0.8"/>
+          <rect x="96" y="234" width="8" height="2" fill="rgba(255,200,80,0.3)"/>
+          <text x="103" y="284" font-family="'Press Start 2P',monospace" font-size="7" fill="#e8a84a" text-anchor="middle" opacity="0.9">DESIGN</text>
+          <text x="103" y="297" font-family="'Press Start 2P',monospace" font-size="7" fill="#e8a84a" text-anchor="middle" opacity="0.9">ROOM</text>
+          <text x="103" y="316" font-family="'Press Start 2P',monospace" font-size="5.5" fill="#5a3a18" text-anchor="middle" opacity="0.7">vision &amp; craft</text>
+          <!-- Doorway east -->
+          <rect x="188" y="258" width="14" height="40" fill="#0a0a0c"/>
+
+          <!-- RESEARCH (forest green, bottom-center) -->
+          <rect x="210" y="200" width="280" height="148" fill="#040b04" stroke="#1a3d1f" stroke-width="3"/>
+          <rect x="214" y="204" width="272" height="140" fill="rgba(4,16,4,0.55)"/>
+          <rect x="218" y="208" width="264" height="132" fill="none" stroke="#4a9a4f" stroke-width="1.5" opacity="0.5"/>
+          <!-- Book stack -->
+          <rect x="322" y="236" width="56" height="38" fill="none" stroke="#4a9a4f" stroke-width="1" opacity="0.5"/>
+          <rect x="326" y="240" width="48" height="6" fill="rgba(74,154,79,0.2)"/>
+          <rect x="326" y="248" width="48" height="6" fill="rgba(74,154,79,0.15)"/>
+          <rect x="326" y="256" width="48" height="6" fill="rgba(74,154,79,0.12)"/>
+          <text x="350" y="298" font-family="'Press Start 2P',monospace" font-size="7" fill="#4a9a4f" text-anchor="middle" opacity="0.9">RESEARCH</text>
+          <text x="350" y="316" font-family="'Press Start 2P',monospace" font-size="5.5" fill="#1a3d1f" text-anchor="middle" opacity="0.7">archive &amp; recall</text>
+          <!-- Doorways: west, east, north -->
+          <rect x="202" y="258" width="14" height="40" fill="#0a0a0c"/>
+          <rect x="486" y="258" width="14" height="40" fill="#0a0a0c"/>
+          <rect x="322" y="192" width="56" height="14" fill="#0a0a0c"/>
+
+          <!-- HATCHERY (earthy, bottom-right) -->
+          <rect x="512" y="200" width="170" height="148" fill="#0a0804" stroke="#3a2810" stroke-width="3"/>
+          <rect x="516" y="204" width="162" height="140" fill="rgba(28,16,4,0.6)"/>
+          <rect x="519" y="207" width="156" height="134" fill="none" stroke="#c8943a" stroke-width="1.2" opacity="0.5"/>
+          <!-- Egg -->
+          <ellipse cx="596" cy="252" rx="16" ry="18" fill="none" stroke="#c8943a" stroke-width="1.5"/>
+          <ellipse cx="596" cy="252" rx="10" ry="12" fill="rgba(200,148,58,0.12)"/>
+          <text x="597" y="284" font-family="'Press Start 2P',monospace" font-size="7" fill="#c8943a" text-anchor="middle" opacity="0.9">THE</text>
+          <text x="597" y="297" font-family="'Press Start 2P',monospace" font-size="7" fill="#c8943a" text-anchor="middle" opacity="0.9">HATCHERY</text>
+          <text x="597" y="316" font-family="'Press Start 2P',monospace" font-size="5.5" fill="#3a2810" text-anchor="middle" opacity="0.7">seeds incubate</text>
+          <!-- Doorway west -->
+          <rect x="498" y="258" width="14" height="40" fill="#0a0a0c"/>
+
+          <!-- Map footer label -->
+          <text x="350" y="352" font-family="'Press Start 2P',monospace" font-size="5.5" fill="#353540" text-anchor="middle" letter-spacing="0.08em">LOCI.GARDEN · PALACE FLOOR PLAN · v0.1</text>
+        </svg><!-- end fallback SVG -->
+      </div>
+    </div>
+
+    <!-- LLMAGE: architecture principles -->
+    <div class="tb-llmage">
+      <p class="about-prose">loci is a context persistence primitive. It solves the stateless session problem for LLM-native workflows — not by adding a cloud layer, but by treating your local machine as the canonical context store. No accounts. No sync. Architecture documented at <a href="https://docs.loci.garden" style="color:var(--text-2);">docs.loci.garden</a>.</p>
+      <div class="llmage-principles">
+        <div class="llmage-principle">Context is state. State must persist.</div>
+        <div class="llmage-principle">Local is canonical. Cloud is optional.</div>
+        <div class="llmage-principle">Rooms are namespaces. Namespaces are tools.</div>
+        <div class="llmage-principle">The index lives with you. Always has.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── GETTING STARTED ──────────────────────────────── -->
+  <hr class="section-divider" />
+  <section id="start">
+    <span class="section-label">
+      <span class="t-scholar">Get started in minutes</span>
+      <span class="t-wizard">The Ritual of Entry</span>
+      <span class="t-llmage">INSTALLATION</span>
+    </span>
+
+    <!-- Requirements block -->
+    <div class="req-block">
+      <div class="req-title">
+        <span class="t-scholar">What you need</span>
+        <span class="t-wizard">Prerequisites</span>
+        <span class="t-llmage">REQUIREMENTS</span>
+      </div>
+      <ul class="req-list">
+        <li>
+          <span class="t-scholar">Any AI tool you already use (Claude, ChatGPT, etc.)</span>
+          <span class="t-wizard">A working LLM endpoint — local or remote</span>
+          <span class="t-llmage">node >= 18 or python >= 3.10</span>
+        </li>
+        <li>
+          <span class="t-scholar">About 20 minutes to set things up</span>
+          <span class="t-wizard">20 minutes + the step-by-step guide</span>
+          <span class="t-llmage">MCP-compatible client (Claude Code, Zed, Cursor)</span>
+        </li>
+        <li>
+          <span class="t-scholar">A browser (that's it!)</span>
+          <span class="t-wizard">A local LLM or Claude API key (for full palace mode)</span>
+          <span class="t-llmage">git + config.json (provided)</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Steps -->
+    <ul class="steps-list" style="margin-top: 32px;">
+      <li class="step-item">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>
+            <span class="t-scholar">Add to your browser or download the installer</span>
+            <span class="t-wizard">Claim Your First Room</span>
+            <span class="t-llmage">clone + configure</span>
+          </h4>
+          <p>
+            <span class="t-scholar">Install the browser extension (free, 30 seconds) or grab the Mac/Windows installer if you prefer a local setup. No account required.</span>
+            <span class="t-wizard">Choose your first room — Dev, Design, or Research. Each comes pre-configured with the right tools and memory zones.</span>
+            <span class="t-llmage"><code>git clone https://github.com/loci-garden/loci && cp config.example.json config.json</code></span>
+          </p>
+          <div class="install-pills tb-scholar">
+            <span class="coming-soon-wrap">
+              <a href="#" class="install-pill" tabindex="-1" aria-disabled="true">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
+                Add to Chrome
+              </a>
+            </span>
+            <span class="coming-soon-wrap">
+              <a href="#" class="install-pill" tabindex="-1" aria-disabled="true">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                Download for Mac
+              </a>
+            </span>
+            <span class="coming-soon-wrap">
+              <a href="#" class="install-pill" tabindex="-1" aria-disabled="true">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/></svg>
+                Download for Windows
+              </a>
+            </span>
+          </div>
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>
+            <span class="t-scholar">Connect your AI chats</span>
+            <span class="t-wizard">Configure Your MCP Endpoint</span>
+            <span class="t-llmage">wire MCP server</span>
+          </h4>
+          <p>
+            <span class="t-scholar">loci reads your chat history from Claude, ChatGPT, and others — locally, in your browser. Nothing leaves your device. No account, no sync, no cloud.</span>
+            <span class="t-wizard">Point loci at your local LLM or API key. Your palace connects to the conjuration engine of your choice.</span>
+            <span class="t-llmage">Add loci to your <code>mcp_servers</code> config. Restart your IDE client.</span>
+          </p>
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>
+            <span class="t-scholar">Search anything you've said</span>
+            <span class="t-wizard">Walk the Palace</span>
+            <span class="t-llmage">invoke + verify</span>
+          </h4>
+          <p>
+            <span class="t-scholar">Press ⌘K and search. Find any conversation, any answer, any idea — instantly. Your AI memory, finally yours.</span>
+            <span class="t-wizard">Navigate your rooms, recall your loci, summon your agents. The palace grows with every session.</span>
+            <span class="t-llmage"><code>@loci search "your query"</code> — verify context window is populated before your first run.</span>
+          </p>
+        </div>
+      </li>
+    </ul>
+
+    <!-- Wizard autoinstaller block -->
+    <div class="wizard-install-block tb-wizard">
+      <div class="wi-comment">// one-line install — terminal</div>
+      <br>
+      <span class="wi-cmd">brew install loci-garden</span>
+      <span class="wi-sep">— or —</span>
+      <span class="wi-cmd">curl -sSL https://loci.garden/install.sh | bash</span>
+      <br><br>
+      <div class="wi-comment">// then follow the palace setup guide at loci.garden/docs</div>
+    </div>
+
+    <!-- LLMAGE code block -->
+    <div class="code-block">
+      <span class="comment"># config.json — minimal setup</span><br>
+      {<br>
+      &nbsp;&nbsp;<span class="string">"loci_dir"</span>: <span class="string">"~/.loci"</span>,<br>
+      &nbsp;&nbsp;<span class="string">"llm"</span>: { <span class="string">"provider"</span>: <span class="string">"local"</span>, <span class="string">"endpoint"</span>: <span class="string">"http://localhost:11434"</span> },<br>
+      &nbsp;&nbsp;<span class="string">"mcp"</span>: { <span class="string">"expose_rooms"</span>: [<span class="string">"dev"</span>, <span class="string">"research"</span>] },<br>
+      &nbsp;&nbsp;<span class="string">"index"</span>: { <span class="string">"semantic"</span>: <span class="keyword">false</span>, <span class="string">"sync_interval"</span>: <span class="string">"5m"</span> }<br>
+      }
+    </div>
+
+    <!-- Final CTA -->
+    <div style="margin-top: 40px; display: flex; gap: 12px; flex-wrap: wrap;">
+      <span class="coming-soon-wrap tb-scholar" style="display:inline-flex;">
+        <a href="#" class="btn-primary" tabindex="-1" aria-disabled="true">
+          <span class="t-scholar">Open loci →</span>
+        </a>
+      </span>
+      <a href="https://loci.garden/start.html" class="btn-primary tb-wizard">
+        <span class="t-wizard">Begin the Ritual →</span>
+      </a>
+      <a href="https://docs.loci.garden" class="btn-primary tb-llmage">
+        <span class="t-llmage">Full documentation →</span>
+      </a>
+    </div>
+  </section>
+
+</main>
+
+<!-- ═══════════════════ FOOTER ════════════════════════ -->
+<hr class="section-divider" style="margin: 0 0;" />
+<footer>
+  <span class="footer-text">
+    <span class="t-scholar">loci.garden — your AI memory, finally yours.</span>
+    <span class="t-wizard">loci.garden · The palace grows with every session. ✦</span>
+    <span class="t-llmage">loci.garden · v0.1.0 · MIT license</span>
+  </span>
+  <span class="footer-text">
+    <span class="t-scholar">Made with care · Local-first · Private by design</span>
+    <span class="t-wizard">Built in the palace · For those who build with fire</span>
+    <span class="t-llmage">no telemetry · no accounts · no cloud required</span>
+  </span>
+  <a href="https://github.com/loci-garden/loci" class="footer-text github-footer-link" style="text-decoration:none; opacity:0.7; align-items:center; gap:6px;" target="_blank" rel="noopener">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+    <span class="t-wizard">GitHub</span>
+    <span class="t-llmage">github</span>
+  </a>
+</footer>
+
+<!-- ═══════════════════ CONTACT MODAL ════════════════ -->
+<div id="contact-modal" class="contact-modal-overlay" onclick="handleModalBackdropClick(event)">
+  <div class="contact-modal-box">
+    <button class="contact-modal-close" onclick="closeContactModal()" aria-label="Close">✕</button>
+    <div class="contact-modal-title">
+      <span class="t-scholar">Get in touch</span>
+      <span class="t-wizard">Send a Raven</span>
+      <span class="t-llmage">Contact</span>
+    </div>
+    <p class="contact-modal-sub">
+      <span class="t-scholar">loci is in early development. Questions, ideas, feedback, or just a hello — all welcome.</span>
+      <span class="t-wizard">The palace is under construction. Ideas, conjurations, questions — send them through.</span>
+      <span class="t-llmage">loci v0.1. Feedback, integration questions, architecture discussions.</span>
+    </p>
+    <a href="mailto:hux@nymtech.net?subject=loci.garden" class="contact-modal-email">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      hux@nymtech.net
+    </a>
+  </div>
+</div>
+
+<!-- ═══════════════════ SCRIPT ════════════════════════ -->
+<script>
+  const THEMES = ['scholar', 'wizard', 'llmage'];
+
+  function setTheme(theme) {
+    if (!THEMES.includes(theme)) return;
+    document.documentElement.setAttribute('data-theme', theme);
+    THEMES.forEach(t => {
+      const btn = document.getElementById('btn-' + t);
+      if (btn) {
+        btn.classList.toggle('active', t === theme);
+        btn.setAttribute('aria-pressed', String(t === theme));
+      }
+    });
+    try { localStorage.setItem('loci-theme', theme); } catch(e) {}
+  }
+
+  // Init: read from storage or default to scholar
+  (function init() {
+    let saved = 'scholar';
+    try { saved = localStorage.getItem('loci-theme') || 'scholar'; } catch(e) {}
+    if (!THEMES.includes(saved)) saved = 'scholar';
+    setTheme(saved);
+  })();
+
+  // ── Resources dropdown ────────────────────────────────
+  function toggleDropdown(id) {
+    const wrap = document.getElementById(id + '-wrap');
+    if (!wrap) return;
+    const isOpen = wrap.classList.contains('open');
+    closeAllDropdowns();
+    if (!isOpen) wrap.classList.add('open');
+  }
+  function closeAllDropdowns() {
+    document.querySelectorAll('.nav-dropdown-wrap').forEach(el => el.classList.remove('open'));
+  }
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.nav-dropdown-wrap')) closeAllDropdowns();
+  });
+
+  // ── Contact modal ──────────────────────────────────────
+  function openContactModal() {
+    closeAllDropdowns();
+    document.getElementById('contact-modal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeContactModal() {
+    document.getElementById('contact-modal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  function handleModalBackdropClick(e) {
+    if (e.target === document.getElementById('contact-modal')) closeContactModal();
+  }
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeContactModal();
+  });
+</script>
+
+</body>
+</html>

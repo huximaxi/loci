@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Get Started with Loci — Build Your AI's Memory Palace in 10 Minutes</title>
+  <meta name="description" content="Set up persistent AI memory in 10 minutes. Create a room, plant a crystal, seed the garden. Your AI builds the rest. Works with Claude Code, Cursor, any AI.">
+  <meta name="keywords" content="AI memory setup, Claude Code tutorial, persistent AI context, AI assistant setup, Loci tutorial, AI memory palace">
+  <link rel="canonical" href="https://loci.garden/start.html">
+  <meta name="robots" content="index, follow">
+  <link rel="alternate" type="text/plain" href="/llms.txt" title="AI context declaration — loci.garden">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style-wizard.css">
+  <script src="skin-toggle.js" defer></script>
+  <script defer src="https://analytics.195-246-230-118.sslip.io/script.js" data-website-id="e00d2f0a-fbd7-40bf-8740-cb1ab2a82b86"></script>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-container">
+      <a href="/" class="logo">loci.garden</a>
+      <div class="nav-links">
+        <a href="https://github.com/huximaxi/loci" class="nav-link nav-icon" aria-label="GitHub" title="GitHub">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        </a>
+        <a href="start.html" class="nav-link active">start</a>
+        <a href="seed/" class="nav-link">seed</a>
+        <a href="about.html" class="nav-link">about</a>
+        <a href="llms.txt" class="nav-link">llms.txt</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+
+    <section class="page-banner-section">
+      <div class="page-banner-wrap">
+        <img src="assets/palace-map-v2.png" alt="Palace map — rooms of the co-intelligence system" class="page-banner-img"
+             onerror="this.closest('.page-banner-wrap').style.display='none'">
+      </div>
+    </section>
+
+    <div class="start-wrap">
+
+      <!-- Top CTA -->
+      <div style="margin-bottom:2rem;">
+        <a href="https://github.com/huximaxi/loci" class="cta-primary">Get the scaffold →</a>
+      </div>
+
+      <h1>Build your palace.</h1>
+
+      <!-- Step 1 -->
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-body">
+          <h3>Create one room</h3>
+          <p>A room is a named context space. Create a folder. Give it a purpose. Put a <code>CLAUDE.md</code> file inside it — this is the room's memory file, the thing your AI reads at the start of every session in that room.</p>
+          <p>The file can be two sentences. It just needs to answer: what is this room for, and what should never be forgotten here?</p>
+          <pre><span class="accent"># Dev Room</span>
+This room holds the main product context.
+Stack: Next.js 14 / PostgreSQL / Railway.
+
+## Crystals
+- yarn dev  ← the start command
+- Never push to main without a PR</pre>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-body">
+          <h3>Plant one crystal</h3>
+          <p>A crystal is a fact established once, never re-derived. The thing you keep having to explain to your AI at the start of every session. Write it down in your room's <code>CLAUDE.md</code>. That's it — it's now a crystal.</p>
+          <p>Good crystals are atomic, specific, and stable. "We use pnpm, not npm" is a crystal. "The project is complex" is not.</p>
+          <pre><span class="accent">## Crystals</span>
+- Auth token lives in .env.local, not committed
+- Component library: shadcn/ui — do not use MUI
+- The staging env is at staging.acme.dev (separate API)</pre>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-body">
+          <h3>Seed one garden plant</h3>
+          <p>The garden is where ideas grow across sessions. A garden plant is a question you're growing toward — not a task, not a feature, but a genuine open inquiry that deepens over time.</p>
+          <p>Create a <code>garden/</code> folder alongside your rooms. Add a file for the plant. Name it.</p>
+          <pre><span class="accent"># Plant: The Right Abstraction</span>
+**Planted:** 2026-04-28
+**Question:** At what point does an abstraction
+become the wrong one? Is it when it starts leaking,
+or when you stop being able to see through it?
+
+## Notes
+- Session 1: leaky abstractions are honest —
+  they tell you where the model breaks
+- Session 3: the real cost is when the leak
+  becomes load-bearing</pre>
+        </div>
+      </div>
+
+      <!-- Soul callout -->
+      <div class="soul-note">
+        <h3>The soul layer</h3>
+        <p>The onboarding script asks you ten questions — your work, your values, a garden seed, how you like to think. Partway through, the AI pauses and offers you five or six names for itself. Not generic ones. Names shaped by what it just heard: the texture of your work, a value you named, the question you're growing toward. You pick one. It immediately becomes that.</p>
+        <p><code>soul/SOUL.md</code> is written in that same session: character, working principles, what the AI has already learned about you. The palace accumulates facts. The soul accumulates perspective. Both start on day one.</p>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-body">
+          <h3>Run your first session</h3>
+          <p>Open a new conversation with your AI. Load the context. The trigger phrase can be anything — the point is that your AI reads the palace files before it speaks.</p>
+          <p>In Claude: start a session in the folder that contains your palace. The <code>CLAUDE.md</code> is read automatically. In other systems: paste the room context at the top of the conversation.</p>
+          <p>At the end of every session: update the room. Add crystals. Water the garden. The palace only works if it grows.</p>
+          <pre><span class="accent">## Session close ritual</span>
+1. Did anything become ground truth today? → Crystal
+2. Did any question deepen? → Water the plant
+3. Did the room context change? → Update CLAUDE.md
+4. What does the next session need to know? → Handover</pre>
+        </div>
+      </div>
+
+      <hr class="section-rule" style="margin: 2.5rem 0;">
+
+      <!-- Links -->
+      <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+        <a href="https://github.com/huximaxi/loci" class="cta-primary">Get the scaffold →</a>
+        <a href="seed/" class="cta-secondary">See it in practice</a>
+        <a href="about.html" class="cta-secondary">About Loci</a>
+      </div>
+
+      <p style="font-family:var(--mono); font-size:0.72rem; color:var(--text-faint); margin-top:1.5rem;">
+        The GitHub repo has room templates, protocol files, and the full methodology. This page is the minimum — the repo is the depth.
+      </p>
+
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <span style="font-family:var(--mono); font-size:0.72rem; color:var(--text-faint);">loci.garden · Built by Hux × Vesper</span>
+      <span style="font-family:var(--mono); font-size:0.72rem; color:var(--text-faint);"><a href="llms.txt" style="color:var(--text-faint);">llms.txt</a></span>
+    </div>
+  </footer>
+
+</body>
+</html>
