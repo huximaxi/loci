@@ -372,12 +372,14 @@ section.hero-section {
   content: '';
   position: absolute;
   inset: 0;
-  /* Fade: transparent at left edge → fully dark at right edge */
+  /* Fade in from left edge AND fade out to right */
   background: linear-gradient(
     to right,
-    rgba(13,13,14,0.05) 0%,
-    rgba(13,13,14,0.25) 30%,
-    rgba(13,13,14,0.72) 65%,
+    #0d0d0e 0%,
+    rgba(13,13,14,0.55) 6%,
+    transparent 18%,
+    transparent 48%,
+    rgba(13,13,14,0.6) 68%,
     #0d0d0e 88%
   );
 }
@@ -707,10 +709,8 @@ section.hero-section {
 }
 
 [data-theme="wizard"] .feature-card {
-  border: 2px solid var(--border);
-  background: var(--surface);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='16'%3E%3Crect width='32' height='16' fill='%23252530'/%3E%3Crect x='0' y='0' width='14' height='7' fill='%232e2e3c'/%3E%3Crect x='16' y='0' width='16' height='7' fill='%23292938'/%3E%3C/svg%3E");
-  image-rendering: pixelated;
+  border: 1px solid rgba(53,53,64,0.6);
+  background: rgba(20,20,28,0.7);
 }
 [data-theme="wizard"] .feature-card:hover {
   border-color: var(--accent);
@@ -1036,11 +1036,18 @@ footer {
 [data-theme="wizard"]  .t-wizard  { display: inline; }
 [data-theme="llmage"]  .t-llmage  { display: inline; }
 
-/* For block-level content switching */
-.tb-scholar, .tb-wizard, .tb-llmage { display: none; }
-[data-theme="scholar"] .tb-scholar { display: block; }
-[data-theme="wizard"]  .tb-wizard  { display: block; }
-[data-theme="llmage"]  .tb-llmage  { display: block; }
+/* For block-level content switching — !important beats inline style overrides */
+.tb-scholar, .tb-wizard, .tb-llmage { display: none !important; }
+[data-theme="scholar"] .tb-scholar { display: block !important; }
+[data-theme="wizard"]  .tb-wizard  { display: block !important; }
+[data-theme="llmage"]  .tb-llmage  { display: block !important; }
+/* Inline-flex variant for span wrappers */
+[data-theme="scholar"] .tb-scholar.coming-soon-wrap,
+[data-theme="scholar"] span.tb-scholar { display: inline-flex !important; }
+[data-theme="wizard"]  .tb-wizard.coming-soon-wrap,
+[data-theme="wizard"]  span.tb-wizard  { display: inline-flex !important; }
+[data-theme="llmage"]  .tb-llmage.coming-soon-wrap,
+[data-theme="llmage"]  span.tb-llmage  { display: inline-flex !important; }
 
 /* ═══════════════════════════════════════════════════════
    ABOUT SECTION
@@ -1054,12 +1061,12 @@ footer {
 }
 
 [data-theme="wizard"] .about-prose {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 9px;
-  line-height: 2.2;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.85;
   color: var(--text-2);
-  max-width: 580px;
-  margin-bottom: 32px;
+  max-width: 620px;
+  margin-bottom: 28px;
 }
 
 [data-theme="llmage"] .about-prose {
@@ -1071,26 +1078,26 @@ footer {
 }
 
 .palace-map-wrap {
-  width: calc(100% + 64px);   /* full bleed past section padding */
-  margin: 20px -32px 0;
-  height: 700px;               /* taller — shows Garden + Hall + rooms */
+  width: calc(100% + 64px);
+  margin: 0 -32px 0;           /* flush to section edges, no top gap */
+  height: 820px;               /* tall enough to show Garden label at bottom */
   overflow: hidden;
   position: relative;
   background: #0d0d0e;
-  border: none !important;     /* remove any border */
+  border: none !important;
   border-radius: 0 !important;
 }
 .palace-map-wrap::after {
   content: '';
   position: absolute;
   inset: 0;
-  /* Bottom fade only — let the top (Garden) breathe */
+  /* Fade starts late — Garden label visible before fade kicks in */
   background: linear-gradient(
     to bottom,
     transparent 0%,
-    transparent 55%,
-    rgba(13,13,14,0.45) 72%,
-    rgba(13,13,14,0.88) 88%,
+    transparent 68%,
+    rgba(13,13,14,0.4) 80%,
+    rgba(13,13,14,0.85) 92%,
     #0d0d0e 100%
   );
   pointer-events: none;
@@ -1897,7 +1904,6 @@ footer {
   </section>
 
   <!-- ── ABOUT / SEED ──────────────────────────────────── -->
-  <hr class="section-divider" />
   <section id="about">
     <span class="section-label">
       <span class="t-scholar">Why we built this</span>
@@ -2179,7 +2185,7 @@ footer {
 
     <!-- Final CTA -->
     <div style="margin-top: 40px; display: flex; gap: 12px; flex-wrap: wrap;">
-      <span class="coming-soon-wrap tb-scholar" style="display:inline-flex;">
+      <span class="coming-soon-wrap tb-scholar">
         <a href="#" class="btn-primary" tabindex="-1" aria-disabled="true">
           <span class="t-scholar">Open loci →</span>
         </a>
