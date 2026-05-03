@@ -48,14 +48,6 @@ Standalone browser extension for search + tagging (Scholar tier).
 
 → See [extension/INSTALL.md](extension/INSTALL.md) for install instructions.
 
-## Deploy
-
-Landing page deploy to VPS:
-```bash
-rsync -avz --exclude='.git' --exclude='README.md' \
-  -e "ssh -p 2222" landing/ user@server:/path/to/loci-garden/
-```
-
 ## Changelog
 
 ### v1.2.0 — 2026-05-03
