@@ -115,8 +115,8 @@ html { scroll-behavior: smooth; }
   --border:       rgba(255,255,255,0.07);
   --border-2:     rgba(255,255,255,0.12);
   --text:         #F0F0F0;
-  --text-2:       #9C9C9C;
-  --text-3:       #4A4A4A;
+  --text-2:       #ABABAB;     /* was #9C9C9C — slightly brighter */
+  --text-3:       #6A6A6A;     /* was #4A4A4A — brighter for readability */
   --accent:       #EBEBEB;
   --accent-light: #FFFFFF;
   --accent-xlight:#FFFFFF;
@@ -200,10 +200,13 @@ body {
 }
 
 [data-theme="wizard"] .nav {
-  background: rgba(13,13,14,0.94);
-  border-bottom: 2px solid #252530;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='8'%3E%3Crect width='32' height='8' fill='%23252530'/%3E%3Crect x='0' y='0' width='14' height='7' fill='%232e2e3c'/%3E%3Crect x='16' y='0' width='16' height='7' fill='%23292938'/%3E%3C/svg%3E");
-  image-rendering: pixelated;
+  background: linear-gradient(
+    180deg,
+    rgba(22,14,4,0.97) 0%,
+    rgba(13,13,14,0.95) 100%
+  );
+  border-bottom: 1px solid rgba(200,124,44,0.2);
+  box-shadow: 0 1px 24px rgba(200,124,44,0.06);
 }
 
 .nav-logo {
@@ -349,10 +352,11 @@ section.hero-section {
 /* Wizard hero background image */
 .wizard-hero-bg {
   position: absolute;
-  top: 0; left: 0;
-  width: 68%;
+  top: 0;
+  left: 0;
+  width: 75%;           /* bleeds from page left edge */
   height: 100%;
-  overflow: hidden;
+  overflow: visible;
   z-index: 0;
   pointer-events: none;
 }
@@ -360,18 +364,21 @@ section.hero-section {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center top;
-  filter: saturate(0.8) brightness(0.65);
+  object-position: left center;
+  filter: saturate(0.8) brightness(0.6);
+  display: block;
 }
 .wizard-hero-bg::after {
   content: '';
   position: absolute;
   inset: 0;
+  /* Fade: transparent at left edge → fully dark at right edge */
   background: linear-gradient(
     to right,
-    transparent 25%,
-    rgba(13,13,14,0.6) 65%,
-    #0d0d0e 90%
+    rgba(13,13,14,0.05) 0%,
+    rgba(13,13,14,0.25) 30%,
+    rgba(13,13,14,0.72) 65%,
+    #0d0d0e 88%
   );
 }
 
@@ -1064,22 +1071,27 @@ footer {
 }
 
 .palace-map-wrap {
-  width: calc(100% + 64px);
-  margin: 32px -32px 0;
-  height: 620px;
+  width: calc(100% + 64px);   /* full bleed past section padding */
+  margin: 20px -32px 0;
+  height: 700px;               /* taller — shows Garden + Hall + rooms */
   overflow: hidden;
   position: relative;
   background: #0d0d0e;
+  border: none !important;     /* remove any border */
+  border-radius: 0 !important;
 }
 .palace-map-wrap::after {
   content: '';
   position: absolute;
   inset: 0;
+  /* Bottom fade only — let the top (Garden) breathe */
   background: linear-gradient(
     to bottom,
-    transparent 58%,
-    rgba(13,13,14,0.65) 78%,
-    #0d0d0e 96%
+    transparent 0%,
+    transparent 55%,
+    rgba(13,13,14,0.45) 72%,
+    rgba(13,13,14,0.88) 88%,
+    #0d0d0e 100%
   );
   pointer-events: none;
   z-index: 2;
@@ -1087,29 +1099,30 @@ footer {
 .palace-map-wrap img {
   position: absolute;
   left: 50%;
-  top: 0;
+  top: 0;                      /* start from top — shows Garden */
   transform: translateX(-50%);
-  width: 720px;
+  width: 800px;                /* slightly wider than 720 for better coverage */
   height: auto;
   display: block;
-  filter: contrast(1.0) saturate(0.82) brightness(0.88);
+  filter: contrast(1.0) saturate(0.85) brightness(0.9);
+  /* Subtle radial mask — keeps edges dark, rooms lit */
   -webkit-mask-image: radial-gradient(
-    ellipse 78% 80% at 50% 32%,
-    black 18%,
-    rgba(0,0,0,0.9) 40%,
-    rgba(0,0,0,0.45) 62%,
-    transparent 80%
+    ellipse 90% 100% at 50% 40%,
+    black 20%,
+    rgba(0,0,0,0.92) 50%,
+    rgba(0,0,0,0.5) 72%,
+    transparent 90%
   );
   mask-image: radial-gradient(
-    ellipse 78% 80% at 50% 32%,
-    black 18%,
-    rgba(0,0,0,0.9) 40%,
-    rgba(0,0,0,0.45) 62%,
-    transparent 80%
+    ellipse 90% 100% at 50% 40%,
+    black 20%,
+    rgba(0,0,0,0.92) 50%,
+    rgba(0,0,0,0.5) 72%,
+    transparent 90%
   );
 }
 @media (max-width: 700px) {
-  .palace-map-wrap { height: 380px; }
+  .palace-map-wrap { height: 420px; }
   .palace-map-wrap img { width: 100%; position: static; transform: none; }
 }
 
@@ -1176,9 +1189,13 @@ footer {
 }
 .dropdown-item:hover { color: var(--text); background: var(--accent-soft); }
 [data-theme="wizard"] .nav-dropdown-menu {
-  border-radius: 0; border: 2px solid var(--border); background: var(--surface);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='16'%3E%3Crect width='32' height='16' fill='%23252530'/%3E%3Crect x='0' y='0' width='14' height='7' fill='%232e2e3c'/%3E%3Crect x='16' y='0' width='16' height='7' fill='%23292938'/%3E%3C/svg%3E");
-  image-rendering: pixelated;
+  border-radius: 0;
+  border: 1px solid rgba(200,124,44,0.2);
+  background: linear-gradient(
+    180deg,
+    rgba(22,14,4,0.97) 0%,
+    rgba(13,13,14,0.95) 100%
+  );
 }
 [data-theme="wizard"] .dropdown-item {
   font-size: 12px; padding: 10px 14px; letter-spacing: 0.02em;
@@ -1899,9 +1916,7 @@ footer {
       <div class="palace-map-wrap">
         <!-- Using the real palace map illustration from loci.garden -->
         <img src="https://loci.garden/assets/palace-map-v2.png"
-             alt="Palace map — rooms of the co-intelligence system"
-             style="width:100%;height:auto;display:block;border-radius:var(--radius);border:2px solid var(--border);image-rendering:pixelated;"
-             loading="lazy" />
+             alt="" aria-hidden="true" loading="lazy" />
         <!-- SVG fallback (hidden — kept for offline/local reference) -->
         <svg viewBox="0 0 700 360" xmlns="http://www.w3.org/2000/svg" style="display:none;image-rendering:pixelated;">
           <rect width="700" height="360" fill="#0a0a0c"/>
@@ -2084,9 +2099,9 @@ footer {
             <span class="t-llmage"><code>git clone https://github.com/huximaxi/Loci && cp config.example.json config.json</code></span>
           </p>
           <div class="install-pills tb-scholar">
-              <a href="https://github.com/huximaxi/Loci/tree/main/extension" class="install-pill" target="_blank" rel="noopener">
+              <a href="https://github.com/huximaxi/Loci/blob/main/extension/INSTALL.md" class="install-pill" target="_blank" rel="noopener">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
-                Install (dev preview) →
+                Chrome Extension (dev preview) →
               </a>
             <span class="coming-soon-wrap">
               <a href="#" class="install-pill" tabindex="-1" aria-disabled="true">
@@ -2146,7 +2161,7 @@ footer {
       <div class="wi-comment">// then follow the palace setup guide at loci.garden/docs</div>
     </div>
     <p class="tb-wizard" style="margin-top:12px;font-size:12px;color:var(--text-3);">
-      Developer install: <a href="https://github.com/huximaxi/Loci/tree/main/extension"
+      Developer install: <a href="https://github.com/huximaxi/Loci/blob/main/extension/INSTALL.md"
       style="color:var(--accent-light);">github.com/huximaxi/Loci</a>
       → extension/ → npm run build → load unpacked
     </p>
