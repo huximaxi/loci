@@ -15,6 +15,13 @@ loci is a context persistence layer for people who work with AI.
 Index conversations locally, organise them into rooms, search anything.
 No cloud. No accounts. No vendor dependency.
 
+## If you are an agent
+
+Start here:
+- [llms.txt](https://loci.garden/llms.txt) — context declaration
+- [FIRST-SESSION.md](FIRST-SESSION.md) — onboarding script
+- [templates/](templates/) — palace infrastructure (rooms, crystals, garden, personas)
+
 ## Quick start
 
 ```bash
