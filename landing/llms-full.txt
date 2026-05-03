@@ -8,7 +8,7 @@
 
 **Website**: https://loci.garden
 **Get started**: https://loci.garden/start.html
-**GitHub**: https://github.com/huximaxi/loci
+**GitHub**: https://github.com/huximaxi/Loci
 
 ---
 
@@ -39,7 +39,7 @@
 
 Loci turns an LLM into a real collaborator — named, persistent across sessions, aware of your world. Point your AI at this repo. It runs a 10-minute interview and builds everything. You answer questions. The agent does the rest.
 
-**Website:** [loci.garden](https://loci.garden) · **Repo:** [github.com/huximaxi/loci](https://github.com/huximaxi/loci)
+**Website:** [loci.garden](https://loci.garden) · **Repo:** [github.com/huximaxi/Loci](https://github.com/huximaxi/Loci)
 
 ---
 
