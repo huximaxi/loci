@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240" width="200" height="240" role="img" aria-label="trust.xyz raised fist mark">
+  <!-- trust.xyz fist mark — burnt amber on charcoal -->
+  <!-- Design: stylized closed raised fist. Vertical emphasis. Minimal, editorial. -->
+
+  <g fill="#c87c2c" stroke="none">
+    <!-- Forearm (extends below fist, falls off canvas bottom) -->
+    <path d="M 72 180 L 72 240 L 128 240 L 128 180 Z"/>
+
+    <!-- Wrist cuff (slight flare where fist meets forearm) -->
+    <rect x="66" y="170" width="68" height="18" rx="4"/>
+
+    <!-- Palm / main fist body -->
+    <path d="M 56 104
+             Q 56 80 80 80
+             L 142 80
+             Q 162 80 162 104
+             L 162 160
+             Q 162 178 144 178
+             L 74 178
+             Q 56 178 56 160
+             Z"/>
+
+    <!-- Thumb wrapping across the front (right side) -->
+    <path d="M 158 100
+             Q 184 98 184 126
+             Q 184 150 164 148
+             Q 158 146 158 140
+             Z"/>
+
+    <!-- Four curled fingers / knuckle bumps across the top -->
+    <path d="M 62 80
+             Q 62 52 78 52
+             Q 92 52 92 76
+             L 92 82 Z
+             M 96 82
+             Q 96 50 112 50
+             Q 126 50 126 76
+             L 126 82 Z
+             M 130 82
+             Q 130 48 146 48
+             Q 160 48 160 74
+             L 160 82 Z"/>
+  </g>
+
+  <!-- Finger separation lines (subtle, darker tone for depth) -->
+  <g stroke="#0d0d0e" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.55">
+    <line x1="92" y1="100" x2="92" y2="158"/>
+    <line x1="126" y1="100" x2="126" y2="158"/>
+    <line x1="158" y1="115" x2="158" y2="158"/>
+  </g>
+
+  <!-- Thumbnail crease detail -->
+  <path d="M 168 120 Q 174 124 172 132" stroke="#0d0d0e" stroke-width="2" fill="none" opacity="0.45" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,31 @@
+User-agent: *
+Allow: /
+Disallow: /private/
+
+# AI agents — explicitly welcome
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: CCBot
+Disallow: /
+
+# Block scrapers and harvesters
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+Sitemap: https://loci.garden/sitemap.xml

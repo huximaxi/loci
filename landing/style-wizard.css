@@ -1,0 +1,571 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   LOCI.GARDEN — WIZARD SKIN v2
+   Nyx × Vesper · 2026-04-28
+   Source: Figma Design System export (loci.css) + palace map pixel art
+   Applied via: html[data-skin="wizard"]
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── TOKENS ────────────────────────────────────────────────────────────────
+   All extracted from the pixel art images. Do not override base palette vars.
+   ─────────────────────────────────────────────────────────────────────────*/
+
+html[data-skin="wizard"] {
+  /* Stone masonry */
+  --stone-darkest: #14141c;
+  --stone-dark:    #252530;
+  --stone-mid:     #353540;
+  --stone-light:   #4a4a58;
+  --stone-mortar:  #1c1c26;
+  --stone-hi:      #5a5a6a;
+
+  /* Ivy */
+  --ivy-dark:   #1a3d1f;
+  --ivy-mid:    #2d6b35;
+  --ivy-bright: #4a9a4f;
+  --ivy-hi:     #6bc26e;
+  --vine-stem:  #5a3010;
+
+  /* Room — HALL */
+  --room-hall-bg:      #160f04;
+  --room-hall-glow:    #ffdd88;
+  --room-hall-lantern: #ff9922;
+
+  /* Room — DEV */
+  --room-dev-bg:      #060b1a;
+  --room-dev-blue:    #1e3a7a;
+  --room-dev-glow:    #4477dd;
+  --room-dev-monitor: #5588ff;
+
+  /* Room — DESIGN */
+  --room-design-bg:     #140c04;
+  --room-design-warm:   #5a3a18;
+  --room-design-glow:   #e8a84a;
+  --room-design-candle: #ffcc66;
+
+  /* Room — RESEARCH */
+  --room-research-bg:    #0c0804;
+  --room-research-brown: #3a2810;
+  --room-research-glow:  #d4891a;
+
+  /* Room — HATCHERY */
+  --room-hatchery-bg:    #100e06;
+  --room-hatchery-earthy:#6a4a18;
+  --room-hatchery-glow:  #c8943a;
+  --room-hatchery-jar:   #d4b060;
+
+  /* Room — GARDEN */
+  --room-garden-bg:    #04080f;
+  --room-garden-teal:  #1a3a5a;
+  --room-garden-glow:  #4a9ab8;
+  --room-garden-moon:  #aaddff;
+  --room-garden-water: #2a5a7a;
+
+  /* Crystal */
+  --crystal-core:   #ffee99;
+  --crystal-bright: #ffcc44;
+  --crystal-mid:    #e8861a;
+  --crystal-outer:  #c87c2c;
+  --crystal-shadow: #7a3a08;
+
+  /* Label tags */
+  --label-bg:     #f0eeea;
+  --label-border: #111111;
+  --label-text:   #111111;
+
+  /* Sky (wizard image backdrop) */
+  --sky-deep:    #060e18;
+  --sky-night:   #0d2535;
+  --castle-blue: #4a7a9b;
+
+  /* Override base surface for wizard */
+  --bg:         #060810;
+  --bg-surface: #0d1018;
+  --bg-card:    #111520;
+  --border:     #2a3045;
+}
+
+/* ── ANIMATIONS ────────────────────────────────────────────────────────── */
+
+@keyframes amber-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0  6px  2px rgba(255, 200,  80, 0.25),
+      0 0 18px  4px rgba(200, 124,  44, 0.15),
+      inset 0 0 20px rgba(200, 124,  44, 0.06);
+  }
+  50% {
+    box-shadow:
+      0 0 14px  4px rgba(255, 220, 100, 0.55),
+      0 0 36px  8px rgba(200, 124,  44, 0.35),
+      0 0 60px 14px rgba(200, 124,  44, 0.15),
+      inset 0 0 30px rgba(200, 124,  44, 0.16);
+  }
+}
+
+@keyframes dev-pulse {
+  0%, 100% { box-shadow: 0 0 6px 2px rgba(68,119,221,0.25), 0 0 18px 4px rgba(30,58,122,0.15); }
+  50%       { box-shadow: 0 0 14px 4px rgba(68,119,221,0.55), 0 0 36px 8px rgba(68,119,221,0.30); }
+}
+
+@keyframes garden-pulse {
+  0%, 100% { box-shadow: 0 0 6px 2px rgba(74,154,184,0.20), 0 0 18px 4px rgba(26,58,90,0.15); }
+  50%       { box-shadow: 0 0 14px 4px rgba(74,154,184,0.50), 0 0 36px 8px rgba(74,154,184,0.28); }
+}
+
+@keyframes crystal-glow {
+  0%, 100% {
+    filter:
+      drop-shadow(0 0  4px rgba(255,200, 80,0.60))
+      drop-shadow(0 0 12px rgba(200,124, 44,0.40));
+  }
+  50% {
+    filter:
+      drop-shadow(0 0  8px rgba(255,238,153,0.90))
+      drop-shadow(0 0 24px rgba(200,124, 44,0.70))
+      drop-shadow(0 0 40px rgba(232,134, 26,0.40));
+  }
+}
+
+@keyframes crystallize {
+  0% {
+    clip-path: ellipse(50% 50% at 50% 50%);
+    filter: blur(3px) brightness(0.7);
+    opacity: 0.7;
+  }
+  35% {
+    clip-path: polygon(50% 8%, 80% 35%, 76% 64%, 50% 92%, 24% 64%, 20% 35%);
+    filter: blur(1.5px) brightness(0.85);
+    opacity: 0.85;
+  }
+  70% {
+    clip-path: polygon(50% 2%, 84% 28%, 75% 68%, 50% 98%, 25% 68%, 16% 28%);
+    filter: blur(0.5px) brightness(1.05);
+  }
+  100% {
+    clip-path: polygon(50% 0%, 85% 30%, 75% 70%, 50% 100%, 25% 70%, 15% 30%);
+    filter: blur(0) brightness(1);
+    opacity: 1;
+  }
+}
+
+@keyframes crt-flicker {
+  0%, 96%, 100% { opacity: 1; }
+  97%  { opacity: 0.97; }
+  98%  { opacity: 0.99; }
+  99%  { opacity: 0.96; }
+}
+
+@keyframes ivy-sway {
+  0%, 100% { transform: rotate(0deg)   translateY(0px); }
+  33%       { transform: rotate(1.5deg) translateY(-1px); }
+  66%       { transform: rotate(-1deg)  translateY(1px); }
+}
+
+@keyframes moonpulse {
+  0%, 100% { opacity: 0.55; transform: translateX(-50%) scale(1); }
+  50%       { opacity: 0.85; transform: translateX(-50%) scale(1.12); }
+}
+
+@keyframes star-blink {
+  0%, 100% { opacity: 0.4; }
+  50%       { opacity: 1.0; }
+}
+
+/* ── GLOBAL RESETS ─────────────────────────────────────────────────────── */
+
+html[data-skin="wizard"] * {
+  border-radius: 0 !important;
+  image-rendering: pixelated;
+}
+
+/* CRT vignette layer */
+html[data-skin="wizard"] body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  background: radial-gradient(ellipse at 50% 50%, transparent 52%, rgba(0,0,0,0.75) 100%);
+}
+
+/* CRT scanlines layer */
+html[data-skin="wizard"] body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent, transparent 3px,
+    rgba(0,0,8,0.42) 3px,
+    rgba(0,0,8,0.42) 4px
+  );
+  animation: crt-flicker 9s infinite;
+  mix-blend-mode: multiply;
+}
+
+/* ── STONE TEXTURE UTILITY ─────────────────────────────────────────────── */
+/* 32×16 px brick tile with mortar lines and subtle block variation */
+
+html[data-skin="wizard"] nav,
+html[data-skin="wizard"] footer,
+html[data-skin="wizard"] .three-doors,
+html[data-skin="wizard"] .adopters {
+  background-color: var(--stone-dark);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='16'%3E%3Crect width='32' height='16' fill='%23252530'/%3E%3Crect x='0' y='0' width='14' height='7' fill='%232e2e3c'/%3E%3Crect x='16' y='0' width='16' height='7' fill='%23292938'/%3E%3Crect x='1' y='1' width='12' height='5' fill='%23313145'/%3E%3Crect x='17' y='1' width='14' height='5' fill='%232c2c3e'/%3E%3Crect x='0' y='9' width='8' height='7' fill='%232a2a3a'/%3E%3Crect x='10' y='9' width='22' height='7' fill='%23303046'/%3E%3Crect x='14' y='0' width='2' height='8' fill='%231c1c28'/%3E%3Crect x='8' y='8' width='2' height='8' fill='%231c1c28'/%3E%3Crect x='0' y='7' width='32' height='2' fill='%231c1c28'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+}
+
+/* ── IVY OVERLAY UTILITY ───────────────────────────────────────────────── */
+
+html[data-skin="wizard"] .section-rule {
+  position: relative;
+  height: 20px;
+  border: none;
+  overflow: visible;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='20'%3E%3Crect x='6' y='4' width='5' height='5' fill='%232d6b35' opacity='.7'/%3E%3Crect x='7' y='5' width='3' height='3' fill='%234a9a4f' opacity='.5'/%3E%3Crect x='52' y='6' width='5' height='5' fill='%232d6b35' opacity='.6'/%3E%3Crect x='53' y='7' width='3' height='3' fill='%234a9a4f' opacity='.5'/%3E%3Crect x='28' y='10' width='8' height='1' fill='%231c1c26'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-position: center;
+  margin: 2rem auto;
+  max-width: 860px;
+}
+
+html[data-skin="wizard"] .section-rule::after {
+  content: '— ✦ —';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--ivy-mid);
+  background: var(--bg);
+  padding: 0 0.75rem;
+  letter-spacing: 0.3em;
+}
+
+/* ── NAV ───────────────────────────────────────────────────────────────── */
+
+html[data-skin="wizard"] nav {
+  border-bottom: 2px solid var(--stone-mortar);
+  box-shadow: 0 2px 0 var(--stone-dark), 0 4px 16px rgba(0,0,0,0.6);
+}
+
+html[data-skin="wizard"] .logo::before {
+  content: '';
+  display: inline-block;
+  width: 13px;
+  height: 18px;
+  margin-right: 5px;
+  vertical-align: middle;
+  position: relative;
+  top: -1px;
+  /* Crystal shape via clip-path */
+  background: linear-gradient(135deg, var(--crystal-bright) 0%, var(--crystal-outer) 60%, var(--crystal-shadow) 100%);
+  clip-path: polygon(50% 0%, 85% 30%, 75% 70%, 50% 100%, 25% 70%, 15% 30%);
+  animation: crystal-glow 2.4s ease-in-out infinite;
+  transition: clip-path 0.35s ease-in-out, filter 0.35s;
+}
+
+html[data-skin="wizard"] .logo:hover::before {
+  animation: crystallize 0.5s ease-in-out forwards, crystal-glow 2.4s ease-in-out 0.5s infinite;
+}
+
+/* Active nav = pixel label tag */
+html[data-skin="wizard"] .nav-link.active {
+  background: var(--label-bg);
+  color: var(--label-border) !important;
+  padding: 0.15rem 0.4rem;
+  font-weight: 700;
+  box-shadow: 2px 2px 0 var(--label-border);
+  outline: 1px solid var(--label-border);
+}
+
+/* ── PIXEL LABEL TAGS ──────────────────────────────────────────────────── */
+
+html[data-skin="wizard"] .door-label,
+html[data-skin="wizard"] .concept h3,
+html[data-skin="wizard"] .adopter-label,
+html[data-skin="wizard"] .compare-label,
+html[data-skin="wizard"] .wizard-eyebrow,
+html[data-skin="wizard"] .palace-eyebrow {
+  display: inline-block;
+  background: var(--label-bg) !important;
+  color: var(--label-text) !important;
+  border: 2px solid var(--label-border) !important;
+  font-family: var(--mono) !important;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.5rem;
+  box-shadow: 2px 2px 0 var(--label-border), 3px 3px 0 rgba(0,0,0,0.55);
+  margin-bottom: 0.6rem;
+  line-height: 1.4;
+}
+
+/* ── THREE DOORS — ROOM CARDS ──────────────────────────────────────────── */
+
+html[data-skin="wizard"] .three-doors {
+  gap: 2px;
+  border: 2px solid var(--stone-mortar);
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.7);
+  background: var(--stone-mortar);
+}
+
+/* Door 1: AI Agents → Dev Room */
+html[data-skin="wizard"] .door:nth-child(1) {
+  background-color: var(--room-dev-bg);
+  border-left: 3px solid var(--room-dev-glow);
+}
+html[data-skin="wizard"] .door:nth-child(1):hover {
+  animation: dev-pulse 2.4s ease-in-out infinite;
+  filter: brightness(1.2);
+}
+
+/* Door 2: Practitioners → The Hall */
+html[data-skin="wizard"] .door:nth-child(2) {
+  background-color: var(--room-hall-bg);
+  border-left: 3px solid var(--room-hall-lantern);
+}
+html[data-skin="wizard"] .door:nth-child(2):hover {
+  animation: amber-pulse 2.4s ease-in-out infinite;
+  filter: brightness(1.2);
+}
+
+/* Door 3: Teams → Research */
+html[data-skin="wizard"] .door:nth-child(3) {
+  background-color: var(--room-research-bg);
+  border-left: 3px solid var(--room-research-glow);
+}
+html[data-skin="wizard"] .door:nth-child(3):hover {
+  animation: amber-pulse 2.4s ease-in-out infinite;
+  filter: brightness(1.2);
+}
+
+/* ── CONCEPT CARDS ─────────────────────────────────────────────────────── */
+
+html[data-skin="wizard"] .concept {
+  border: 2px solid var(--stone-mortar);
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.6);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+html[data-skin="wizard"] .concept:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.6);
+}
+
+html[data-skin="wizard"] .concept:nth-child(1) { background: var(--room-hall-bg); border-color: var(--room-hall-lantern); }
+html[data-skin="wizard"] .concept:nth-child(2) { background: var(--room-garden-bg); border-color: var(--room-garden-teal); }
+html[data-skin="wizard"] .concept:nth-child(3) { background: var(--room-hatchery-bg); border-color: var(--room-hatchery-glow); }
+html[data-skin="wizard"] .concept:nth-child(4) { background: var(--room-research-bg); border-color: var(--room-research-glow); }
+
+/* ── GARDEN SECTION (THE GARDEN room atmosphere) ───────────────────────── */
+
+html[data-skin="wizard"] .distinction {
+  background: var(--room-garden-bg);
+  border: 2px solid var(--room-garden-teal);
+  padding: 2.5rem 2rem;
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.7);
+  position: relative;
+  overflow: hidden;
+  animation: garden-pulse 3s ease-in-out infinite;
+}
+
+/* Moonlight radial glow */
+html[data-skin="wizard"] .distinction::before {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70px;
+  height: 35px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(170,221,255,0.45) 0%,
+    rgba(170,221,255,0.12) 40%,
+    transparent 70%
+  );
+  animation: moonpulse 3.5s ease-in-out infinite;
+}
+
+/* Ivy overlay on garden section */
+html[data-skin="wizard"] .distinction::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Crect x='6' y='4' width='5' height='5' fill='%232d6b35' opacity='.35'/%3E%3Crect x='7' y='5' width='3' height='3' fill='%234a9a4f' opacity='.25'/%3E%3Crect x='52' y='8' width='4' height='4' fill='%231a3d1f' opacity='.4'/%3E%3Crect x='28' y='54' width='5' height='5' fill='%232d6b35' opacity='.3'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  opacity: 0.6;
+}
+
+html[data-skin="wizard"] .key-line {
+  color: var(--room-garden-moon);
+  text-shadow: 0 0 14px rgba(74,154,184,0.5);
+}
+
+/* ── WIZARD HERO SECTION ───────────────────────────────────────────────── */
+
+html[data-skin="wizard"] .wizard-hero-image-wrap {
+  border-bottom: 2px solid var(--stone-mortar);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+}
+
+/* Pixel-art the wizard image */
+html[data-skin="wizard"] .wizard-hero-img {
+  filter: contrast(1.08) saturate(0.88);
+  mix-blend-mode: normal;
+}
+
+/* ── PALACE MAP (ASCII fallback) ───────────────────────────────────────── */
+
+html[data-skin="wizard"] .palace-map {
+  border: 2px solid var(--stone-mortar);
+  background: var(--room-hall-bg);
+  box-shadow:
+    4px 4px 0 rgba(0,0,0,0.7),
+    inset 0 0 40px rgba(200,124,44,0.06);
+  animation: amber-pulse 3s ease-in-out infinite;
+}
+
+/* ── COMPARISON TABLE ──────────────────────────────────────────────────── */
+
+html[data-skin="wizard"] .compare-scroll {
+  border: 2px solid var(--stone-mortar);
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.7);
+}
+
+html[data-skin="wizard"] .compare-table thead {
+  background-color: var(--stone-dark);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='16'%3E%3Crect width='32' height='16' fill='%23252530'/%3E%3Crect x='0' y='0' width='14' height='7' fill='%232e2e3c'/%3E%3Crect x='16' y='0' width='16' height='7' fill='%23292938'/%3E%3C/svg%3E");
+}
+
+html[data-skin="wizard"] .compare-table .col-loci {
+  background: rgba(200,124,44,0.12);
+  animation: amber-pulse 3.5s ease-in-out infinite;
+}
+
+html[data-skin="wizard"] .compare-table td,
+html[data-skin="wizard"] .compare-table th {
+  border-bottom: 1px solid var(--stone-mortar);
+}
+
+/* ── BUTTONS — PIXEL STYLE ─────────────────────────────────────────────── */
+
+html[data-skin="wizard"] .cta-primary {
+  background: var(--accent);
+  border: 2px solid var(--crystal-shadow);
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.8);
+  letter-spacing: 0.1em;
+  transition: transform 0.08s, box-shadow 0.08s, background 0.1s;
+}
+html[data-skin="wizard"] .cta-primary:hover {
+  background: var(--accent-light);
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.8);
+}
+html[data-skin="wizard"] .cta-primary:active {
+  transform: translate(1px, 1px);
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.8);
+}
+
+html[data-skin="wizard"] .cta-secondary {
+  border: 2px solid var(--stone-light);
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.7);
+  transition: transform 0.08s, box-shadow 0.08s;
+}
+html[data-skin="wizard"] .cta-secondary:hover {
+  border-color: var(--accent);
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.7);
+}
+
+/* ── DISPATCH ENTRIES ──────────────────────────────────────────────────── */
+
+html[data-skin="wizard"] .dispatch-entry {
+  border: 2px solid var(--stone-mortar);
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.6);
+  background: var(--room-research-bg);
+}
+html[data-skin="wizard"] .dispatch-entry:hover {
+  border-color: var(--accent);
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.6);
+}
+
+/* ── ORG CARDS / ABOUT PAGE ────────────────────────────────────────────── */
+
+html[data-skin="wizard"] .org-card {
+  background: var(--room-hall-bg);
+  border: 2px solid var(--stone-mortar);
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.6);
+}
+
+/* ── STEP NUMBERS (start page) ─────────────────────────────────────────── */
+
+html[data-skin="wizard"] .step-num {
+  border: 2px solid var(--accent);
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.7);
+  background: rgba(200,124,44,0.12);
+}
+
+html[data-skin="wizard"] .step-body pre {
+  border: 2px solid var(--stone-mortar);
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.6);
+  background: var(--room-dev-bg);
+  border-left: 3px solid var(--room-dev-glow);
+}
+
+/* ── SKIN TOGGLE BUTTON ────────────────────────────────────────────────── */
+
+.skin-toggle {
+  position: fixed;
+  bottom: 1.25rem;
+  right: 1.25rem;
+  z-index: 9997;       /* below CRT overlay */
+  background: var(--bg-surface, #131315);
+  border: 1px solid var(--border, #252528);
+  color: var(--text-dim, #7a7772);
+  font-family: 'Courier New', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.45rem 0.7rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: border-color 0.15s, color 0.15s;
+  border-radius: 3px;
+}
+
+.skin-toggle:hover {
+  border-color: var(--accent, #c87c2c);
+  color: var(--accent-light, #e8974a);
+}
+
+html[data-skin="wizard"] .skin-toggle {
+  background: var(--stone-dark);
+  border: 2px solid var(--stone-mortar);
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.7);
+  border-radius: 0;
+  color: var(--text, #e8e4dd);
+}
+
+html[data-skin="wizard"] .skin-toggle:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.7);
+  color: var(--accent-light);
+}
+
+/* Crystal mark in toggle button */
+.toggle-crystal {
+  display: inline-block;
+  width: 10px;
+  height: 14px;
+  background: linear-gradient(135deg, #ffcc44 0%, #c87c2c 60%, #7a3a08 100%);
+  clip-path: polygon(50% 0%, 85% 30%, 75% 70%, 50% 100%, 25% 70%, 15% 30%);
+  animation: crystal-glow 2.4s ease-in-out infinite;
+}
