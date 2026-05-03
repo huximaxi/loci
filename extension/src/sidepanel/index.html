@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>loci</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Design tokens ──────────────────────────────────────────────────────── */
+    :root {
+      --loci-bg:           #F7F5F0;
+      --loci-surface:      #FFFFFF;
+      --loci-border:       rgba(59, 109, 17, 0.15);
+      --loci-text:         #1A2A0A;
+      --loci-text-2:       #4A6020;
+      --loci-text-3:       #8AAA60;
+      --loci-accent:       #3B6D11;
+      --loci-accent-light: #97C459;
+      --loci-accent-soft:  rgba(59, 109, 17, 0.08);
+      --loci-radius:       12px;
+      --loci-font:         'Inter', system-ui, sans-serif;
+    }
+
+    /* ── Reset ──────────────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      background: var(--loci-bg);
+      color: var(--loci-text);
+      font-family: var(--loci-font);
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Layout ─────────────────────────────────────────────────────────────── */
+    .loci-panel {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    /* ── Header ─────────────────────────────────────────────────────────────── */
+    .loci-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 16px 12px;
+      border-bottom: 1px solid var(--loci-border);
+      flex-shrink: 0;
+      background: var(--loci-surface);
+    }
+
+    .loci-logo {
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+
+    .loci-wordmark {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--loci-accent);
+      letter-spacing: -0.02em;
+    }
+
+    .loci-header-count {
+      margin-left: auto;
+      font-size: 11px;
+      color: var(--loci-text-3);
+      font-weight: 400;
+    }
+
+    /* ── Search input ───────────────────────────────────────────────────────── */
+    .loci-search-wrap {
+      padding: 10px 12px;
+      flex-shrink: 0;
+      background: var(--loci-surface);
+      border-bottom: 1px solid var(--loci-border);
+    }
+
+    .loci-search-inner {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--loci-bg);
+      border: 1px solid var(--loci-border);
+      border-radius: 8px;
+      padding: 0 10px;
+      height: 36px;
+      transition: border-color 150ms ease, box-shadow 150ms ease;
+    }
+
+    .loci-search-inner:focus-within {
+      border-color: var(--loci-accent-light);
+      box-shadow: 0 0 0 3px var(--loci-accent-soft);
+    }
+
+    .loci-search-inner svg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+      color: var(--loci-text-3);
+    }
+
+    #loci-search {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: transparent;
+      font-family: var(--loci-font);
+      font-size: 13px;
+      color: var(--loci-text);
+      min-width: 0;
+    }
+
+    #loci-search::placeholder { color: var(--loci-text-3); }
+    #loci-search::-webkit-search-cancel-button { display: none; }
+
+    /* ── Tag chips ──────────────────────────────────────────────────────────── */
+    .loci-tags-scroll {
+      padding: 8px 12px;
+      flex-shrink: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+      border-bottom: 1px solid var(--loci-border);
+      background: var(--loci-surface);
+    }
+
+    .loci-tags-scroll::-webkit-scrollbar { display: none; }
+
+    .loci-tags-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .loci-tag-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--loci-text-2);
+      background: var(--loci-bg);
+      border: 1px solid var(--loci-border);
+      cursor: pointer;
+      transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .loci-tag-chip:hover {
+      background: var(--loci-accent-soft);
+      border-color: var(--loci-accent-light);
+      color: var(--loci-accent);
+    }
+
+    .loci-tag-chip.is-active {
+      background: var(--loci-accent);
+      border-color: var(--loci-accent);
+      color: #FFFFFF;
+    }
+
+    .loci-tag-chip .chip-count {
+      font-size: 10px;
+      opacity: 0.7;
+    }
+
+    /* ── Results list ───────────────────────────────────────────────────────── */
+    .loci-results {
+      flex: 1;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+      scrollbar-color: var(--loci-border) transparent;
+    }
+
+    /* ── Individual result ──────────────────────────────────────────────────── */
+    .loci-result {
+      display: grid;
+      grid-template-columns: 30px 1fr;
+      grid-template-rows: auto auto auto;
+      column-gap: 10px;
+      padding: 10px 14px;
+      cursor: pointer;
+      border-bottom: 1px solid var(--loci-border);
+      transition: background 100ms ease;
+      outline: none;
+    }
+
+    .loci-result:last-child { border-bottom: none; }
+
+    .loci-result:hover,
+    .loci-result.is-focused {
+      background: var(--loci-accent-soft);
+    }
+
+    .loci-result__icon {
+      grid-row: 1 / 4;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 7px;
+      background: var(--loci-bg);
+      border: 1px solid var(--loci-border);
+      font-size: 14px;
+      line-height: 1;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .loci-result__title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--loci-text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.35;
+    }
+
+    .loci-result__meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 1px;
+    }
+
+    .loci-result__date {
+      font-size: 11px;
+      color: var(--loci-text-3);
+      flex-shrink: 0;
+    }
+
+    .loci-result__excerpt {
+      font-size: 12px;
+      color: var(--loci-text-2);
+      line-height: 1.5;
+      margin-top: 3px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .loci-result__tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 4px;
+    }
+
+    .loci-result__tag {
+      font-size: 10px;
+      font-weight: 500;
+      padding: 1px 6px;
+      border-radius: 10px;
+      background: var(--loci-accent-soft);
+      color: var(--loci-accent);
+      border: 1px solid rgba(59, 109, 17, 0.2);
+    }
+
+    /* ── Empty state ────────────────────────────────────────────────────────── */
+    .loci-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 48px 24px;
+      text-align: center;
+      color: var(--loci-text-3);
+    }
+
+    .loci-empty__icon {
+      font-size: 32px;
+      line-height: 1;
+      opacity: 0.5;
+    }
+
+    .loci-empty__title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--loci-text-2);
+    }
+
+    .loci-empty__body {
+      font-size: 12px;
+      line-height: 1.6;
+      max-width: 220px;
+    }
+
+    /* ── Footer ─────────────────────────────────────────────────────────────── */
+    .loci-footer {
+      padding: 10px 14px;
+      border-top: 1px solid var(--loci-border);
+      flex-shrink: 0;
+      background: var(--loci-surface);
+    }
+
+    .loci-footer a {
+      font-size: 11px;
+      color: var(--loci-text-3);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: color 120ms ease;
+    }
+
+    .loci-footer a:hover { color: var(--loci-accent); }
+
+    .loci-footer a svg {
+      width: 12px;
+      height: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="loci-panel">
+
+    <!-- Header -->
+    <header class="loci-header">
+      <svg class="loci-logo" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="11" cy="11" r="10" stroke="#3B6D11" stroke-width="1.5"/>
+        <circle cx="11" cy="11" r="4" fill="#3B6D11" opacity="0.2"/>
+        <circle cx="11" cy="11" r="1.5" fill="#3B6D11"/>
+        <line x1="11" y1="1" x2="11" y2="5" stroke="#3B6D11" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="11" y1="17" x2="11" y2="21" stroke="#3B6D11" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="1" y1="11" x2="5" y2="11" stroke="#3B6D11" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="17" y1="11" x2="21" y2="11" stroke="#3B6D11" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <span class="loci-wordmark">loci</span>
+      <span class="loci-header-count" id="loci-count"></span>
+    </header>
+
+    <!-- Search input -->
+    <div class="loci-search-wrap">
+      <div class="loci-search-inner">
+        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <circle cx="6.5" cy="6.5" r="4.75" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        <input
+          id="loci-search"
+          type="search"
+          placeholder="Search conversations…"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
+          aria-label="Search conversations"
+        />
+      </div>
+    </div>
+
+    <!-- Tag filter chips -->
+    <div class="loci-tags-scroll" id="loci-tags-wrap" aria-label="Filter by tag">
+      <div class="loci-tags-row" id="loci-tags-row">
+        <!-- rendered by sidepanel.ts -->
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div class="loci-results" id="loci-results" role="list" aria-label="Conversations">
+      <!-- rendered by sidepanel.ts -->
+    </div>
+
+    <!-- Footer -->
+    <footer class="loci-footer">
+      <a href="https://loci.garden" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M6 1H11V6M11 1L5 7M2 3H1V11H9V10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Open in loci app
+      </a>
+    </footer>
+
+  </div>
+
+  <script type="module" src="./sidepanel.ts"></script>
+</body>
+</html>

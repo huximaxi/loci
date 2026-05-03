@@ -1,0 +1,21 @@
+{
+  "name": "loci",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Local-first AI memory. Searchable, private, yours.",
+  "packageManager": "pnpm@9.0.0",
+  "workspaces": [
+    "packages/*",
+    "extension",
+    "desktop",
+    "docs"
+  ],
+  "scripts": {
+    "dev:extension": "pnpm --filter extension dev",
+    "build:extension": "pnpm --filter extension build",
+    "build:all": "pnpm --filter @loci/core build && pnpm --filter @loci/ui build && pnpm --filter extension build",
+    "typecheck": "pnpm --filter @loci/core typecheck && pnpm --filter extension typecheck",
+    "docs:dev": "pnpm --filter docs dev",
+    "docs:build": "pnpm --filter docs build"
+  }
+}

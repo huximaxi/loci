@@ -1,0 +1,63 @@
+{
+  "manifest_version": 3,
+  "name": "loci · AI memory",
+  "version": "0.1.0",
+  "description": "Local-first search for your AI conversations. Private, instant, yours.",
+
+  "permissions": [
+    "storage",
+    "scripting",
+    "activeTab",
+    "sidePanel",
+    "unlimitedStorage",
+    "tabs"
+  ],
+
+  "host_permissions": [
+    "https://claude.ai/*",
+    "https://chatgpt.com/*",
+    "https://chat.openai.com/*"
+  ],
+
+  "background": {
+    "service_worker": "src/background/service-worker.ts",
+    "type": "module"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["https://claude.ai/*"],
+      "js": ["src/content/claude.ts"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://chatgpt.com/*",
+        "https://chat.openai.com/*"
+      ],
+      "js": ["src/content/chatgpt.ts"],
+      "run_at": "document_idle"
+    }
+  ],
+
+  "side_panel": {
+    "default_path": "src/sidepanel/index.html"
+  },
+
+  "action": {
+    "default_title": "loci"
+  },
+
+  "icons": {
+    "16": "icons/loci-16.png",
+    "48": "icons/loci-48.png",
+    "128": "icons/loci-128.png"
+  },
+
+  "web_accessible_resources": [
+    {
+      "resources": ["sidepanel/*", "overlay/*"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

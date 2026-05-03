@@ -1,16 +1,24 @@
-# Personal palace — don't commit your actual palace to the shared repo
-my-palace/
-
-# OS
+node_modules/
+dist/
 .DS_Store
-Thumbs.db
+*.local
+.env
+.env.*
 
-# Editor
-.vscode/
+# Tauri
+src-tauri/target/
+*.dmg
+*.exe
+*.app
+
+# Vite build cache
+*.timestamp-*.mjs
+.vite/
+
+# IDE
 .idea/
-*.swp
-*.swo
-
-# Private context files (if you fork and add your own)
-*.private.md
-*.secret.*
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
