@@ -12,17 +12,17 @@
 **Local-first AI memory. Searchable, private, yours.**
 
 ```
-                    [ THE GARDEN ]
-                          |
-          +---------------+---------------+
-          |               |               |
-     [ DEV ROOM ]   [ GREAT HALL ]  [ DESIGN ROOM ]
-      terminal blue  amber lantern   candlelit warm
-          |               |               |
-          +-------+--------+-------+-------+
-                  |                 |
-           [ RESEARCH ]      [ HATCHERY ]
-            forest green       earthy amber
+              [ THE GARDEN ]
+                    |
+    +───────────────+───────────────+
+    |               |               |
+[ DEV ROOM ]  [ GREAT HALL ]  [ DESIGN ROOM ]
+  terminal     amber lantern    candlelit
+    |               |               |
+    +───────+────────+────────+──────+
+            |                 |
+      [ RESEARCH ]      [ HATCHERY ]
+       forest green       earthy amber
 ```
 
 loci is a context persistence layer for people who work with AI.
@@ -33,58 +33,47 @@ No cloud. No accounts. No vendor dependency.
 
 | Package | Description | Status |
 |---------|-------------|--------|
-| `extension/` | Chrome MV3 — search + tagging | v0.1 — build ready |
+| `extension/` | Chrome MV3 — search + tagging | v1.2.0 |
 | `desktop/` | Tauri v2 — Scholar + Wizard desktop app | Scoped |
-| `docs/` | VitePress documentation | In progress |
-| `packages/core/` | Shared TypeScript types + utilities | v0.1 |
+| `packages/core/` | Shared TypeScript types | v0.1 |
 | `landing/` | loci.garden website | Live |
 
 ## Quick start
 
-### Chrome extension (development)
-```bash
-cd extension
-npm install
-npm run build
-# Load dist/ as unpacked extension in Chrome
-```
+**Chrome extension (developer preview):**
+→ See [extension/INSTALL.md](extension/INSTALL.md) for step-by-step instructions.
 
-### Docs site
+**Wizard / LLMAGE:**
 ```bash
-cd ../loci-docs
-npm install
-npm run docs:dev
+git clone https://github.com/huximaxi/Loci
+cd Loci/extension && npm install && npm run build
 ```
 
 ## Three tiers
 
-- **Scholar** — search + tagging, browser extension, no AI config required
-- **Wizard** — full palace, MCP integration, agent architecture, local LLMs
+- **Scholar** — Chrome extension, search + tagging, no config required
+- **Wizard** — full palace, MCP integration, local LLMs, agent architecture
 - **LLMAGE** — CLI/MCP only, zero cloud, IDE-native
-
-## Architecture
-
-→ [Full architecture docs](https://docs.loci.garden)
-→ [Security analysis](../loci-cipher-security-analysis.md)
 
 ## Changelog
 
-### v0.1.0 — 2026-05-03
+### v1.2.0 — 2026-05-03
+- Content sanitization in extension (THREAT-01 mitigation)
+- Message sender validation (THREAT-04)
+- Search rate limiting
+- INSTALL.md for regular users
+- Security notes in README
+
+### v1.0.0 — 2026-05-03
 - Chrome MV3 extension: search + tagging for Claude.ai + ChatGPT
-- Three-tier landing page (Scholar / Wizard / LLMAGE theme switcher)
-- 9 wizard feature cards with RPG tone and group dividers
-- Resources nav dropdown + contact modal
-- Monorepo structure: extension, packages/core, landing, docs
-- Cipher security analysis: 7 threats documented, pre-CWS checklist
+- Three-tier landing page (Scholar / Wizard / LLMAGE)
+- 9 wizard feature cards with RPG tone
+- Monorepo structure
 - VitePress docs skeleton
-- loci.garden deployed: SEO, OG tags, sitemap, robots.txt, llms.txt updated
-- Build: 0 TypeScript errors, zero network calls in bundle
 
 ### v0.0.1 — 2026 (prior)
 - loci methodology: palace, rooms, crystals, garden, soul files
-- loci.garden live at 1984 Hosting, Iceland
-- llms.txt + llms-full.txt context declarations
-- Original wizard landing with hero image
+- loci.garden live, llms.txt, original wizard landing
 
 ## License
 
