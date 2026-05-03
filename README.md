@@ -46,8 +46,13 @@ For detailed setup: [SETUP-GUIDE.md](SETUP-GUIDE.md) · [AGENT-SETUP.md](AGENT-S
 ## Three tiers
 
 - **Scholar** — search + tagging, browser extension, no config required
+  *For: anyone who wants searchable AI chat history without setup.*
+
 - **Wizard** — full palace, MCP integration, local LLMs, agent architecture
+  *For: power users building persistent co-intelligence systems.*
+
 - **LLMAGE** — CLI/MCP only, zero cloud, IDE-native
+  *For: developers who live in the terminal and want zero GUI.*
 
 ## Chrome extension
 
