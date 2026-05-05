@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>loci — palace migration</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #faf9f6;
+      color: #2a3d2f;
+      padding: 40px;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 580px;
+      margin: 0 auto;
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .logo svg {
+      width: 48px;
+      height: 48px;
+      fill: #4a6b54;
+    }
+
+    .logo h1 {
+      font-size: 24px;
+      font-weight: 600;
+      color: #4a6b54;
+      margin-top: 12px;
+    }
+
+    .logo p {
+      font-size: 14px;
+      color: #6b7c70;
+      margin-top: 4px;
+    }
+
+    .picker {
+      background: white;
+      border: 1px solid #d4d9d6;
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .picker label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: #4a6b54;
+      margin-bottom: 8px;
+    }
+
+    .folder-input-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .folder-input {
+      flex: 1;
+      padding: 10px 12px;
+      border: 1px solid #d4d9d6;
+      border-radius: 6px;
+      font-size: 13px;
+      background: #faf9f6;
+      color: #2a3d2f;
+    }
+
+    .folder-input:focus {
+      outline: none;
+      border-color: #4a6b54;
+    }
+
+    .btn {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary {
+      background: #e8ebe9;
+      color: #4a6b54;
+    }
+
+    .btn-secondary:hover {
+      background: #d4d9d6;
+    }
+
+    .btn-primary {
+      background: #4a6b54;
+      color: white;
+      width: 100%;
+    }
+
+    .btn-primary:hover {
+      background: #3d5a47;
+    }
+
+    .btn-primary:disabled {
+      background: #d4d9d6;
+      color: #9ca6a0;
+      cursor: not-allowed;
+    }
+
+    .result {
+      background: white;
+      border: 1px solid #d4d9d6;
+      border-radius: 8px;
+      padding: 24px;
+      display: none;
+    }
+
+    .result.show {
+      display: block;
+    }
+
+    .result-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .badge {
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-green {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .badge-yellow {
+      background: #fff9e6;
+      color: #c67a00;
+    }
+
+    .result-text {
+      font-size: 14px;
+      color: #2a3d2f;
+      margin-bottom: 16px;
+    }
+
+    .stats {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 20px;
+      padding: 12px;
+      background: #faf9f6;
+      border-radius: 6px;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      display: block;
+      font-size: 20px;
+      font-weight: 600;
+      color: #4a6b54;
+    }
+
+    .stat-label {
+      display: block;
+      font-size: 11px;
+      color: #6b7c70;
+      margin-top: 2px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-action {
+      flex: 1;
+    }
+
+    .path-display {
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 11px;
+      color: #6b7c70;
+      margin-top: 8px;
+      padding: 8px;
+      background: #faf9f6;
+      border-radius: 4px;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path d="M50 10 L70 35 L50 35 Z"/>
+        <path d="M50 35 L70 35 L60 50 Z"/>
+        <path d="M50 35 L60 50 L40 50 Z"/>
+        <path d="M40 50 L60 50 L50 65 Z"/>
+      </svg>
+      <h1>loci</h1>
+      <p>Migrate your memory palace</p>
+    </div>
+
+    <div class="picker">
+      <label for="folderPath">Select your workspace or Dev folder</label>
+      <div class="folder-input-group">
+        <input
+          type="text"
+          id="folderPath"
+          class="folder-input"
+          placeholder="~/Dev or ~/workspace"
+          readonly
+        >
+        <button class="btn btn-secondary" id="browseBtn">Browse</button>
+      </div>
+      <button class="btn btn-primary" id="detectBtn" disabled>Detect Palace</button>
+    </div>
+
+    <div class="result" id="resultCard">
+      <div class="result-header">
+        <span class="badge" id="resultBadge"></span>
+      </div>
+      <p class="result-text" id="resultText"></p>
+      <div class="stats" id="statsSection" style="display: none;">
+        <div class="stat">
+          <span class="stat-value" id="roomCount">—</span>
+          <span class="stat-label">rooms</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value" id="crystalCount">—</span>
+          <span class="stat-label">crystals</span>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-secondary btn-action" id="openFinderBtn">Open in Finder</button>
+        <button class="btn btn-primary btn-action" id="actionBtn"></button>
+      </div>
+      <div class="path-display" id="pathDisplay"></div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
