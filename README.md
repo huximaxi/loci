@@ -62,23 +62,9 @@ Standalone browser extension for search + tagging (Scholar tier).
 
 ## Changelog
 
-### v1.2.0 — 2026-05-05 (extension)
-- Content sanitization (THREAT-01 mitigation)
-- Message sender validation (THREAT-04)
-- Search rate limiting
-- INSTALL.md for regular users
+**Latest:** extension v1.2.0 · desktop v0.1.0 · site 2026-05-05
 
-### v0.1.0 — 2026-05-05 (desktop)
-- KISS palace detector + migrator
-- Detects loci, MemPalace, Karpathy-style, PALACE.md variants
-- Migration to ~/.loci/ format
-- Mac + Windows (Tauri v2)
-
-### loci.garden — 2026-05-05 (site)
-- Comparison page vs MemPalace / LLMChronicle / Karpathy
-- Resources dropdown updated
-- LLMAGE title: "loci: the context primitive"
-- Wizard hero: right-aligned, contrast improved
+→ Full history: [CHANGELOG.md](CHANGELOG.md)
 
 ## License
 
