@@ -41,7 +41,7 @@ For detailed setup: [SETUP-GUIDE.md](SETUP-GUIDE.md) · [AGENT-SETUP.md](AGENT-S
 | `landing/` | loci.garden website | Live |
 | `extension/` | Chrome MV3 browser extension | v1.2.0 |
 | `packages/core/` | Shared TypeScript types | v0.1 |
-| `desktop/` | Tauri v2 desktop app | Scoped |
+| `desktop/` | Tauri v2 desktop app | v0.1.0 |
 
 ## Three tiers
 
@@ -62,35 +62,23 @@ Standalone browser extension for search + tagging (Scholar tier).
 
 ## Changelog
 
-### v1.2.0 — 2026-05-03
-Security hardening: content sanitization, sender validation, rate limiting, INSTALL.md guide.
+### v1.2.0 — 2026-05-05 (extension)
+- Content sanitization (THREAT-01 mitigation)
+- Message sender validation (THREAT-04)
+- Search rate limiting
+- INSTALL.md for regular users
 
-### v1.1.0 — 2026-05-03
-Design refactor: wizard hero left-bleed, palace map full-width, navbar polish, LLMAGE contrast fix.
+### v0.1.0 — 2026-05-05 (desktop)
+- KISS palace detector + migrator
+- Detects loci, MemPalace, Karpathy-style, PALACE.md variants
+- Migration to ~/.loci/ format
+- Mac + Windows (Tauri v2)
 
-### v1.0.0 — 2026-05-03
-Chrome MV3 extension with search + tagging. Three-tier landing (Scholar/Wizard/LLMAGE). Monorepo.
-
-### v0.7.0 — 2026-05-02
-Palace v2: entanglement index, crystal tiers, garden-memory pattern, friends system, eval cadence.
-
-### v0.6.0 — 2026-04
-Session-delta handover process. loci.garden website live. Comms modules generalised.
-
-### v0.5.0 — 2026-04
-Palace-update process. Cherry-pick onboarding flow.
-
-### v0.4.0 — 2026-03
-Autodream, naming ceremony, daily routine, Zulip integration, engine-agnostic refactor.
-
-### v0.3.0 — 2026-03
-Rename to Loci. Garden metaphor. Persona system. Retrieval hierarchy.
-
-### v0.2.0 — 2026-02
-Obsidian mindmap integration. Add-friend process. Dynamic paths. Soul-first scheduled tasks.
-
-### v0.1.0 — 2026-01
-Initial palace-starter. Agent-first repo structure. Room templates. Crystal system.
+### loci.garden — 2026-05-05 (site)
+- Comparison page vs MemPalace / LLMChronicle / Karpathy
+- Resources dropdown updated
+- LLMAGE title: "loci: the context primitive"
+- Wizard hero: right-aligned, contrast improved
 
 ## License
 
