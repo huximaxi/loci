@@ -394,6 +394,30 @@ section.hero-section {
   z-index: 1;
 }
 
+/* Wizard hero: right-aligned + contrast boost */
+[data-theme="wizard"] .hero-section {
+  text-align: right;
+}
+[data-theme="wizard"] .hero-title {
+  text-shadow: 0 2px 16px rgba(0,0,0,0.95), 0 0 32px rgba(0,0,0,0.7);
+}
+[data-theme="wizard"] .hero-sub {
+  margin-left: auto;
+  margin-right: 0;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.98), 0 0 20px rgba(0,0,0,0.85);
+  color: #d4c4a0;  /* brighter than --text-2 for readability over image */
+}
+[data-theme="wizard"] .hero-cta {
+  justify-content: flex-end;
+}
+[data-theme="wizard"] .hero-crystal {
+  justify-content: flex-end;
+}
+[data-theme="wizard"] .hero-tag {
+  background: rgba(13,13,14,0.72);
+  box-shadow: 0 0 0 1px rgba(200,124,44,0.4);
+}
+
 /* ═══════════════════════════════════════════════════════
    HERO CRYSTAL
 ═══════════════════════════════════════════════════════ */
@@ -1525,6 +1549,11 @@ footer {
           <span class="t-wizard">The Seed ↗</span>
           <span class="t-llmage">Seed ↗</span>
         </a>
+        <a href="/comparison.html" class="dropdown-item">
+          <span class="t-scholar">Compare methods</span>
+          <span class="t-wizard">vs. the alternatives</span>
+          <span class="t-llmage">Comparison</span>
+        </a>
         <button class="dropdown-item" onclick="openContactModal()">
           <span class="t-scholar">Get in touch</span>
           <span class="t-wizard">Send a raven</span>
@@ -1615,7 +1644,7 @@ footer {
     <h1 class="hero-title">
       <span class="t-scholar">Your cosy<br>second brain.</span>
       <span class="t-wizard">Your Palace of Co&#8209;Intelligence</span>
-      <span class="t-llmage">The context<br>layer.</span>
+      <span class="t-llmage">loci: the context<br>primitive</span>
     </h1>
 
     <!-- Sub -->

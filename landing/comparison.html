@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How loci differs — loci.garden</title>
+  <meta name="description" content="Four approaches to persistent AI memory. Compare Karpathy-style, MemPalace, LLMChronicle, and loci.">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpolygon points='50,5 20,50 50,50' fill='%23ffcc44'/%3E%3Cpolygon points='50,5 80,50 50,50' fill='%23e8861a'/%3E%3Cpolygon points='20,50 50,95 50,50' fill='%23c87c2c'/%3E%3Cpolygon points='80,50 50,95 50,50' fill='%237a3a08'/%3E%3C/svg%3E">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d0d0e;
+      --bg-2: #131315;
+      --surface: #14141c;
+      --border: #252530;
+      --border-2: #353540;
+      --text: #e8e4dd;
+      --text-2: #a09880;
+      --text-3: #5a5a6a;
+      --accent: #c87c2c;
+      --accent-light: #e8974a;
+      --accent-xlight: #ffdd88;
+      --accent-soft: rgba(200,124,44,0.10);
+      --accent-glow: rgba(200,124,44,0.35);
+      --card-bg: #14141c;
+      --radius: 4px;
+      --radius-sm: 2px;
+      --font-main: 'Inter', system-ui, sans-serif;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      font-size: 16px;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-main);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Nav */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: rgba(13,13,14,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-inner {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+    }
+
+    .nav-links a {
+      color: var(--text-2);
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--accent-light);
+    }
+
+    /* Hero */
+    .hero {
+      padding: 140px 0 60px;
+      text-align: center;
+    }
+
+    .hero h1 {
+      font-size: 2.5rem;
+      font-weight: 600;
+      color: var(--accent-xlight);
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .hero p {
+      font-size: 1.25rem;
+      color: var(--text-2);
+      font-weight: 300;
+    }
+
+    /* Table */
+    .table-wrapper {
+      overflow-x: auto;
+      margin: 40px 0;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th, td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      background: var(--bg-2);
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    th:first-child {
+      color: var(--text-2);
+      font-weight: 500;
+    }
+
+    th.loci-col {
+      color: var(--accent-light);
+      background: var(--accent-soft);
+    }
+
+    td {
+      color: var(--text-2);
+      vertical-align: top;
+    }
+
+    td:first-child {
+      font-weight: 500;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    td.loci-col {
+      background: var(--accent-soft);
+      color: var(--text);
+    }
+
+    tr:last-child td,
+    tr:last-child th {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: rgba(255,255,255,0.02);
+    }
+
+    tr:hover td.loci-col {
+      background: rgba(200,124,44,0.15);
+    }
+
+    .check {
+      color: var(--accent-light);
+    }
+
+    .cross {
+      color: var(--text-3);
+    }
+
+    /* Assessments */
+    .assessments {
+      margin: 60px 0;
+    }
+
+    .assessment {
+      margin-bottom: 40px;
+      padding: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    .assessment h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+
+    .assessment p {
+      color: var(--text-2);
+      line-height: 1.7;
+    }
+
+    .assessment.loci-position {
+      border-color: var(--accent);
+      background: linear-gradient(135deg, var(--accent-soft), transparent);
+    }
+
+    .assessment.loci-position h3 {
+      color: var(--accent-light);
+    }
+
+    .assessment.loci-position p {
+      color: var(--text);
+    }
+
+    /* Footer */
+    footer {
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+
+    .footer-inner {
+      max-width: 1000px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .footer-text {
+      color: var(--text-3);
+      font-size: 13px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .footer-links a {
+      color: var(--text-3);
+      text-decoration: none;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover {
+      color: var(--accent-light);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 1.75rem;
+      }
+
+      .hero p {
+        font-size: 1rem;
+      }
+
+      th, td {
+        padding: 10px 12px;
+        font-size: 13px;
+      }
+
+      .footer-inner {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="nav-inner">
+      <a href="/" class="nav-logo">
+        <svg width="140" height="42" viewBox="0 0 400 120" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="68,12 32,60 68,60" fill="#ffcc44"/>
+          <polygon points="68,12 104,60 68,60" fill="#e8861a"/>
+          <polygon points="32,60 68,108 68,60" fill="#c87c2c"/>
+          <polygon points="104,60 68,108 68,60" fill="#7a3a08"/>
+          <polygon points="68,12 32,60 68,108 104,60" fill="none" stroke="rgba(255,220,100,0.4)" stroke-width="0.8"/>
+          <line x1="68" y1="12" x2="68" y2="108" stroke="rgba(255,220,100,0.2)" stroke-width="0.5"/>
+          <line x1="32" y1="60" x2="104" y2="60" stroke="rgba(255,220,100,0.2)" stroke-width="0.5"/>
+          <text x="122" y="72" font-family="'Helvetica Neue','Arial',sans-serif" font-size="34" letter-spacing="-0.5">
+            <tspan font-weight="600" fill="#ffcc44">loci</tspan><tspan font-weight="300" fill="#c87c2c">.garden</tspan>
+          </text>
+        </svg>
+      </a>
+      <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="https://github.com/huximaxi/Loci" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <section class="hero">
+      <h1>How loci differs</h1>
+      <p>Four approaches to persistent AI memory.</p>
+    </section>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Karpathy-style</th>
+            <th>MemPalace</th>
+            <th>LLMChronicle</th>
+            <th class="loci-col">loci</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Core idea</td>
+            <td>Markdown files with semantic search</td>
+            <td>Hierarchical memory palace metaphor</td>
+            <td>Automated conversation logging</td>
+            <td class="loci-col">Local-first searchable archive</td>
+          </tr>
+          <tr>
+            <td>Storage</td>
+            <td>Local markdown</td>
+            <td>Cloud (Firebase)</td>
+            <td>SQLite + cloud sync</td>
+            <td class="loci-col">Markdown + SQLite (apps)</td>
+          </tr>
+          <tr>
+            <td>Dependencies</td>
+            <td>Python + embeddings API</td>
+            <td>Firebase, React, cloud auth</td>
+            <td>Electron, sync infrastructure</td>
+            <td class="loci-col">Zero external services</td>
+          </tr>
+          <tr>
+            <td>Search</td>
+            <td>Vector similarity</td>
+            <td>Keyword + hierarchy nav</td>
+            <td>Full-text + filters</td>
+            <td class="loci-col">Full-text + fuzzy match</td>
+          </tr>
+          <tr>
+            <td>AI character</td>
+            <td>Manual prompt files</td>
+            <td>Palace-defined personas</td>
+            <td>No character layer</td>
+            <td class="loci-col">CLAUDE.md native integration</td>
+          </tr>
+          <tr>
+            <td>Growth</td>
+            <td>Manual curation</td>
+            <td>Structured placement</td>
+            <td>Automatic logging</td>
+            <td class="loci-col">Automatic + manual gardens</td>
+          </tr>
+          <tr>
+            <td>Multi-agent</td>
+            <td class="cross">—</td>
+            <td class="check">Yes (rooms)</td>
+            <td class="cross">—</td>
+            <td class="loci-col check">Yes (personas)</td>
+          </tr>
+          <tr>
+            <td>Browser extension</td>
+            <td class="cross">—</td>
+            <td class="cross">—</td>
+            <td class="check">Yes</td>
+            <td class="loci-col check">Yes — beta live</td>
+          </tr>
+          <tr>
+            <td>Team / friends mode</td>
+            <td class="cross">—</td>
+            <td class="check">Yes (cloud)</td>
+            <td class="check">Yes (sync)</td>
+            <td class="loci-col check">In development ✦</td>
+          </tr>
+          <tr>
+            <td>Setup time</td>
+            <td>~30 min</td>
+            <td>~10 min (account)</td>
+            <td>~5 min</td>
+            <td class="loci-col">~2 min</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <section class="assessments">
+      <div class="assessment">
+        <h3>On Karpathy-style memory</h3>
+        <p>The "dump everything to markdown and embed it" approach pioneered by Andrej Karpathy is elegant and hackable. It works beautifully if you're comfortable writing Python, managing embedding APIs, and curating your knowledge base manually. The semantic search is genuinely powerful. But it requires active maintenance — you're building a second brain that needs constant gardening. For engineers who enjoy that process, it's ideal. For everyone else, the activation energy is too high.</p>
+      </div>
+
+      <div class="assessment">
+        <h3>On MemPalace</h3>
+        <p>MemPalace's spatial metaphor is compelling — the idea of walking through rooms of memory resonates with how humans actually think. The cloud-first architecture makes collaboration possible and removes local setup friction. The tradeoff is clear: your memories live on someone else's servers. For teams building shared AI workflows, this might be acceptable. For individuals who care about data sovereignty, it's a dealbreaker. The Firebase dependency also means your archive is only as durable as your subscription.</p>
+      </div>
+
+      <div class="assessment">
+        <h3>On LLMChronicle</h3>
+        <p>LLMChronicle solves the "I said something brilliant three weeks ago and can't find it" problem directly. The browser extension approach captures conversations without manual effort, and the Electron app provides a decent search interface. The sync layer adds convenience but also complexity — more moving parts mean more potential failure modes. It's a solid choice if you value automatic capture above all else and don't mind the cloud sync tradeoff.</p>
+      </div>
+
+      <div class="assessment loci-position">
+        <h3>Where loci stands</h3>
+        <p>loci takes an opinionated position: your AI memory should be local, private, and zero-dependency. No accounts, no cloud, no embeddings API, no sync infrastructure. Just a SQLite database on your machine and a search interface that works. The Chrome extension is in beta — automatic capture from Claude.ai and ChatGPT, no setup required. Team and friends mode is in active development: shared rooms, shared crystals, context that travels between collaborators without a cloud dependency. What you get today is durability (it's just files), privacy (nothing leaves your machine), and simplicity (it works offline, forever). loci is for people who want their AI memory to be as reliable as a text file and as searchable as their email — and soon, as useful for a team as it is for one.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <span class="footer-text">loci.garden · The palace grows with every session. ✦</span>
+      <div class="footer-links">
+        <a href="/">Home</a>
+        <a href="https://github.com/huximaxi/Loci" target="_blank" rel="noopener">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+          </svg>
+          GitHub
+        </a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
