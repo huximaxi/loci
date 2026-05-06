@@ -1,266 +1,429 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-skin="wizard">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>loci — palace migration</title>
+  <title>loci wizard</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    /* ── RESET & WIZARD TOKENS ─────────────────────────────────────────── */
+    * { margin: 0; padding: 0; box-sizing: border-box; border-radius: 0 !important; image-rendering: pixelated; }
+
+    :root {
+      --bg:           #060810;
+      --bg-surface:   #0d1018;
+      --bg-card:      #111520;
+      --border:       #2a3045;
+      --border-soft:  #1e2535;
+      --text:         #e2ddd4;
+      --text-dim:     #8a8575;
+      --text-faint:   #4a4840;
+      --accent:       #c87c2c;
+      --accent-light: #e8974a;
+      --room-hall:    rgba(200,130,44,0.10);
+      --stone-crack:  rgba(255,255,255,0.04);
+      --ivy-green:    #2d6e3d;
+      --mono:         'Courier New', Courier, monospace;
     }
 
+    /* ── BODY — scanlines ──────────────────────────────────────────────── */
     body {
-      font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #faf9f6;
-      color: #2a3d2f;
-      padding: 40px;
-      line-height: 1.6;
-    }
-
-    .container {
-      max-width: 580px;
-      margin: 0 auto;
-    }
-
-    .logo {
-      text-align: center;
-      margin-bottom: 32px;
-    }
-
-    .logo svg {
-      width: 48px;
-      height: 48px;
-      fill: #4a6b54;
-    }
-
-    .logo h1 {
-      font-size: 24px;
-      font-weight: 600;
-      color: #4a6b54;
-      margin-top: 12px;
-    }
-
-    .logo p {
-      font-size: 14px;
-      color: #6b7c70;
-      margin-top: 4px;
-    }
-
-    .picker {
-      background: white;
-      border: 1px solid #d4d9d6;
-      border-radius: 8px;
-      padding: 24px;
-      margin-bottom: 20px;
-    }
-
-    .picker label {
-      display: block;
-      font-size: 13px;
-      font-weight: 500;
-      color: #4a6b54;
-      margin-bottom: 8px;
-    }
-
-    .folder-input-group {
+      font-family: var(--mono);
+      background-color: var(--bg);
+      background-image: repeating-linear-gradient(
+        0deg, transparent, transparent 3px,
+        rgba(0,0,0,0.06) 3px, rgba(0,0,0,0.06) 4px
+      );
+      color: var(--text);
+      height: 520px;
+      width: 680px;
+      overflow: hidden;
       display: flex;
-      gap: 8px;
-      margin-bottom: 16px;
+      flex-direction: column;
+      user-select: none;
+    }
+
+    /* ── TITLEBAR ──────────────────────────────────────────────────────── */
+    .titlebar {
+      background: var(--bg-surface);
+      border-bottom: 2px solid var(--border);
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+      background-image: repeating-linear-gradient(
+        90deg, transparent, transparent 7px,
+        var(--stone-crack) 7px, var(--stone-crack) 8px
+      );
+    }
+
+    .title-crystal {
+      width: 14px; height: 18px; flex-shrink: 0;
+      animation: crystal-ambient 2.5s ease-in-out infinite;
+    }
+
+    @keyframes crystal-ambient {
+      0%, 100% { filter: drop-shadow(0 0 3px rgba(200,124,44,0.7)); }
+      50%       { filter: drop-shadow(0 0 9px rgba(200,124,44,1.0)); }
+    }
+
+    .title-text {
+      flex: 1;
+      font-size: 0.68rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      text-align: center;
+    }
+
+    .title-version {
+      font-size: 0.58rem;
+      color: var(--text-faint);
+      letter-spacing: 0.08em;
+    }
+
+    /* ── MAIN SCROLL AREA ──────────────────────────────────────────────── */
+    .main {
+      flex: 1;
+      padding: 20px 28px;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .main::-webkit-scrollbar { width: 6px; }
+    .main::-webkit-scrollbar-track { background: var(--bg); }
+    .main::-webkit-scrollbar-thumb { background: var(--border); }
+
+    /* ── ROOM LABEL (pixel tag) ────────────────────────────────────────── */
+    .room-label {
+      display: inline-block;
+      background: var(--text);
+      color: var(--bg);
+      font-family: var(--mono);
+      font-size: 0.58rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 0.18rem 0.5rem;
+      border: 2px solid var(--bg);
+      outline: 1px solid var(--text);
+      font-weight: bold;
+      margin-bottom: 14px;
+    }
+
+    /* ── STONE CARDS ───────────────────────────────────────────────────── */
+    .stone-card {
+      background: var(--bg-surface);
+      border: 2px solid var(--border);
+      padding: 18px 20px;
+      margin-bottom: 12px;
+      box-shadow: 3px 3px 0 rgba(0,0,0,0.6);
+      background-image:
+        repeating-linear-gradient(
+          90deg, transparent, transparent 7px,
+          var(--stone-crack) 7px, var(--stone-crack) 8px
+        ),
+        repeating-linear-gradient(
+          0deg, transparent, transparent 7px,
+          var(--stone-crack) 7px, var(--stone-crack) 8px
+        );
+    }
+
+    .stone-card.hall-tint {
+      background-color: color-mix(in srgb, var(--bg-surface), var(--room-hall));
+      border-color: #4a3010;
+    }
+
+    .card-sublabel {
+      font-size: 0.58rem;
+      color: var(--text-faint);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    /* ── FOLDER PICKER ─────────────────────────────────────────────────── */
+    .folder-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
     }
 
     .folder-input {
       flex: 1;
-      padding: 10px 12px;
-      border: 1px solid #d4d9d6;
-      border-radius: 6px;
-      font-size: 13px;
-      background: #faf9f6;
-      color: #2a3d2f;
-    }
-
-    .folder-input:focus {
+      padding: 9px 11px;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      color: var(--text-dim);
+      font-family: var(--mono);
+      font-size: 0.65rem;
       outline: none;
-      border-color: #4a6b54;
     }
 
+    .folder-input:focus { border-color: var(--accent); color: var(--text); }
+
+    /* ── BUTTONS ───────────────────────────────────────────────────────── */
     .btn {
-      padding: 10px 16px;
-      border: none;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 500;
+      padding: 9px 14px;
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      font-weight: bold;
       cursor: pointer;
-      transition: all 0.2s;
+      border: 2px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-dim);
+      box-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+      transition: transform 0.08s, box-shadow 0.08s, color 0.1s, border-color 0.1s;
     }
 
-    .btn-secondary {
-      background: #e8ebe9;
-      color: #4a6b54;
+    .btn:hover:not(:disabled) {
+      color: var(--text);
+      border-color: var(--text-dim);
+      transform: translate(-1px, -1px);
+      box-shadow: 3px 3px 0 rgba(0,0,0,0.5);
     }
 
-    .btn-secondary:hover {
-      background: #d4d9d6;
+    .btn:active:not(:disabled) {
+      transform: translate(1px, 1px);
+      box-shadow: 1px 1px 0 rgba(0,0,0,0.5);
     }
+
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
     .btn-primary {
-      background: #4a6b54;
-      color: white;
-      width: 100%;
+      background: var(--accent);
+      border-color: #a86020;
+      color: var(--bg);
+      box-shadow: 3px 3px 0 rgba(0,0,0,0.6);
     }
 
-    .btn-primary:hover {
-      background: #3d5a47;
+    .btn-primary:hover:not(:disabled) {
+      background: var(--accent-light);
+      border-color: var(--accent);
+      color: var(--bg);
     }
 
-    .btn-primary:disabled {
-      background: #d4d9d6;
-      color: #9ca6a0;
-      cursor: not-allowed;
-    }
+    .btn-full { width: 100%; }
 
-    .result {
-      background: white;
-      border: 1px solid #d4d9d6;
-      border-radius: 8px;
-      padding: 24px;
-      display: none;
-    }
+    /* ── RESULT CARD ───────────────────────────────────────────────────── */
+    .result-card { display: none; }
+    .result-card.show { display: block; }
 
-    .result.show {
-      display: block;
-    }
-
-    .result-header {
+    .badge-row {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 16px;
+      gap: 8px;
+      margin-bottom: 10px;
     }
 
     .badge {
-      padding: 4px 10px;
-      border-radius: 4px;
-      font-size: 11px;
-      font-weight: 600;
+      display: inline-block;
+      background: var(--text);
+      color: var(--bg);
+      font-family: var(--mono);
+      font-size: 0.58rem;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      padding: 0.18rem 0.5rem;
+      border: 2px solid var(--bg);
+      outline: 1px solid var(--text);
+      font-weight: bold;
     }
 
-    .badge-green {
-      background: #e8f5e9;
-      color: #2e7d32;
+    .badge-found {
+      background: #3a7a4a;
+      color: #d4f0d8;
+      border-color: #1a4a2a;
+      outline-color: #3a7a4a;
     }
 
-    .badge-yellow {
-      background: #fff9e6;
-      color: #c67a00;
+    .badge-none {
+      background: #6a5a20;
+      color: #f0d870;
+      border-color: #3a3010;
+      outline-color: #6a5a20;
     }
 
     .result-text {
-      font-size: 14px;
-      color: #2a3d2f;
-      margin-bottom: 16px;
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      line-height: 1.55;
+      margin-bottom: 10px;
     }
 
-    .stats {
+    .stats-row {
       display: flex;
-      gap: 16px;
-      margin-bottom: 20px;
-      padding: 12px;
-      background: #faf9f6;
-      border-radius: 6px;
+      gap: 10px;
+      margin-bottom: 10px;
     }
 
-    .stat {
-      text-align: center;
+    .stat-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 7px 12px;
+      min-width: 60px;
     }
 
-    .stat-value {
-      display: block;
-      font-size: 20px;
-      font-weight: 600;
-      color: #4a6b54;
+    .stat-num {
+      font-size: 1.1rem;
+      color: var(--accent);
+      font-weight: bold;
+      line-height: 1;
     }
 
-    .stat-label {
-      display: block;
-      font-size: 11px;
-      color: #6b7c70;
-      margin-top: 2px;
-    }
-
-    .actions {
-      display: flex;
-      gap: 8px;
-    }
-
-    .btn-action {
-      flex: 1;
+    .stat-lbl {
+      font-size: 0.52rem;
+      color: var(--text-faint);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-top: 3px;
     }
 
     .path-display {
-      font-family: 'SF Mono', Monaco, monospace;
-      font-size: 11px;
-      color: #6b7c70;
-      margin-top: 8px;
-      padding: 8px;
-      background: #faf9f6;
-      border-radius: 4px;
+      font-size: 0.6rem;
+      color: #4a6b94;
+      margin-bottom: 12px;
       word-break: break-all;
+      padding: 4px 6px;
+      background: var(--bg);
+      border: 1px solid var(--border-soft);
     }
+
+    .action-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    /* ── IVY RULE ──────────────────────────────────────────────────────── */
+    .ivy-rule {
+      height: 16px;
+      position: relative;
+      margin: 4px 0 8px;
+      overflow: visible;
+    }
+
+    .ivy-rule::before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 0; right: 0;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .ivy-rule::after {
+      content: '❧ · · · · · · · · · · · · · · · · · · ❧';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 0.5rem;
+      color: var(--ivy-green);
+      letter-spacing: 0.2em;
+      white-space: nowrap;
+      background: var(--bg);
+      padding: 0 0.4rem;
+    }
+
+    /* ── FOOTER ────────────────────────────────────────────────────────── */
+    .footer {
+      border-top: 2px solid var(--border-soft);
+      padding: 7px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+      background-image: repeating-linear-gradient(
+        90deg, transparent, transparent 7px,
+        var(--stone-crack) 7px, var(--stone-crack) 8px
+      );
+    }
+
+    .footer-text {
+      font-size: 0.58rem;
+      color: var(--text-faint);
+      letter-spacing: 0.06em;
+    }
+
+    .footer-accent { color: var(--accent); }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="logo">
-      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <path d="M50 10 L70 35 L50 35 Z"/>
-        <path d="M50 35 L70 35 L60 50 Z"/>
-        <path d="M50 35 L60 50 L40 50 Z"/>
-        <path d="M40 50 L60 50 L50 65 Z"/>
-      </svg>
-      <h1>loci</h1>
-      <p>Migrate your memory palace</p>
-    </div>
 
-    <div class="picker">
-      <label for="folderPath">Select your workspace or Dev folder</label>
-      <div class="folder-input-group">
+  <!-- Titlebar -->
+  <div class="titlebar">
+    <svg class="title-crystal" viewBox="0 0 32 43" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="16,2  23,11 16,8  9,11"  fill="#ffee99"/>
+      <polygon points="9,11  16,8  16,30 3,21"  fill="#e8861a"/>
+      <polygon points="23,11 16,8  16,30 29,21" fill="#ffcc44"/>
+      <polygon points="3,21  16,30 16,38 8,28"  fill="#c87c2c"/>
+      <polygon points="29,21 16,30 16,38 24,28" fill="#e8861a"/>
+      <polygon points="8,28  16,38 24,28 16,42" fill="#7a3a08"/>
+      <polygon points="14,3  18,9  16,8"        fill="rgba(255,255,255,0.55)"/>
+      <polygon points="11,13 15,10 13,20"       fill="rgba(255,255,255,0.25)"/>
+      <rect    x="15" y="15" width="2" height="4" fill="rgba(255,238,153,0.6)"/>
+    </svg>
+    <div class="title-text">loci wizard</div>
+    <div class="title-version">v0.2.0</div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+
+    <div class="room-label">▸ The Hall · Palace Migration</div>
+
+    <!-- Picker card -->
+    <div class="stone-card">
+      <div class="card-sublabel">Select workspace folder</div>
+      <div class="folder-row">
         <input
-          type="text"
           id="folderPath"
           class="folder-input"
-          placeholder="~/Dev or ~/workspace"
+          type="text"
+          placeholder="/Users/you/Dev"
           readonly
         >
-        <button class="btn btn-secondary" id="browseBtn">Browse</button>
+        <button id="browseBtn" class="btn">Browse</button>
       </div>
-      <button class="btn btn-primary" id="detectBtn" disabled>Detect Palace</button>
+      <button id="detectBtn" class="btn btn-primary btn-full" disabled>
+        Detect Palace →
+      </button>
     </div>
 
-    <div class="result" id="resultCard">
-      <div class="result-header">
-        <span class="badge" id="resultBadge"></span>
+    <!-- Result card (hidden until detection runs) -->
+    <div id="resultCard" class="stone-card hall-tint result-card">
+      <div class="badge-row">
+        <span id="resultBadge" class="badge">none</span>
+        <span id="resultMeta" style="font-size:0.58rem;color:var(--text-faint);">—</span>
       </div>
-      <p class="result-text" id="resultText"></p>
-      <div class="stats" id="statsSection" style="display: none;">
-        <div class="stat">
-          <span class="stat-value" id="roomCount">—</span>
-          <span class="stat-label">rooms</span>
+      <p id="resultText" class="result-text"></p>
+
+      <div id="statsSection" class="stats-row" style="display:none;">
+        <div class="stat-box">
+          <div id="roomCount" class="stat-num">—</div>
+          <div class="stat-lbl">rooms</div>
         </div>
-        <div class="stat">
-          <span class="stat-value" id="crystalCount">—</span>
-          <span class="stat-label">crystals</span>
+        <div class="stat-box">
+          <div id="crystalCount" class="stat-num">—</div>
+          <div class="stat-lbl">crystals</div>
         </div>
       </div>
-      <div class="actions">
-        <button class="btn btn-secondary btn-action" id="openFinderBtn">Open in Finder</button>
-        <button class="btn btn-primary btn-action" id="actionBtn"></button>
+
+      <div id="pathDisplay" class="path-display"></div>
+
+      <div class="action-row">
+        <button id="openFinderBtn" class="btn" style="flex:1;">Open in Finder</button>
+        <button id="actionBtn" class="btn btn-primary" style="flex:2;" disabled>—</button>
       </div>
-      <div class="path-display" id="pathDisplay"></div>
     </div>
+
+    <div class="ivy-rule"></div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <span class="footer-text">loci.garden</span>
+    <span class="footer-text">Hux × Vesper &nbsp;·&nbsp; <span class="footer-accent">✦</span></span>
   </div>
 
   <script type="module" src="/src/main.ts"></script>
