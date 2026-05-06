@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en" data-skin="wizard">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Download loci wizard — loci.garden</title>
+  <meta name="description" content="Download loci wizard v0.2.0 — palace migration desktop app for macOS and Windows. Detect, migrate, and inhabit your AI memory palace.">
+  <meta property="og:title" content="Download loci wizard — loci.garden">
+  <meta property="og:description" content="loci wizard v0.2.0. macOS Universal + Windows. Detect and migrate your AI memory palace.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://loci.garden/download.html">
+  <meta property="og:site_name" content="loci.garden">
+  <link rel="canonical" href="https://loci.garden/download.html">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style-wizard.css">
+  <!-- NO skin-toggle.js — download page is always wizard skin -->
+  <script defer src="https://analytics.195-246-230-118.sslip.io/script.js" data-website-id="e00d2f0a-fbd7-40bf-8740-cb1ab2a82b86"></script>
+  <style>
+    /* Force wizard skin — override any stored scholar preference */
+    html { --skin: wizard; }
+
+    /* ── DOWNLOAD PAGE SPECIFIC ─────────────────────────────────── */
+    .download-wrap {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 4rem;
+    }
+
+    .dl-eyebrow {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      margin-bottom: 0.6rem;
+    }
+
+    .dl-title {
+      font-family: var(--serif);
+      font-size: 2.2rem;
+      color: var(--text);
+      margin-bottom: 0.3rem;
+      line-height: 1.1;
+    }
+
+    .dl-version {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--accent);
+      letter-spacing: 0.08em;
+      margin-bottom: 2.5rem;
+    }
+
+    /* Crystal hero */
+    .dl-crystal-hero {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .dl-crystal-hero svg {
+      filter: drop-shadow(0 0 18px rgba(200,124,44,0.55));
+      animation: crystal-ambient 2.5s ease-in-out infinite;
+    }
+
+    @keyframes crystal-ambient {
+      0%, 100% { filter: drop-shadow(0 0 10px rgba(200,124,44,0.55)); }
+      50%       { filter: drop-shadow(0 0 24px rgba(200,124,44,0.85)); }
+    }
+
+    .dl-crystal-tagline {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      color: var(--text-faint);
+      letter-spacing: 0.1em;
+      margin-top: 0.75rem;
+    }
+
+    /* Download buttons */
+    .dl-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width: 520px) {
+      .dl-buttons { grid-template-columns: 1fr; }
+    }
+
+    .dl-btn-card {
+      border: 2px solid var(--border);
+      background: var(--bg-surface);
+      padding: 20px 20px;
+      box-shadow: 3px 3px 0 rgba(0,0,0,0.5);
+      text-decoration: none;
+      display: block;
+      transition: transform 0.08s, box-shadow 0.08s, border-color 0.1s;
+      background-image:
+        repeating-linear-gradient(
+          90deg, transparent, transparent 7px,
+          rgba(255,255,255,0.03) 7px, rgba(255,255,255,0.03) 8px
+        );
+    }
+
+    .dl-btn-card:hover {
+      border-color: var(--accent);
+      transform: translate(-2px, -2px);
+      box-shadow: 5px 5px 0 rgba(0,0,0,0.5);
+    }
+
+    .dl-btn-card:active {
+      transform: translate(0, 0);
+      box-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+    }
+
+    .dl-os {
+      font-family: var(--mono);
+      font-size: 0.58rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      margin-bottom: 0.4rem;
+    }
+
+    .dl-format {
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      color: var(--text);
+      margin-bottom: 0.2rem;
+      line-height: 1.2;
+    }
+
+    .dl-detail {
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      color: var(--text-dim);
+      margin-bottom: 1rem;
+    }
+
+    .dl-cta {
+      display: block;
+      background: var(--accent);
+      border: 2px solid #a86020;
+      color: var(--bg);
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      font-weight: bold;
+      padding: 8px 14px;
+      text-align: center;
+      box-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+      text-transform: uppercase;
+    }
+
+    .dl-btn-card:hover .dl-cta {
+      background: var(--accent-light);
+    }
+
+    /* Footnotes */
+    .dl-footnote {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      color: var(--text-faint);
+      line-height: 1.7;
+      border-left: 2px solid var(--border);
+      padding-left: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .dl-footnote a {
+      color: var(--text-dim);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .dl-footnote a:hover { color: var(--accent); }
+
+    .dl-footnote strong { color: var(--text-dim); }
+
+    /* Source link */
+    .dl-source-row {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+      flex-wrap: wrap;
+    }
+
+    .dl-source-link {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      letter-spacing: 0.06em;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1px;
+    }
+
+    .dl-source-link:hover { color: var(--accent); border-color: var(--accent); }
+
+    /* What it does section */
+    .dl-what {
+      border-top: 1px solid var(--border-soft);
+      padding-top: 1.5rem;
+    }
+
+    .dl-what-label {
+      display: inline-block;
+      background: var(--text);
+      color: var(--bg);
+      font-family: var(--mono);
+      font-size: 0.58rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 0.15rem 0.45rem;
+      border: 2px solid var(--bg);
+      outline: 1px solid var(--text);
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+
+    .dl-what-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    @media (max-width: 520px) {
+      .dl-what-grid { grid-template-columns: 1fr; }
+    }
+
+    .dl-what-item {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      padding: 12px 14px;
+      background-image:
+        repeating-linear-gradient(
+          90deg, transparent, transparent 7px,
+          rgba(255,255,255,0.03) 7px, rgba(255,255,255,0.03) 8px
+        );
+    }
+
+    .dl-what-verb {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--accent);
+      font-weight: bold;
+      margin-bottom: 0.3rem;
+      letter-spacing: 0.06em;
+    }
+
+    .dl-what-desc {
+      font-size: 0.62rem;
+      color: var(--text-dim);
+      line-height: 1.45;
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-container">
+      <a href="/" class="logo">loci.garden</a>
+      <div class="nav-links">
+        <a href="https://github.com/huximaxi/loci" class="nav-link nav-icon" aria-label="GitHub" title="GitHub">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        </a>
+        <a href="start.html" class="nav-link">start</a>
+        <a href="seed/" class="nav-link">seed</a>
+        <a href="about.html" class="nav-link">about</a>
+        <a href="download.html" class="nav-link active">download</a>
+        <a href="llms.txt" class="nav-link">llms.txt</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <div class="download-wrap">
+
+      <div class="dl-eyebrow">loci wizard · desktop app</div>
+      <div class="dl-title">Download</div>
+      <div class="dl-version">v0.2.0 · 2026-05-06 · Apache 2.0</div>
+
+      <div class="dl-crystal-hero">
+        <svg viewBox="0 0 32 43" width="72" height="97" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated;">
+          <polygon points="16,2  23,11 16,8  9,11"  fill="#ffee99"/>
+          <polygon points="9,11  16,8  16,30 3,21"  fill="#e8861a"/>
+          <polygon points="23,11 16,8  16,30 29,21" fill="#ffcc44"/>
+          <polygon points="3,21  16,30 16,38 8,28"  fill="#c87c2c"/>
+          <polygon points="29,21 16,30 16,38 24,28" fill="#e8861a"/>
+          <polygon points="8,28  16,38 24,28 16,42" fill="#7a3a08"/>
+          <polygon points="14,3  18,9  16,8"        fill="rgba(255,255,255,0.55)"/>
+          <polygon points="11,13 15,10 13,20"       fill="rgba(255,255,255,0.25)"/>
+          <rect    x="15" y="15" width="2" height="4" fill="rgba(255,238,153,0.6)"/>
+        </svg>
+        <div class="dl-crystal-tagline">Detect · Migrate · Inhabit</div>
+      </div>
+
+      <div class="dl-buttons">
+        <a
+          href="https://github.com/huximaxi/loci/releases/tag/v0.2.0"
+          class="dl-btn-card"
+          title="Download loci wizard for macOS (Universal)"
+        >
+          <div class="dl-os">macOS</div>
+          <div class="dl-format">Universal Binary</div>
+          <div class="dl-detail">.dmg · arm64 + x86_64 · macOS 10.13+</div>
+          <div class="dl-cta">Download .dmg →</div>
+        </a>
+        <a
+          href="https://github.com/huximaxi/loci/releases/tag/v0.2.0"
+          class="dl-btn-card"
+          title="Download loci wizard for Windows"
+        >
+          <div class="dl-os">Windows</div>
+          <div class="dl-format">x64 Installer</div>
+          <div class="dl-detail">.exe · NSIS · Windows 10+</div>
+          <div class="dl-cta">Download .exe →</div>
+        </a>
+      </div>
+
+      <div class="dl-footnote">
+        <strong>macOS:</strong> If Gatekeeper blocks the app, right-click → Open, then confirm.
+        Apple notarization is in progress for future releases.<br>
+        <strong>Windows:</strong> SmartScreen may warn on first run — click "More info" → "Run anyway".
+        This is expected for unsigned installers.
+      </div>
+
+      <div class="dl-source-row">
+        <a href="https://github.com/huximaxi/loci/releases" class="dl-source-link">All releases</a>
+        <a href="https://github.com/huximaxi/loci/releases/tag/v0.2.0" class="dl-source-link">v0.2.0 release notes</a>
+        <a href="https://github.com/huximaxi/loci" class="dl-source-link">Build from source</a>
+        <a href="https://github.com/huximaxi/loci/blob/main/CHANGELOG.md" class="dl-source-link">Changelog</a>
+      </div>
+
+      <div class="dl-what">
+        <div class="dl-what-label">▸ What it does</div>
+        <div class="dl-what-grid">
+          <div class="dl-what-item">
+            <div class="dl-what-verb">Detect</div>
+            <div class="dl-what-desc">Scans your workspace for loci, MemPalace, Karpathy-style, and PALACE.md patterns.</div>
+          </div>
+          <div class="dl-what-item">
+            <div class="dl-what-verb">Migrate</div>
+            <div class="dl-what-desc">Copies your existing palace to <code>~/.loci/</code> format with a version manifest.</div>
+          </div>
+          <div class="dl-what-item">
+            <div class="dl-what-verb">Inhabit</div>
+            <div class="dl-what-desc">Your AI reads from <code>~/.loci/</code> on every session. The palace persists.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer>
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+      <span style="font-family:var(--mono); font-size:0.72rem; color:var(--text-faint);">loci.garden · Built by Hux × Vesper</span>
+      <span style="font-family:var(--mono); font-size:0.72rem; color:var(--text-faint);">Umami analytics · No tracking · <a href="llms.txt" style="color:var(--text-faint);">llms.txt</a></span>
+    </div>
+  </footer>
+
+</body>
+</html>
