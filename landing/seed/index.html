@@ -16,6 +16,38 @@
 </head>
 <body>
 
+  <!-- Back-office ribbon -->
+  <div class="backoffice-ribbon">
+    <span class="ribbon-mark">◈</span>
+    <span class="ribbon-label">supplementary back-office</span>
+    <span class="ribbon-sep">·</span>
+    <span class="ribbon-desc">extended garden — dispatches, seeds &amp; resources not in the front office</span>
+    <span class="ribbon-sep">·</span>
+    <a href="/" class="ribbon-link">← front office</a>
+  </div>
+  <style>
+    .backoffice-ribbon {
+      background: var(--bg-surface);
+      border-bottom: 1px solid rgba(200,124,44,0.15);
+      padding: 0.45rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.14em;
+      text-transform: lowercase;
+      flex-wrap: wrap;
+    }
+    .ribbon-mark { color: var(--accent); }
+    .ribbon-label { color: var(--text-dim); font-weight: 600; }
+    .ribbon-sep { color: var(--text-faint); }
+    .ribbon-desc { color: var(--text-faint); }
+    .ribbon-link { color: var(--accent); text-decoration: none; opacity: 0.7; }
+    .ribbon-link:hover { opacity: 1; }
+  </style>
+
   <nav>
     <div class="nav-container">
       <a href="/" class="logo">loci.garden</a>
@@ -26,6 +58,8 @@
         <a href="/" class="nav-link">home</a>
         <a href="../seed/" class="nav-link active">seed</a>
         <a href="../about.html" class="nav-link">about</a>
+        <a href="../guide.html" class="nav-link">guide</a>
+        <a href="https://docs.loci.garden" class="nav-link" target="_blank" rel="noopener">docs</a>
         <a href="../llms.txt" class="nav-link">llms.txt</a>
       </div>
     </div>

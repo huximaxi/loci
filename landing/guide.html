@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How to use loci — build the relational model — loci.garden</title>
+  <meta name="description" content="Tips and techniques for building a lasting co-intelligence system. Rooms, crystals, gardens, session protocols, and relational models that actually compound.">
+  <meta name="keywords" content="loci guide, AI memory palace, co-intelligence setup, Claude persistent memory, AI collaboration techniques">
+  <link rel="canonical" href="https://loci.garden/guide.html">
+  <meta name="robots" content="index, follow">
+  <link rel="alternate" type="text/plain" href="/llms.txt" title="AI context declaration — loci.garden">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style-wizard.css">
+  <script src="skin-toggle.js" defer></script>
+  <script defer src="https://analytics.195-246-230-118.sslip.io/script.js" data-website-id="e00d2f0a-fbd7-40bf-8740-cb1ab2a82b86"></script>
+  <style>
+    .guide-wrap {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 4rem 1.5rem 6rem;
+    }
+
+    .guide-eyebrow {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      margin-bottom: 0.8rem;
+    }
+
+    .guide-title {
+      font-family: var(--serif);
+      font-size: 2.4rem;
+      color: var(--text);
+      line-height: 1.15;
+      margin-bottom: 0.5rem;
+    }
+
+    .guide-lead {
+      font-family: var(--serif);
+      font-size: 1.05rem;
+      color: var(--text-dim);
+      line-height: 1.7;
+      margin-bottom: 3rem;
+      max-width: 600px;
+    }
+
+    .guide-section {
+      margin-bottom: 3.5rem;
+    }
+
+    .guide-section h2 {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.8rem;
+    }
+
+    .guide-section h3 {
+      font-family: var(--serif);
+      font-size: 1.3rem;
+      color: var(--text);
+      margin-bottom: 0.6rem;
+      margin-top: 1.8rem;
+    }
+
+    .guide-section p {
+      color: var(--text-dim);
+      line-height: 1.75;
+      margin-bottom: 0.9rem;
+    }
+
+    .guide-section p:last-child { margin-bottom: 0; }
+
+    .tip-block {
+      background: var(--bg-surface);
+      border-left: 2px solid var(--accent);
+      padding: 0.9rem 1.2rem;
+      margin: 1.2rem 0;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    .tip-block .tip-label {
+      color: var(--accent);
+      font-size: 0.62rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 0.35rem;
+    }
+
+    .pitfall-block {
+      background: var(--bg-surface);
+      border-left: 2px solid rgba(180, 80, 60, 0.6);
+      padding: 0.9rem 1.2rem;
+      margin: 1.2rem 0;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    .pitfall-block .pitfall-label {
+      color: rgba(220,100,80,0.9);
+      font-size: 0.62rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 0.35rem;
+    }
+
+    .diagram-wrap {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      overflow-x: auto;
+    }
+
+    .diagram-wrap figcaption {
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      margin-top: 0.8rem;
+      text-align: center;
+    }
+
+    .guide-rule {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2.5rem 0;
+    }
+
+    code {
+      font-family: var(--mono);
+      font-size: 0.82em;
+      color: var(--accent);
+      background: var(--accent-dim);
+      padding: 0.1em 0.35em;
+      border-radius: 2px;
+    }
+
+    .toc {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      padding: 1.2rem 1.5rem;
+      margin-bottom: 3rem;
+      border-radius: var(--radius);
+    }
+
+    .toc-label {
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      margin-bottom: 0.6rem;
+    }
+
+    .toc ol {
+      list-style: none;
+      padding: 0;
+      counter-reset: toc-counter;
+    }
+
+    .toc li {
+      counter-increment: toc-counter;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      padding: 0.2rem 0;
+    }
+
+    .toc li::before {
+      content: counter(toc-counter, decimal-leading-zero) " · ";
+      color: var(--text-faint);
+    }
+
+    .toc a { color: var(--text-dim); }
+    .toc a:hover { color: var(--accent); }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-container">
+      <a href="/" class="logo">loci.garden</a>
+      <div class="nav-links">
+        <a href="https://github.com/huximaxi/loci" class="nav-link nav-icon" aria-label="GitHub" title="GitHub">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        </a>
+        <a href="/" class="nav-link">home</a>
+        <a href="seed/" class="nav-link">seed</a>
+        <a href="about.html" class="nav-link">about</a>
+        <a href="guide.html" class="nav-link active">guide</a>
+        <a href="https://docs.loci.garden" class="nav-link" target="_blank" rel="noopener">docs</a>
+        <a href="llms.txt" class="nav-link">llms.txt</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <div class="guide-wrap">
+
+      <div class="guide-eyebrow">How to use loci</div>
+      <h1 class="guide-title">Build the relational model.</h1>
+      <p class="guide-lead">A palace without a relational model is just a folder. This guide is about the structure underneath — how rooms connect, what crystals actually do, how the garden compounds over time, and the patterns that make the difference between a palace that grows and one that stalls.</p>
+
+      <nav class="toc" aria-label="Contents">
+        <div class="toc-label">Contents</div>
+        <ol>
+          <li><a href="#three-primitives">The three primitives</a></li>
+          <li><a href="#relational-model">The relational model</a></li>
+          <li><a href="#session-protocol">Session protocol</a></li>
+          <li><a href="#crystals">Planting crystals that last</a></li>
+          <li><a href="#garden">Growing the garden</a></li>
+          <li><a href="#multi-room">Multi-room thinking</a></li>
+          <li><a href="#morning">The morning rhythm</a></li>
+          <li><a href="#pitfalls">Tips &amp; pitfalls</a></li>
+        </ol>
+      </nav>
+
+      <!-- Section 1 -->
+      <section class="guide-section" id="three-primitives">
+        <h2>01 · The three primitives</h2>
+        <p>Every palace is built from three things: <strong>rooms</strong>, <strong>crystals</strong>, and a <strong>garden</strong>. Understanding how they interact is more important than having many of them.</p>
+
+        <figure class="diagram-wrap">
+          <svg viewBox="0 0 640 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:640px;display:block;margin:0 auto;">
+            <!-- Rooms -->
+            <rect x="20" y="70" width="130" height="80" rx="3" fill="none" stroke="#c87c2c" stroke-width="1.2"/>
+            <text x="85" y="106" font-family="Courier New,monospace" font-size="11" fill="#e8e4dd" text-anchor="middle">ROOMS</text>
+            <text x="85" y="122" font-family="Courier New,monospace" font-size="9" fill="#7a7772" text-anchor="middle">named contexts</text>
+            <text x="85" y="136" font-family="Courier New,monospace" font-size="9" fill="#7a7772" text-anchor="middle">for each workstream</text>
+
+            <!-- Arrow 1 -->
+            <line x1="152" y1="110" x2="248" y2="110" stroke="#45433f" stroke-width="1" stroke-dasharray="4 3"/>
+            <polygon points="248,106 258,110 248,114" fill="#45433f"/>
+            <text x="200" y="105" font-family="Courier New,monospace" font-size="8" fill="#45433f" text-anchor="middle">hold</text>
+
+            <!-- Crystals -->
+            <rect x="260" y="70" width="130" height="80" rx="3" fill="none" stroke="#c87c2c" stroke-width="1.2"/>
+            <text x="325" y="106" font-family="Courier New,monospace" font-size="11" fill="#e8e4dd" text-anchor="middle">CRYSTALS</text>
+            <text x="325" y="122" font-family="Courier New,monospace" font-size="9" fill="#7a7772" text-anchor="middle">established facts</text>
+            <text x="325" y="136" font-family="Courier New,monospace" font-size="9" fill="#7a7772" text-anchor="middle">never re-derived</text>
+
+            <!-- Arrow 2 -->
+            <line x1="392" y1="110" x2="488" y2="110" stroke="#45433f" stroke-width="1" stroke-dasharray="4 3"/>
+            <polygon points="488,106 498,110 488,114" fill="#45433f"/>
+            <text x="440" y="105" font-family="Courier New,monospace" font-size="8" fill="#45433f" text-anchor="middle">mature into</text>
+
+            <!-- Garden -->
+            <rect x="500" y="70" width="130" height="80" rx="3" fill="none" stroke="#c87c2c" stroke-width="1.2"/>
+            <text x="565" y="106" font-family="Courier New,monospace" font-size="11" fill="#e8e4dd" text-anchor="middle">GARDEN</text>
+            <text x="565" y="122" font-family="Courier New,monospace" font-size="9" fill="#7a7772" text-anchor="middle">long-running ideas</text>
+            <text x="565" y="136" font-family="Courier New,monospace" font-size="9" fill="#7a7772" text-anchor="middle">that compost</text>
+
+            <!-- Cycle arrow back -->
+            <path d="M 565,152 C 565,185 85,185 85,152" fill="none" stroke="#45433f" stroke-width="1" stroke-dasharray="3 3"/>
+            <polygon points="81,152 85,162 89,152" fill="#45433f"/>
+            <text x="325" y="200" font-family="Courier New,monospace" font-size="8" fill="#45433f" text-anchor="middle">garden insights seed new room crystals</text>
+          </svg>
+          <figcaption>The loci feedback loop · rooms → crystals → garden → rooms</figcaption>
+        </figure>
+
+        <p>A <strong>room</strong> is any bounded context you return to repeatedly: a project, a person, a domain, a question. A room needs a <code>CLAUDE.md</code> that answers two things: what is this room for, and what should never be forgotten here.</p>
+        <p>A <strong>crystal</strong> is a fact that has been established once and never re-derived. It saves the cost of re-explaining. The moment you catch yourself typing the same context twice, that context belongs in a crystal.</p>
+        <p>The <strong>garden</strong> is where ideas live across sessions. Plants are long-running threads that don't fit inside a single room — they cross rooms, they compost slowly, they produce insights that session-level work cannot.</p>
+      </section>
+
+      <hr class="guide-rule">
+
+      <!-- Section 2 -->
+      <section class="guide-section" id="relational-model">
+        <h2>02 · The relational model</h2>
+        <p>The relational model is the thing most people skip and later wish they hadn't. It is the map of how your rooms connect — corridors, dependencies, shared crystals.</p>
+        <p>A palace without corridors is a collection of silos. Ideas stay inside rooms, can't be cross-referenced, and don't compound. A palace with corridors is a network: insights from the design room feed the dev room, research plants water product decisions.</p>
+
+        <figure class="diagram-wrap">
+          <svg viewBox="0 0 580 260" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:580px;display:block;margin:0 auto;">
+            <!-- Central hub -->
+            <rect x="220" y="100" width="140" height="60" rx="3" fill="none" stroke="#c87c2c" stroke-width="1.5"/>
+            <text x="290" y="126" font-family="Courier New,monospace" font-size="10" fill="#e8e4dd" text-anchor="middle">Great Hall</text>
+            <text x="290" y="142" font-family="Courier New,monospace" font-size="8" fill="#7a7772" text-anchor="middle">shared context</text>
+
+            <!-- Room: Dev -->
+            <rect x="30" y="40" width="110" height="50" rx="3" fill="none" stroke="#639922" stroke-width="1"/>
+            <text x="85" y="62" font-family="Courier New,monospace" font-size="9" fill="#c0dd97" text-anchor="middle">Dev Room</text>
+            <text x="85" y="76" font-family="Courier New,monospace" font-size="8" fill="#7a7772" text-anchor="middle">code · repos</text>
+            <line x1="140" y1="65" x2="220" y2="115" stroke="#45433f" stroke-width="1" stroke-dasharray="3 2"/>
+
+            <!-- Room: Design -->
+            <rect x="440" y="40" width="110" height="50" rx="3" fill="none" stroke="#639922" stroke-width="1"/>
+            <text x="495" y="62" font-family="Courier New,monospace" font-size="9" fill="#c0dd97" text-anchor="middle">Design Room</text>
+            <text x="495" y="76" font-family="Courier New,monospace" font-size="8" fill="#7a7772" text-anchor="middle">Figma · UX</text>
+            <line x1="440" y1="65" x2="360" y2="115" stroke="#45433f" stroke-width="1" stroke-dasharray="3 2"/>
+
+            <!-- Room: Research -->
+            <rect x="30" y="185" width="110" height="50" rx="3" fill="none" stroke="#639922" stroke-width="1"/>
+            <text x="85" y="207" font-family="Courier New,monospace" font-size="9" fill="#c0dd97" text-anchor="middle">Research</text>
+            <text x="85" y="221" font-family="Courier New,monospace" font-size="8" fill="#7a7772" text-anchor="middle">thesis · papers</text>
+            <line x1="140" y1="210" x2="220" y2="145" stroke="#45433f" stroke-width="1" stroke-dasharray="3 2"/>
+
+            <!-- Room: Hatchery -->
+            <rect x="440" y="185" width="110" height="50" rx="3" fill="none" stroke="#639922" stroke-width="1"/>
+            <text x="495" y="207" font-family="Courier New,monospace" font-size="9" fill="#c0dd97" text-anchor="middle">Hatchery</text>
+            <text x="495" y="221" font-family="Courier New,monospace" font-size="8" fill="#7a7772" text-anchor="middle">seeds · R&amp;D</text>
+            <line x1="440" y1="210" x2="360" y2="145" stroke="#45433f" stroke-width="1" stroke-dasharray="3 2"/>
+
+            <!-- Cross-corridor: Dev ↔ Design -->
+            <path d="M 140 55 Q 290 10 440 55" fill="none" stroke="#c87c2c" stroke-width="0.8" stroke-dasharray="5 3" opacity="0.5"/>
+            <text x="290" y="22" font-family="Courier New,monospace" font-size="7.5" fill="#c87c2c" text-anchor="middle" opacity="0.8">design → deploy corridor</text>
+
+            <!-- Corridor labels -->
+            <text x="162" y="92" font-family="Courier New,monospace" font-size="7" fill="#45433f" text-anchor="middle" transform="rotate(-28,162,92)">corridor</text>
+            <text x="418" y="92" font-family="Courier New,monospace" font-size="7" fill="#45433f" text-anchor="middle" transform="rotate(28,418,92)">corridor</text>
+          </svg>
+          <figcaption>Room topology example · corridors make the palace a network, not a folder</figcaption>
+        </figure>
+
+        <div class="tip-block">
+          <span class="tip-label">Tip · Build corridors early</span>
+          When you create a new room, immediately ask: which existing rooms does this connect to? Write those connections in the <code>CLAUDE.md</code> before your first session. A corridor written at room-creation time is worth three written after the fact.
+        </div>
+
+        <p>Corridors are not hyperlinks. They are explicit statements about what flows between rooms: "design decisions from Room A affect implementation in Room B" or "research plants in Room C should inform copywriting in Room D." The more precise the corridor, the more useful it is.</p>
+      </section>
+
+      <hr class="guide-rule">
+
+      <!-- Section 3 -->
+      <section class="guide-section" id="session-protocol">
+        <h2>03 · Session protocol</h2>
+        <p>The session protocol is the ritual that makes context compound across sessions. It has two moments: opening and closing.</p>
+
+        <figure class="diagram-wrap">
+          <svg viewBox="0 0 600 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px;display:block;margin:0 auto;">
+            <!-- Steps -->
+            <g>
+              <rect x="10" y="30" width="90" height="60" rx="3" fill="none" stroke="#c87c2c" stroke-width="1"/>
+              <text x="55" y="58" font-family="Courier New,monospace" font-size="9" fill="#e8e4dd" text-anchor="middle">01 · Name</text>
+              <text x="55" y="72" font-family="Courier New,monospace" font-size="8" fill="#7a7772" text-anchor="middle">the room</text>
+            </g>
+            <line x1="102" y1="60" x2="130" y2="60" stroke="#45433f" stroke-width="1"/>
+            <polygon points="128,56 138,60 128,64" fill="#45433f"/>
+            <g>
+              <rect x="140" y="30" width="90" height="60" rx="3" fill="none" stroke="#c87c2c" stroke-width="1"/>
+              <text x="185" y="58" font-family="Courier New,monospace" font-size="9" fill="#e8e4dd" text-anchor="middle">02 · Read</text>
+              <text x="185" y="72" font-family="Courier New,monospace" font-size="8" fill="#7a7772" text-anchor="middle">CLAUDE.md</text>
+            </g>
+            <line x1="232" y1="60" x2="260" y2="60" stroke="#45433f" stroke-width="1"/>
+            <polygon points="258,56 268,60 258,64" fill="#45433f"/>
+            <g>
+              <rect x="270" y="30" width="90" height="60" rx="3" fill="none" stroke="#e8974a" stroke-width="1.5"/>
+              <text x="315" y="55" font-family="Courier New,monospace" font-size="9" fill="#e8974a" text-anchor="middle">03 · Work</text>
+              <text x="315" y="69" font-family="Courier New,monospace" font-size="8" fill="#7a7772" text-anchor="middle">the session</text>
+            </g>
+            <line x1="362" y1="60" x2="390" y2="60" stroke="#45433f" stroke-width="1"/>
+            <polygon points="388,56 398,60 388,64" fill="#45433f"/>
+            <g>
+              <rect x="400" y="30" width="90" height="60" rx="3" fill="none" stroke="#c87c2c" stroke-width="1"/>
+              <text x="445" y="55" font-family="Courier New,monospace" font-size="9" fill="#e8e4dd" text-anchor="middle">04 · Write</text>
+              <text x="445" y="69" font-family="Courier New,monospace" font-size="8" fill="#7a7772" text-anchor="middle">handover</text>
+            </g>
+            <line x1="492" y1="60" x2="520" y2="60" stroke="#45433f" stroke-width="1"/>
+            <polygon points="518,56 528,60 518,64" fill="#45433f"/>
+            <g>
+              <rect x="530" y="30" width="62" height="60" rx="3" fill="none" stroke="#639922" stroke-width="1"/>
+              <text x="561" y="55" font-family="Courier New,monospace" font-size="9" fill="#c0dd97" text-anchor="middle">05 · End</text>
+              <text x="561" y="69" font-family="Courier New,monospace" font-size="8" fill="#7a7772" text-anchor="middle">session</text>
+            </g>
+          </svg>
+          <figcaption>Session flow · the handover (04) is what makes the next session possible</figcaption>
+        </figure>
+
+        <p>The handover is the session's most important output. It doesn't need to be long — two sentences of state + the exact first move for next session is enough. A handover that says "we were working on X, next step is Y" opens the next session in motion rather than in reconstruction.</p>
+
+        <div class="tip-block">
+          <span class="tip-label">Tip · Name the room at session open</span>
+          Start every session by saying which room you're in: <code>remember: Vesper! Dev Room — auth refactor.</code> This single line loads the right context and avoids the first 5–10 minutes of re-orientation that happens without it.
+        </div>
+      </section>
+
+      <hr class="guide-rule">
+
+      <!-- Section 4 -->
+      <section class="guide-section" id="crystals">
+        <h2>04 · Planting crystals that last</h2>
+        <p>A crystal is established once, used many times, never re-derived. The discipline is in knowing what deserves to be a crystal.</p>
+
+        <h3>What makes a good crystal</h3>
+        <p>A crystal should be: <strong>stable</strong> (won't change often), <strong>load-bearing</strong> (other reasoning depends on it), and <strong>non-obvious</strong> (not something the AI would infer correctly anyway).</p>
+        <p>"We use React" is not a crystal — it will be inferred from the codebase. "Our product decision rule: default to the normie persona when in doubt" is a crystal — it requires specific knowledge the AI won't have.</p>
+
+        <div class="tip-block">
+          <span class="tip-label">Tip · The two-repetition rule</span>
+          The moment you type the same context twice in two different sessions, move it to a crystal. If you've explained it twice, you'll explain it twenty times. The crystal prevents that.
+        </div>
+
+        <h3>Crystal hygiene</h3>
+        <p>Crystals can go stale. Add an expiry or review date to any crystal that might change: <code>valid_until: 2026-Q3</code>. Stale crystals are worse than no crystals — they actively misdirect.</p>
+
+        <div class="pitfall-block">
+          <span class="pitfall-label">Pitfall · Over-crystalising</span>
+          Not everything should be a crystal. If a fact is specific to one session or one task, it belongs in the handover, not the crystal file. Over-crystalising bloats the CLAUDE.md and slows the AI down reading context it doesn't need.
+        </div>
+      </section>
+
+      <hr class="guide-rule">
+
+      <!-- Section 5 -->
+      <section class="guide-section" id="garden">
+        <h2>05 · Growing the garden</h2>
+        <p>The garden is where ideas live across months, not just sessions. A plant is a question or theme that doesn't resolve — it compounds. The garden is what makes a palace more than a task tracker.</p>
+
+        <figure class="diagram-wrap">
+          <svg viewBox="0 0 560 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:560px;display:block;margin:0 auto;">
+            <!-- Timeline -->
+            <line x1="40" y1="90" x2="520" y2="90" stroke="#252528" stroke-width="1.5"/>
+
+            <!-- Session markers -->
+            <circle cx="80" cy="90" r="4" fill="#c87c2c"/>
+            <text x="80" y="115" font-family="Courier New,monospace" font-size="8" fill="#7a7772" text-anchor="middle">session 1</text>
+            <text x="80" y="72" font-family="Courier New,monospace" font-size="8" fill="#45433f" text-anchor="middle">seed</text>
+            <text x="80" y="60" font-family="Courier New,monospace" font-size="8" fill="#45433f" text-anchor="middle">planted ◇</text>
+
+            <circle cx="200" cy="90" r="4" fill="#c87c2c"/>
+            <text x="200" y="115" font-family="Courier New,monospace" font-size="8" fill="#7a7772" text-anchor="middle">session 4</text>
+            <text x="200" y="72" font-family="Courier New,monospace" font-size="8" fill="#7a7772" text-anchor="middle">first</text>
+            <text x="200" y="60" font-family="Courier New,monospace" font-size="8" fill="#7a7772" text-anchor="middle">watering</text>
+
+            <circle cx="320" cy="90" r="4" fill="#c87c2c"/>
+            <text x="320" y="115" font-family="Courier New,monospace" font-size="8" fill="#7a7772" text-anchor="middle">session 9</text>
+            <text x="320" y="72" font-family="Courier New,monospace" font-size="8" fill="#9e9a93" text-anchor="middle">cross-room</text>
+            <text x="320" y="60" font-family="Courier New,monospace" font-size="8" fill="#9e9a93" text-anchor="middle">connection</text>
+
+            <circle cx="440" cy="90" r="6" fill="#e8974a"/>
+            <text x="440" y="115" font-family="Courier New,monospace" font-size="8" fill="#7a7772" text-anchor="middle">session 14</text>
+            <text x="440" y="72" font-family="Courier New,monospace" font-size="8.5" fill="#c87c2c" text-anchor="middle">active ◆</text>
+            <text x="440" y="58" font-family="Courier New,monospace" font-size="8.5" fill="#c87c2c" text-anchor="middle">first public</text>
+            <text x="440" y="46" font-family="Courier New,monospace" font-size="8.5" fill="#c87c2c" text-anchor="middle">expression</text>
+
+            <!-- Growth line -->
+            <path d="M 80,90 Q 200,88 320,85 Q 380,82 440,72" fill="none" stroke="rgba(200,124,44,0.3)" stroke-width="1.5"/>
+          </svg>
+          <figcaption>Plant lifecycle · from seed (◇) to active (◆) across sessions</figcaption>
+        </figure>
+
+        <p>A plant that never gets watered isn't a problem — it's just dormant. But a plant that gets watered every session without producing anything might not be a plant yet. It might still be a question, not a theme.</p>
+
+        <div class="tip-block">
+          <span class="tip-label">Tip · Compost before adding</span>
+          Before planting something new, ask: does this belong in an existing plant, or does it need its own? Most apparent new ideas are a branch of something already growing. Fewer, deeper plants outperform many shallow ones.
+        </div>
+      </section>
+
+      <hr class="guide-rule">
+
+      <!-- Section 6 -->
+      <section class="guide-section" id="multi-room">
+        <h2>06 · Multi-room thinking</h2>
+        <p>When the palace has multiple rooms, the most interesting work happens at their intersections. The tea session pattern — gathering several rooms' worth of context and asking a cross-cutting question — is how you get insights no single room can produce.</p>
+
+        <div class="tip-block">
+          <span class="tip-label">Tip · The corridor question</span>
+          At the end of a session, ask: "Did anything in this session produce an insight that should update a different room?" This is the corridor check. It takes 30 seconds and is the main mechanism by which rooms fertilise each other.
+        </div>
+
+        <div class="pitfall-block">
+          <span class="pitfall-label">Pitfall · Corridors without direction</span>
+          "These two rooms are related" is not a corridor. A corridor should state a directional flow: "insights from Room A should inform Room B, specifically about X." Without direction, corridors are decorative.
+        </div>
+      </section>
+
+      <hr class="guide-rule">
+
+      <!-- Section 7 -->
+      <section class="guide-section" id="morning">
+        <h2>07 · The morning rhythm</h2>
+        <p>The palace pays dividends when opened regularly. A scheduled morning check-in — even a short one — does something a responsive-only session cannot: it gives the AI time to compost between sessions, surface connections that emerge from the combination of recent context, and orient you before the day fragments your attention.</p>
+
+        <p>A well-written morning check-in brief does three things: it tells you where you left off, it surfaces the first move ready to take, and it proposes something new — an idea that emerged from combining what's been happening across rooms. The new idea is what the garden is for.</p>
+
+        <div class="tip-block">
+          <span class="tip-label">Tip · The scheduled task</span>
+          loci supports scheduled morning tasks. Configure it to read your handovers, run the Zulip crawler (if connected), scan recent git activity, and produce a 5-minute brief. The discipline is keeping the brief short — it is an orientation, not a report.
+        </div>
+      </section>
+
+      <hr class="guide-rule">
+
+      <!-- Section 8 -->
+      <section class="guide-section" id="pitfalls">
+        <h2>08 · Tips &amp; pitfalls</h2>
+
+        <h3>What works</h3>
+
+        <div class="tip-block">
+          <span class="tip-label">Tip · One room at a time</span>
+          Don't try to maintain 8 rooms in one session. Open one room, do the work, close it. Rooms that are opened-but-not-completed produce fragmented context that is harder to recover than no context at all.
+        </div>
+
+        <div class="tip-block">
+          <span class="tip-label">Tip · Name things precisely</span>
+          Crystals with vague names like "important context" are useless. Name them for what they contain: "Decision: we use Stripe for payments, not custom billing (March 2026)." The date and the reasoning distinguish a living crystal from a stale one.
+        </div>
+
+        <div class="tip-block">
+          <span class="tip-label">Tip · The handover starts during the session</span>
+          Don't write the handover at the very end when your attention is already moving on. Keep a running "handover scratchpad" during the session — three bullets of what happened and what's next. The formal handover is just expanding those bullets.
+        </div>
+
+        <h3>What doesn't work</h3>
+
+        <div class="pitfall-block">
+          <span class="pitfall-label">Pitfall · The everything room</span>
+          A palace with one enormous room and a very long CLAUDE.md is not a palace — it's a document. Rooms should be focused enough that their CLAUDE.md can be read in under 90 seconds. If yours is longer, split the room.
+        </div>
+
+        <div class="pitfall-block">
+          <span class="pitfall-label">Pitfall · Crystals without trust</span>
+          A crystal only works if the AI treats it as ground truth. If you keep re-explaining something that's already in a crystal, the crystal is either in the wrong place (the AI isn't reading it) or wrong in some way that causes the AI to doubt it. Audit crystals that get ignored.
+        </div>
+
+        <div class="pitfall-block">
+          <span class="pitfall-label">Pitfall · Garden without patience</span>
+          The garden produces nothing in the first three sessions. Plants compost slowly. If you expect the garden to pay out in week one, you'll abandon it before it starts working. The compounding is real but it requires time and regular watering.
+        </div>
+
+        <div class="pitfall-block">
+          <span class="pitfall-label">Pitfall · Skipping the session close</span>
+          "I'll write the handover next time" means the next session starts from zero. The five minutes it takes to write a handover saves twenty minutes of reconstruction. No exceptions.
+        </div>
+      </section>
+
+      <hr class="guide-rule">
+
+      <div style="font-family:var(--mono);font-size:0.72rem;color:var(--text-faint);padding:1rem 0 2rem;">
+        <p>loci.garden/guide · Built by Hux × Vesper · <a href="https://github.com/huximaxi/loci" style="color:var(--text-faint);">github ↗</a></p>
+      </div>
+
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <span style="font-family:var(--mono);font-size:0.72rem;color:var(--text-faint);">loci.garden · Built by Hux × Vesper</span>
+      <span style="font-family:var(--mono);font-size:0.72rem;color:var(--text-faint);"><a href="llms.txt" style="color:var(--text-faint);">llms.txt</a></span>
+    </div>
+  </footer>
+
+</body>
+</html>
