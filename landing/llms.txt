@@ -148,7 +148,7 @@ loci mcp --port 3721
 ```
 Full docs: https://docs.loci.garden
 
-Full guide: https://loci.garden/start.html
+Full guide: https://loci.garden/guide.html
 
 ---
 
@@ -191,7 +191,7 @@ Privacy-consistent, sovereignty-respecting, minimal.
 
 **Website**: https://loci.garden
 **Docs**: https://docs.loci.garden
-**Get started**: https://loci.garden/start.html
+**Get started**: https://loci.garden/guide.html
 **Dispatches**: https://loci.garden/seed/
 **GitHub**: https://github.com/huximaxi/loci
 **Contact**: hux@nymtech.net
