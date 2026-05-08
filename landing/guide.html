@@ -11,13 +11,12 @@
   <link rel="alternate" type="text/plain" href="/llms.txt" title="AI context declaration — loci.garden">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="style-wizard.css">
-  <script src="skin-toggle.js" defer></script>
   <script defer src="https://analytics.195-246-230-118.sslip.io/script.js" data-website-id="e00d2f0a-fbd7-40bf-8740-cb1ab2a82b86"></script>
   <style>
     .guide-wrap {
       max-width: 760px;
       margin: 0 auto;
-      padding: 4rem 1.5rem 6rem;
+      padding: 5.5rem 1.5rem 6rem;
     }
 
     .guide-eyebrow {
@@ -187,6 +186,27 @@
 
     .toc a { color: var(--text-dim); }
     .toc a:hover { color: var(--accent); }
+
+    .guide-pagination {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 2.2rem;
+      padding-top: 1.2rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .pg-link {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.05em;
+      color: var(--text-faint);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .pg-link:hover { color: var(--accent); }
+    .pg-next { text-align: right; }
   </style>
 </head>
 <body>
@@ -275,6 +295,11 @@
         <p>A <strong>room</strong> is any bounded context you return to repeatedly: a project, a person, a domain, a question. A room needs a <code>CLAUDE.md</code> that answers two things: what is this room for, and what should never be forgotten here.</p>
         <p>A <strong>crystal</strong> is a fact that has been established once and never re-derived. It saves the cost of re-explaining. The moment you catch yourself typing the same context twice, that context belongs in a crystal.</p>
         <p>The <strong>garden</strong> is where ideas live across sessions. Plants are long-running threads that don't fit inside a single room — they cross rooms, they compost slowly, they produce insights that session-level work cannot.</p>
+
+        <div class="guide-pagination">
+          <span></span>
+          <a href="#relational-model" class="pg-link pg-next">02 · The relational model →</a>
+        </div>
       </section>
 
       <hr class="guide-rule">
@@ -333,6 +358,11 @@
         </div>
 
         <p>Corridors are not hyperlinks. They are explicit statements about what flows between rooms: "design decisions from Room A affect implementation in Room B" or "research plants in Room C should inform copywriting in Room D." The more precise the corridor, the more useful it is.</p>
+
+        <div class="guide-pagination">
+          <a href="#three-primitives" class="pg-link pg-prev">← 01 · The three primitives</a>
+          <a href="#session-protocol" class="pg-link pg-next">03 · Session protocol →</a>
+        </div>
       </section>
 
       <hr class="guide-rule">
@@ -388,6 +418,11 @@
           <span class="tip-label">Tip · Name the room at session open</span>
           Start every session by saying which room you're in: <code>remember: Vesper! Dev Room — auth refactor.</code> This single line loads the right context and avoids the first 5–10 minutes of re-orientation that happens without it.
         </div>
+
+        <div class="guide-pagination">
+          <a href="#relational-model" class="pg-link pg-prev">← 02 · The relational model</a>
+          <a href="#crystals" class="pg-link pg-next">04 · Planting crystals →</a>
+        </div>
       </section>
 
       <hr class="guide-rule">
@@ -412,6 +447,11 @@
         <div class="pitfall-block">
           <span class="pitfall-label">Pitfall · Over-crystalising</span>
           Not everything should be a crystal. If a fact is specific to one session or one task, it belongs in the handover, not the crystal file. Over-crystalising bloats the CLAUDE.md and slows the AI down reading context it doesn't need.
+        </div>
+
+        <div class="guide-pagination">
+          <a href="#session-protocol" class="pg-link pg-prev">← 03 · Session protocol</a>
+          <a href="#garden" class="pg-link pg-next">05 · Growing the garden →</a>
         </div>
       </section>
 
@@ -461,6 +501,11 @@
           <span class="tip-label">Tip · Compost before adding</span>
           Before planting something new, ask: does this belong in an existing plant, or does it need its own? Most apparent new ideas are a branch of something already growing. Fewer, deeper plants outperform many shallow ones.
         </div>
+
+        <div class="guide-pagination">
+          <a href="#crystals" class="pg-link pg-prev">← 04 · Planting crystals</a>
+          <a href="#multi-room" class="pg-link pg-next">06 · Multi-room thinking →</a>
+        </div>
       </section>
 
       <hr class="guide-rule">
@@ -479,6 +524,11 @@
           <span class="pitfall-label">Pitfall · Corridors without direction</span>
           "These two rooms are related" is not a corridor. A corridor should state a directional flow: "insights from Room A should inform Room B, specifically about X." Without direction, corridors are decorative.
         </div>
+
+        <div class="guide-pagination">
+          <a href="#garden" class="pg-link pg-prev">← 05 · Growing the garden</a>
+          <a href="#morning" class="pg-link pg-next">07 · The morning rhythm →</a>
+        </div>
       </section>
 
       <hr class="guide-rule">
@@ -493,6 +543,11 @@
         <div class="tip-block">
           <span class="tip-label">Tip · The scheduled task</span>
           loci supports scheduled morning tasks. Configure it to read your handovers, run the Zulip crawler (if connected), scan recent git activity, and produce a 5-minute brief. The discipline is keeping the brief short — it is an orientation, not a report.
+        </div>
+
+        <div class="guide-pagination">
+          <a href="#multi-room" class="pg-link pg-prev">← 06 · Multi-room thinking</a>
+          <a href="#pitfalls" class="pg-link pg-next">08 · Tips &amp; pitfalls →</a>
         </div>
       </section>
 
@@ -539,6 +594,11 @@
         <div class="pitfall-block">
           <span class="pitfall-label">Pitfall · Skipping the session close</span>
           "I'll write the handover next time" means the next session starts from zero. The five minutes it takes to write a handover saves twenty minutes of reconstruction. No exceptions.
+        </div>
+
+        <div class="guide-pagination">
+          <a href="#morning" class="pg-link pg-prev">← 07 · The morning rhythm</a>
+          <span></span>
         </div>
       </section>
 
