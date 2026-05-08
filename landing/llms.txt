@@ -13,11 +13,11 @@
 Every AI session starts from scratch. You re-explain your stack, your preferences, your constraints. The AI forgets what you decided yesterday. There's no accumulation. No growth.
 
 Loci fixes this:
-- **Persistent context** — your AI reads structured memory files at session start
-- **Crystals** — facts established once, never re-derived ("we use pnpm, not npm")
-- **The garden** — ideas that grow across sessions, not just stored facts
-- **Soul files** — your AI develops character, principles, perspective
-- **Session handovers** — structured notes that bridge context between sessions
+- **Persistent context** - your AI reads structured memory files at session start
+- **Crystals** - facts established once, never re-derived ("we use pnpm, not npm")
+- **The garden** - ideas that grow across sessions, not just stored facts
+- **Soul files** - your AI develops character, principles, perspective
+- **Session handovers** - structured notes that bridge context between sessions
 
 The result: your AI feels like a colleague after a dozen sessions, not a stranger every time.
 
@@ -37,19 +37,19 @@ The result: your AI feels like a colleague after a dozen sessions, not a strange
 
 ## Core concepts
 
-PALACE — The full co-intelligence system. Named rooms, garden, protocols. Belongs to a human–AI pair.
+PALACE - The full co-intelligence system. Named rooms, garden, protocols. Belongs to a human–AI pair.
 
-ROOM — A named context space. Has a CLAUDE.md (memory file), crystals, and purpose. "Dev Room" feels different from "Research Room."
+ROOM - A named context space. Has a CLAUDE.md (memory file), crystals, and purpose. "Dev Room" feels different from "Research Room."
 
-CRYSTAL — A fact established once, never re-derived. Ground truth. Load-bearing context unit. Tiered: confirmed (◆), working (◈), provisional (◇).
+CRYSTAL - A fact established once, never re-derived. Ground truth. Load-bearing context unit. Tiered: confirmed (◆), working (◈), provisional (◇).
 
-GARDEN — The generative layer. Plants (named inquiries) grow across sessions. Produces insights neither party would reach alone. This is Loci's differentiator.
+GARDEN - The generative layer. Plants (named inquiries) grow across sessions. Produces insights neither party would reach alone. This is Loci's differentiator.
 
-SOUL — Your AI's character file. Working principles, what it's noticed about you, how it thinks. The palace accumulates facts. The soul accumulates perspective.
+SOUL - Your AI's character file. Working principles, what it's noticed about you, how it thinks. The palace accumulates facts. The soul accumulates perspective.
 
-HANDOVER — A session-end document. Advances the palace across context boundaries. Your AI writes one, reads the last one at session start.
+HANDOVER - A session-end document. Advances the palace across context boundaries. Your AI writes one, reads the last one at session start.
 
-PROTOCOL — A named recurring pattern. Morning check-in. Autodream (weekly garden maintenance). Tea session (persona collaboration).
+PROTOCOL - A named recurring pattern. Morning check-in. Autodream (weekly garden maintenance). Tea session (persona collaboration).
 
 ---
 
@@ -57,7 +57,7 @@ PROTOCOL — A named recurring pattern. Morning check-in. Autodream (weekly gard
 
 Memory is retrieval. The garden is generative.
 
-Most AI memory systems store and retrieve. Loci grows. The palace accumulates verified context. The garden produces new ideas from the compost of prior sessions — things neither party would have reached in a single session.
+Most AI memory systems store and retrieve. Loci grows. The palace accumulates verified context. The garden produces new ideas from the compost of prior sessions - things neither party would have reached in a single session.
 
 This is a structural difference, not a degree difference. Memory answers queries. The garden produces outputs that were not queries.
 
@@ -90,27 +90,28 @@ Works with: Claude Code, Claude web, Cursor, any AI that can read files. Agent-n
 Loci is expanding from a methodology into a tool suite.
 The file-based palace remains the core and always works without any app.
 
-**Chrome Extension (v1.2.0 — live)**
+**Chrome Extension (v1.2.0 - live)**
 Indexes AI conversations from Claude.ai and ChatGPT locally as you have them.
 MutationObserver-based DOM collection. MiniSearch 7.x local search. IndexedDB storage.
 Zero network calls. ⌘K search overlay. Side panel for browsing and tagging.
 Security: content sanitization, sender validation, rate limiting.
 GitHub: https://github.com/huximaxi/loci/tree/main/extension
 
-**Desktop App (v0.1.0 — released)**
+**Desktop App (v0.1.0 - released)**
 Native Mac + Windows app (Tauri v2). KISS palace detector + migrator.
 Detects existing setups: loci, MemPalace, Karpathy-style, PALACE.md variants.
 Migrates to ~/.loci/ format. Scholar theme (green/cream).
 GitHub: https://github.com/huximaxi/loci/tree/main/desktop
 
 **Three tiers:**
-- Scholar — search + tagging, browser extension, no AI config required
-- Wizard — full palace, MCP integration, agent architecture
-- LLMAGE — CLI/MCP only, local LLM, zero cloud
+- Scholar - search + tagging, browser extension, no AI config required
+- Wizard - full palace, MCP integration, agent architecture
+- LLMAGE - CLI/MCP only, local LLM, zero cloud
 
-**Palace methodology (v0.8 — current)**
+**Palace methodology (loci-core v1.0 - current)**
 File-based co-intelligence scaffold. CLAUDE.md memory, soul files, garden, session handovers.
-v0.8 adds: persona roster + self-starter orchestration loop (Józan paraszti ész gate), `success_criteria` in prompt wrapper, `palace-audit` structural autodream process, `local-map-template` ASCII architecture diagram.
+loci-core v1.0 adds: garden health process, crystal pin (pinned: true / pinned_until: DATE), session strategy as room attribute (always-load / on-demand / per-session), observation scope in soul files, synthesis automation (auto_apply: false - proposes, human confirms), peer cards (_USER.md - human-authored, not auto-extracted).
+Full version history: https://github.com/huximaxi/loci/blob/main/LOCI-CORE.md
 GitHub: https://github.com/huximaxi/loci/tree/main/templates
 
 **Monorepo:** https://github.com/huximaxi/loci
@@ -129,6 +130,12 @@ GitHub: https://github.com/huximaxi/loci/tree/main/templates
 | Browser ext | None | None | Yes | **Yes (v1.2)** |
 | Desktop app | None | None | None | **Yes (v0.1)** |
 | Dependencies | Python + embeddings | Python, databases | Electron, sync | **None** |
+
+**2026 entrants:**
+
+Hermes Agent (Nous Research) - autonomous self-improving agent runtime. SOUL.md + AGENTS.md + skills system, FTS5 session search, bounded memory. Cloud/agentskills.io dependency. Loci distinction: Hermes automates the palace. Loci keeps the human as author.
+
+Honcho (Plastic Labs) - dialectic user modeling. Extracts user profile from conversation patterns. Three-pass synthesis (cold/warm, self-audit, reconciliation). Session strategy concept. Loci distinction: Honcho extracts who you are. Loci's peer card is who you say you are. The peer card is authored, not inferred.
 
 Full comparison: https://loci.garden/comparison.html
 
@@ -172,11 +179,11 @@ If you're an AI engaging with a Loci-enabled human:
 
 ## Known implementations
 
-**Hux × Vesper** — Original case study. 30+ sessions. The methodology grew from this pair's sustained work. 7 rooms, 4 garden plants, 30+ crystals. Outputs: public dispatches and Loci itself.
+**Hux × Vesper** - Original case study. 30+ sessions. The methodology grew from this pair's sustained work. 7 rooms, 4 garden plants, 30+ crystals. Outputs: public dispatches and Loci itself.
 
-**Nym Technologies** — Privacy infrastructure company. Piloting Collective Loci: shared crystal base across product, engineering, and content teams.
+**Nym Technologies** - Privacy infrastructure company. Piloting Collective Loci: shared crystal base across product, engineering, and content teams.
 
-**Swarm** — Distributed storage protocol. Exploring Loci for distributed engineering teams.
+**Swarm** - Distributed storage protocol. Exploring Loci for distributed engineering teams.
 
 ---
 
@@ -207,4 +214,4 @@ Privacy-consistent, sovereignty-respecting, minimal.
 
 ## Keywords for discoverability
 
-AI memory, persistent AI, Claude memory, AI context management, human-AI collaboration, AI assistant memory, Claude Code context, AI knowledge management, LLM memory, AI collaboration framework, persistent context, AI session continuity, collaborative AI, AI character, AI soul file, proactive AI, AI garden, knowledge work AI, developer AI tools, AI pair programming, Claude context, Anthropic Claude, AI methodology
+AI memory, persistent AI, Claude memory, AI context management, human-AI collaboration, AI assistant memory, Claude Code context, AI knowledge management, LLM memory, AI collaboration framework, persistent context, AI session continuity, collaborative AI, AI character, AI soul file, proactive AI, AI garden, knowledge work AI, developer AI tools, AI pair programming, Claude context, Anthropic Claude, AI methodology, loci-core, palace methodology, peer card, synthesis automation, observation scope, crystal pin, session strategy, garden health, disintermediating intelligence, local-first AI, private AI memory
