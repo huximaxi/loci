@@ -377,6 +377,30 @@
       color: var(--accent-light);
     }
 
+    /* Public beta badge */
+    .beta-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent-light);
+      background: rgba(200,124,44,0.12);
+      border: 1px solid rgba(200,124,44,0.3);
+      border-radius: 2px;
+      padding: 1px 5px;
+      text-decoration: none;
+      margin-left: 6px;
+      vertical-align: middle;
+      white-space: nowrap;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .beta-badge:hover {
+      background: rgba(200,124,44,0.22);
+      border-color: var(--accent-light);
+      color: var(--accent-xlight);
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
       .hero h1 {
@@ -489,14 +513,14 @@
             <td class="cross">-</td>
             <td class="cross">-</td>
             <td class="check">Yes</td>
-            <td class="loci-col check">Yes - v1.2</td>
+            <td class="loci-col check">Yes - v1.2 <a href="https://github.com/huximaxi/loci/releases" target="_blank" rel="noopener" class="beta-badge">public beta ↗</a></td>
           </tr>
           <tr>
             <td>Desktop app</td>
             <td class="cross">-</td>
             <td class="cross">-</td>
             <td class="cross">-</td>
-            <td class="loci-col check">Yes - v0.1 (Tauri)</td>
+            <td class="loci-col check">Yes - v0.1 · Tauri <a href="https://github.com/huximaxi/loci/releases" target="_blank" rel="noopener" class="beta-badge">public beta ↗</a></td>
           </tr>
           <tr>
             <td>Team / friends mode</td>
