@@ -4,6 +4,14 @@ All notable changes to loci are documented here.
 
 ---
 
+## loci.garden - 2026-05-08 (site)
+- **Public beta labels** - desktop + extension now marked as public beta on download.html and comparison.html
+- **Guide pagination** - guide.html split into sections with prev/next navigation
+- **Surface tokens** - index.html Tauri section uses `--surface-*` CSS tokens instead of pixel tile
+- **Skin toggle removed** - simplified theme switching
+
+---
+
 ## v1.0 - 2026-05-08 (palace)
 - **Garden Health process** - `templates/garden-health-template.md`: structured health pass for crystals, plants, handovers, and rooms. Surfaces stale/dormant nodes for human review. Never auto-archives. Integrates with Process Adjustment Trigger. Produces a `_health.md`-style report per run.
 - **Crystal pin feature** - `templates/crystals-guide.md`: `pinned: true` field (or inline `· pinned` marker) protects any crystal from garden health flagging. Supports `pinned_until: DATE` for time-windowed protection. Retiring a crystal now includes a `~~retired:~~` notation pattern. Lifecycle diagram added (Seeded → Contextual → Confirmed → Pinned → Composted).
