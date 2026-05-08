@@ -108,6 +108,11 @@ GitHub: https://github.com/huximaxi/loci/tree/main/desktop
 - Wizard — full palace, MCP integration, agent architecture
 - LLMAGE — CLI/MCP only, local LLM, zero cloud
 
+**Palace methodology (v0.8 — current)**
+File-based co-intelligence scaffold. CLAUDE.md memory, soul files, garden, session handovers.
+v0.8 adds: persona roster + self-starter orchestration loop (Józan paraszti ész gate), `success_criteria` in prompt wrapper, `palace-audit` structural autodream process, `local-map-template` ASCII architecture diagram.
+GitHub: https://github.com/huximaxi/loci/tree/main/templates
+
 **Monorepo:** https://github.com/huximaxi/loci
 **Docs:** https://docs.loci.garden
 
