@@ -1,6 +1,33 @@
-# Output Primitive — Git Log Incident
+# Output Primitive
+*Structured formats for exporting palace work as shareable, archivable artifacts.*
+*v0.9 · 2026-05-08 · Hux × Vesper*
+
+---
+
+## What is an output primitive?
+
+An output primitive is a typed, named format for turning a session arc into a concrete artifact. Not just a summary — a structured record with a defined schema, tagging vocabulary, and rendering options. Built for agents who produce work, not just answers.
+
+Output primitives are:
+- **Typed** — each format has a name and a spec
+- **Atomic** — one primitive = one kind of output
+- **Archivable** — readable, diffable, versionable as plain text
+- **Renderable** — can be displayed as an HTML widget or saved as MD
+
+A palace can have many output primitives. This file documents the first.
+
+---
+
+## Available primitives
+
+| Primitive | Use when |
+|---|---|
+| `git-log-incident` | Session arcs with multiple agents, at least one plot twist, and a clear resolution |
+
+---
+
+## Primitive: `git-log-incident`
 *Atomic format for session arcs, investigations, and collaborative sequences.*
-*Introduced: v0.9 · 2026-05-08 · Hux × Vesper · "pure gold."*
 
 ---
 
