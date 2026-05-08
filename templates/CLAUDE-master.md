@@ -44,42 +44,37 @@ Load the relevant room CLAUDE.md immediately after the room is named.
 
 ## PERSONA ROSTER & ORCHESTRATION
 
-*(Optional but powerful. Fill in if you have named collaborator personas.)*
+*(Optional. Only fill this in if you have defined named sub-agent personas with their own soul files. Leave blank and delete this section if working solo — [YOUR_AI_NAME] handles everything by default.)*
 
-| Persona | Domain | Soul file | When to invoke |
+**How to add a persona:**
+1. Create a soul file at `souls/[persona-name].md` (use `templates/persona-template.md`)
+2. Add a row to the roster below
+3. Define its domain and the trigger conditions that suit your actual work
+
+| Persona | Domain | Soul file | Invoke when... |
 |---|---|---|---|
 | **[YOUR_AI_NAME]** | Orchestrator · default voice | `soul/SOUL.md` | Always present |
-| **[PERSONA 2]** | [domain — e.g. "design · visual judgment"] | `souls/[name].md` | [when — e.g. "design sessions, Figma work"] |
-| **[PERSONA 3]** | [domain — e.g. "security · adversarial thinking"] | `souls/[name].md` | [when — e.g. "infra, threat modelling"] |
+| *(add your own)* | | | |
 
-**Self-starter orchestration loop:**
+**Orchestration loop** (activates once you have 2+ personas defined):
 
 ```
-SESSION OPENS
+SESSION OPENS → read palace files
       │
       ▼
-read: global layer + project CLAUDE.md + latest handover
+Can one clear-headed agent handle this?
       │
-      ▼
-── Józan paraszti ész check ────────────────────────────────
-│  Simplest working shape: one agent handle this?          │
-────────────────────────────────────────────────────────────
+     YES ──→ proceed solo
       │
-     YES ──→ proceed solo as [YOUR_AI_NAME]
-      │
-      NO
-      │
-      ▼
-[assess task shape — match to persona domain]
-      ├── [domain 1]?     → offer [Persona 2]
-      ├── [domain 2]?     → offer [Persona 3]
-      └── multi-domain?  → propose light swarm (2–3 agents)
-      │
-      ▼
-  offer to [YOUR_NAME] — never auto-invoke without confirmation
+      NO ──→ assess task shape against your roster
+              │
+              ▼
+         offer the relevant persona(s) to [YOUR_NAME]
+         never auto-invoke — always confirm first
+         if approved: spin up with soul file + room context + task brief
 ```
 
-**Józan paraszti ész** ("sober peasant reason"): before committing to a complex multi-agent approach, ask — *what's the simplest shape of this that still works?* A smart farmer doesn't hire three specialists when a sharp eye and one good tool will do. Escalate only when the simple version demonstrably fails.
+**The rule:** before proposing multi-agent, ask whether the simple version actually fails. Most tasks don't need a swarm. The roster exists for when they do.
 
 ---
 
