@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>How loci differs — loci.garden</title>
+  <title>How loci differs - loci.garden</title>
   <meta name="description" content="Four approaches to persistent AI memory. Compare Karpathy-style, MemPalace, LLMChronicle, and loci.">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpolygon points='50,5 20,50 50,50' fill='%23ffcc44'/%3E%3Cpolygon points='50,5 80,50 50,50' fill='%23e8861a'/%3E%3Cpolygon points='20,50 50,95 50,50' fill='%23c87c2c'/%3E%3Cpolygon points='80,50 50,95 50,50' fill='%237a3a08'/%3E%3C/svg%3E">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -232,6 +232,105 @@
       color: var(--text);
     }
 
+    /* New entrants section */
+    .new-entrants {
+      margin: 60px 0;
+    }
+
+    .new-entrants h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .new-entrants .section-lead {
+      color: var(--text-2);
+      margin-bottom: 32px;
+      font-size: 1rem;
+      line-height: 1.7;
+    }
+
+    .comparison-duo {
+      overflow-x: auto;
+      margin: 32px 0;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .comparison-duo table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    .comparison-duo th, .comparison-duo td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .comparison-duo th {
+      background: var(--bg-2);
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .comparison-duo th:first-child {
+      color: var(--text-2);
+      font-weight: 500;
+    }
+
+    .comparison-duo th.loci-col {
+      color: var(--accent-light);
+      background: var(--accent-soft);
+    }
+
+    .comparison-duo td {
+      color: var(--text-2);
+      vertical-align: top;
+    }
+
+    .comparison-duo td:first-child {
+      font-weight: 500;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .comparison-duo td.loci-col {
+      background: var(--accent-soft);
+      color: var(--text);
+    }
+
+    .comparison-duo tr:last-child td,
+    .comparison-duo tr:last-child th {
+      border-bottom: none;
+    }
+
+    .slogan-block {
+      margin: 40px 0;
+      padding: 28px 32px;
+      border-left: 3px solid var(--accent);
+      background: linear-gradient(135deg, rgba(200,124,44,0.08), transparent);
+      border-radius: 0 var(--radius) var(--radius) 0;
+    }
+
+    .slogan-block .slogan-main {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--accent-xlight);
+      letter-spacing: -0.3px;
+      margin-bottom: 8px;
+    }
+
+    .slogan-block .slogan-sub {
+      font-size: 0.9rem;
+      color: var(--text-2);
+      line-height: 1.6;
+    }
+
     /* Footer */
     footer {
       padding: 40px 24px;
@@ -376,28 +475,28 @@
           </tr>
           <tr>
             <td>Multi-agent</td>
-            <td class="cross">—</td>
+            <td class="cross">-</td>
             <td class="check">Yes (rooms)</td>
-            <td class="cross">—</td>
+            <td class="cross">-</td>
             <td class="loci-col check">Yes (personas)</td>
           </tr>
           <tr>
             <td>Browser extension</td>
-            <td class="cross">—</td>
-            <td class="cross">—</td>
+            <td class="cross">-</td>
+            <td class="cross">-</td>
             <td class="check">Yes</td>
-            <td class="loci-col check">Yes — v1.2</td>
+            <td class="loci-col check">Yes - v1.2</td>
           </tr>
           <tr>
             <td>Desktop app</td>
-            <td class="cross">—</td>
-            <td class="cross">—</td>
-            <td class="cross">—</td>
-            <td class="loci-col check">Yes — v0.1 (Tauri)</td>
+            <td class="cross">-</td>
+            <td class="cross">-</td>
+            <td class="cross">-</td>
+            <td class="loci-col check">Yes - v0.1 (Tauri)</td>
           </tr>
           <tr>
             <td>Team / friends mode</td>
-            <td class="cross">—</td>
+            <td class="cross">-</td>
             <td class="check">Yes (cloud)</td>
             <td class="check">Yes (sync)</td>
             <td class="loci-col check">In development ✦</td>
@@ -416,22 +515,96 @@
     <section class="assessments">
       <div class="assessment">
         <h3>On Karpathy-style memory</h3>
-        <p>The "dump everything to markdown and embed it" approach pioneered by Andrej Karpathy is elegant and hackable. It works beautifully if you're comfortable writing Python, managing embedding APIs, and curating your knowledge base manually. The semantic search is genuinely powerful. But it requires active maintenance — you're building a second brain that needs constant gardening. For engineers who enjoy that process, it's ideal. For everyone else, the activation energy is too high.</p>
+        <p>The "dump everything to markdown and embed it" approach pioneered by Andrej Karpathy is elegant and hackable. It works beautifully if you're comfortable writing Python, managing embedding APIs, and curating your knowledge base manually. The semantic search is genuinely powerful. But it requires active maintenance - you're building a second brain that needs constant gardening. For engineers who enjoy that process, it's ideal. For everyone else, the activation energy is too high.</p>
       </div>
 
       <div class="assessment">
         <h3>On MemPalace</h3>
-        <p>MemPalace's spatial metaphor is compelling — the idea of walking through rooms of memory resonates with how humans actually think. The cloud-first architecture makes collaboration possible and removes local setup friction. The tradeoff is clear: your memories live on someone else's servers. For teams building shared AI workflows, this might be acceptable. For individuals who care about data sovereignty, it's a dealbreaker. The Firebase dependency also means your archive is only as durable as your subscription.</p>
+        <p>MemPalace's spatial metaphor is compelling - the idea of walking through rooms of memory resonates with how humans actually think. The cloud-first architecture makes collaboration possible and removes local setup friction. The tradeoff is clear: your memories live on someone else's servers. For teams building shared AI workflows, this might be acceptable. For individuals who care about data sovereignty, it's a dealbreaker. The Firebase dependency also means your archive is only as durable as your subscription.</p>
       </div>
 
       <div class="assessment">
         <h3>On LLMChronicle</h3>
-        <p>LLMChronicle solves the "I said something brilliant three weeks ago and can't find it" problem directly. The browser extension approach captures conversations without manual effort, and the Electron app provides a decent search interface. The sync layer adds convenience but also complexity — more moving parts mean more potential failure modes. It's a solid choice if you value automatic capture above all else and don't mind the cloud sync tradeoff.</p>
+        <p>LLMChronicle solves the "I said something brilliant three weeks ago and can't find it" problem directly. The browser extension approach captures conversations without manual effort, and the Electron app provides a decent search interface. The sync layer adds convenience but also complexity - more moving parts mean more potential failure modes. It's a solid choice if you value automatic capture above all else and don't mind the cloud sync tradeoff.</p>
       </div>
 
       <div class="assessment loci-position">
         <h3>Where loci stands</h3>
-        <p>loci takes an opinionated position: your AI memory should be local, private, and zero-dependency. No accounts, no cloud, no embeddings API, no sync infrastructure. Just a SQLite database on your machine and a search interface that works. The Chrome extension is in beta — automatic capture from Claude.ai and ChatGPT, no setup required. Team and friends mode is in active development: shared rooms, shared crystals, context that travels between collaborators without a cloud dependency. What you get today is durability (it's just files), privacy (nothing leaves your machine), and simplicity (it works offline, forever). loci is for people who want their AI memory to be as reliable as a text file and as searchable as their email — and soon, as useful for a team as it is for one.</p>
+        <p>loci takes an opinionated position: your AI memory should be local, private, and zero-dependency. No accounts, no cloud, no embeddings API, no sync infrastructure. The knowledge you build with AI should crystallise where you are - in files you own, in a structure you author, in a palace that doesn't require a subscription to keep standing. The Chrome extension is in beta - automatic capture from Claude.ai and ChatGPT, no setup required. Team and friends mode is in active development: shared rooms, shared crystals, context that travels between collaborators without a cloud dependency. What you get today is durability (it's just files), privacy (nothing leaves your machine), and simplicity (it works offline, forever). But the deeper bet is this: an agent that knows what you prefer is useful. A palace that knows what you understand - and grows as your understanding deepens - is something else. That's what loci is building toward.</p>
+      </div>
+    </section>
+
+    <section class="new-entrants">
+      <h2>The new entrants - 2026</h2>
+      <p class="section-lead">Two serious tools entered the adjacent space in 2026: <strong style="color:var(--text)">Hermes Agent</strong> (Nous Research - the lab that trains models) and <strong style="color:var(--text)">Honcho</strong> (Plastic Labs - dialectic user modeling). They're often used together. They are genuinely good. They are also doing something different.</p>
+
+      <div class="comparison-duo">
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th>Hermes + Honcho</th>
+              <th class="loci-col">loci</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Core purpose</td>
+              <td>Self-improving task agent + cross-session user modeler</td>
+              <td class="loci-col">Knowledge garden - a place where what you know grows</td>
+            </tr>
+            <tr>
+              <td>What it learns</td>
+              <td>Who you are: preferences, habits, communication style</td>
+              <td class="loci-col">What you know: architecture, connections, lifecycle</td>
+            </tr>
+            <tr>
+              <td>Knowledge unit</td>
+              <td>Extracted fact (flat, auto-generated by LLM)</td>
+              <td class="loci-col">Crystal - authored, tiered (◆◈◇), with expiry and pin</td>
+            </tr>
+            <tr>
+              <td>Persona model</td>
+              <td>Single agent per profile, SOUL.md + preset overlays</td>
+              <td class="loci-col">Multiple named personas with soul files, room-activated</td>
+            </tr>
+            <tr>
+              <td>Infrastructure</td>
+              <td>Requires VPS or cloud for full use. SQLite state DB, YAML config, API keys</td>
+              <td class="loci-col">Zero. Markdown files. Works offline, forever.</td>
+            </tr>
+            <tr>
+              <td>Privacy model</td>
+              <td>Your conversations train Honcho's user model (cloud by default)</td>
+              <td class="loci-col">Nothing leaves your machine. No accounts. No cloud.</td>
+            </tr>
+            <tr>
+              <td>Epistemic depth</td>
+              <td>Optimised for task execution and user preference recall</td>
+              <td class="loci-col">Optimised for knowledge architecture and growth over time</td>
+            </tr>
+            <tr>
+              <td>The metaphor</td>
+              <td>An agent that knows you. Learns what you like.</td>
+              <td class="loci-col">A palace that grows with you. Knows what you know.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="assessment">
+        <h3>On Hermes Agent</h3>
+        <p>Hermes is impressive engineering. Built by the team that trains the Hermes model family, it's an autonomous agent that gets more capable the longer it runs - self-improving through a skill system it creates from experience, persistent memory in bounded markdown files, and a background curator that prunes its own knowledge library. It runs anywhere: local, VPS, serverless. It speaks 15 messaging platforms. It is, in the truest sense, a self-improving agent runtime. The constraint: it is built around doing. It executes tasks, automates workflows, delegates to subagents. Its memory is optimised for what you've asked it to do. That's not what loci is for.</p>
+      </div>
+
+      <div class="assessment">
+        <h3>On Honcho</h3>
+        <p>Honcho does one thing with unusual depth: it models who you are. A dialectic LLM process runs alongside every conversation, reasoning about your preferences, your communication style, your recurring patterns - and crystallises these into a persistent representation that follows you across sessions. It has per-profile AI peers, cross-session synthesis, and a self-hosted option. It is the closest thing in the ecosystem to what loci does at a conceptual level. The distinction: Honcho builds a model of you. loci builds a model of what you know. These are related but different problems. Honcho answers "what does this user need right now?" loci answers "what does this person understand, and how is it growing?" A profile of preferences is not a knowledge garden.</p>
+      </div>
+
+      <div class="slogan-block">
+        <p class="slogan-main">Disintermediating intelligence.</p>
+        <p class="slogan-sub">Every major knowledge tool has inserted itself between you and your own knowing - as a platform, an account, a cloud sync, a mediator. loci removes the intermediary. Not as a feature. As a position. Your intelligence lives where you live: local, private, and architecturally yours.</p>
       </div>
     </section>
   </main>
