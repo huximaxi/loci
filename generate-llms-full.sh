@@ -20,6 +20,7 @@ OUT="llms-full.txt"
   for file in \
     README.md \
     FIRST-SESSION.md \
+    PALACE-UPDATE.md \
     SETUP-GUIDE.md \
     AGENT-SETUP.md \
     PROCESSES.md \
@@ -31,6 +32,7 @@ OUT="llms-full.txt"
     templates/persona-template.md \
     templates/handover-template.md \
     templates/scheduled-task-template.md \
+    templates/output-primitive.md \
     examples/example-CLAUDE.md
   do
     if [ -f "$file" ]; then
