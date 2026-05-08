@@ -19,8 +19,9 @@ No cloud. No accounts. No vendor dependency.
 
 Start here:
 - [llms.txt](https://loci.garden/llms.txt) — context declaration
-- [FIRST-SESSION.md](FIRST-SESSION.md) — onboarding script
-- [templates/](templates/) — palace infrastructure (rooms, crystals, garden, personas)
+- [FIRST-SESSION.md](FIRST-SESSION.md) — onboarding script (first-time palace setup)
+- [PALACE-UPDATE.md](PALACE-UPDATE.md) — update script (existing palace, running `palace-update`)
+- [templates/](templates/) — palace infrastructure (rooms, crystals, garden, personas, output primitives)
 
 ## Quick start
 

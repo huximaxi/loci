@@ -5,8 +5,11 @@ All notable changes to loci are documented here.
 ---
 
 ## v0.9 — 2026-05-08 (palace)
-- **Git Log Incident output primitive** — `templates/git-log-incident.md`: structured format for documenting session arcs as annotated git logs. Each discrete action = one commit. Tags vocabulary: `[DISCOVERY]`, `[FATAL DISCOVERY]`, `[PLOT TWIST]`, `[FALSE NEGATIVE]`, `[SALVATION]`, `[FORENSICS]`, `[HTTP 400/500]`, `[DELIVERED]`, `[HUXGATE]`, `[NOISE]`, `[SIGNAL]`. Vocabulary is open — add tags as arcs demand. Output: HTML widget (monospace card layout, hash in accent color, tags as badges) or diffable MD file. Atomic principle: the 400 before the 200 is part of the story.
-- **Output primitives feature card** — landing page (`index.html`): new feature card across all three themes (Scholar/Wizard/LLMAGE) documenting the output primitives concept and git-log-incident as the first example.
+- **Output primitive** — `templates/output-primitive.md`: introduces output primitives as a typed, named loci concept — structured formats for exporting palace work as archivable artifacts. First primitive: `git-log-incident` — session arcs as annotated commit logs. Tags: `[DISCOVERY]` `[FATAL DISCOVERY]` `[PLOT TWIST]` `[FALSE NEGATIVE]` `[SALVATION]` `[FORENSICS]` `[HTTP 400/500]` `[DELIVERED]` `[HUXGATE]` `[NOISE]` `[SIGNAL]`. Vocabulary open. Output: HTML widget or diffable MD. Atomic principle: the 400 before the 200 is part of the record.
+- **Output primitive feature card** — `landing/index.html`: Feature 6 added across Scholar/Wizard/LLMAGE themes.
+- **`loci-feature-release` process** — `PROCESSES.md`: end-to-end release pipeline for palace features — template → feature card → changelog → branch → HuxGATE → PR → VPS deploy.
+- **`PALACE-UPDATE.md`** — agent update script (parallel to `AGENT-SETUP.md`). Entry point for existing palace holders running `palace-update`.
+- **README** — agent section updated with `PALACE-UPDATE.md` pointer.
 
 ---
 

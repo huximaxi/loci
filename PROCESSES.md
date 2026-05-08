@@ -18,10 +18,12 @@
 | `update-mindmap` | "Update the mindmap" | Refreshes palace-map.canvas with current structure |
 | `palace-update` | "Update my palace" or "What's new in Loci" | Delta analysis: your palace vs. current Loci features + cherry-pick setup |
 | `session-delta` | "End of session" / "Write the handover" | Session delta with mandatory artifact listing |
+| `palace-audit` | "Palace audit" / "Structural autodream" / "Check our architecture" / "Is our file structure healthy" | Scans palace for staleness, duplication, broken refs, coverage gaps, architectural drift. Scores /25. Outputs to `[palace]/audits/YYYY-MM-DD.md`. See `templates/palace-audit-process.md` |
 | `garden-memory-generator` | "Evolve the garden" / "Check garden evolution" | Mnemonic conductor: assesses plant arcs, proposes promote/retire/fork/new-question |
 | `entanglement-housekeeping` | "Housekeeping" / "How was today?" | ⚗️ *Experimental* — Single rotating question about session co-intelligence quality; logs to entanglement.md |
 | `eval-cadence` | "Run the eval" / "How are we doing?" | 12-area co-intelligence self-assessment; returns scorecard + 3 concrete actions |
 | `[username]GATE` | "Review [task] [username]GATE" | Human review checkpoint before work ships — the calibration point for human-AI attention balance |
+| `loci-feature-release` | "Ship this as a Loci feature" / "Add [thing] to Loci" / "Make this a Loci output primitive" | Full release pipeline: template file → feature card → changelog → branch → commit → HuxGATE → PR → VPS deploy |
 
 ---
 
@@ -638,6 +640,99 @@ If yes: run `add-persona` process.
 | Quick | "Quick palace check" / "just the diff" | Bullet list of gaps only |
 | Area-specific | "Check my crystal schema" | That area only, full detail |
 | Summary | "Am I up to date?" | One line per area, yes/no |
+
+---
+
+## Process: `loci-feature-release`
+
+**Trigger phrases:**
+- "Ship this as a Loci feature"
+- "Add [thing] to Loci"
+- "Let's release [feature]"
+- "Make this a Loci output primitive"
+
+### What it does
+
+Packages a new palace feature — template, output primitive, or process — into the Loci repo with a complete paper trail: template file, landing page feature card, changelog entry, git commit, PR. Then guides the VPS deploy after merge.
+
+### Scope
+
+Use for anything that belongs in the canonical Loci repo and should appear on loci.garden:
+- New `templates/` primitives (output formats, process blueprints, config templates)
+- New palace processes added to `PROCESSES.md`
+- Landing page feature cards
+- Any change that touches `landing/**` and needs to be deployed
+
+### Agent Protocol
+
+```
+1. Read CHANGELOG.md — determine current version + what track (palace/extension/site)
+
+2. Create feature branch:
+   git checkout main && git pull
+   git checkout -b feat/[feature-slug]
+
+3. Write the template or process file:
+   - Templates → templates/[feature-slug].md
+   - Processes → append to PROCESSES.md (follow Adding New Processes spec)
+   - Both if the feature merits it
+
+4. Add feature card to landing/index.html (if the feature is user-facing):
+   - Add to the shared features grid (non-wizard-grid)
+   - Write three variants: t-scholar (plain language) / t-wizard (poetic) / t-llmage (technical)
+   - Use an SVG icon from the same viewBox="0 0 24 24" vocabulary
+   - Insert before the card-wizard-only div
+
+5. Write CHANGELOG.md entry:
+   - Version: bump palace minor (vX.Y → vX.Y+1) or site/extension as appropriate
+   - Date: today
+   - One bullet per concrete change, no fluff
+
+6. Commit (three files max per commit — keep it atomic):
+   git add [files]
+   git commit -m "feat([track]): [what this adds]
+
+   - [file]: [one-line description]
+   - [file]: [one-line description]"
+
+7. HuxGATE — show:
+   - Branch name
+   - Files changed
+   - Commit message
+   - What the PR will be titled
+   Wait for "go" before pushing.
+
+8. Push + open PR:
+   git push -u origin feat/[feature-slug]
+   Open PR on GitHub: feat/[feature-slug] → main
+
+9. After PR is merged:
+   - Hux pulls main locally: git checkout main && git pull
+   - Deploy to VPS: cd landing && ./deploy.sh "[commit message]"
+   - Caddy serves immediately (no restart needed)
+```
+
+### Checklist
+
+Before declaring done:
+- [ ] Template file exists and is complete (includes When to use, spec, examples)
+- [ ] Feature card has all three theme variants
+- [ ] CHANGELOG entry is specific (file paths, not vague descriptions)
+- [ ] Commit message is imperative mood, under 72 chars for title
+- [ ] HuxGATE cleared before push
+- [ ] PR title matches commit title
+
+### Deploy clarification
+
+`deploy.sh` rsync-pushes from `landing/` to VPS directly — no SSH required after merge. Run from `loci/landing/`, not repo root.
+
+```bash
+# After merging PR:
+cd ~/Dev/loci
+git checkout main && git pull
+cd landing
+./deploy.sh "feat: [short description]"
+```
 
 ---
 
