@@ -18,6 +18,7 @@
 | `update-mindmap` | "Update the mindmap" | Refreshes palace-map.canvas with current structure |
 | `palace-update` | "Update my palace" or "What's new in Loci" | Delta analysis: your palace vs. current Loci features + cherry-pick setup |
 | `session-delta` | "End of session" / "Write the handover" | Session delta with mandatory artifact listing |
+| `palace-audit` | "Palace audit" / "Structural autodream" / "Check our architecture" / "Is our file structure healthy" | Scans palace for staleness, duplication, broken refs, coverage gaps, architectural drift. Scores /25. Outputs to `[palace]/audits/YYYY-MM-DD.md`. See `templates/palace-audit-process.md` |
 | `garden-memory-generator` | "Evolve the garden" / "Check garden evolution" | Mnemonic conductor: assesses plant arcs, proposes promote/retire/fork/new-question |
 | `entanglement-housekeeping` | "Housekeeping" / "How was today?" | ⚗️ *Experimental* — Single rotating question about session co-intelligence quality; logs to entanglement.md |
 | `eval-cadence` | "Run the eval" / "How are we doing?" | 12-area co-intelligence self-assessment; returns scorecard + 3 concrete actions |
