@@ -76,11 +76,11 @@
 └─────────────────────────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────────────────────────┐
-│  PERSONA ROSTER                                                                     │
+│  PERSONA ROSTER  (optional — only if you have named sub-agent personas)             │
 │                                                                                     │
-│  [emoji] [Name]   [Domain]    soul: [soul-file-path]                               │
-│  [emoji] [Name]   [Domain]    soul: [soul-file-path]                               │
-│  ...                                                                                │
+│  [emoji] [Name]   [Domain]    soul: souls/[name].md    invoke when: [condition]    │
+│  [emoji] [Name]   [Domain]    soul: souls/[name].md    invoke when: [condition]    │
+│  *(leave blank if working solo)*                                                    │
 └─────────────────────────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────────────────────────┐
