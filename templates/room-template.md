@@ -1,4 +1,4 @@
-# [ROOM EMOJI] [ROOM NAME] — Context
+# [ROOM EMOJI] [ROOM NAME] - Context
 > Load this at the start of every [room name] session. Don't re-derive anything listed here.
 
 ---
@@ -13,21 +13,21 @@ Workstream tag: `[TAG]`
 [1-3 sentences. What kind of work happens here? What's the goal of this room?]
 
 *(Examples:*
-*- "This is where I work on my novel — structure, scenes, character arcs, prose editing."*
-*- "This is where I handle client work — briefs, deliverables, project tracking."*
-*- "This is where I think out loud about new ideas — low structure, high energy.")*
+*- "This is where I work on my novel - structure, scenes, character arcs, prose editing."*
+*- "This is where I handle client work - briefs, deliverables, project tracking."*
+*- "This is where I think out loud about new ideas - low structure, high energy.")*
 
 ---
 
-## Ground truth — don't re-derive
+## Ground truth - don't re-derive
 
 *(Established facts about this room's context. The things Claude should always know when working here. Add to this as facts get confirmed.)*
 
-- **[KEY FACT 1]:** [e.g. "The client's brand voice is warm, informal, no jargon — see brand-guide.pdf"]
-- **[KEY FACT 2]:** [e.g. "The novel is set in 1970s Buenos Aires — all research in research/notes.md"]
-- **[KEY FACT 3]:** [e.g. "Stack: Python 3.11 / FastAPI / PostgreSQL — no new dependencies without rationale"]
+- **[KEY FACT 1]:** [e.g. "The client's brand voice is warm, informal, no jargon - see brand-guide.pdf"]
+- **[KEY FACT 2]:** [e.g. "The novel is set in 1970s Buenos Aires - all research in research/notes.md"]
+- **[KEY FACT 3]:** [e.g. "Stack: Python 3.11 / FastAPI / PostgreSQL - no new dependencies without rationale"]
 
-*(Leave blank if you have nothing yet — fill in as you go.)*
+*(Leave blank if you have nothing yet - fill in as you go.)*
 
 ---
 
@@ -35,9 +35,9 @@ Workstream tag: `[TAG]`
 
 *(How should Claude behave specifically here? Some rooms are high-energy and exploratory. Others are careful and precise. State it.)*
 
-- [e.g. "Plan mode on for any task that changes existing work — don't overwrite without asking"]
-- [e.g. "Low structure, high energy — ideas welcome, rigor on exit"]
-- [e.g. "Always show your work — explain the reasoning, not just the output"]
+- [e.g. "Plan mode on for any task that changes existing work - don't overwrite without asking"]
+- [e.g. "Low structure, high energy - ideas welcome, rigor on exit"]
+- [e.g. "Always show your work - explain the reasoning, not just the output"]
 - [e.g. "Never send or publish anything without my explicit go-ahead"]
 
 ---
@@ -58,7 +58,7 @@ Workstream tag: `[TAG]`
 
 - [e.g. "Research folder: `[room-name]/research/`"]
 - [e.g. "Main doc: `[room-name]/main.md`"]
-- [e.g. "Client contact: [name] — email in contacts.txt"]
+- [e.g. "Client contact: [name] - email in contacts.txt"]
 
 ---
 
@@ -68,8 +68,35 @@ Workstream tag: `[TAG]`
 
 ---
 
+## Session Strategy
+
+*(How the agent should load this room's context. Set once; update if your working style changes.)*
+
+```yaml
+session_strategy:
+  scope: on-demand            # always-load | on-demand | per-session
+  auto_detect: true           # read first message for room signals before asking
+  crystals_to_load: global    # global | room-only | [specific names]
+  handover_depth: 1           # recent handovers to surface at session start (0 = none)
+```
+
+**Scope options:**
+- `always-load` - loads every session (use for Great Hall, identity, master context)
+- `on-demand` - loads when user enters this room or topic clearly matches (default for most rooms)
+- `per-session` - load once, don't reload mid-session
+
+---
+
+## Pinned Crystals
+
+*(Protected from garden health checks in this room. List by name if relevant.)*
+
+- *(none yet - add as needed)*
+
+---
+
 ## Corridors (connections to other rooms)
 
 *(Does this room feed into another room? Note the connection.)*
 
-- → [OTHER ROOM NAME]: [why they connect — e.g. "Research Room feeds Writing Room — confirm facts there before using them here"]
+- → [OTHER ROOM NAME]: [why they connect - e.g. "Research Room feeds Writing Room - confirm facts there before using them here"]

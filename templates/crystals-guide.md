@@ -4,11 +4,11 @@ version: 0.1
 type: guide
 ---
 
-# Crystal Tiers — Guide
+# Crystal Tiers - Guide
 
 *How facts live in the palace. What changes. What doesn't. How to tell the difference.*
 
-Crystals are the palace's memory system — established truths about you, your work, your world. But not all truths are equally stable. The three-tier system captures that difference explicitly, so the palace knows what to trust, what to revisit, and what to treat as a working hypothesis.
+Crystals are the palace's memory system - established truths about you, your work, your world. But not all truths are equally stable. The three-tier system captures that difference explicitly, so the palace knows what to trust, what to revisit, and what to treat as a working hypothesis.
 
 ---
 
@@ -16,7 +16,7 @@ Crystals are the palace's memory system — established truths about you, your w
 
 ### ◆ Confirmed (solid diamond)
 
-**What it is:** Foundational facts. Core to who you are, what you do, how you work. Rarely changes. If it does change, it's significant — and worth noting explicitly.
+**What it is:** Foundational facts. Core to who you are, what you do, how you work. Rarely changes. If it does change, it's significant - and worth noting explicitly.
 
 **Examples:**
 - Your name, your role, your organisation
@@ -33,9 +33,9 @@ Crystals are the palace's memory system — established truths about you, your w
 
 **Example entries:**
 ```
-◆ Owner: Hux — Head of UX/Product, Nym Technologies SA
+◆ Owner: Hux - Head of UX/Product, Nym Technologies SA
 ◆ Stack: Next.js 14 / Strapi v4 / Vercel
-◆ Privacy model: mixnet + zk-nym credentials — metadata-resistant
+◆ Privacy model: mixnet + zk-nym credentials - metadata-resistant
 ◆ Core value: Simplicity first. No over-engineering.
 ```
 
@@ -52,7 +52,7 @@ Crystals are the palace's memory system — established truths about you, your w
 - A team member's current role (if in flux)
 - A working approach you're trying for a while
 
-**Rule:** When a ◈ crystal reaches its `valid_until` date, flag it for review. Don't auto-delete — review and either confirm, update, or retire.
+**Rule:** When a ◈ crystal reaches its `valid_until` date, flag it for review. Don't auto-delete - review and either confirm, update, or retire.
 
 **Format:**
 ```
@@ -65,7 +65,7 @@ valid_until: [YYYY-MM-DD or event]
 ◈ Current sprint: Censorship circumvention features (Airporting toggle + Client Config Access)
 valid_until: 2026-05-30
 
-◈ Vendor: Stripe for payment processing — active contract
+◈ Vendor: Stripe for payment processing - active contract
 valid_until: 2026-12-31
 
 ◈ Working approach: Daily 9am check-in while this feature is in flight
@@ -84,17 +84,17 @@ valid_until: sprint-end
 - A framing you're trying out
 - Something you believe but haven't proven
 
-**Rule:** Exploratory crystals are not disposable — they're the palace's research in progress. Name them clearly. When you learn more, promote or retire them explicitly.
+**Rule:** Exploratory crystals are not disposable - they're the palace's research in progress. Name them clearly. When you learn more, promote or retire them explicitly.
 
 **Format:**
 ```
 ◇ [Crystal name]: [hypothesis]
-valid_until: [optional — when you expect to know more]
+valid_until: [optional - when you expect to know more]
 ```
 
 **Example entries:**
 ```
-◇ User behaviour: Privacy-conscious normies don't toggle advanced settings — they trust defaults
+◇ User behaviour: Privacy-conscious normies don't toggle advanced settings - they trust defaults
 valid_until: 2026-Q2-research
 
 ◇ Architecture: Moving to edge functions for the auth flow will reduce latency enough to matter
@@ -112,22 +112,22 @@ During a session, add crystals as you learn them. You don't have to wait for a f
 **Quick format** (inline in CLAUDE.md or room files):
 ```
 ◆ [name]: [value]
-◈ [name]: [value] — valid_until: [date or event]
+◈ [name]: [value] - valid_until: [date or event]
 ◇ [name]: [value]
 ```
 
-**Agent rule:** When a crystal is established in conversation, write it to the appropriate file immediately — don't leave it in chat. Crystals live in `CLAUDE.md` (palace-wide) or in the relevant room's `CLAUDE.md` (room-specific).
+**Agent rule:** When a crystal is established in conversation, write it to the appropriate file immediately - don't leave it in chat. Crystals live in `CLAUDE.md` (palace-wide) or in the relevant room's `CLAUDE.md` (room-specific).
 
 ---
 
 ## Promoting Between Tiers
 
-Promotion is explicit. Don't silently upgrade a crystal — note what changed.
+Promotion is explicit. Don't silently upgrade a crystal - note what changed.
 
 ```
 ◇ Framing: "Speed mode" lands better than "2-hop mode"
 → Promoted to ◈ 2026-04-15: confirmed by 3 user interviews. Still A/B testing.
-→ Promoted to ◆ 2026-05-01: A/B concluded — "Speed mode" wins across all segments.
+→ Promoted to ◆ 2026-05-01: A/B concluded - "Speed mode" wins across all segments.
 ```
 
 **Promotion criteria:**
@@ -153,7 +153,7 @@ valid_until: 2026-Q3             # quarter
 valid_until: after-user-research # milestone
 ```
 
-**Morning check-in surfacing:** The `morning-check-in` process scans for crystals whose `valid_until` is within 7 days and flags them for review. This is the palace's built-in insight decay mechanism — facts don't go stale silently.
+**Morning check-in surfacing:** The `morning-check-in` process scans for crystals whose `valid_until` is within 7 days and flags them for review. This is the palace's built-in insight decay mechanism - facts don't go stale silently.
 
 ---
 
@@ -161,27 +161,27 @@ valid_until: after-user-research # milestone
 
 | Where | What goes there |
 |-------|----------------|
-| `CLAUDE.md` (root) | Palace-wide facts — identity, stack, values, global working style |
-| `rooms/[room]/CLAUDE.md` | Room-specific facts — project state, room context, relevant crystals for that mode |
-| `soul/SOUL.md` | Identity-level facts — who you are, what you care about, the soul's core |
+| `CLAUDE.md` (root) | Palace-wide facts - identity, stack, values, global working style |
+| `rooms/[room]/CLAUDE.md` | Room-specific facts - project state, room context, relevant crystals for that mode |
+| `soul/SOUL.md` | Identity-level facts - who you are, what you care about, the soul's core |
 
-Crystals can be duplicated across files if they're relevant in multiple contexts. The palace is spatial — the same truth can live in multiple rooms.
+Crystals can be duplicated across files if they're relevant in multiple contexts. The palace is spatial - the same truth can live in multiple rooms.
 
 ---
 
-## Example — Full Crystal Block
+## Example - Full Crystal Block
 
 ```markdown
 ## Crystals
 
-◆ Owner: [Name] — [Role], [Organisation]
+◆ Owner: [Name] - [Role], [Organisation]
 ◆ Stack: [Tech stack]
 ◆ Privacy stance: [One line on how they think about privacy]
 
 ◈ Current focus: [Sprint or project goal]
 valid_until: [DATE or EVENT]
 
-◈ Working approach: [How they're currently working — could change]
+◈ Working approach: [How they're currently working - could change]
 valid_until: [DATE or EVENT]
 
 ◇ Hypothesis: [Something believed but not yet confirmed]
@@ -191,3 +191,69 @@ valid_until: [DATE or EVENT]
 ---
 
 *Three tiers. One principle: know what you know, know what you don't, and never let the two blur.*
+
+---
+
+## Pinning a Crystal
+
+Pinned crystals are protected from the garden health pass and from any agent-driven cleanup. A pinned crystal will never be flagged as stale, dormant, or a candidate for retirement - regardless of how long since it was referenced.
+
+**Use pinning for:**
+- Foundational truths that shouldn't be questioned in routine sessions (values, identity, core principles)
+- Deliberately slow-moving facts where recency is not the signal (e.g., a philosophical commitment)
+- First fruits - crystallised insights that should persist indefinitely as reference points
+- Anything you'd be annoyed to find flagged during a routine health check
+
+**Syntax:**
+```
+◆ Privacy that works leaves no trace of working.
+pinned: true
+```
+
+Or inline:
+```
+◆ [crystal name]: [value] · pinned
+```
+
+**Rules:**
+- Any tier can be pinned (◆ ◈ ◇)
+- Pinning does not prevent the human from updating or retiring the crystal manually
+- Pinning only protects against *agent-initiated* review and cleanup
+- The agent will note pinned crystals during a health check but will not propose action on them
+- To unpin, remove the `pinned: true` field or the `· pinned` marker
+
+**In the health report:**
+```
+📌 PINNED - [crystal name]: protected, skipped
+```
+
+**Time-windowed pins (optional):**
+For crystals that should be protected during a specific period but eventually reviewed:
+```
+◈ [crystal name]: [value]
+valid_until: 2026-12-31
+pinned_until: 2026-09-01
+```
+The crystal is protected until `pinned_until`, then becomes subject to normal health checks from that date forward.
+
+---
+
+## Crystal Lifecycle Overview
+
+```
+SEEDED (◇)
+  ↓ confirmed once
+CONTEXTUAL (◈) - valid_until: [event/date]
+  ↓ confirmed across contexts, no longer phase-bound
+CONFIRMED (◆)
+  ↓ [optional] flagged as special
+PINNED (◆ · pinned) - protected indefinitely
+```
+
+Composting (retirement) can happen at any tier. Always add a note when a crystal is retired:
+```
+~~◈ Working approach: Daily 9am check-in~~
+retired: 2026-06-01 - sprint ended, back to async
+```
+
+The history matters. Retired crystals tell the story of how understanding evolved.
