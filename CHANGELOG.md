@@ -4,6 +4,12 @@ All notable changes to loci are documented here.
 
 ---
 
+## v0.9 — 2026-05-08 (palace)
+- **Git Log Incident output primitive** — `templates/git-log-incident.md`: structured format for documenting session arcs as annotated git logs. Each discrete action = one commit. Tags vocabulary: `[DISCOVERY]`, `[FATAL DISCOVERY]`, `[PLOT TWIST]`, `[FALSE NEGATIVE]`, `[SALVATION]`, `[FORENSICS]`, `[HTTP 400/500]`, `[DELIVERED]`, `[HUXGATE]`, `[NOISE]`, `[SIGNAL]`. Vocabulary is open — add tags as arcs demand. Output: HTML widget (monospace card layout, hash in accent color, tags as badges) or diffable MD file. Atomic principle: the 400 before the 200 is part of the story.
+- **Output primitives feature card** — landing page (`index.html`): new feature card across all three themes (Scholar/Wizard/LLMAGE) documenting the output primitives concept and git-log-incident as the first example.
+
+---
+
 ## v1.2.0 — 2026-05-05 (extension)
 - Content sanitization (THREAT-01 mitigation)
 - Message sender validation (THREAT-04)
@@ -50,6 +56,15 @@ All notable changes to loci are documented here.
 - The Seed dispatch archive
 
 ---
+
+## v0.8 — May 2026 (palace)
+- **Persona Roster + Self-Starter Orchestration Loop** — `templates/CLAUDE-master.md`: quartet pattern (orchestrator + specialist personas) with an ASCII decision loop. Józan paraszti ész gate before escalating to multi-agent. Never auto-invoke — offer to human first. Light swarm capped at 2–3 agents.
+- **Józan paraszti ész** — new principle in CLAUDE-master.md: before committing to a complex multi-agent approach, ask what the simplest shape is that still works. Escalate only when the simple version demonstrably fails.
+- **`<success_criteria>` in prompt wrapper** — CLAUDE-master.md now includes a `success_criteria` field between `context` and `task`. Evaluation-first prompting: define what done looks like before writing the task instruction.
+- **Clarifying questions protocol** — wrapper note: if a field cannot be inferred, ask one focused question. Human can reply "keep it broad" — valid answer, not a non-answer. One question max.
+- **Model selection principle** — match model to task weight. Specific model name lives in project CLAUDE.md (goes stale); the principle lives in the global layer (stable).
+- **`palace-audit` process** — `templates/palace-audit-process.md` + `PROCESSES.md` entry. Structural autodream for the palace setup: scans CLAUDE.md files, soul files, skills, handover chain for staleness / duplication / broken refs / coverage gaps / architectural drift. Scores /25. Reports to `[palace]/audits/YYYY-MM-DD.md`. Enforces the two-layer rule: global = behavioral constants only; project CLAUDE.md = living state only.
+- **`local-map-template.md`** — `templates/local-map-template.md`: ASCII palace architecture diagram template. Five layers: global behavioral → project state → rooms → knowledge core → connections. Filled once, updated by palace-audit on each structural autodream.
 
 ## v0.7 — May 2026 (palace)
 - **Crystal tiers formalised (◆◈◇)** — `templates/crystals-guide.md`: confirmed / contextual / exploratory tiers with `valid_until` expiry fields, promotion criteria between tiers, and example crystal blocks. Morning check-in now surfaces expiring ◈ crystals for human decision (delete / migrate / renew).
