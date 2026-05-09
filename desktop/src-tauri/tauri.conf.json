@@ -21,9 +21,7 @@
     ],
     "macOS": {
       "minimumSystemVersion": "10.13",
-      "dmg": {
-        "appName": "loci wizard"
-      }
+      "dmg": {}
     },
     "windows": {
       "nsis": {
