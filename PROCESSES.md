@@ -653,6 +653,8 @@ If yes: run `add-persona` process.
 - "Let's release [feature]"
 - "Make this a Loci output primitive"
 
+> **GitHub conventions:** Before starting, load `pipeline/GITHUB-STRATEGY.md`. Branch naming: `feat/{ID}-{slug}`. Commit format: `{type}({component}): {desc} ({ID})`. Release tags: `{component}/vX.Y.Z`. Root `package.json` is never bumped. Full PR template in `.github/PULL_REQUEST_TEMPLATE.md`. Deploy is Engine Room — not part of this process.
+
 ### What it does
 
 Packages a new palace feature — template, output primitive, or process — into the Loci repo with a complete paper trail: template file, landing page feature card, changelog entry, git commit, PR. Then guides the VPS deploy after merge.

@@ -4,6 +4,100 @@ All notable changes to loci are documented here.
 
 ---
 
+## desktop v0.4.0 - 2026-05-09 — Goose MCP Server (1B)
+
+Loci is now an MCP server. Any MCP-compatible AI agent — Goose, Claude Code, Continue.dev — can query your knowledge garden.
+
+- **`start_mcp_server`** — Tauri command that spawns the MCP server at `localhost:{port}` (default: 3456). Idempotent: returns the current port if already running. Port range validated: 1024–65535.
+- **`stop_mcp_server`** — Graceful shutdown via tokio oneshot channel. No-op if not running.
+- **`mcp_server_status`** — Returns `{running: bool, port: number|null}`. Use to gate the "Enable MCP" toggle in UI.
+- **MCP resources:**
+  - `loci://locus/{id}` — single Locus node (title, content, tags, roomId, createdAt)
+  - `loci://room/{roomId}/loci` — all Loci in a Room
+  - `loci://search?q={query}` — keyword search over Locus titles + content (top 20, title matches weighted 2×)
+- **MCP tools:**
+  - `create_locus(title, content, tags?, room_id?)` — writes a new Locus `.md` to `~/.loci/loci/`. Slug-based ID: `locus-{date}-{slug}`.
+  - `tag_locus(id, tags)` — updates the `tags:` line in existing Locus frontmatter. Preserves all other fields and body exactly.
+- **Protocol:** JSON-RPC 2.0, MCP spec version `2024-11-05`. Supports: `initialize`, `resources/list`, `resources/read`, `resources/templates/list`, `tools/list`, `tools/call`.
+- **THREAT-01 gate (Cipher)** — `Conversation` objects are never exposed via MCP. Locus nodes (user-authored Markdown) only. All responses carry `X-Loci-Content-Trust: user-authored` and `X-Loci-Threat-Gate: THREAT-01:enforced` headers.
+- **localhost-only** — Server binds to `127.0.0.1:{port}`. Never `0.0.0.0`. Tailscale users set port forwarding manually.
+- **Cargo deps** — `axum 0.7` (http1 + json + tokio features), `tower-http 0.5`, `tokio-util 0.7`.
+- **Storage format** — Reads `~/.loci/loci/{id}.md` with YAML frontmatter. ID validation prevents path traversal on all read and write paths (alphanumeric + hyphens + underscores only).
+
+**Pending (Hux to build in Tauri desktop UI):**
+- Settings panel: "Enable MCP server" toggle (calls `start_mcp_server` / `stop_mcp_server`)
+- Status indicator: port display when running (calls `mcp_server_status` on load)
+- Copy-to-clipboard button for the Goose config snippet
+
+**Next (standalone package, separate brief):**
+- `loci-mcp-server` repo — extracted as a standalone Apache 2.0 package for power users running without the Tauri app
+- MCP registry listing
+
+**Branch:** `feat/1B-goose-mcp` · **Acceptance criteria:** see `pipeline/features/1B-goose-mcp/JUMP-IN.md`
+
+---
+
+## desktop v0.4.0 - 2026-05-09 — MCP Server: Goose / Claude Code compatible (1B)
+
+Loci's first external API. The knowledge garden is now queryable by any MCP-compatible AI agent.
+
+- **`start_mcp_server(port?, loci_dir?)`** — Tauri command. Spawns an axum HTTP server at `127.0.0.1:{port}` (default: 3456). Idempotent. Port validated 1024–65535. Never binds to 0.0.0.0.
+- **`stop_mcp_server()`** — graceful shutdown via tokio oneshot channel.
+- **`mcp_server_status()`** — returns `{running, port}` for the settings panel toggle state.
+- **MCP resources:**
+  - `loci://locus/{id}` — single Locus node (title, content, tags, roomId, createdAt)
+  - `loci://room/{id}/loci` — all Loci in a Room, filtered by YAML frontmatter `roomId`
+  - `loci://search?q={query}` — keyword search, title-weighted 2×, top 20 results
+- **MCP tools:**
+  - `create_locus(title, content, tags, room_id)` — writes `~/.loci/loci/{id}.md`
+  - `tag_locus(id, tags)` — rewrites `tags:` frontmatter in-place, preserves all other content
+- **`desktop/src-tauri/src/mcp/` module** — new. `mod.rs`, `resources.rs`, `tools.rs`, `server.rs`. JSON-RPC 2.0 over HTTP POST `/`. `GET /health` for Goose connection verification.
+- **Hand-rolled YAML frontmatter parser** — no external YAML crate. Cipher gate: avoid dep-chain surprises in file parsing.
+- **Security headers** — all MCP responses carry `X-Loci-Content-Trust: user-authored` + `X-Loci-Threat-Gate: THREAT-01:enforced`.
+- **THREAT-01 enforced** — raw `Conversation` objects are NOT exposed. Locus nodes (user-authored) only. Conversation context follows the sanitise sprint.
+- **`McpConfig` type** — `packages/core/src/types.ts`. Fields: `enabled`, `port`, `expose_rooms`. Exported as `MCP_DEFAULTS`.
+- **Cargo deps** — `axum 0.7` (http1 + json + tokio), `tower-http 0.5`, `tokio-util 0.7`.
+- **Security gates (Cipher):** path traversal prevented in `read_locus` (alphanumeric + hyphens only); `room_id` validated before fs operations; port range enforced; localhost bind only.
+
+**Pending (Hux to build in UI):**
+- Settings panel: "Enable MCP server" toggle + port display + Goose config copy button
+- `expose_rooms` allowlist enforcement (currently exposes all rooms)
+
+**Pending (separate session):**
+- `loci-mcp-server` standalone repo (Apache 2.0)
+- MCP registry listing
+- Goose connection test + screenshot for docs
+
+**Branch:** `feat/1B-goose-mcp` (contains 1A + 1B — ships together as v0.4.0)
+**Acceptance criteria:** see `pipeline/features/1B-goose-mcp/JUMP-IN.md`
+
+> **Note:** `desktop/v0.3.0` is a CHANGELOG-only milestone (1A Ollama backend, no separate git tag). The git tag `desktop/v0.4.0` covers both 1A + 1B as a single binary.
+
+---
+
+## desktop v0.3.0 - 2026-05-09 — Ollama Local Inference (1A)
+
+The first sovereignty stack feature ships. Loci can now run entirely on your machine.
+
+- **`check_ollama_health`** — Tauri command that probes `localhost:11434`. Returns bool. Use to gate the "local AI" toggle in UI.
+- **`list_ollama_models`** — Fetches available models from Ollama's `/api/tags`. Powers the model selector dropdown.
+- **`call_ollama`** — Sends a prompt to any Ollama-served model via the OpenAI-compatible `/v1/chat/completions` endpoint. No streaming in v1 — full response returned. Stream support in v2.
+- **`embed_text`** — Embeds text via `/api/embeddings`. Default model: `nomic-embed-text`. Returns `Vec<f32>` for cosine similarity search. Foundation for semantic search upgrade in `extension/src/shared/search.ts`.
+- **`OllamaConfig` type** — New interface in `@loci/core/types`. Fields: `enabled`, `base_url`, `chat_model`, `embed_model`, `offline_mode`. Exported as `OLLAMA_DEFAULTS`. `LociConfig.ollama` replaces the old `llm` stub (legacy field kept for migration).
+- **URL validation (Cipher gate)** — `base_url` is validated before every HTTP call. Accepts: `localhost`, `127.0.0.1`, `[::1]`, Tailscale CGNAT range (`100.64.x.x`–`100.127.x.x`). All other hosts rejected. No SSRF surface.
+- **Fail-closed invariant** — All four commands return `Err("ollama_offline")` if the daemon is unreachable. No silent external API fallback. `offline_mode: true` is the default in `OLLAMA_DEFAULTS`.
+- **Shared HTTP client** — `reqwest::Client` held in Tauri managed state. One client per app lifetime. Connection pooling. 120s timeout (generous for local inference cold starts).
+- **Cargo deps** — `reqwest 0.12` (json + rustls-tls, no openssl), `tokio 1` (full), `url 2`.
+
+**Pending (Hux to build in Tauri desktop UI):**
+- Settings panel: "Use local AI" toggle + model selector dropdown (calls `list_ollama_models`)
+- Offline badge: status bar indicator showing Ollama state (calls `check_ollama_health` on load)
+- Error state: clear message when `check_ollama_health` returns false
+
+**Branch:** `feat/1A-ollama` · **Acceptance criteria:** see `pipeline/features/1A-ollama/JUMP-IN.md`
+
+---
+
 ## loci.garden - 2026-05-09 (site) — Sovereignty Stack Launch
 
 - **Cognitive Sovereignty Manifesto** — `landing/manifesto.html` published. Loci's public declaration: local-first, keypair-signed, protocol-aligned, open. Written by Rune.

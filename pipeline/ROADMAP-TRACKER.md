@@ -20,8 +20,8 @@
 
 | ID | Feature | Persona | Status | Dependency | Branch | Last Activity |
 |----|---------|---------|--------|-----------|--------|---------------|
-| 1A | Ollama Local Inference | Kata | 🔴 not-started | — | `feat/1A-ollama` | — |
-| 1B | Goose MCP Plugin | Cipher | 🔴 not-started | — | `feat/1B-goose-mcp` | — |
+| 1A | Ollama Local Inference | Kata | 🟡 in-progress | — | `feat/1B-goose-mcp` ¹ | 2026-05-09 |
+| 1B | Goose MCP Plugin | Cipher | 🟡 in-progress | — | `feat/1B-goose-mcp` | 2026-05-09 |
 | 1C | Nostr Keypair Identity | Cipher | 🔴 not-started | — | `feat/1C-nostr-identity` | — |
 | 1D | Nym Partnership | Rune | 🔴 not-started | 1A + 1B live | `comms/1D-nym-announcement` | — |
 
@@ -46,6 +46,9 @@
 2026-05-09  All briefs initialised by Vesper convent session
 2026-05-09  Auth principle confirmed: no gating, feature-level choice
 2026-05-09  v1.3 alliance brief locked
+2026-05-09  [1A] in-progress — Kata session. Backend complete: OllamaConfig types, 4 Tauri commands, URL validation, fail-closed invariant. Desktop v0.3.0. UI (settings panel + offline badge) pending Hux.
+2026-05-09  [1B] in-progress — Cipher session. Backend complete: axum MCP server, 3 resources (locus/room/search), 2 tools (create_locus/tag_locus), JSON-RPC 2.0, THREAT-01 gate, X-Loci-Content-Trust headers, localhost-only bind. Desktop v0.4.0. UI (toggle + status) pending Hux. Standalone loci-mcp-server + registry listing next.
+2026-05-09  [1A+1B] Ship together as desktop/v0.4.0. feat/1B-goose-mcp is live branch. feat/1A-ollama superseded. desktop/v0.3.0 = CHANGELOG-only milestone, no git tag.
 ```
 
 *Watcher appends here automatically. Manual entries use format: `YYYY-MM-DD  [ID] [action] [detail]`*
