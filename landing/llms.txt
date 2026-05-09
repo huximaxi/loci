@@ -95,13 +95,18 @@ Loci is building the knowledge layer that the sovereignty stack has been missing
 
 **Q3 2026 — shipping:**
 
-**1A — Ollama Local Inference**
+**1A — Ollama Local Inference** *(in development — backend complete, ships with desktop v0.4.0)*
 Loci uses any open-weight model (Llama, Mistral, Gemma) as its AI engine. `nomic-embed-text` for local semantic indexing. Zero API keys, zero cloud, zero telemetry. If Ollama goes offline, Loci fails closed — never silently calls external APIs.
 Integration surface: Ollama REST API (localhost:11434). Config type: OllamaConfig.
+Status: Tauri backend complete (check_ollama_health, list_ollama_models, call_ollama, embed_text). URL validation (localhost + Tailscale only). UI layer (settings panel, offline badge) in progress.
 
-**1B — MCP Server (Goose / Claude Code compatible)**
-Loci's first external API — built sovereign-first. Exposes: `loci://locus/{id}`, `loci://room/{id}/loci`, `loci://search`. Tools: `create_locus`, `tag_locus`. Security gate: THREAT-01 — raw Conversation objects gated behind sanitise-before-write. Locus nodes (user-authored) safe immediately.
-MCP server runs at `localhost:3456` (Tauri command: `start_mcp_server`).
+**1B — MCP Server (Goose / Claude Code compatible)** · Status: in-progress · desktop v0.4.0
+Loci's first external API — built sovereign-first. Implemented as an axum JSON-RPC 2.0 server embedded in the Tauri desktop app. Protocol: MCP spec 2024-11-05. Transport: HTTP POST at `http://localhost:3456/`.
+Resources: `loci://locus/{id}` (single node), `loci://room/{roomId}/loci` (room contents), `loci://search?q={query}` (keyword search, top 20).
+Tools: `create_locus(title, content, tags?, room_id?)` writes `~/.loci/loci/locus-{date}-{slug}.md`. `tag_locus(id, tags)` updates frontmatter tags on existing node.
+Goose config: `{"mcpServers": {"loci": {"url": "http://localhost:3456"}}}`.
+Security: `127.0.0.1` bind only. `X-Loci-Content-Trust: user-authored` + `X-Loci-Threat-Gate: THREAT-01:enforced` headers on all responses. Conversation objects never exposed. ID/room_id validated (alphanumeric + hyphens only, no path traversal). Port range: 1024–65535 (default 3456).
+Tauri commands: `start_mcp_server(port?, loci_dir?)`, `stop_mcp_server()`, `mcp_server_status()`. Storage: YAML frontmatter + Markdown. No external database.
 
 **1C — Nostr Keypair Identity (NIP-07)**
 Loci's first auth model. Sign in with Nostr keypair via NIP-07 browser extension (Alby, nos2x). Private key never touches Loci's code. Auth is a feature, not a gate — the garden works without it. nsec stored in OS keychain when used.
