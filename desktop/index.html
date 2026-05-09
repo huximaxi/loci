@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>loci wizard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     /* ── RESET & WIZARD TOKENS ─────────────────────────────────────────── */
     * { margin: 0; padding: 0; box-sizing: border-box; border-radius: 0 !important; image-rendering: pixelated; }
@@ -23,6 +26,22 @@
       --stone-crack:  rgba(255,255,255,0.04);
       --ivy-green:    #2d6e3d;
       --mono:         'Courier New', Courier, monospace;
+
+      /* ── Scholar tokens (status bar + settings panel) ──────────────── */
+      --sch-bg:          #1A1A1A;
+      --sch-bg-strip:    #141414;
+      --sch-bg-raised:   #202020;
+      --sch-border:      rgba(245,240,232,0.06);
+      --sch-rule:        #242220;
+      --sch-text:        #F5F0E8;
+      --sch-text-muted:  rgba(245,240,232,0.55);
+      --sch-text-faint:  rgba(245,240,232,0.32);
+      --sch-text-dim:    rgba(245,240,232,0.22);
+      --sch-green:       #6D9A7B;
+      --sch-grey:        #6A6A6A;
+      --sch-amber:       #C8882E;
+      --sch-mono:        'IBM Plex Mono', 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+      --sch-sans:        'IBM Plex Sans', -apple-system, system-ui, sans-serif;
     }
 
     /* ── BODY — scanlines ──────────────────────────────────────────────── */
@@ -40,6 +59,7 @@
       display: flex;
       flex-direction: column;
       user-select: none;
+      position: relative;
     }
 
     /* ── TITLEBAR ──────────────────────────────────────────────────────── */
@@ -324,27 +344,322 @@
       padding: 0 0.4rem;
     }
 
-    /* ── FOOTER ────────────────────────────────────────────────────────── */
-    .footer {
-      border-top: 2px solid var(--border-soft);
-      padding: 7px 28px;
-      display: flex;
-      justify-content: space-between;
+    /* ── SCHOLAR STATUS BAR ────────────────────────────────────────────── */
+    .scholar-bar {
+      flex: 0 0 24px;
+      height: 24px;
+      background: var(--sch-bg-strip);
+      border-top: 1px solid var(--sch-rule);
+      display: grid;
+      grid-template-columns: auto 1fr auto;
       align-items: center;
+      padding: 0 12px;
+      gap: 12px;
       flex-shrink: 0;
-      background-image: repeating-linear-gradient(
-        90deg, transparent, transparent 7px,
-        var(--stone-crack) 7px, var(--stone-crack) 8px
-      );
     }
 
-    .footer-text {
-      font-size: 0.58rem;
-      color: var(--text-faint);
+    /* AI status badge */
+    .ai-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-family: var(--sch-mono);
+      font-size: 10.5px;
+      color: var(--sch-text-muted);
+      letter-spacing: 0.04em;
+      cursor: default;
+      user-select: none;
+      padding: 2px 0;
+      transition: color 120ms ease;
+      position: relative;
+    }
+    .ai-badge.clickable { cursor: pointer; }
+    .ai-badge.clickable:hover { color: var(--sch-text); }
+    .ai-badge.clickable:hover .ai-tooltip { display: block; }
+
+    .ai-dot {
+      width: 7px; height: 7px;
+      border-radius: 50% !important; /* override global reset */
+      background: var(--sch-green);
+      flex-shrink: 0;
+      transition: background 300ms ease, box-shadow 300ms ease;
+    }
+    .ai-dot.online  { box-shadow: 0 0 5px rgba(109,154,123,0.5); }
+    .ai-dot.offline { background: var(--sch-grey); box-shadow: none; }
+
+    @keyframes scholar-fade {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    .ai-label { animation: scholar-fade 300ms ease; }
+
+    .ai-tooltip {
+      display: none;
+      position: absolute;
+      bottom: 28px; left: 0;
+      background: #0f0e0d;
+      border: 1px solid var(--sch-rule);
+      border-radius: 4px !important;
+      padding: 8px 10px;
+      font-family: var(--sch-mono);
+      font-size: 10px;
+      color: var(--sch-text-muted);
+      letter-spacing: 0.02em;
+      line-height: 1.5;
+      width: 220px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      white-space: nowrap;
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    .scholar-bar-center {
+      font-family: var(--sch-mono);
+      font-size: 10.5px;
+      color: var(--sch-text-dim);
+      letter-spacing: 0.04em;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .scholar-bar-right {
+      font-family: var(--sch-mono);
+      font-size: 10.5px;
+      color: var(--sch-text-dim);
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    /* ── SETTINGS VIEW ─────────────────────────────────────────────────── */
+    .settings-view {
+      position: absolute;
+      top: 36px;    /* below titlebar */
+      bottom: 24px; /* above scholar bar */
+      left: 0; right: 0;
+      background: var(--sch-bg);
+      display: flex;
+      flex-direction: column;
+      z-index: 10;
+      overflow: hidden;
+    }
+
+    .settings-header {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 28px;
+      border-bottom: 1px solid var(--sch-border);
+    }
+
+    .settings-back {
+      all: unset;
+      font-family: var(--sch-mono);
+      font-size: 11px;
+      color: var(--sch-text-faint);
       letter-spacing: 0.06em;
+      cursor: pointer;
+      transition: color 120ms ease;
+    }
+    .settings-back:hover { color: var(--sch-text-muted); }
+
+    .settings-header-title {
+      font-family: var(--sch-mono);
+      font-size: 10.5px;
+      color: var(--sch-text-dim);
+      letter-spacing: 0.18em;
+      text-transform: lowercase;
     }
 
-    .footer-accent { color: var(--accent); }
+    .settings-main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 28px 28px;
+    }
+    .settings-main::-webkit-scrollbar { width: 4px; }
+    .settings-main::-webkit-scrollbar-track { background: transparent; }
+    .settings-main::-webkit-scrollbar-thumb { background: var(--sch-border); }
+
+    .settings-section {
+      margin-bottom: 28px;
+    }
+    .settings-section + .settings-section {
+      padding-top: 4px;
+      border-top: 1px solid var(--sch-border);
+    }
+
+    .section-eyebrow {
+      font-family: var(--sch-mono);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      color: var(--sch-text-faint);
+      text-transform: lowercase;
+      margin-bottom: 14px;
+    }
+
+    /* Setting rows */
+    .setting-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 13px 0;
+      border-bottom: 1px solid var(--sch-border);
+    }
+    .setting-row:last-of-type { border-bottom: 0; }
+    .setting-row.secondary { padding: 9px 0; }
+
+    .setting-label {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .label-text {
+      font-family: var(--sch-sans);
+      font-size: 13px;
+      color: var(--sch-text);
+      line-height: 1.3;
+    }
+    .label-sub {
+      font-family: var(--sch-sans);
+      font-size: 11.5px;
+      color: var(--sch-text-muted);
+      line-height: 1.4;
+    }
+    .label-hint {
+      font-family: var(--sch-mono);
+      font-size: 10px;
+      color: var(--sch-text-faint);
+      letter-spacing: 0.04em;
+    }
+
+    /* Scholar toggle */
+    .sch-toggle {
+      position: relative;
+      width: 36px; height: 20px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .sch-toggle input { position: absolute; opacity: 0; width: 0; height: 0; }
+    .sch-toggle-track {
+      position: absolute;
+      inset: 0;
+      background: rgba(245,240,232,0.07);
+      border: 1px solid rgba(245,240,232,0.12);
+      border-radius: 999px !important;
+      cursor: pointer;
+      transition: background 200ms ease, border-color 200ms ease;
+    }
+    .sch-toggle-track::after {
+      content: '';
+      position: absolute;
+      width: 14px; height: 14px;
+      border-radius: 50% !important;
+      background: rgba(245,240,232,0.28);
+      top: 2px; left: 2px;
+      transition: transform 200ms ease, background 200ms ease;
+    }
+    .sch-toggle input:checked + .sch-toggle-track {
+      background: rgba(109,154,123,0.22);
+      border-color: var(--sch-green);
+    }
+    .sch-toggle input:checked + .sch-toggle-track::after {
+      transform: translateX(16px);
+      background: var(--sch-green);
+    }
+
+    /* Inline status (settings panel) */
+    .settings-status {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 0 4px;
+      font-family: var(--sch-mono);
+      font-size: 11px;
+      color: var(--sch-text-muted);
+      letter-spacing: 0.04em;
+    }
+    .settings-status-dot {
+      width: 7px; height: 7px;
+      border-radius: 50% !important;
+      background: var(--sch-grey);
+      flex-shrink: 0;
+      transition: background 300ms ease, box-shadow 300ms ease;
+    }
+    .settings-status-dot.online {
+      background: var(--sch-green);
+      box-shadow: 0 0 5px rgba(109,154,123,0.5);
+    }
+
+    /* Model select */
+    .model-select {
+      background: rgba(245,240,232,0.04);
+      border: 1px solid rgba(245,240,232,0.10);
+      border-radius: 4px !important;
+      color: var(--sch-text);
+      font-family: var(--sch-mono);
+      font-size: 11px;
+      padding: 5px 28px 5px 10px;
+      outline: none;
+      cursor: pointer;
+      min-width: 176px;
+      letter-spacing: 0.02em;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='rgba(245,240,232,0.25)'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      transition: border-color 120ms ease;
+    }
+    .model-select:focus { border-color: var(--sch-green); }
+    .model-select:disabled { opacity: 0.35; cursor: not-allowed; }
+    .model-select option { background: #1A1A1A; color: var(--sch-text); }
+
+    /* Warning */
+    .warning-row {
+      font-family: var(--sch-mono);
+      font-size: 10.5px;
+      color: var(--sch-amber);
+      letter-spacing: 0.04em;
+      padding: 5px 0 8px;
+    }
+
+    /* MCP status + copy button */
+    .mcp-status-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 0 4px;
+    }
+    .mcp-status-label {
+      font-family: var(--sch-mono);
+      font-size: 10.5px;
+      color: var(--sch-text-faint);
+      letter-spacing: 0.04em;
+    }
+    .copy-btn {
+      all: unset;
+      font-family: var(--sch-mono);
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      color: var(--sch-text-faint);
+      cursor: pointer;
+      padding: 3px 8px;
+      border: 1px solid rgba(245,240,232,0.08);
+      border-radius: 3px !important;
+      transition: color 120ms ease, border-color 120ms ease;
+    }
+    .copy-btn:hover { color: var(--sch-text-muted); border-color: rgba(245,240,232,0.14); }
+
+    /* Disabled state for Ollama-dependent controls */
+    .ollama-dependent { transition: opacity 200ms ease; }
+    .ollama-dependent.off { opacity: 0.3; pointer-events: none; }
+
   </style>
 </head>
 <body>
@@ -363,11 +678,108 @@
       <rect    x="15" y="15" width="2" height="4" fill="rgba(255,238,153,0.6)"/>
     </svg>
     <div class="title-text">loci wizard</div>
-    <div class="title-version">v0.2.0</div>
+    <div class="title-version">v0.4.0</div>
   </div>
 
-  <!-- Main -->
-  <div class="main">
+  <!-- Settings view (hidden by default, overlays main) -->
+  <div id="settings-view" class="settings-view" style="display:none;">
+    <div class="settings-header">
+      <button id="settingsBack" class="settings-back">← back</button>
+      <span class="settings-header-title">settings</span>
+    </div>
+    <div class="settings-main">
+
+      <!-- Local AI section -->
+      <div class="settings-section">
+        <div class="section-eyebrow">local AI</div>
+
+        <!-- Ollama master toggle -->
+        <div class="setting-row">
+          <div class="setting-label">
+            <span class="label-text">Use local AI (Ollama)</span>
+            <span class="label-sub">Run Loci without sending data to any external server</span>
+            <span class="label-hint">requires Ollama running at localhost:11434</span>
+          </div>
+          <label class="sch-toggle">
+            <input type="checkbox" id="ollamaToggle">
+            <span class="sch-toggle-track"></span>
+          </label>
+        </div>
+
+        <!-- Inline status (shown when toggle is on) -->
+        <div id="ollamaStatusRow" class="ollama-dependent off">
+          <div class="settings-status">
+            <span class="settings-status-dot" id="settingsDot"></span>
+            <span id="settingsStatusLabel">checking…</span>
+          </div>
+        </div>
+
+        <!-- Chat model -->
+        <div class="setting-row ollama-dependent off" id="chatModelRow">
+          <label class="setting-label" for="chatModelSelect">
+            <span class="label-text">Chat model</span>
+          </label>
+          <select id="chatModelSelect" class="model-select" disabled>
+            <option value="">Detecting models…</option>
+          </select>
+        </div>
+
+        <!-- Embedding model -->
+        <div class="setting-row ollama-dependent off" id="embedModelRow">
+          <label class="setting-label" for="embedModelSelect">
+            <span class="label-text">Embedding model</span>
+            <span class="label-hint">used for semantic search. nomic-embed-text recommended.</span>
+          </label>
+          <select id="embedModelSelect" class="model-select" disabled>
+            <option value="">Detecting models…</option>
+          </select>
+        </div>
+
+        <!-- Fail-closed toggle -->
+        <div class="setting-row secondary ollama-dependent off">
+          <label class="setting-label" for="failClosedToggle">
+            <span class="label-text">Fail closed</span>
+            <span class="label-sub">never call external APIs if Ollama is offline</span>
+          </label>
+          <label class="sch-toggle">
+            <input type="checkbox" id="failClosedToggle" checked>
+            <span class="sch-toggle-track"></span>
+          </label>
+        </div>
+
+        <!-- Fail-open warning (shown when fail-closed is off) -->
+        <div id="failOpenWarning" class="warning-row" style="display:none;">
+          ⚠ Loci may fall back to external APIs
+        </div>
+      </div>
+
+      <!-- MCP server section -->
+      <div class="settings-section">
+        <div class="section-eyebrow">MCP server</div>
+
+        <div class="setting-row">
+          <div class="setting-label">
+            <span class="label-text">Enable MCP server</span>
+            <span class="label-sub">Expose Loci knowledge at localhost:3456</span>
+            <span class="label-hint">compatible with Goose, Claude Code, Continue.dev</span>
+          </div>
+          <label class="sch-toggle">
+            <input type="checkbox" id="mcpToggle">
+            <span class="sch-toggle-track"></span>
+          </label>
+        </div>
+
+        <div id="mcpStatusRow" class="mcp-status-row" style="display:none;">
+          <span class="mcp-status-label" id="mcpStatusLabel">—</span>
+          <button id="copyGooseConfig" class="copy-btn">copy goose config</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Main wizard view -->
+  <div id="main-view" class="main">
 
     <div class="room-label">▸ The Hall · Palace Migration</div>
 
@@ -420,10 +832,15 @@
 
   </div>
 
-  <!-- Footer -->
-  <div class="footer">
-    <span class="footer-text">loci.garden</span>
-    <span class="footer-text">Hux × Vesper &nbsp;·&nbsp; <span class="footer-accent">✦</span></span>
+  <!-- Scholar status bar (persistent, below all views) -->
+  <div class="scholar-bar">
+    <span class="ai-badge" id="ai-badge" style="display:none;">
+      <span class="ai-dot" id="ai-dot"></span>
+      <span class="ai-label" id="ai-label">local AI · online</span>
+      <div class="ai-tooltip">ollama not reachable on :11434<br>open settings → local AI</div>
+    </span>
+    <span class="scholar-bar-center" id="bar-center"></span>
+    <span class="scholar-bar-right">v0.4.0</span>
   </div>
 
   <script type="module" src="/src/main.ts"></script>
