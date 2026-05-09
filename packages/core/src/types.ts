@@ -63,6 +63,40 @@ export interface Room {
   createdAt: number;
 }
 
+// ─── Ollama local inference config (1A) ──────────────────────────────────────
+//
+// OllamaConfig is the source-of-truth type for the Ollama integration.
+// Stored in LociConfig and read by the Tauri backend on every command invocation.
+//
+// Cipher gate:
+//   - base_url is validated in Rust before any HTTP call (localhost / Tailscale only)
+//   - offline_mode: true → Rust returns Err("ollama_offline") immediately; no external fallback
+//   - private key / API key: never present — Ollama is keyless by design
+
+export interface OllamaConfig {
+  /** Whether the Ollama integration is enabled. Default: false. */
+  enabled: boolean;
+  /** Ollama base URL. Default: "http://localhost:11434". Tailscale IPs (100.x.x.x) also accepted. */
+  base_url: string;
+  /** Chat/generation model. Default: "llama3". */
+  chat_model: string;
+  /** Embedding model. Default: "nomic-embed-text". */
+  embed_model: string;
+  /**
+   * If true, Loci never falls back to an external API when Ollama is unreachable.
+   * Prefer this for maximum sovereignty. Default: true.
+   */
+  offline_mode: boolean;
+}
+
+export const OLLAMA_DEFAULTS: OllamaConfig = {
+  enabled: false,
+  base_url: 'http://localhost:11434',
+  chat_model: 'llama3',
+  embed_model: 'nomic-embed-text',
+  offline_mode: true,
+} as const;
+
 export interface LociConfig {
   version: string;
   tier: 'scholar' | 'wizard' | 'llmage';
@@ -72,16 +106,47 @@ export interface LociConfig {
     fullText: boolean;
     semantic: boolean;
   };
+  /** Ollama local inference config. Replaces the legacy llm stub. */
+  ollama?: OllamaConfig;
+  /** Legacy: kept for config migration compatibility. Use ollama instead. */
   llm?: {
     provider: 'local' | 'claude' | 'openai';
     endpoint?: string;
     model?: string;
   };
-  mcp?: {
-    exposeRooms: string[];
-    port: number;
-  };
+  /** MCP server config. Replaces inline mcp stub (1B). */
+  mcp?: McpConfig;
 }
+
+// ─── MCP server config (1B) ──────────────────────────────────────────────────
+//
+// McpConfig governs the embedded MCP server (localhost:3456).
+// Served by the Tauri backend via axum. Goose, Continue.dev, Claude Code compatible.
+//
+// Cipher gate:
+//   - port must be in range 1024–65535 (validated in Rust before bind)
+//   - bind_host is always localhost — no 0.0.0.0 exposure
+//   - expose_rooms: empty = expose all rooms. Non-empty = allowlist.
+//   - Conversation objects NEVER exposed — THREAT-01 gate.
+//   - All MCP responses carry `X-Loci-Content-Trust: user-authored` header.
+
+export interface McpConfig {
+  /** Whether the MCP server is enabled. Default: false. */
+  enabled: boolean;
+  /** Port to bind on localhost. Default: 3456. Must be 1024–65535. */
+  port: number;
+  /**
+   * Room IDs to expose via MCP. Empty array = expose all rooms.
+   * Set to specific IDs to restrict which rooms agents can query.
+   */
+  expose_rooms: string[];
+}
+
+export const MCP_DEFAULTS: McpConfig = {
+  enabled: false,
+  port: 3456,
+  expose_rooms: [],
+} as const;
 
 // ─── IndexedDB schema ────────────────────────────────────────────────────────
 
