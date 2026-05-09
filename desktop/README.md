@@ -1,96 +1,107 @@
 # loci Desktop App
 
-Tauri v2 desktop application for detecting and migrating memory palace setups to loci format.
+Tauri v2 desktop application. Scholar-themed. Local-first.
+
+**v0.4.0** — Ollama local inference (1A) + Goose MCP server (1B)
 
 ## What it does
 
-One job: **Detect existing memory palaces and migrate them to `~/.loci/` format.**
+Three things:
 
-Detects:
-- **loci** — Already migrated to `~/.loci/`
-- **mempalace** — Vesper × Hux `_palace/` pattern
-- **mila-mempalace** — Mila's palace structure
-- **karpathy** — Karpathy-style `LLM/` folder
+1. **Palace detection + migration** — finds existing memory palace setups (`_palace/`, `mila-mempalace/`, Karpathy `LLM/`) and migrates them to `~/.loci/` format.
+2. **Ollama local inference** — connects to a local Ollama instance for AI features with zero API keys. Fails closed — never silently calls external APIs.
+3. **MCP server** — exposes your knowledge garden as MCP resources so any compatible agent (Goose, Continue.dev, Claude Code) can query and extend it.
 
 ## Requirements
 
 - Node.js 18+
 - Rust 1.70+
 - Tauri CLI 2.0+
+- Optional: [Ollama](https://ollama.ai) for local AI features
+- Optional: Goose or any MCP-compatible agent to consume the MCP server
 
 ## Development
 
 ```bash
-# Install dependencies
 npm install
-
-# Run in dev mode
-npm run tauri:dev
-
-# Build for production
-npm run tauri:build
-```
-
-## Build script
-
-```bash
-./build.sh
+npm run tauri:dev   # dev mode
+npm run tauri:build # production build
 ```
 
 ## Architecture
 
 - **Frontend**: Vite + TypeScript + Scholar theme (green/cream)
 - **Backend**: Rust + Tauri v2
+- **HTTP**: axum 0.7 (MCP server, localhost only)
 - **Plugins**: `tauri-plugin-dialog`, `tauri-plugin-opener`
 
 ## Files
 
 ```
 desktop/
-├── package.json           # Node dependencies
-├── vite.config.ts         # Vite config
-├── tsconfig.json          # TypeScript config
-├── index.html             # UI (Scholar theme)
+├── index.html             # UI — Scholar status bar + settings overlay
 ├── src/
-│   └── main.ts            # Frontend logic
-├── src-tauri/
-│   ├── Cargo.toml         # Rust dependencies
-│   ├── build.rs           # Build script
-│   ├── tauri.conf.json    # App config
-│   └── src/
-│       └── main.rs        # Rust backend (detection + migration)
-└── build.sh               # Build helper
+│   └── main.ts            # Frontend — Ollama state machine, MCP toggle, health poll
+└── src-tauri/
+    ├── Cargo.toml         # reqwest, axum, tokio, url, dirs, chrono
+    ├── tauri.conf.json    # v0.4.0
+    └── src/
+        ├── main.rs        # Tauri commands: detect_palace, migrate_to_loci,
+        │                  # check_ollama_health, list_ollama_models, call_ollama,
+        │                  # embed_text, start_mcp_server, stop_mcp_server,
+        │                  # mcp_server_status
+        └── mcp/
+            ├── mod.rs     # Module root + Cipher gate docs
+            ├── server.rs  # axum JSON-RPC 2.0 server (MCP spec 2024-11-05)
+            ├── resources.rs # loci://locus/{id}, loci://room/{id}/loci, loci://search
+            └── tools.rs   # create_locus, tag_locus
 ```
 
-## Detection logic
+## Tauri commands
 
-1. Check `~/.loci/` → already migrated
-2. Check `<search_path>/_palace/` → Vesper × Hux palace
-3. Check `<search_path>/mila-mempalace/` → Mila palace
-4. Check `<search_path>/LLM/` → Karpathy pattern
-5. None found → offer to create new
+| Command | Description |
+|---------|-------------|
+| `detect_palace` | Find existing palace at a given path |
+| `migrate_to_loci` | Copy palace to `~/.loci/` |
+| `check_ollama_health` | Probe `localhost:11434` — returns bool |
+| `list_ollama_models` | Fetch available models from Ollama |
+| `call_ollama` | Chat completion via Ollama OpenAI-compat API |
+| `embed_text` | Embed text via `nomic-embed-text` (or custom model) |
+| `start_mcp_server` | Start MCP server at `localhost:{port}` (default 3456) |
+| `stop_mcp_server` | Graceful shutdown |
+| `mcp_server_status` | Returns `{running, port}` |
 
-## Migration
+## MCP server
 
-Copies entire palace structure to `~/.loci/` and creates `loci.json` manifest:
+JSON-RPC 2.0 over HTTP POST at `http://localhost:3456/`.
 
+**Resources:** `loci://locus/{id}` · `loci://room/{roomId}/loci` · `loci://search?q={query}`
+
+**Tools:** `create_locus(title, content, tags?, room_id?)` · `tag_locus(id, tags)`
+
+**Goose config:**
 ```json
-{
-  "version": "1.0",
-  "migrated_from": "/Users/you/Dev/_palace",
-  "migrated_at": "2026-05-05T17:30:00Z"
-}
+{"mcpServers": {"loci": {"url": "http://localhost:3456"}}}
 ```
+
+**Security:** `127.0.0.1` bind only. `X-Loci-Content-Trust: user-authored` on all responses. Conversation objects never exposed (THREAT-01 gate). Port range: 1024–65535.
+
+## Ollama integration
+
+URL validation: `localhost` and Tailscale CGNAT (`100.64.x.x–100.127.x.x`) only. `offline_mode: true` by default — no silent fallback to external APIs.
+
+## Storage
+
+`~/.loci/loci/{id}.md` — YAML frontmatter + Markdown body.
 
 ## Window
 
 - **Size**: 680×520px (not resizable)
 - **Theme**: Scholar (green `#4a6b54` / cream `#faf9f6`)
-- **Logo**: 4-triangle loci diamond
 
-## Next
+## Security gates (Cipher)
 
-- Icon assets (`icons/` folder)
-- Palace creation wizard
-- Multi-palace support
-- Garden integration
+- THREAT-01: Conversation objects never exposed via MCP
+- SSRF: Ollama `base_url` validated before every HTTP call
+- Path traversal: all Locus IDs validated (alphanumeric + hyphens only)
+- Port: MCP server refuses to bind below 1024
