@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loci · Sovereignty Roadmap</title>
+  <style>
+    /* ── TOKENS (from loci.css) ──────────────────────────────── */
+    :root {
+      --bg:           #0d0d0e;
+      --accent:       #c87c2c;
+      --accent-light: #e8974a;
+      --text:         #e8e4dd;
+      --surface:      #131315;
+      --stone-dark:   #252530;
+      --stone-mid:    #353540;
+      --stone-light:  #4a4a58;
+      --stone-mortar: #1c1c26;
+      --stone-hi:     #5a5a6a;
+      --ivy-mid:      #2d6b35;
+      --ivy-bright:   #4a9a4f;
+      --ivy-hi:       #6bc26e;
+      --crystal-core: #ffee99;
+      --crystal-bright:#ffcc44;
+      --crystal-mid:  #e8861a;
+      --crystal-outer:#c87c2c;
+      --room-garden-teal: #1a3a5a;
+      --room-garden-glow: #4a9ab8;
+      --room-dev-glow: #4477dd;
+      --dim: rgba(232,228,221,0.45);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', 'Helvetica Neue', sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── LAYOUT ──────────────────────────────────────────────── */
+    .page { max-width: 900px; margin: 0 auto; padding: 80px 24px 120px; }
+
+    /* ── HEADER ─────────────────────────────────────────────── */
+    .header { margin-bottom: 72px; }
+
+    .loci-mark {
+      font-size: 13px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .loci-mark::before {
+      content: '';
+      display: inline-block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse-dot 2.4s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%,100% { box-shadow: 0 0 0 0 rgba(200,124,44,0.4); }
+      50%      { box-shadow: 0 0 0 6px rgba(200,124,44,0); }
+    }
+
+    .header h1 {
+      font-size: clamp(28px, 5vw, 44px);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      margin-bottom: 20px;
+      color: var(--text);
+    }
+    .header h1 em {
+      font-style: normal;
+      color: var(--accent-light);
+    }
+
+    .header p {
+      font-size: 17px;
+      color: var(--dim);
+      max-width: 560px;
+      line-height: 1.7;
+    }
+
+    /* ── MANIFESTO PULL-QUOTE ────────────────────────────────── */
+    .manifesto {
+      border-left: 2px solid var(--accent);
+      padding: 16px 24px;
+      margin: 48px 0 64px;
+      background: rgba(200,124,44,0.04);
+      border-radius: 0 6px 6px 0;
+    }
+    .manifesto p {
+      font-size: 16px;
+      color: var(--text);
+      font-style: italic;
+      line-height: 1.75;
+    }
+    .manifesto .attr {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--accent);
+      font-style: normal;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    /* ── SECTION LABELS ─────────────────────────────────────── */
+    .tier-label {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .tier-label h2 {
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      font-weight: 600;
+      color: var(--dim);
+    }
+    .tier-label .tier-badge {
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+    }
+    .tier-1 .tier-badge { background: rgba(200,124,44,0.15); color: var(--accent-light); border: 1px solid rgba(200,124,44,0.3); }
+    .tier-2 .tier-badge { background: rgba(74,154,79,0.12); color: var(--ivy-hi); border: 1px solid rgba(74,154,79,0.25); }
+    .tier-3 .tier-badge { background: rgba(74,154,184,0.1); color: var(--room-garden-glow); border: 1px solid rgba(74,154,184,0.2); }
+    .tier-label .line { flex: 1; height: 1px; background: var(--stone-dark); }
+
+    /* ── FEATURE CARDS ──────────────────────────────────────── */
+    .feature-grid { display: flex; flex-direction: column; gap: 2px; margin-bottom: 56px; }
+
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--stone-mortar);
+      border-radius: 8px;
+      padding: 18px 20px;
+      display: grid;
+      grid-template-columns: 48px 1fr auto;
+      align-items: start;
+      gap: 16px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .feature-card:hover {
+      border-color: var(--stone-light);
+      background: var(--stone-mortar);
+    }
+
+    /* Status dot */
+    .status-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      margin-top: 6px;
+      flex-shrink: 0;
+      display: inline-block;
+    }
+    .feature-id-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .feature-id {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--dim);
+    }
+
+    /* Status colours */
+    [data-status="not-started"] .status-dot { background: var(--stone-hi); }
+    [data-status="in-progress"]  .status-dot { background: var(--crystal-bright); animation: pulse-dot 1.6s ease-in-out infinite; }
+    [data-status="shipped"]      .status-dot { background: var(--ivy-hi); }
+    [data-status="blocked"]      .status-dot { background: var(--dim); }
+    [data-status="specced"]      .status-dot { background: var(--room-dev-glow); }
+
+    .feature-body { min-width: 0; }
+    .feature-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+      line-height: 1.3;
+    }
+    .feature-desc {
+      font-size: 13px;
+      color: var(--dim);
+      line-height: 1.55;
+    }
+    .feature-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      background: var(--stone-dark);
+      color: var(--dim);
+      border: 1px solid var(--stone-mid);
+    }
+    .tag.persona { color: var(--accent); border-color: rgba(200,124,44,0.3); background: rgba(200,124,44,0.08); }
+    .tag.dep { color: var(--room-garden-glow); border-color: rgba(74,154,184,0.3); background: rgba(74,154,184,0.08); }
+    .tag.security { color: #e05858; border-color: rgba(224,88,88,0.3); background: rgba(224,88,88,0.06); }
+
+    .feature-status-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      padding-top: 4px;
+    }
+    [data-status="not-started"] .feature-status-label { color: var(--stone-hi); }
+    [data-status="in-progress"]  .feature-status-label { color: var(--crystal-bright); }
+    [data-status="shipped"]      .feature-status-label { color: var(--ivy-hi); }
+    [data-status="blocked"]      .feature-status-label { color: var(--dim); }
+    [data-status="specced"]      .feature-status-label { color: var(--room-dev-glow); }
+
+    /* ── AUTH PRINCIPLE BANNER ──────────────────────────────── */
+    .principle-banner {
+      background: rgba(74,154,79,0.07);
+      border: 1px solid rgba(74,154,79,0.2);
+      border-radius: 8px;
+      padding: 14px 20px;
+      margin-bottom: 56px;
+      font-size: 13px;
+      color: var(--dim);
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .principle-banner .icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+    .principle-banner strong { color: var(--ivy-hi); }
+
+    /* ── SOVEREIGN STACK RECIPE ─────────────────────────────── */
+    .stack-recipe {
+      background: var(--stone-mortar);
+      border: 1px solid var(--stone-dark);
+      border-radius: 10px;
+      padding: 28px 28px;
+      margin-bottom: 64px;
+    }
+    .stack-recipe h3 {
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--dim);
+      margin-bottom: 20px;
+    }
+    .stack-row {
+      display: grid;
+      grid-template-columns: 100px 1fr;
+      gap: 8px 20px;
+      align-items: baseline;
+      margin-bottom: 8px;
+    }
+    .stack-layer {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .stack-value {
+      font-size: 13px;
+      color: var(--text);
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    }
+    .stack-note { font-size: 11px; color: var(--dim); font-family: inherit; }
+
+    /* ── LEGEND ─────────────────────────────────────────────── */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-bottom: 64px;
+      padding: 16px 20px;
+      background: var(--surface);
+      border-radius: 8px;
+      border: 1px solid var(--stone-mortar);
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--dim);
+    }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .ld-ns  { background: var(--stone-hi); }
+    .ld-ip  { background: var(--crystal-bright); }
+    .ld-sh  { background: var(--ivy-hi); }
+    .ld-bl  { background: var(--dim); opacity: 0.5; }
+    .ld-sp  { background: var(--room-dev-glow); }
+
+    /* ── FOOTER ─────────────────────────────────────────────── */
+    .footer {
+      border-top: 1px solid var(--stone-dark);
+      padding-top: 32px;
+      font-size: 12px;
+      color: var(--dim);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .footer a { color: var(--accent); text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="loci-mark">Loci.Garden · Sovereignty Roadmap</div>
+    <h1>Building the knowledge layer<br>the <em>sovereignty stack</em> was missing.</h1>
+    <p>Loci is an AI-native knowledge garden — your second brain, privately held. This roadmap is our public commitment to the protocols, tools, and communities that share our values.</p>
+  </div>
+
+  <!-- Manifesto pull -->
+  <div class="manifesto">
+    <p>There is a war for where thinking happens. One side wants cognition on their servers, indexed, monetized, sold back to you as "assistance." Loci is not on that side.<br><br>
+    We are building the knowledge layer that runs locally, signs with your keypair, syncs through mixnets, and serves agents that you control. Not a feature. A qualifying criterion for an ecosystem.</p>
+    <div class="attr">Cognitive Sovereignty Manifesto · Loci × The Sovereignty Stack · 2026</div>
+  </div>
+
+  <!-- Auth principle -->
+  <div class="principle-banner">
+    <span class="icon">🔑</span>
+    <span><strong>Auth is a feature, not a gate.</strong> Identity (Nostr keypair, AT Protocol DID) is available at every tier. You choose whether to authenticate. It increases internal trust and enables publishing — but the garden works without it. Sovereignty is never paywalled.</span>
+  </div>
+
+  <!-- ── TIER 1 ── -->
+  <div class="tier-label tier-1">
+    <h2>Tier 1</h2>
+    <span class="tier-badge">Q3 2026 — Ship It</span>
+    <div class="line"></div>
+  </div>
+
+  <div class="feature-grid">
+
+    <div class="feature-card" data-status="not-started" data-id="1A">
+      <div class="feature-id-col">
+        <span class="feature-id">1A</span>
+        <span class="status-dot"></span>
+      </div>
+      <div class="feature-body">
+        <div class="feature-title">Ollama Local Inference</div>
+        <div class="feature-desc">Loci uses any open-weight model (Llama, Mistral, Gemma) as its AI engine. <code>nomic-embed-text</code> for local semantic indexing. Zero API keys, zero cloud, zero telemetry. If Ollama goes offline, Loci fails closed — never silently calls external APIs.</div>
+        <div class="feature-meta">
+          <span class="tag persona">Kata</span>
+          <span class="tag">Ollama · nomic-embed</span>
+          <span class="tag">Local inference</span>
+        </div>
+      </div>
+      <div class="feature-status-label">Not started</div>
+    </div>
+
+    <div class="feature-card" data-status="not-started" data-id="1B">
+      <div class="feature-id-col">
+        <span class="feature-id">1B</span>
+        <span class="status-dot"></span>
+      </div>
+      <div class="feature-body">
+        <div class="feature-title">MCP Plugin — Goose &amp; Beyond</div>
+        <div class="feature-desc">Loci publishes an open-source MCP server. Any MCP-compatible agent (Goose, Continue.dev, Claude Code) can query your knowledge garden as context. Locus nodes and Rooms are exposed as MCP resources. This is Loci's first external API — built sovereign-first.</div>
+        <div class="feature-meta">
+          <span class="tag persona">Cipher</span>
+          <span class="tag">MCP · Goose · Apache 2.0</span>
+          <span class="tag security">THREAT-01 gate</span>
+        </div>
+      </div>
+      <div class="feature-status-label">Not started</div>
+    </div>
+
+    <div class="feature-card" data-status="not-started" data-id="1C">
+      <div class="feature-id-col">
+        <span class="feature-id">1C</span>
+        <span class="status-dot"></span>
+      </div>
+      <div class="feature-body">
+        <div class="feature-title">Nostr Keypair Identity</div>
+        <div class="feature-desc">Sign into Loci with your Nostr keypair via NIP-07 browser extension (Alby, nos2x). The garden is yours before the first note is written. Your private key never touches Loci's code. Since there's no existing auth model, this is Loci's first — sovereign by default.</div>
+        <div class="feature-meta">
+          <span class="tag persona">Cipher</span>
+          <span class="tag">Nostr · NIP-07 · secp256k1</span>
+        </div>
+      </div>
+      <div class="feature-status-label">Not started</div>
+    </div>
+
+    <div class="feature-card" data-status="not-started" data-id="1D">
+      <div class="feature-id-col">
+        <span class="feature-id">1D</span>
+        <span class="status-dot"></span>
+      </div>
+      <div class="feature-body">
+        <div class="feature-title">Nym Partnership Announcement</div>
+        <div class="feature-desc">Formal alignment between Loci and Nym Technologies. Loci commits to metadata-private sync (Q4). Nym signals Loci as an aligned ecosystem partner. Loci protects the content of your thinking; Nym protects the fact that you're thinking. Together, they close a gap neither can close alone.</div>
+        <div class="feature-meta">
+          <span class="tag persona">Rune</span>
+          <span class="tag">Nym · Mixnet · Partnership</span>
+          <span class="tag dep">Requires 1A + 1B live</span>
+        </div>
+      </div>
+      <div class="feature-status-label">Not started</div>
+    </div>
+
+  </div>
+
+  <!-- ── TIER 2 ── -->
+  <div class="tier-label tier-2">
+    <h2>Tier 2</h2>
+    <span class="tier-badge">Q4 2026 — Build Toward</span>
+    <div class="line"></div>
+  </div>
+
+  <div class="feature-grid">
+
+    <div class="feature-card" data-status="blocked" data-id="2A">
+      <div class="feature-id-col">
+        <span class="feature-id">2A</span>
+        <span class="status-dot"></span>
+      </div>
+      <div class="feature-body">
+        <div class="feature-title">Continue.dev Context Provider</div>
+        <div class="feature-desc">Register Loci as a context source in Continue.dev. When a developer asks their AI coding assistant a question, it pulls relevant Loci nodes as grounding context. Nearly free after MCP server ships.</div>
+        <div class="feature-meta">
+          <span class="tag persona">Kata</span>
+          <span class="tag">Continue.dev · MCP context</span>
+          <span class="tag dep">Needs 1B</span>
+        </div>
+      </div>
+      <div class="feature-status-label">Blocked</div>
+    </div>
+
+    <div class="feature-card" data-status="blocked" data-id="2B">
+      <div class="feature-id-col">
+        <span class="feature-id">2B</span>
+        <span class="status-dot"></span>
+      </div>
+      <div class="feature-body">
+        <div class="feature-title">Nostr Publishing + Zaps</div>
+        <div class="feature-desc">Publish Locus nodes as signed Nostr events. Receive Lightning zaps from readers who find your thinking valuable. The value-flow vision: knowledge that earns for the thinker.</div>
+        <div class="feature-meta">
+          <span class="tag persona">Nyx</span>
+          <span class="tag">Nostr · NIP-01 · NIP-57 · Lightning</span>
+          <span class="tag dep">Needs 1C</span>
+        </div>
+      </div>
+      <div class="feature-status-label">Blocked</div>
+    </div>
+
+    <div class="feature-card" data-status="not-started" data-id="2C">
+      <div class="feature-id-col">
+        <span class="feature-id">2C</span>
+        <span class="status-dot"></span>
+      </div>
+      <div class="feature-body">
+        <div class="feature-title">AT Protocol DID Support</div>
+        <div class="feature-desc">AT Protocol DID as identity option. "Share to Bluesky" for published garden content. A Loci lexicon for knowledge-garden objects as a community contribution to the AT Protocol ecosystem.</div>
+        <div class="feature-meta">
+          <span class="tag persona">Cipher</span>
+          <span class="tag">AT Protocol · DID · Bluesky</span>
+        </div>
+      </div>
+      <div class="feature-status-label">Not started</div>
+    </div>
+
+    <div class="feature-card" data-status="blocked" data-id="2D">
+      <div class="feature-id-col">
+        <span class="feature-id">2D</span>
+        <span class="status-dot"></span>
+      </div>
+      <div class="feature-body">
+        <div class="feature-title">Nym Private Sync</div>
+        <div class="feature-desc">Route Loci sync traffic through the Nym mixnet. Metadata-invisible — no observer, including Nym's relays, can see what you're syncing or when. Fail-closed: if Nym routing fails, sync pauses. Never a silent fallback to unprotected state.</div>
+        <div class="feature-meta">
+          <span class="tag persona">Kata · Cipher</span>
+          <span class="tag">Nym · Mixnet · SOCKS5</span>
+          <span class="tag dep">Needs 1D confirmed</span>
+        </div>
+      </div>
+      <div class="feature-status-label">Blocked</div>
+    </div>
+
+    <div class="feature-card" data-status="not-started" data-id="2E">
+      <div class="feature-id-col">
+        <span class="feature-id">2E</span>
+        <span class="status-dot"></span>
+      </div>
+      <div class="feature-body">
+        <div class="feature-title">IPFS Garden Export</div>
+        <div class="feature-desc">Export any Room or full garden to IPFS. Content-addressed, persistent, accessible without Loci's servers. Your knowledge garden survives any infrastructure change.</div>
+        <div class="feature-meta">
+          <span class="tag persona">Kata</span>
+          <span class="tag">IPFS · CAR · Content-addressed</span>
+        </div>
+      </div>
+      <div class="feature-status-label">Not started</div>
+    </div>
+
+    <div class="feature-card" data-status="blocked" data-id="2F">
+      <div class="feature-id-col">
+        <span class="feature-id">2F</span>
+        <span class="status-dot"></span>
+      </div>
+      <div class="feature-body">
+        <div class="feature-title">AnythingLLM Bridge</div>
+        <div class="feature-desc">Loci as a knowledge source in AnythingLLM workspaces. AnythingLLM handles your documents; Loci holds your thinking. Connect them.</div>
+        <div class="feature-meta">
+          <span class="tag persona">Nyx</span>
+          <span class="tag">AnythingLLM · MCP · RAG</span>
+          <span class="tag dep">Needs 1B</span>
+        </div>
+      </div>
+      <div class="feature-status-label">Blocked</div>
+    </div>
+
+    <div class="feature-card" data-status="not-started" data-id="2G">
+      <div class="feature-id-col">
+        <span class="feature-id">2G</span>
+        <span class="status-dot"></span>
+      </div>
+      <div class="feature-body">
+        <div class="feature-title">Kagi &amp; SearXNG Web Enrichment</div>
+        <div class="feature-desc">Two tiers of sovereign web search for agent enrichment. Kagi: managed privacy (subscription, no ads, no tracking, user is customer). SearXNG: self-hosted (your server, zero external query logs). You choose your trust model.</div>
+        <div class="feature-meta">
+          <span class="tag persona">Rune</span>
+          <span class="tag">Kagi · SearXNG · Web enrichment</span>
+        </div>
+      </div>
+      <div class="feature-status-label">Not started</div>
+    </div>
+
+    <div class="feature-card" data-status="specced" data-id="2H">
+      <div class="feature-id-col">
+        <span class="feature-id">2H</span>
+        <span class="status-dot"></span>
+      </div>
+      <div class="feature-body">
+        <div class="feature-title">Tailscale Local Brain</div>
+        <div class="feature-desc">Loci running on a persistent Tailscale node — home server or VPS. Browser extension on any device connects to the same garden over the mesh. One sovereign brain, multiple clients, no cloud intermediary. Foundation for autonomous palace instances.</div>
+        <div class="feature-meta">
+          <span class="tag persona">Cipher</span>
+          <span class="tag">Tailscale · WireGuard · Persistent node</span>
+        </div>
+      </div>
+      <div class="feature-status-label">Specced</div>
+    </div>
+
+  </div>
+
+  <!-- ── TIER 3 ── -->
+  <div class="tier-label tier-3">
+    <h2>Tier 3</h2>
+    <span class="tier-badge">2027 Horizon — Strategic Bets</span>
+    <div class="line"></div>
+  </div>
+
+  <div class="feature-grid" style="margin-bottom: 64px;">
+    <div class="feature-card" data-status="not-started">
+      <div class="feature-id-col">
+        <span class="feature-id">3+</span>
+        <span class="status-dot" style="background:var(--stone-hi);opacity:0.4;"></span>
+      </div>
+      <div class="feature-body">
+        <div class="feature-title" style="color:var(--dim);">Bitcoin/Lightning · Zcash/Monero · Ceramic · Solid · Bittensor · Federated Gardens</div>
+        <div class="feature-desc">The long arc. We're watching ecosystem momentum, regulatory clarity, and community signals. When the conditions are right, we'll build.</div>
+        <div class="feature-meta">
+          <span class="tag">Watching</span>
+        </div>
+      </div>
+      <div class="feature-status-label" style="color:var(--stone-hi);opacity:0.6;">Horizon</div>
+    </div>
+  </div>
+
+  <!-- Sovereign stack recipe -->
+  <div class="stack-recipe">
+    <h3>The Sovereign Stack for Loci v1</h3>
+    <div class="stack-row"><span class="stack-layer">Inference</span><span class="stack-value">Ollama <span class="stack-note">— Llama 3, Mistral, Gemma</span></span></div>
+    <div class="stack-row"><span class="stack-layer">Embeddings</span><span class="stack-value">nomic-embed-text <span class="stack-note">— local semantic search</span></span></div>
+    <div class="stack-row"><span class="stack-layer">Vector DB</span><span class="stack-value">Chroma <span class="stack-note">— Apache 2.0, local</span></span></div>
+    <div class="stack-row"><span class="stack-layer">Agent</span><span class="stack-value">Goose / MCP <span class="stack-note">— reads + writes to your garden</span></span></div>
+    <div class="stack-row"><span class="stack-layer">Search</span><span class="stack-value">SearXNG or Kagi <span class="stack-note">— self-hosted or managed privacy</span></span></div>
+    <div class="stack-row"><span class="stack-layer">Identity</span><span class="stack-value">Nostr keypair <span class="stack-note">— NIP-07, secp256k1</span></span></div>
+    <div class="stack-row"><span class="stack-layer">Transport</span><span class="stack-value">Nym mixnet <span class="stack-note">— metadata-private sync</span></span></div>
+    <div class="stack-row"><span class="stack-layer">Network</span><span class="stack-value">Tailscale <span class="stack-note">— persistent brain, multi-device</span></span></div>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legend-item"><span class="legend-dot ld-ns"></span>Not started</div>
+    <div class="legend-item"><span class="legend-dot ld-ip"></span>In progress</div>
+    <div class="legend-item"><span class="legend-dot ld-sh"></span>Shipped</div>
+    <div class="legend-item"><span class="legend-dot ld-bl"></span>Blocked</div>
+    <div class="legend-item"><span class="legend-dot ld-sp"></span>Specced / ADR complete</div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <span>Loci.Garden · Sovereignty Roadmap · Last updated 2026-05-09</span>
+    <span>
+      <a href="https://loci.garden">loci.garden</a> ·
+      <a href="https://github.com/loci-garden">GitHub</a> ·
+      <a href="https://nymtech.net">Built alongside Nym</a>
+    </span>
+  </div>
+
+</div>
+</body>
+</html>
