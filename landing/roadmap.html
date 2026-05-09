@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Loci · Sovereignty Roadmap</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style-wizard.css">
+  <script src="skin-toggle.js" defer></script>
   <style>
     /* ── TOKENS (from loci.css) ──────────────────────────────── */
     :root {
@@ -324,61 +327,26 @@
     }
     .footer a { color: var(--accent); text-decoration: none; }
     .footer a:hover { text-decoration: underline; }
-    /* site nav — matches standard loci.garden nav */
-    .loci-nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: var(--bg);
-      border-bottom: 1px solid var(--stone-dark);
-      padding: 0 1.5rem;
-    }
-    .loci-nav-inner {
-      max-width: 960px;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      height: 52px;
-      gap: 0;
-    }
-    .loci-nav-logo {
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: var(--text);
-      text-decoration: none;
-      letter-spacing: -0.01em;
-      margin-right: auto;
-    }
-    .loci-nav-logo:hover { color: var(--accent); }
-    .loci-nav-links {
-      display: flex;
-      align-items: center;
-      gap: 1.5rem;
-    }
-    .loci-nav-links a {
-      font-size: 0.8rem;
-      color: var(--stone-hi);
-      text-decoration: none;
-      font-family: 'JetBrains Mono', 'Fira Mono', monospace;
-      transition: color 0.15s;
-    }
-    .loci-nav-links a:hover { color: var(--text); }
-    .loci-nav-links a.active { color: var(--accent); }
+    /* page body offset for fixed nav */
+    body { padding-top: var(--nav-height, 52px); }
   </style>
 </head>
 <body>
 <div class="page">
 
   <!-- Site nav -->
-  <nav class="loci-nav">
-    <div class="loci-nav-inner">
-      <a href="/" class="loci-nav-logo">loci.garden</a>
-      <div class="loci-nav-links">
-        <a href="about.html">about</a>
-        <a href="manifesto.html">manifesto</a>
-        <a href="roadmap.html" class="active">roadmap</a>
-        <a href="guide.html">guide</a>
-        <a href="https://github.com/huximaxi/loci" target="_blank" rel="noopener">github ↗</a>
+  <nav>
+    <div class="nav-container">
+      <a href="/" class="logo">loci.garden</a>
+      <div class="nav-links">
+        <a href="/" class="nav-link">home</a>
+        <a href="seed/" class="nav-link">seed</a>
+        <a href="about.html" class="nav-link">about</a>
+        <a href="manifesto.html" class="nav-link">manifesto</a>
+        <a href="roadmap.html" class="nav-link active">roadmap</a>
+        <a href="guide.html" class="nav-link">guide</a>
+        <a href="https://docs.loci.garden" class="nav-link" target="_blank" rel="noopener">docs</a>
+        <a href="llms.txt" class="nav-link">llms.txt</a>
       </div>
     </div>
   </nav>
