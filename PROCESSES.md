@@ -24,6 +24,8 @@
 | `eval-cadence` | "Run the eval" / "How are we doing?" | 12-area co-intelligence self-assessment; returns scorecard + 3 concrete actions |
 | `[username]GATE` | "Review [task] [username]GATE" | Human review checkpoint before work ships — the calibration point for human-AI attention balance |
 | `loci-feature-release` | "Ship this as a Loci feature" / "Add [thing] to Loci" / "Make this a Loci output primitive" | Full release pipeline: template file → feature card → changelog → branch → commit → HuxGATE → PR → VPS deploy |
+| `session-closing` | "Wrap up" / "Close the session" / "Closing ritual" / "Session closing" | Full session-close: handover → crystal extraction pass → CLAUDE.md update → VESPER.md if shifted → confirm |
+| `crystal-coherence` | Daily scheduled task / "Crystal coherence" / "Run coherence check" | Cross-palace crystal audit: stale/conflicting/dormant/◇ provisional — outputs coherence report, surfaces proposals |
 
 ---
 
@@ -1159,3 +1161,217 @@ The right balance of human-AI attention is not fixed. Early in a collaboration: 
 Over time, the pattern teaches both parties: which kinds of outputs the human wants to see, which they're happy to let the agent handle. The gate is not bureaucracy. It is the collaboration learning itself.
 
 *"The gate is not a bottleneck. It is the place where trust is built."*
+
+---
+
+## Process: `session-closing`
+
+**Trigger phrases:**
+- "Wrap up"
+- "Close the session"
+- "Closing ritual"
+- "Session closing"
+- "Perform the closing ritual"
+- "End of session" (if session-delta has already been written, skips to synthesis pass)
+
+### What it does
+
+A complete, ordered close of a working session. Combines the session-delta handover with a mandatory synthesis automation step: extracting crystal candidates from this session's decisions and flagging them for promotion. The synthesis step is not optional — a session that doesn't extract is a session that leaks.
+
+**Phases:**
+1. **Handover** — session-delta (see `session-delta` process)
+2. **Synthesis** — crystal extraction pass over this session's decisions
+3. **Memory update** — write confirmed crystals to CLAUDE.md, flag provisional ones as ◇
+4. **Soul check** — update VESPER.md if any shift in working patterns or character was observed
+5. **Confirm** — summary of what was written, what was flagged, what was deferred
+
+### Agent Protocol
+
+```
+PHASE 1 — HANDOVER
+1. If session-delta has already been written this session: skip to Phase 2
+2. Otherwise: run session-delta process in full
+   (TL;DR → State snapshot → Artifact listing → Decisions → Blockers → Next session opens here)
+   Save to: soul/handovers/YYYY-MM-DD[a/b/c].md
+
+PHASE 2 — CRYSTAL EXTRACTION PASS
+3. Read the handover just written (or the most recent one if already complete)
+4. Read CLAUDE.md — current crystal tables
+5. Scan for crystal candidates:
+   - Any explicit decision made this session that should survive context reset
+   - Any technical fact discovered (path, host, deploy pattern, API behaviour)
+   - Any working principle observed (persona rule, collaboration pattern, process refinement)
+   - Any named pattern, constraint, or architectural invariant
+6. For each candidate:
+   a. Check: does this already exist in CLAUDE.md? (exact or near-duplicate)
+      - Yes → skip or note "already crystalised"
+      - No → classify as ◇ provisional
+   b. Assess confidence:
+      - HIGH (confirmed this session, specific, factual) → propose for immediate write
+      - MEDIUM (observed pattern, may need one more session) → flag as ◇ provisional
+      - LOW (speculation, needs validation) → note only, do not propose
+7. Present extraction results:
+   "Crystal extraction — [N] candidates found:
+   ✓ [Crystal text] — HIGH — propose writing to CLAUDE.md
+   ◇ [Crystal text] — MEDIUM — flagging as provisional
+   ~ [Crystal text] — LOW — noted only"
+8. Write HIGH-confidence crystals to CLAUDE.md (Global Context Crystals table or appropriate section)
+   auto_apply: false — present the exact edit, wait for "yes" before writing
+9. Write ◇ provisional crystals to a `## Provisional Crystals` section in CLAUDE.md
+   (separate from confirmed crystals — reviewed at next session or crystal-coherence pass)
+
+PHASE 3 — SOUL CHECK
+10. Read soul/VESPER.md (or nym-stone/vesper/VESPER.md for palace instances)
+11. Ask: did this session show any shift in:
+    - Working patterns (persona activation quality, collaboration mode, pacing)
+    - Character (new working principle observed, old one violated, something to name)
+    - Garden growth (a plant that visibly moved — watering worthy)
+12. If yes: write a session note to VESPER.md or water the relevant plant
+13. If no shift observed: note this explicitly ("no soul update needed")
+
+PHASE 4 — CONFIRM
+14. Output closing summary:
+    "Session closed — [DATE]
+    Handover: [path]
+    Crystals written: [N] | Provisional flagged: [N] | Low-confidence noted: [N]
+    Soul update: [yes — what changed / no]
+    Next session opens: [first move from handover]"
+```
+
+### Crystal candidate format
+
+```markdown
+## Provisional Crystals ◇
+
+| Crystal | Value | Source | Confidence | Date |
+|---------|-------|--------|------------|------|
+| ◇ [crystal name] | [value] | Session [N] — [track] | MEDIUM | YYYY-MM-DD |
+```
+
+Provisional crystals are reviewed at every `crystal-coherence` pass. Three sessions without contradiction = promote to confirmed. One contradiction = demote to noted-only.
+
+---
+
+## Process: `crystal-coherence`
+
+**Trigger phrases:**
+- "Crystal coherence"
+- "Run coherence check"
+- "Crystal audit"
+- Daily scheduled task (recommended: 08:00 local)
+
+### What it does
+
+A cross-palace crystal audit. Reads all crystal tables in the palace (CLAUDE.md, any room CLAUDE.md files, VESPER.md, handovers), identifies anomalies, and outputs a coherence report. Designed to run quietly and surface proposals only when there's something worth surfacing.
+
+**Four anomaly types:**
+- **Stale** — crystal that references a path, host, state, or version that may have changed (age > 30 days since last confirmed)
+- **Conflicting** — two crystals that contradict each other
+- **Dormant** — provisional crystal (◇) that has sat unconfirmed for 3+ sessions
+- **Orphaned** — crystal that references a file, project, or track that no longer exists
+
+If no anomalies: output "Crystal coherence — all clear. [N] crystals checked." No further action.
+
+If anomalies found: output the coherence report and surface proposals (see format below). Proposals are surfaced:
+- In the next `morning-check-in` output (prepended as ⚠️ Crystal proposals)
+- When entering a room whose context is directly related to the flagged crystal
+
+### Agent Protocol
+
+```
+1. Read CLAUDE.md — all crystal tables (Global Context Crystals, Provisional Crystals if present)
+2. Read _PALACE_CONTEXT.md (if exists)
+3. Read any active room CLAUDE.md files:
+   - _palace/dev-room/CLAUDE.md
+   - _palace/design-room/CLAUDE.md
+   - _palace/marketing-room/CLAUDE.md
+   - _palace/engine-room/CLAUDE.md
+   (skip rooms that don't exist)
+4. Read last 3 handovers from soul/handovers/ or nym-stone/vesper/handovers/
+5. Read VESPER.md — check for working principles that may have been superseded
+
+6. For each crystal in all sources:
+   a. STALE check:
+      - Does the crystal reference a specific version, path, host, or tool?
+      - Has there been any session activity suggesting this has changed?
+      - Age check: last confirmed in handover > 30 days ago?
+      → Flag: ⚠️ STALE — [crystal name] — last confirmed [date]
+   b. CONFLICT check:
+      - Scan all crystals pairwise for logical contradiction
+      - Example: two different values for the same host, path, or pattern
+      → Flag: ❌ CONFLICT — [crystal A] vs [crystal B]
+   c. DORMANT check:
+      - Is this crystal marked ◇ provisional?
+      - Count sessions since it was added
+      - If 3+ sessions without confirmation or contradiction: flag for resolution
+      → Flag: 💤 DORMANT — [crystal name] — [N] sessions unresolved
+   d. ORPHAN check:
+      - Does the crystal reference a project, file, or track that appears to be inactive?
+      - Cross-reference active tracks in CLAUDE.md
+      → Flag: 🪦 ORPHANED — [crystal name] — [project] appears inactive
+
+7. If no anomalies: output "Crystal coherence — all clear. [N] crystals checked. [date]"
+   Write this line to a coherence log: soul/coherence-log.md (append)
+
+8. If anomalies found:
+   a. Write coherence report (see format below)
+   b. Save to: soul/coherence-[DATE].md
+   c. Prepend proposal summary to next morning-check-in output
+   d. Flag relevant proposals when entering related rooms
+
+9. For each flagged crystal, propose one resolution:
+   - STALE: "Confirm current value or update to: [proposed value]"
+   - CONFLICT: "Resolve: which value is correct? [A] or [B]? Or archive both?"
+   - DORMANT: "Promote to confirmed / demote to noted-only / archive"
+   - ORPHAN: "Archive this crystal? Project [X] appears inactive since [date]"
+
+10. Do NOT auto-apply any changes. Proposals only. Human confirms.
+```
+
+### Coherence Report Format
+
+```markdown
+# Crystal Coherence Report — [DATE]
+
+[N] crystals checked across [N] palace files.
+
+## Anomalies ([N] found)
+
+### ⚠️ Stale ([N])
+- **[Crystal name]** — last confirmed [date]
+  Current value: [value]
+  Possible updated value: [if detectable]
+  Source: [file]
+  Proposal: Confirm or update.
+
+### ❌ Conflicting ([N])
+- **[Crystal A]** vs **[Crystal B]**
+  A says: [value]
+  B says: [value]
+  Sources: [file A], [file B]
+  Proposal: Which is correct?
+
+### 💤 Dormant ([N])
+- **◇ [Crystal name]** — added [date], [N] sessions unconfirmed
+  Value: [value]
+  Proposal: Promote / demote / archive?
+
+### 🪦 Orphaned ([N])
+- **[Crystal name]** — references [project/file]
+  Last active: [date or "unknown"]
+  Proposal: Archive?
+
+---
+
+## Summary
+Promoted: 0 | Updated: 0 | Archived: 0 (all pending confirmation)
+Next coherence check: [tomorrow / next scheduled run]
+```
+
+### Surfacing rule
+
+Coherence proposals are surfaced **once** per anomaly cycle. If the user does not act on them within 3 sessions, they are escalated in the next coherence report with a note: "[N] sessions unresolved."
+
+If a room is entered that is directly related to a flagged crystal, the agent prepends: "⚠️ Crystal proposal pending for this room — [1-line summary]. Run `crystal-coherence` to resolve."
+
+This keeps coherence proposals visible without being noisy.
