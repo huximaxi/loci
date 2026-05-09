@@ -4,6 +4,18 @@ All notable changes to loci are documented here.
 
 ---
 
+## loci.garden - 2026-05-09 (site) — Sovereignty Stack Launch
+
+- **Cognitive Sovereignty Manifesto** — `landing/manifesto.html` published. Loci's public declaration: local-first, keypair-signed, protocol-aligned, open. Written by Rune.
+- **Sovereignty Roadmap** — `landing/roadmap.html` added to site. 12 integrations across Tier 1 (Q3) and Tier 2 (Q4): Ollama, MCP/Goose, Nostr, Nym, Continue.dev, Nostr Zaps, AT Protocol, Nym Private Sync, IPFS, AnythingLLM, Kagi, Tailscale. Audited by Cipher. Signed by Rune.
+- **Nav updated** — Manifesto + Roadmap links added across all landing pages: index.html, about.html, comparison.html, download.html, guide.html, start.html.
+- **Homepage hero** — LLMAGE sub updated with sovereignty stack signal (Nostr, Nym, Ollama, Goose). Hero tag updated with "Keypair-signed" (Scholar) and "sovereignty stack" (LLMAGE).
+- **llms.txt** — Comprehensive sovereignty stack section added covering all 12 roadmap integrations with technical detail, MCP schema, fail-closed invariants, Nostr/Nym/Tailscale specs. Sovereignty principles documented. New keywords added.
+- **Roadmap headline** — "The knowledge layer for the sovereignty stack."
+- **Pipeline** — 12 JUMP-IN briefs, ROADMAP-TRACKER.md, roadmap-watcher.sh cron, Cipher audit, Rune manifesto v1+v2, website copy drafts all committed under `loci/pipeline/`.
+
+---
+
 ## loci.garden - 2026-05-08 (site)
 - **Public beta labels** - desktop + extension now marked as public beta on download.html and comparison.html
 - **Guide pagination** - guide.html split into sections with prev/next navigation
