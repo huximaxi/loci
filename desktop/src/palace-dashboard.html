@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<!--
+  PALACE DASHBOARD — WIREFRAME v0.1
+  ─────────────────────────────────
+  Core wireframe for the Loci Tauri RPG overlay.
+  Build the dashboard for local use first. Apply skins after.
+
+  SKIN SLOTS (annotated inline with: <!-- SKIN: ... -->):
+  - #palette     → CSS custom property overrides per skin
+  - .room        → per-room glyph, accent colour, lore text
+  - .track-icon  → persona portrait / class icon
+  - .phase-block → dungeon floor / quest stage labels
+  - .blocker     → encounter card styling
+  - .pulse       → heartbeat visual (orb / rune / crystal)
+
+  TAURI WIRING (annotated inline with: <!-- TAURI: ... -->):
+  - Room state   → invoke("get_room_states") → populate .room-state dots
+  - Track state  → invoke("get_active_tracks") → populate .tracks
+  - Phase gate   → invoke("read_state_tracker") → parse state-tracker.json
+  - Blockers     → invoke("get_blockers") → read CLAUDE.md pending section
+  - Crystal count → invoke("get_crystal_count") → scan palace YAML headers
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Palace Dashboard</title>
+<style>
+  /* ── PALETTE — override this block per skin ───────────────────────────── */
+  /* SKIN: palette */
+  :root {
+    --bg:            #0a0a0c;
+    --surface:       rgba(255,255,255,0.04);
+    --surface-hover: rgba(255,255,255,0.08);
+    --border:        rgba(255,255,255,0.07);
+    --border-strong: rgba(255,255,255,0.14);
+    --text-primary:  #e8e6e3;
+    --text-secondary:rgba(255,255,255,0.55);
+    --text-muted:    rgba(255,255,255,0.28);
+    --text-label:    rgba(255,255,255,0.22);
+
+    /* State colours */
+    --active:   #5BF0A0;   /* green  — live / synced */
+    --warm:     #FFCC33;   /* amber  — pending / gate */
+    --blocked:  #E73E14;   /* red    — blocker */
+    --dim:      rgba(255,255,255,0.18); /* inactive */
+
+    /* Typography */
+    --font-mono: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+    --font-size-base: 11px;
+    --font-size-sm:   9px;
+    --font-size-lg:   13px;
+
+    /* Layout */
+    --radius:  4px;
+    --gap:     8px;
+    --pad:     12px;
+  }
+
+  /* ── Reset ────────────────────────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html {
+    background: #0a0a0c;
+  }
+
+  body {
+    font-family: var(--font-mono);
+    font-size: var(--font-size-base);
+    background: #0a0a0c;
+    color: #e8e6e3;
+    min-height: 100vh;
+    padding: var(--pad);
+  }
+
+  /* ── Layout ───────────────────────────────────────────────────────────── */
+  .dashboard {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto auto auto;
+    gap: var(--gap);
+    max-width: 680px;
+  }
+
+  .span-full { grid-column: 1 / -1; }
+
+  /* ── Section chrome ───────────────────────────────────────────────────── */
+  .section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: var(--gap);
+  }
+
+  .section-label {
+    font-size: var(--font-size-sm);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-label);
+    margin-bottom: 6px;
+  }
+
+  .divider {
+    grid-column: 1 / -1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── Header ───────────────────────────────────────────────────────────── */
+  .header {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: var(--gap);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-title {
+    font-size: var(--font-size-sm);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .header-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+  }
+
+  /* SKIN: pulse — replace with orb / rune / crystal animation */
+  .pulse {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--active);
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.25;} }
+
+  /* ── Room grid ────────────────────────────────────────────────────────── */
+  .rooms-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+  }
+
+  /* SKIN: room — replace surface with room-specific card art / glyph */
+  .room {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 7px 6px 5px;
+    cursor: pointer;
+    transition: background 0.12s, border-color 0.12s;
+    position: relative;
+  }
+  .room:hover {
+    background: var(--surface-hover);
+    border-color: var(--border-strong);
+  }
+  .room.state-active  { border-bottom: 2px solid var(--active); }
+  .room.state-warm    { border-bottom: 2px solid var(--warm); }
+  .room.state-pending { border-bottom: 2px solid var(--dim); }
+
+  .room-icon  { font-size: 15px; line-height: 1; display: block; }
+  .room-name  { font-size: var(--font-size-sm); color: var(--text-secondary); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .room-tag   { font-size: 8px; color: var(--text-label); }
+
+  .room-status-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    position: absolute;
+    top: 6px; right: 6px;
+  }
+  .dot-active  { background: var(--active); }
+  .dot-warm    { background: var(--warm); }
+  .dot-pending { background: var(--dim); }
+
+  /* ── Active tracks ────────────────────────────────────────────────────── */
+  .tracks { display: flex; flex-direction: column; gap: 4px; }
+
+  /* SKIN: track — replace icon with persona portrait / class glyph */
+  .track {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 8px;
+    background: transparent;
+    border-radius: 3px;
+    border-left: 2px solid transparent;
+    transition: background 0.1s;
+  }
+  .track:hover { background: var(--surface-hover); }
+  .track.active  { border-left-color: var(--active); }
+  .track.warm    { border-left-color: var(--warm); }
+  .track.pending { border-left-color: var(--dim); }
+
+  /* SKIN: track-icon */
+  .track-icon { font-size: 11px; width: 16px; text-align: center; flex-shrink: 0; }
+  .track-name { flex: 1; color: var(--text-secondary); }
+  .track-status { font-size: var(--font-size-sm); color: var(--text-muted); text-align: right; flex-shrink: 0; }
+
+  /* ── Phase roadmap ────────────────────────────────────────────────────── */
+  .phase-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  /* SKIN: phase-block — replace label text with dungeon floor / quest stage names */
+  .phase-block {
+    flex: 1;
+    height: 26px;
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-sm);
+    letter-spacing: 0.08em;
+    border: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  .phase-block.active  { background: rgba(91,240,160,0.1); color: var(--active); border-color: rgba(91,240,160,0.28); }
+  .phase-block.blocked { background: transparent; color: var(--text-label); }
+  .phase-arrow { color: var(--text-label); font-size: 10px; flex-shrink: 0; }
+
+  /* ── Gates & Blockers ─────────────────────────────────────────────────── */
+  .gates-blockers { display: flex; flex-direction: column; gap: 3px; }
+
+  /* SKIN: gate — replace with lock / chest / portal icon */
+  .gate {
+    font-size: var(--font-size-sm);
+    padding: 4px 7px;
+    background: rgba(255,204,51,0.06);
+    border-left: 2px solid rgba(255,204,51,0.35);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    color: rgba(255,204,51,0.7);
+  }
+
+  /* SKIN: blocker — replace with encounter card / red rune */
+  .blocker {
+    font-size: var(--font-size-sm);
+    padding: 4px 7px;
+    background: rgba(231,62,20,0.06);
+    border-left: 2px solid rgba(231,62,20,0.35);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    color: rgba(255,255,255,0.45);
+  }
+
+  /* ── Crystal counter ──────────────────────────────────────────────────── */
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--text-label);
+    font-size: var(--font-size-sm);
+  }
+
+  .crystal-row { display: flex; gap: 10px; }
+  .crystal-stat { display: flex; align-items: center; gap: 4px; }
+
+  /* SKIN: crystal — replace text glyph with animated crystal sprites */
+  .crystal-glyph { font-size: 10px; }
+</style>
+</head>
+<body>
+<div class="dashboard">
+
+  <!-- ── HEADER ─────────────────────────────────────────────────────────── -->
+  <!-- TAURI: session name + date from invoke("get_session_info") -->
+  <div class="header span-full">
+    <span class="header-title">🏛 Palace · Session 25 · 2026-05-11</span>
+    <div class="header-meta">
+      <span>loci-core v1.0</span>
+      <!-- SKIN: pulse -->
+      <div class="pulse"></div>
+    </div>
+  </div>
+
+  <!-- ── ROOMS ──────────────────────────────────────────────────────────── -->
+  <!-- TAURI: room state dots from invoke("get_room_states") -->
+  <div class="section span-full">
+    <div class="section-label">Palace Rooms</div>
+    <div class="rooms-grid">
+
+      <!-- SKIN: room — card art per room -->
+      <div class="room state-active" title="Dev Room">
+        <span class="room-status-dot dot-active"></span>
+        <span class="room-icon">🖥️</span>
+        <div class="room-name">Dev Room</div>
+        <div class="room-tag">[DEV]</div>
+      </div>
+
+      <div class="room state-warm" title="Nym Studio">
+        <span class="room-status-dot dot-warm"></span>
+        <span class="room-icon">🎨</span>
+        <div class="room-name">Nym Studio</div>
+        <div class="room-tag">[DESIGN]</div>
+      </div>
+
+      <div class="room state-warm" title="Trust CP">
+        <span class="room-status-dot dot-warm"></span>
+        <span class="room-icon">🔬</span>
+        <div class="room-name">Trust CP</div>
+        <div class="room-tag">[THESIS]</div>
+      </div>
+
+      <div class="room state-active" title="Marketing Room — RUNE leads">
+        <span class="room-status-dot dot-active"></span>
+        <span class="room-icon">🔮</span>
+        <div class="room-name">Mktg Room</div>
+        <div class="room-tag">[RUNE]</div>
+      </div>
+
+      <div class="room state-pending" title="Cave — Kata">
+        <span class="room-status-dot dot-pending"></span>
+        <span class="room-icon">🪨</span>
+        <div class="room-name">Cave</div>
+        <div class="room-tag">[KATA]</div>
+      </div>
+
+      <div class="room state-pending" title="Engine Room — Cipher">
+        <span class="room-status-dot dot-pending"></span>
+        <span class="room-icon">🛠</span>
+        <div class="room-name">Engine</div>
+        <div class="room-tag">[CIPHER]</div>
+      </div>
+
+      <div class="room state-pending" title="Hatchery">
+        <span class="room-status-dot dot-pending"></span>
+        <span class="room-icon">🥚</span>
+        <div class="room-name">Hatchery</div>
+        <div class="room-tag">[HATCH]</div>
+      </div>
+
+      <div class="room state-pending" title="Anon-Agent">
+        <span class="room-status-dot dot-pending"></span>
+        <span class="room-icon">🕵️</span>
+        <div class="room-name">Anon-Agent</div>
+        <div class="room-tag">[ANON]</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── ACTIVE TRACKS ──────────────────────────────────────────────────── -->
+  <!-- TAURI: live tracks from invoke("get_active_tracks") → parse CLAUDE.md -->
+  <div class="section span-full">
+    <div class="section-label">Active Tracks</div>
+    <div class="tracks">
+
+      <!-- SKIN: track-icon — persona portrait / class glyph -->
+      <div class="track active">
+        <span class="track-icon">🌿</span>
+        <span class="track-name">Loci RUNE Funnel + CSE</span>
+        <span class="track-status">Phase 1 ready</span>
+      </div>
+
+      <div class="track warm">
+        <span class="track-icon">📖</span>
+        <span class="track-name">Trust CP</span>
+        <span class="track-status">2 refs pending</span>
+      </div>
+
+      <div class="track active">
+        <span class="track-icon">🛸</span>
+        <span class="track-name">Loci 1A+1B reconcile</span>
+        <span class="track-status">cargo unconfirmed</span>
+      </div>
+
+      <div class="track warm">
+        <span class="track-icon">🖥</span>
+        <span class="track-name">NymVPN Design</span>
+        <span class="track-status">3 Figma screens</span>
+      </div>
+
+      <div class="track pending">
+        <span class="track-icon">🤖</span>
+        <span class="track-name">B2Agent Phase 3</span>
+        <span class="track-status">Claude Privacy MCP</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── PHASE ROADMAP ──────────────────────────────────────────────────── -->
+  <!-- TAURI: phase states from invoke("read_file", {path: "...state-tracker.json"}) -->
+  <div class="section span-full">
+    <div class="section-label">Loci RUNE Roadmap</div>
+    <!-- SKIN: phase-block — dungeon floors / quest stages -->
+    <div class="phase-row">
+      <div class="phase-block active">P1 · Threshold</div>
+      <div class="phase-arrow">→</div>
+      <div class="phase-block blocked">P2 · Copy + Ritual</div>
+      <div class="phase-arrow">→</div>
+      <div class="phase-block blocked">P3 · Depth</div>
+    </div>
+  </div>
+
+  <!-- ── GATES & BLOCKERS ───────────────────────────────────────────────── -->
+  <!-- TAURI: parse pending section of CLAUDE.md via invoke("get_blockers") -->
+  <div class="section span-full">
+    <div class="section-label">Gates &amp; Blockers</div>
+    <div class="gates-blockers">
+      <!-- SKIN: gate — lock / chest / portal icon -->
+      <div class="gate">⬡ HUXGATE — P1 complete before P2 starts</div>
+      <div class="gate">⬡ HUXGATE — doctoral coordinator → SSRN pre-push</div>
+      <!-- SKIN: blocker — encounter card / red rune -->
+      <div class="blocker">⚑ 7 dead links on loci.garden (P1.1–P1.4)</div>
+      <div class="blocker">⚑ cargo build unconfirmed (Tauri 0.4.0)</div>
+      <div class="blocker">⚑ Misztal 1996 page + Vervaeke ep (physical library)</div>
+      <div class="blocker">⚑ waitlist service not yet deployed to VPS</div>
+    </div>
+  </div>
+
+  <!-- ── FOOTER / CRYSTAL COUNT ─────────────────────────────────────────── -->
+  <!-- TAURI: crystal counts from invoke("scan_crystal_counts") → scan YAML headers -->
+  <div class="footer span-full">
+    <div class="crystal-row">
+      <!-- SKIN: crystal — animated crystal sprites -->
+      <div class="crystal-stat"><span class="crystal-glyph">◆</span> Global: 14</div>
+      <div class="crystal-stat"><span class="crystal-glyph">◈</span> Session: 7</div>
+      <div class="crystal-stat"><span class="crystal-glyph">◇</span> Pending: 3</div>
+    </div>
+    <span>loci-core v1.0 · v1.1 candidate</span>
+  </div>
+
+</div>
+</body>
+</html>
