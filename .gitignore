@@ -4,6 +4,8 @@ dist/
 *.local
 .env
 .env.*
+server/waitlist.db
+server/venv/
 
 # Tauri
 src-tauri/target/
