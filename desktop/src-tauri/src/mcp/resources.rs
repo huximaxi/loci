@@ -153,11 +153,27 @@ fn loci_dir(base: &Path) -> PathBuf {
     base.join("loci")
 }
 
+/// Returns true if the given room_id is exposed given the allowlist.
+///
+/// Cipher gate:
+/// - Empty allowlist = all rooms exposed (default, opt-in restriction)
+/// - Unroomed loci (room_id = None) are always accessible
+/// - Room-assigned loci are accessible only if their room_id is in the allowlist
+fn room_is_exposed(room_id: Option<&str>, expose_rooms: &[String]) -> bool {
+    if expose_rooms.is_empty() {
+        return true;
+    }
+    match room_id {
+        None => true, // unroomed loci always accessible
+        Some(rid) => expose_rooms.iter().any(|r| r.as_str() == rid),
+    }
+}
+
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 /// Return all Locus nodes as a flat list of MCP resource descriptors
 /// (uri + name + mimeType only — no text body, per MCP resources/list spec).
-pub fn list_loci(loci_base: &Path) -> Vec<serde_json::Value> {
+pub fn list_loci(loci_base: &Path, expose_rooms: &[String]) -> Vec<serde_json::Value> {
     let dir = loci_dir(loci_base);
     let Ok(entries) = fs::read_dir(&dir) else {
         return vec![];
@@ -173,6 +189,7 @@ pub fn list_loci(loci_base: &Path) -> Vec<serde_json::Value> {
                 .unwrap_or(false)
         })
         .filter_map(|e| file_to_resource(&e.path()))
+        .filter(|r| room_is_exposed(r.metadata.room_id.as_deref(), expose_rooms))
         .map(|r| {
             serde_json::json!({
                 "uri": r.uri,
@@ -185,7 +202,7 @@ pub fn list_loci(loci_base: &Path) -> Vec<serde_json::Value> {
 }
 
 /// Return a single Locus node by ID (full text included).
-pub fn read_locus(id: &str, loci_base: &Path) -> Option<McpResource> {
+pub fn read_locus(id: &str, loci_base: &Path, expose_rooms: &[String]) -> Option<McpResource> {
     // Sanitise id: only allow alphanumeric, hyphens, underscores.
     // Prevents path traversal (Cipher gate).
     if !id.chars().all(|c| c.is_alphanumeric() || c == '-' || c == '_') {
@@ -193,11 +210,15 @@ pub fn read_locus(id: &str, loci_base: &Path) -> Option<McpResource> {
     }
 
     let path = loci_dir(loci_base).join(format!("{}.md", id));
-    file_to_resource(&path)
+    let resource = file_to_resource(&path)?;
+    if !room_is_exposed(resource.metadata.room_id.as_deref(), expose_rooms) {
+        return None;
+    }
+    Some(resource)
 }
 
 /// Return all Loci belonging to a specific Room.
-pub fn list_room_loci(room_id: &str, loci_base: &Path) -> Vec<McpResource> {
+pub fn list_room_loci(room_id: &str, loci_base: &Path, expose_rooms: &[String]) -> Vec<McpResource> {
     let dir = loci_dir(loci_base);
     let Ok(entries) = fs::read_dir(&dir) else {
         return vec![];
@@ -214,12 +235,13 @@ pub fn list_room_loci(room_id: &str, loci_base: &Path) -> Vec<McpResource> {
         })
         .filter_map(|e| file_to_resource(&e.path()))
         .filter(|r| r.metadata.room_id.as_deref() == Some(room_id))
+        .filter(|r| room_is_exposed(r.metadata.room_id.as_deref(), expose_rooms))
         .collect()
 }
 
 /// Simple keyword search over Locus titles and content.
 /// Returns up to 20 results, ranked by match count (title matches weighted 2x).
-pub fn search_loci(query: &str, loci_base: &Path) -> Vec<McpResource> {
+pub fn search_loci(query: &str, loci_base: &Path, expose_rooms: &[String]) -> Vec<McpResource> {
     let dir = loci_dir(loci_base);
     let Ok(entries) = fs::read_dir(&dir) else {
         return vec![];
@@ -246,6 +268,7 @@ pub fn search_loci(query: &str, loci_base: &Path) -> Vec<McpResource> {
                 .unwrap_or(false)
         })
         .filter_map(|e| file_to_resource(&e.path()))
+        .filter(|r| room_is_exposed(r.metadata.room_id.as_deref(), expose_rooms))
         .filter_map(|r| {
             let title_lower = r.name.to_lowercase();
             let text_lower = r.text.to_lowercase();

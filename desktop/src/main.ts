@@ -173,6 +173,54 @@ function setFailClosed(on: boolean): void {
   localStorage.setItem('loci.ollama.fail_closed', String(on));
 }
 
+// ── Loci config persistence (Tauri) ─────────────────────────────────────────
+// Bridge: localStorage = sync in-memory state. Tauri = cross-restart persistence.
+// loadConfig() pulls from Tauri on boot and seeds localStorage.
+// saveConfig() writes current state to Tauri on every settings change.
+
+async function loadConfig(): Promise<void> {
+  try {
+    const config = await invoke<{
+      ollama?: {
+        enabled?: boolean;
+        base_url?: string;
+        chat_model?: string;
+        embed_model?: string;
+        fail_closed?: boolean;
+      };
+    }>('read_loci_config');
+
+    if (config.ollama) {
+      const o = config.ollama;
+      if (o.enabled !== undefined)   setOllamaEnabled(o.enabled);
+      if (o.fail_closed !== undefined) setFailClosed(o.fail_closed);
+      if (o.chat_model)  localStorage.setItem('loci.ollama.chat_model',  o.chat_model);
+      if (o.embed_model) localStorage.setItem('loci.ollama.embed_model', o.embed_model);
+    }
+  } catch {
+    // No config yet — defaults from localStorage apply
+  }
+}
+
+async function saveConfig(): Promise<void> {
+  try {
+    await invoke('write_loci_config', {
+      config: {
+        ollama: {
+          enabled:     getOllamaEnabled(),
+          base_url:    'http://localhost:11434',
+          chat_model:  localStorage.getItem('loci.ollama.chat_model')  ?? 'llama3',
+          embed_model: localStorage.getItem('loci.ollama.embed_model') ?? 'nomic-embed-text',
+          offline_mode: false,
+          fail_closed: getFailClosed(),
+        },
+      },
+    });
+  } catch (err) {
+    console.warn('write_loci_config failed:', err);
+  }
+}
+
 async function checkOllamaHealth(): Promise<void> {
   if (!getOllamaEnabled()) {
     applyOllamaState('disabled');
@@ -333,6 +381,7 @@ document.getElementById('ai-badge')?.addEventListener('click', () => {
   ?.addEventListener('change', (e) => {
     const on = (e.target as HTMLInputElement).checked;
     setOllamaEnabled(on);
+    void saveConfig();
     setDependentsEnabled(on);
     checkOllamaHealth();
     if (on && ollamaState === 'online') populateModels();
@@ -342,6 +391,7 @@ document.getElementById('ai-badge')?.addEventListener('click', () => {
   ?.addEventListener('change', (e) => {
     const on = (e.target as HTMLInputElement).checked;
     setFailClosed(on);
+    void saveConfig();
     const warning = document.getElementById('failOpenWarning');
     if (warning) warning.style.display = on ? 'none' : 'block';
   });
@@ -349,11 +399,13 @@ document.getElementById('ai-badge')?.addEventListener('click', () => {
 (document.getElementById('chatModelSelect') as HTMLSelectElement | null)
   ?.addEventListener('change', (e) => {
     localStorage.setItem('loci.ollama.chat_model', (e.target as HTMLSelectElement).value);
+    void saveConfig();
   });
 
 (document.getElementById('embedModelSelect') as HTMLSelectElement | null)
   ?.addEventListener('change', (e) => {
     localStorage.setItem('loci.ollama.embed_model', (e.target as HTMLSelectElement).value);
+    void saveConfig();
   });
 
 (document.getElementById('mcpToggle') as HTMLInputElement | null)
@@ -398,4 +450,4 @@ document.addEventListener('keydown', (e) => {
 
 // ── Boot ────────────────────────────────────────────────────────────────
 
-startOllamaPolling();
+void loadConfig().then(() => startOllamaPolling());

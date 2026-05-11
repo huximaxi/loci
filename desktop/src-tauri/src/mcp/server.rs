@@ -47,6 +47,10 @@ use super::tools;
 pub struct McpServerState {
     /// Base path for the loci store (e.g. `~/.loci/`).
     pub loci_base: PathBuf,
+    /// Room IDs exposed via MCP. Empty = all rooms exposed. Non-empty = allowlist.
+    /// Enforced by resource handlers — agents can only read loci from listed rooms.
+    /// Cipher gate: this value is set at server start and immutable for the server lifetime.
+    pub expose_rooms: Vec<String>,
 }
 
 // ─── JSON-RPC types ───────────────────────────────────────────────────────────
@@ -135,7 +139,7 @@ fn handle_initialize(id: Option<Value>) -> JsonRpcResponse {
 }
 
 fn handle_resources_list(id: Option<Value>, state: &McpServerState) -> JsonRpcResponse {
-    let resources = resources::list_loci(&state.loci_base);
+    let resources = resources::list_loci(&state.loci_base, &state.expose_rooms);
     JsonRpcResponse::ok(id, json!({ "resources": resources }))
 }
 
@@ -172,7 +176,7 @@ fn handle_resources_read(id: Option<Value>, params: &Value, state: &McpServerSta
 
     // Route by URI scheme
     if let Some(rest) = uri.strip_prefix("loci://locus/") {
-        match resources::read_locus(rest, &state.loci_base) {
+        match resources::read_locus(rest, &state.loci_base, &state.expose_rooms) {
             Some(r) => JsonRpcResponse::ok(id, json!({
                 "contents": [{
                     "uri": r.uri,
@@ -186,7 +190,11 @@ fn handle_resources_read(id: Option<Value>, params: &Value, state: &McpServerSta
     } else if let Some(rest) = uri.strip_prefix("loci://room/") {
         // loci://room/{roomId}/loci
         let room_id = rest.trim_end_matches("/loci");
-        let loci = resources::list_room_loci(room_id, &state.loci_base);
+        // Cipher gate: check room is exposed before listing its loci
+        if !state.expose_rooms.is_empty() && !state.expose_rooms.iter().any(|r| r == room_id) {
+            return JsonRpcResponse::err(id, -32002, format!("room '{}' is not exposed via MCP", room_id));
+        }
+        let loci = resources::list_room_loci(room_id, &state.loci_base, &state.expose_rooms);
         let contents: Vec<Value> = loci
             .into_iter()
             .map(|r| json!({
@@ -198,7 +206,7 @@ fn handle_resources_read(id: Option<Value>, params: &Value, state: &McpServerSta
             .collect();
         JsonRpcResponse::ok(id, json!({ "contents": contents }))
     } else if let Some(rest) = uri.strip_prefix("loci://search?q=") {
-        let results = resources::search_loci(rest, &state.loci_base);
+        let results = resources::search_loci(rest, &state.loci_base, &state.expose_rooms);
         let contents: Vec<Value> = results
             .into_iter()
             .map(|r| json!({
@@ -371,9 +379,10 @@ async fn health_check() -> impl IntoResponse {
 pub async fn start_server(
     port: u16,
     loci_base: PathBuf,
+    expose_rooms: Vec<String>,
     shutdown_rx: oneshot::Receiver<()>,
 ) -> Result<u16, String> {
-    let state = Arc::new(McpServerState { loci_base });
+    let state = Arc::new(McpServerState { loci_base, expose_rooms });
 
     let app = Router::new()
         .route("/", post(mcp_rpc))
