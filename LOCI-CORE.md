@@ -6,6 +6,18 @@ Palace methodology version tracker. The structural and intellectual core of loci
 
 ---
 
+## loci-core v1.2 candidate - 2026-05-11
+
+**Palace Dashboard overlay** - Tauri RPG overlay for local palace state tracking. Wireframe at `desktop/src/palace-dashboard.html`. Sections: rooms grid (8 rooms, state dots), active tracks (persona-tagged), phase roadmap (gate-aware), blockers/HUXGATEs, crystal counter. Skin slots annotated inline (`<!-- SKIN: ... -->`). Tauri invoke hooks annotated inline (`<!-- TAURI: ... -->`). Build order: static wireframe → wire Tauri commands → apply skins.
+
+---
+
+## loci-core v1.1 candidate - 2026-05-11
+
+**Node-entry ritual** - four protocol levels (0=none, 1=phrase, 2=breath+visual, 3=full CSE). Always skippable. YAML spec in room soul file. Sovereignty principle: content always one tap away. CSE widget is the Level 3 engine. Spec: `pipeline/features/node-entry-ritual.md`.
+
+---
+
 ## loci-core v1.0 - 2026-05-08
 
 **Garden Health process** - structured health pass for crystals, plants, handovers, and rooms. Surfaces stale/dormant nodes for human review. Never auto-archives. Produces a `_health.md`-style report per run.

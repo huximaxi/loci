@@ -1,6 +1,6 @@
 import { invoke } from '@tauri-apps/api/core';
 import { open } from '@tauri-apps/plugin-dialog';
-import { open as openPath } from '@tauri-apps/plugin-opener';
+import { openPath } from '@tauri-apps/plugin-opener';
 
 interface DetectionResult {
   found: boolean;
@@ -278,14 +278,32 @@ function startOllamaPolling(): void {
   window.setInterval(checkOllamaHealth, 30_000);
 }
 
+// ── View routing ────────────────────────────────────────────────────────
+// Three views: welcome (default) · wizard (migrate path) · settings
+
+type AppView = 'welcome' | 'wizard' | 'settings';
+let previousView: AppView = 'welcome';
+
+function showView(view: AppView): void {
+  const welcome  = document.getElementById('welcome-view');
+  const wizard   = document.getElementById('main-view');
+  const settings = document.getElementById('settings-view');
+  if (!welcome || !wizard || !settings) return;
+  welcome.style.display  = view === 'welcome'  ? 'flex' : 'none';
+  wizard.style.display   = view === 'wizard'   ? 'block' : 'none';
+  settings.style.display = view === 'settings' ? 'flex' : 'none';
+}
+
 // ── Settings panel ──────────────────────────────────────────────────────
 
 function openSettings(): void {
-  const mainView     = document.getElementById('main-view');
-  const settingsView = document.getElementById('settings-view');
-  if (!mainView || !settingsView) return;
-  mainView.style.display = 'none';
-  settingsView.style.display = 'flex';
+  const current = document.getElementById('settings-view')?.style.display;
+  if (current !== 'flex') {
+    // remember where we came from
+    previousView = document.getElementById('welcome-view')?.style.display !== 'none'
+      ? 'welcome' : 'wizard';
+  }
+  showView('settings');
   syncSettingsUI();
   checkOllamaHealth();
   if (getOllamaEnabled() && ollamaState === 'online') populateModels();
@@ -293,11 +311,7 @@ function openSettings(): void {
 }
 
 function closeSettings(): void {
-  const mainView     = document.getElementById('main-view');
-  const settingsView = document.getElementById('settings-view');
-  if (!mainView || !settingsView) return;
-  settingsView.style.display = 'none';
-  mainView.style.display = '';
+  showView(previousView);
 }
 
 function syncSettingsUI(): void {
@@ -423,6 +437,20 @@ document.getElementById('ai-badge')?.addEventListener('click', () => {
       await syncMcpStatus();
     }
   });
+
+document.getElementById('titlebarSettingsBtn')?.addEventListener('click', openSettings);
+
+// Welcome screen choices
+document.getElementById('diveInBtn')?.addEventListener('click', openSettings);
+document.getElementById('migrateBtn')?.addEventListener('click', () => {
+  previousView = 'wizard';
+  showView('wizard');
+});
+
+// Wizard back button → welcome
+document.getElementById('wizardBackBtn')?.addEventListener('click', () => {
+  showView('welcome');
+});
 
 document.getElementById('copyGooseConfig')?.addEventListener('click', (e) => {
   const config = '{"mcpServers":{"loci":{"url":"http://localhost:3456"}}}';
