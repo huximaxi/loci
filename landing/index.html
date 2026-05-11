@@ -1246,6 +1246,98 @@ footer {
 [data-theme="llmage"] .contact-modal-email { border-radius: 0; font-weight: 400; font-size: 13px; border: 1px solid var(--text); }
 
 /* ═══════════════════════════════════════════════════════
+   WAITLIST MODAL
+═══════════════════════════════════════════════════════ */
+.waitlist-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.52); z-index: 1000;
+  display: none; align-items: center; justify-content: center; padding: 20px;
+}
+.waitlist-overlay.open { display: flex; }
+.waitlist-box {
+  background: var(--surface); border: 1px solid var(--border-2);
+  border-radius: var(--radius); padding: 32px 28px; max-width: 420px; width: 100%;
+  position: relative; animation: modal-in 0.18s ease;
+}
+[data-theme="wizard"] .waitlist-box {
+  border: 2px solid var(--border-2); border-radius: 0; background: var(--card-bg);
+}
+[data-theme="llmage"] .waitlist-box { border-radius: 0; border: 1px solid var(--border-2); background: var(--bg-2); }
+.waitlist-close {
+  position: absolute; top: 14px; right: 16px; background: none; border: none;
+  color: var(--text-3); font-size: 18px; cursor: pointer; padding: 4px; line-height: 1;
+}
+.waitlist-close:hover { color: var(--text); }
+.waitlist-title {
+  font-size: 20px; font-weight: 600; color: var(--text); margin-bottom: 8px;
+}
+[data-theme="wizard"] .waitlist-title {
+  font-family: 'Press Start 2P', monospace; font-size: 10px; line-height: 1.9; color: var(--accent-xlight);
+}
+[data-theme="llmage"] .waitlist-title { font-size: 16px; font-weight: 300; letter-spacing: -0.02em; }
+.waitlist-sub {
+  font-size: 14px; color: var(--text-2); line-height: 1.65; margin-bottom: 22px;
+}
+[data-theme="wizard"] .waitlist-sub {
+  font-family: 'Press Start 2P', monospace; font-size: 8px; line-height: 2.2;
+}
+[data-theme="llmage"] .waitlist-sub { font-size: 12px; font-weight: 300; color: var(--text-3); letter-spacing: 0.01em; }
+.waitlist-form { display: flex; flex-direction: column; gap: 10px; }
+.waitlist-input {
+  width: 100%; padding: 11px 14px;
+  background: var(--bg); border: 1px solid var(--border-2);
+  border-radius: var(--radius-sm); color: var(--text);
+  font-size: 14px; font-family: var(--font-main);
+  outline: none; transition: border-color 0.18s;
+}
+.waitlist-input:focus { border-color: var(--accent); }
+[data-theme="wizard"] .waitlist-input {
+  border-radius: 0; border: 2px solid var(--border); background: var(--bg-2);
+  font-family: 'Press Start 2P', monospace; font-size: 9px; color: var(--text);
+}
+[data-theme="llmage"] .waitlist-input {
+  border-radius: 0; background: var(--bg-2); font-weight: 300; font-size: 13px; letter-spacing: 0.01em;
+}
+.waitlist-btn {
+  width: 100%; padding: 12px 20px;
+  background: var(--btn-bg); color: var(--btn-text);
+  border: none; border-radius: var(--radius-sm);
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  font-family: var(--font-main); transition: background 0.18s;
+}
+.waitlist-btn:hover:not(:disabled) { background: var(--btn-hover); }
+.waitlist-btn:disabled { opacity: 0.6; cursor: default; }
+[data-theme="wizard"] .waitlist-btn {
+  border-radius: 0; border: 2px solid var(--accent);
+  font-family: 'Press Start 2P', monospace; font-size: 8px;
+  background: transparent; color: var(--accent);
+}
+[data-theme="wizard"] .waitlist-btn:hover:not(:disabled) { background: var(--accent-soft); }
+[data-theme="llmage"] .waitlist-btn {
+  border-radius: 0; font-weight: 400; font-size: 13px; border: 1px solid var(--text);
+}
+.waitlist-privacy {
+  font-size: 11px; color: var(--text-3); text-align: center; margin-top: 4px; line-height: 1.5;
+}
+[data-theme="wizard"] .waitlist-privacy {
+  font-family: 'Press Start 2P', monospace; font-size: 7px; line-height: 2.2;
+}
+[data-theme="llmage"] .waitlist-privacy { font-weight: 300; letter-spacing: 0.01em; }
+.waitlist-error { font-size: 12px; color: #e05050; margin-top: 6px; text-align: center; }
+.waitlist-success { text-align: center; padding: 20px 0; }
+.waitlist-success-icon { font-size: 28px; margin-bottom: 12px; }
+.waitlist-success-text {
+  font-size: 15px; color: var(--text); font-weight: 500; margin-bottom: 6px;
+}
+[data-theme="wizard"] .waitlist-success-text {
+  font-family: 'Press Start 2P', monospace; font-size: 9px; line-height: 2;
+}
+[data-theme="llmage"] .waitlist-success-text { font-weight: 300; font-size: 13px; }
+.waitlist-success-sub { font-size: 13px; color: var(--text-2); }
+[data-theme="wizard"] .waitlist-success-sub {
+  font-family: 'Press Start 2P', monospace; font-size: 7.5px; line-height: 2;
+}
+
+/* ═══════════════════════════════════════════════════════
    WIZARD 9-CARD GRID
 ═══════════════════════════════════════════════════════ */
 .wizard-features-grid {
@@ -1716,35 +1808,25 @@ footer {
   </a>
 
   <div class="nav-right">
-    <!-- Primary nav link: mode-native label -->
     <a href="#features" class="nav-link">
       <span class="t-scholar">How it works</span>
       <span class="t-wizard">The Palace</span>
       <span class="t-llmage">Spec</span>
     </a>
-    <!-- Secondary nav link -->
     <a href="#start" class="nav-link">
-      <span class="t-scholar">Get the extension</span>
+      <span class="t-scholar">Install</span>
       <span class="t-wizard">Enter</span>
       <span class="t-llmage">Install</span>
     </a>
-    <!-- Manifesto + Roadmap: all modes -->
     <a href="manifesto.html" class="nav-link">
       <span class="t-scholar">Manifesto</span>
       <span class="t-wizard">The Spell</span>
       <span class="t-llmage">Manifesto</span>
     </a>
-    <a href="roadmap.html" class="nav-link">
-      <span class="t-scholar">Roadmap</span>
-      <span class="t-wizard">Quest Log</span>
-      <span class="t-llmage">Roadmap</span>
-    </a>
-    <!-- Seed: Wizard only -->
-    <a href="https://loci.garden/seed/" class="nav-link tn-wizard" target="_blank" rel="noopener">The Seed ↗</a>
-    <!-- Download: Wizard + LLMAGE only -->
-    <a href="#download" class="nav-link tn-wizard-up">
-      <span class="t-wizard">Download app</span>
-      <span class="t-llmage">Download</span>
+    <a href="https://github.com/huximaxi/Loci" class="nav-link" target="_blank" rel="noopener">
+      <span class="t-scholar">GitHub ↗</span>
+      <span class="t-wizard">Source ↗</span>
+      <span class="t-llmage">GitHub ↗</span>
     </a>
 
     <!-- Theme Switcher -->
@@ -2201,12 +2283,12 @@ footer {
         </div>
 
         <div class="tauri-download-row">
-          <a href="#" class="tauri-btn" aria-disabled="true" tabindex="-1">
+          <a href="#" class="tauri-btn" onclick="openWaitlist('tauri-mac'); return false;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
             <span class="t-wizard">Download for Mac</span>
             <span class="t-llmage">macOS (.dmg)</span>
           </a>
-          <a href="#" class="tauri-btn" aria-disabled="true" tabindex="-1">
+          <a href="#" class="tauri-btn" onclick="openWaitlist('tauri-win'); return false;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/></svg>
             <span class="t-wizard">Download for Windows</span>
             <span class="t-llmage">Windows (.exe)</span>
@@ -2462,18 +2544,14 @@ footer {
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
                 Chrome Extension (dev preview) →
               </a>
-            <span class="coming-soon-wrap">
-              <a href="#" class="install-pill" tabindex="-1" aria-disabled="true">
+              <a href="#" class="install-pill" onclick="openWaitlist('scholar-mac'); return false;">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-                Download for Mac
+                Mac (early access)
               </a>
-            </span>
-            <span class="coming-soon-wrap">
-              <a href="#" class="install-pill" tabindex="-1" aria-disabled="true">
+              <a href="#" class="install-pill" onclick="openWaitlist('scholar-win'); return false;">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/></svg>
-                Download for Windows
+                Windows (early access)
               </a>
-            </span>
           </div>
         </div>
       </li>
@@ -2538,11 +2616,9 @@ footer {
 
     <!-- Final CTA -->
     <div style="margin-top: 40px; display: flex; gap: 12px; flex-wrap: wrap;">
-      <span class="coming-soon-wrap tb-scholar" style="display:inline-flex;">
-        <a href="#" class="btn-primary" tabindex="-1" aria-disabled="true">
-          <span class="t-scholar">Open loci →</span>
-        </a>
-      </span>
+      <a href="https://github.com/huximaxi/Loci/blob/main/extension/INSTALL.md" class="btn-primary tb-scholar" target="_blank" rel="noopener">
+        <span class="t-scholar">Get the extension →</span>
+      </a>
       <a href="https://loci.garden/start.html" class="btn-primary tb-wizard">
         <span class="t-wizard">Begin the Ritual →</span>
       </a>
@@ -2612,6 +2688,59 @@ footer {
   </div>
 </div>
 
+<!-- ═══════════════════ WAITLIST MODAL ═══════════════ -->
+<div id="waitlist-modal" class="waitlist-overlay" onclick="handleWaitlistBackdrop(event)">
+  <div class="waitlist-box">
+    <button class="waitlist-close" onclick="closeWaitlist()" aria-label="Close">✕</button>
+
+    <!-- Form state -->
+    <div id="waitlist-form-state">
+      <div class="waitlist-title">
+        <span class="t-scholar">Desktop app — early access</span>
+        <span class="t-wizard">The forge is running.</span>
+        <span class="t-llmage">Tauri build · pre-release</span>
+      </div>
+      <p class="waitlist-sub">
+        <span class="t-scholar">The desktop app is coming. Join the list — we'll reach you when it's ready to download.</span>
+        <span class="t-wizard">The Tauri build is taking shape. Leave your mark — we'll summon you when the gates open.</span>
+        <span class="t-llmage">v0.4.0 not yet public. Early access list — email only. Signal incoming on ship date.</span>
+      </p>
+      <form class="waitlist-form" id="waitlist-form" onsubmit="submitWaitlist(event)">
+        <input type="email" class="waitlist-input" id="waitlist-email"
+               placeholder="your@email.com" required autocomplete="email"
+               aria-label="Email address" />
+        <input type="hidden" id="waitlist-source" value="direct" />
+        <button type="submit" class="waitlist-btn" id="waitlist-submit">
+          <span class="t-scholar">Notify me →</span>
+          <span class="t-wizard">Claim your place →</span>
+          <span class="t-llmage">Request access →</span>
+        </button>
+        <p class="waitlist-privacy">
+          <span class="t-scholar">Email only. One notification when it ships. Nothing else.</span>
+          <span class="t-wizard">Email only. One signal when the palace is ready. The list stays private.</span>
+          <span class="t-llmage">Email → one notification → done. No accounts. No tracking.</span>
+        </p>
+        <p class="waitlist-error" id="waitlist-error" style="display:none;"></p>
+      </form>
+    </div>
+
+    <!-- Success state -->
+    <div id="waitlist-success-state" style="display:none;" class="waitlist-success">
+      <div class="waitlist-success-icon">✦</div>
+      <p class="waitlist-success-text">
+        <span class="t-scholar">You're on the list.</span>
+        <span class="t-wizard">Your mark is set.</span>
+        <span class="t-llmage">Registered.</span>
+      </p>
+      <p class="waitlist-success-sub">
+        <span class="t-scholar">We'll reach you when the desktop app is ready.</span>
+        <span class="t-wizard">The palace will call you when the gates open.</span>
+        <span class="t-llmage">Signal incoming on ship date.</span>
+      </p>
+    </div>
+  </div>
+</div>
+
 <!-- ═══════════════════ SCRIPT ════════════════════════ -->
 <script>
   const THEMES = ['scholar', 'wizard', 'llmage'];
@@ -2666,8 +2795,55 @@ footer {
     if (e.target === document.getElementById('contact-modal')) closeContactModal();
   }
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') closeContactModal();
+    if (e.key === 'Escape') { closeContactModal(); closeWaitlist(); }
   });
+
+  // ── Waitlist modal ─────────────────────────────────────
+  function openWaitlist(source) {
+    document.getElementById('waitlist-source').value = source || 'direct';
+    document.getElementById('waitlist-form-state').style.display = '';
+    document.getElementById('waitlist-success-state').style.display = 'none';
+    document.getElementById('waitlist-error').style.display = 'none';
+    document.getElementById('waitlist-email').value = '';
+    document.getElementById('waitlist-submit').disabled = false;
+    document.getElementById('waitlist-modal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    setTimeout(function() { document.getElementById('waitlist-email').focus(); }, 80);
+  }
+  function closeWaitlist() {
+    document.getElementById('waitlist-modal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  function handleWaitlistBackdrop(e) {
+    if (e.target === document.getElementById('waitlist-modal')) closeWaitlist();
+  }
+  async function submitWaitlist(e) {
+    e.preventDefault();
+    var email = document.getElementById('waitlist-email').value.trim();
+    var source = document.getElementById('waitlist-source').value;
+    var btn = document.getElementById('waitlist-submit');
+    var err = document.getElementById('waitlist-error');
+    if (!email) return;
+    btn.disabled = true;
+    err.style.display = 'none';
+    try {
+      var res = await fetch('https://loci.garden/waitlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, source: source })
+      });
+      if (res.ok) {
+        document.getElementById('waitlist-form-state').style.display = 'none';
+        document.getElementById('waitlist-success-state').style.display = '';
+      } else {
+        throw new Error('server');
+      }
+    } catch(_) {
+      err.textContent = 'Something went wrong. Try again or email hux@nymtech.net.';
+      err.style.display = 'block';
+      btn.disabled = false;
+    }
+  }
 </script>
 
 </body>
