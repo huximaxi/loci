@@ -4,6 +4,7 @@ dist/
 *.local
 .env
 .env.*
+!.env.example
 server/waitlist.db
 server/venv/
 
