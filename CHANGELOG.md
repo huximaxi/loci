@@ -4,6 +4,23 @@ All notable changes to loci are documented here.
 
 ---
 
+## desktop v0.5.0 - 2026-05-12 — Welcome Screen + Design Refresh
+
+First-run experience and unified design system.
+
+- **Welcome screen** — new entry view with "dive in" (settings) and "migrate existing palace" CTAs. Tagline: "your knowledge stays local · nothing leaves this machine."
+- **3-view routing** — welcome / wizard / settings as distinct views with proper back navigation. Settings accessible from titlebar gear button at all times.
+- **Design token unification** — dual `--bg-*` / `--sch-*` token split collapsed into a single palette. Cleaner, more maintainable.
+- **Google Fonts removed** — system mono stack (`SF Mono`, `Fira Code`, `Cascadia Code`) replaces IBM Plex. No external network call at launch. Privacy-consistent.
+- **Tauri v2 capabilities** — plugin permissions migrated from deprecated `plugins{}` block in `tauri.conf.json` to `capabilities/default.json` (correct Tauri v2 pattern).
+- **Vite optimizeDeps fix** — excluded Tauri virtual modules from pre-bundling (prevents named export corruption on reload).
+- **Palace Dashboard wireframe** — `desktop/src/palace-dashboard.html` added. Static wireframe for the Tauri RPG overlay (rooms grid, active tracks, phase roadmap, blockers). Tauri wiring and skins in next session.
+- **Crystal SVG simplified** — titlebar crystal reduced to core facets.
+
+**Note:** bundle identifier `garden.loci.app` ends with `.app` — conflicts with macOS bundle extension convention. Fix to `garden.loci.desktop` before v0.6.0.
+
+---
+
 ## desktop v0.4.0 - 2026-05-09 — Goose MCP Server (1B)
 
 Loci is now an MCP server. Any MCP-compatible AI agent — Goose, Claude Code, Continue.dev — can query your knowledge garden.

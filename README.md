@@ -46,7 +46,7 @@ For detailed setup: [SETUP-GUIDE.md](SETUP-GUIDE.md) · [AGENT-SETUP.md](AGENT-S
 | `landing/` | loci.garden website | Live |
 | `extension/` | Chrome MV3 browser extension | v1.2.0 |
 | `packages/core/` | Shared TypeScript types | v0.1 |
-| `desktop/` | Tauri v2 desktop app | v0.1.0 |
+| `desktop/` | Tauri v2 desktop app | v0.5.0 |
 | `LOCI-CORE.md` | Palace methodology version tracker | v1.0 |
 
 ## Three tiers
@@ -68,7 +68,7 @@ Standalone browser extension for search + tagging (Scholar tier).
 
 ## Changelog
 
-**Latest:** loci-core v1.0 · extension v1.2.0 · desktop v0.1.0 · site 2026-05-05
+**Latest:** loci-core v1.2 candidate · extension v1.2.0 · desktop v0.5.0 · site 2026-05-09
 
 → Palace methodology: [LOCI-CORE.md](LOCI-CORE.md)
 → Full history: [CHANGELOG.md](CHANGELOG.md)
