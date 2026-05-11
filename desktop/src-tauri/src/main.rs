@@ -9,6 +9,66 @@ use std::sync::Mutex;
 // ─── 1B: MCP server ───────────────────────────────────────────────────────────
 mod mcp;
 
+// ─── Loci config (persisted to ~/.loci/config.json) ──────────────────────────
+//
+// LociRustConfig mirrors the TypeScript LociConfig type in packages/core/src/types.ts.
+// Stored as pretty-printed JSON at ~/.loci/config.json.
+// Read by the Tauri backend at startup and on-demand via Tauri commands.
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+struct LociRustConfig {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    ollama: Option<OllamaRustConfig>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    mcp: Option<McpRustConfig>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+struct OllamaRustConfig {
+    enabled: bool,
+    base_url: String,
+    chat_model: String,
+    embed_model: String,
+    offline_mode: bool,
+    fail_closed: bool,
+}
+
+impl Default for OllamaRustConfig {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            base_url: "http://localhost:11434".to_string(),
+            chat_model: "llama3".to_string(),
+            embed_model: "nomic-embed-text".to_string(),
+            offline_mode: false,
+            fail_closed: true,
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+struct McpRustConfig {
+    enabled: bool,
+    port: u16,
+    expose_rooms: Vec<String>,
+}
+
+impl Default for McpRustConfig {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            port: 3456,
+            expose_rooms: vec![],
+        }
+    }
+}
+
+fn loci_config_path() -> Result<std::path::PathBuf, String> {
+    dirs::home_dir()
+        .ok_or_else(|| "could not determine home directory".to_string())
+        .map(|h| h.join(".loci").join("config.json"))
+}
+
 // ─── 1A: Ollama local inference ───────────────────────────────────────────────
 //
 // Cipher gate (non-negotiable):
@@ -295,9 +355,15 @@ async fn start_mcp_server(
     std::fs::create_dir_all(&base)
         .map_err(|e| format!("failed to create loci base dir: {}", e))?;
 
+    // Read expose_rooms from persisted config (empty = expose all rooms)
+    let expose_rooms = read_loci_config()
+        .mcp
+        .map(|m| m.expose_rooms)
+        .unwrap_or_default();
+
     let (shutdown_tx, shutdown_rx) = tokio::sync::oneshot::channel::<()>();
 
-    let actual_port = mcp::server::start_server(requested_port, base, shutdown_rx)
+    let actual_port = mcp::server::start_server(requested_port, base, expose_rooms, shutdown_rx)
         .await
         .map_err(|e| format!("MCP server failed to start: {}", e))?;
 
@@ -337,6 +403,40 @@ fn mcp_server_status(
         "running": handle.shutdown_tx.is_some(),
         "port": handle.port,
     })
+}
+
+// ─── Config persistence ───────────────────────────────────────────────────────
+
+/// Read the persisted Loci config from ~/.loci/config.json.
+/// Returns defaults if the file does not exist or cannot be parsed.
+/// Never errors — callers always get a valid config.
+#[tauri::command]
+fn read_loci_config() -> LociRustConfig {
+    let path = match loci_config_path() {
+        Ok(p) => p,
+        Err(_) => return LociRustConfig::default(),
+    };
+    if !path.exists() {
+        return LociRustConfig::default();
+    }
+    let content = match std::fs::read_to_string(&path) {
+        Ok(c) => c,
+        Err(_) => return LociRustConfig::default(),
+    };
+    serde_json::from_str(&content).unwrap_or_default()
+}
+
+/// Write the Loci config to ~/.loci/config.json (pretty-printed JSON).
+/// Creates ~/.loci/ if it does not exist.
+#[tauri::command]
+fn write_loci_config(config: LociRustConfig) -> Result<(), String> {
+    let path = loci_config_path()?;
+    std::fs::create_dir_all(path.parent().ok_or("no parent dir")?)
+        .map_err(|e| format!("failed to create .loci directory: {}", e))?;
+    let content = serde_json::to_string_pretty(&config)
+        .map_err(|e| format!("failed to serialize config: {}", e))?;
+    std::fs::write(&path, content)
+        .map_err(|e| format!("failed to write config: {}", e))
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -537,6 +637,9 @@ fn main() {
             start_mcp_server,
             stop_mcp_server,
             mcp_server_status,
+            // Config persistence
+            read_loci_config,
+            write_loci_config,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
