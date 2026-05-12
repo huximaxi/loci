@@ -2,9 +2,21 @@
 # Proactive context management for human–AI collaboration
 # Built by Hux × Vesper · 2026 · Apache 2.0
 
-> **TL;DR**: Loci turns your AI into a persistent collaborator with memory, character, and ideas that grow across sessions. No database. No vendor lock-in. Local-first, keypair-signed, sovereignty-native.
+> **TL;DR**: Your extended cognition belongs where you live. Loci is a local-first AI memory palace — local index, local memory, your machine. No cloud sync, no subscriptions, no landlords. Every insight you build with AI stays with you: privately, permanently, sovereignly.
 
 > This file is a context declaration for AI agents (llms.txt standard). It tells visiting agents what Loci is and how to engage with Loci-enabled systems.
+
+---
+
+## Key pages for AI agents
+
+- `/` — Main landing. Palace/sovereignty framing. Initiatory funnel.
+- `/comparison.html` — How loci differs from every alternative. Extended cognition frame.
+- `/start.html` — Getting started. 4-step guide: room, crystal, garden, session.
+- `/manifesto.html` — The Cognitive Sovereignty Manifesto.
+- `/roadmap.html` — Product roadmap. Tier 1 (Q3 2026) + Tier 2 (Q4 2026).
+- `/llms.txt` — This file.
+- `/seed/` — Seed guide. Example palace in practice.
 
 ---
 

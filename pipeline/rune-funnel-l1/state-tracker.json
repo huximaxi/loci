@@ -1,0 +1,139 @@
+{
+  "project": "RUNE Funnel + Node-Entry Ritual",
+  "created": "2026-05-11",
+  "phases": {
+    "phase-1": {
+      "label": "Unblock the threshold",
+      "status": "completed",
+      "huxgate": "required before phase-2",
+      "tasks": [
+        {
+          "id": "P1.1",
+          "label": "Fix Tauri download links \u2192 email waitlist modal + RUNE copy",
+          "status": "completed",
+          "owner": "vesper",
+          "completed": "2026-05-11",
+          "notes": "Waitlist modal added: CSS + HTML + JS. Three themes (Scholar/Wizard/LLMAGE). Tauri buttons now trigger openWaitlist('tauri-mac'/'tauri-win'). RUNE copy: Scholar=warm/practical, Wizard=ritual/summon, LLMAGE=terse/technical."
+        },
+        {
+          "id": "P1.2",
+          "label": "Fix extension install pills \u2192 Chrome live, Mac/Win \u2192 waitlist triggers",
+          "status": "completed",
+          "owner": "vesper",
+          "completed": "2026-05-11",
+          "notes": "Removed coming-soon-wrap from Mac/Win pills. Now trigger openWaitlist('scholar-mac'/'scholar-win'). Scholar final CTA 'Open loci' \u2192 live link to extension/INSTALL.md."
+        },
+        {
+          "id": "P1.3",
+          "label": "Verify / fix docs.loci.garden or route to llms-full.txt",
+          "status": "completed",
+          "owner": "hux",
+          "notes": "Blocked on Hux: check if https://docs.loci.garden resolves. LLMAGE 'Full documentation' CTA points there. If not live, change to https://github.com/huximaxi/Loci/blob/main/llms-full.txt \u2014 RESOLVED: docs.loci.garden confirmed live.",
+          "completed": "2026-05-11"
+        },
+        {
+          "id": "P1.4",
+          "label": "Nav simplification: 4 items max, remove dead links",
+          "status": "completed",
+          "owner": "vesper",
+          "completed": "2026-05-11",
+          "notes": "Nav now: How it works \u00b7 Install \u00b7 Manifesto \u00b7 GitHub. Removed: Roadmap, The Seed (wizard-only), Download app (wizard+llmage). Roadmap remains accessible at roadmap.html via footer/direct link."
+        },
+        {
+          "id": "P1.5",
+          "label": "Email waitlist: standalone FastAPI service at Dev/loci/server/",
+          "status": "completed",
+          "owner": "hux",
+          "completed": "2026-05-11",
+          "notes": "Standalone service built. Dev/loci/server/main.py, requirements.txt, .env.example, README.md. Runs port 8001. Wedding-server untouched. Deploy: copy to palace-vps, systemd unit, Caddy block."
+        }
+      ]
+    },
+    "phase-2": {
+      "label": "Funnel copy + Level 1 ritual",
+      "status": "completed",
+      "huxgate": "passed_2026-05-12",
+      "tasks": [
+        {
+          "id": "P2.1",
+          "label": "RUNE copy pass: Stage 1-3 (hero, scroll, comparison)",
+          "status": "completed",
+          "owner": "rune",
+          "completed": "2026-05-12",
+          "notes": "RUNE hero copy + Stage 3 demiurge block shipped to index.html. Hero headline, sub, CTA rewritten. \"Bring it home \u2192\" applied."
+        },
+        {
+          "id": "P2.2",
+          "label": "Threshold verb decision + apply to all CTAs",
+          "status": "completed",
+          "owner": "hux+rune",
+          "completed": "2026-05-12",
+          "notes": "Threshold verb decided: \"Bring it home \u2192\". Nurture arc with \"Keep it close\" body copy. Applied to all CTAs."
+        },
+        {
+          "id": "P2.3",
+          "label": "start.html: design one cognitive homecoming moment",
+          "status": "completed",
+          "owner": "nyx+rune",
+          "completed": "2026-05-12",
+          "notes": "start.html homecoming moment written. Cognitive homecoming section + \"You just made space. Now we fill it.\""
+        },
+        {
+          "id": "P2.4",
+          "label": "Level 1 ritual: ship single-phrase fade on node entry",
+          "status": "completed",
+          "owner": "vesper",
+          "completed": "2026-05-12",
+          "notes": "Level 1 ritual shipped: \"The palace remembers.\" 3.5s fade, skippable. CSS + JS on start.html."
+        },
+        {
+          "id": "P2.5",
+          "label": "Persona fold: Scholar+Wizard \u2192 single journey, LLMage separate",
+          "status": "completed",
+          "owner": "nyx",
+          "completed": "2026-05-12",
+          "notes": "Persona fold complete. Wizard card CTA \u2192 #start \"Enter the Palace \u2192\". Scholar/Wizard converge on same journey."
+        }
+      ]
+    },
+    "phase-3": {
+      "label": "Depth + compounding",
+      "status": "in_progress",
+      "huxgate": "required before shipping",
+      "tasks": [
+        {
+          "id": "P3.1",
+          "label": "Level 2 ritual: CSE embed in Loci desktop",
+          "status": "not_started",
+          "owner": "vesper"
+        },
+        {
+          "id": "P3.2",
+          "label": "Full onboarding: anamnesis sequence + crystal pre-load",
+          "status": "not_started",
+          "owner": "nyx+rune"
+        },
+        {
+          "id": "P3.3",
+          "label": "LLMage track: separate page, developer-native",
+          "status": "not_started",
+          "owner": "vesper+nyx"
+        },
+        {
+          "id": "P3.4",
+          "label": "comparison.html: RUNE frame-installation copy pass",
+          "status": "completed",
+          "owner": "rune",
+          "completed": "2026-05-12",
+          "notes": "comparison.html hero rewritten with Crane/Semantrixx C+ frame. \"Everything you figured out is still part of you. It just doesn't know where you live.\" + extended cognition copy + \"Not yet, is not forever. Own your memory now.\""
+        }
+      ]
+    }
+  },
+  "palace_links": {
+    "rune_funnel_doc": "_palace/marketing-room/sessions/2026-05-10-rune-funnel-stack.md",
+    "node_entry_spec": "loci/pipeline/features/node-entry-ritual.md",
+    "tcp_addendum": "_palace/trust-cp/work/thesis/ch08-empirical/8-4b-hypnosis-addendum.md",
+    "cse_widget": "session_2026-05-11_cowork"
+  }
+}
