@@ -63,6 +63,7 @@ Short version:
 | Output primitives | `templates/output-primitive.md` in scope? |
 | Processes | All relevant processes known and triggerable? |
 | Insight decay | Time-sensitive crystals marked with `valid_until`? |
+| **Two-tier wiring** | Identity block at top of CLAUDE.md? Global layer configured for their tool (`~/.claude/CLAUDE.md` / Project Instructions / Cowork workspace)? Run `scripts/check-two-tier.py` for a full report. |
 
 ---
 
@@ -80,7 +81,8 @@ If unsure: run a full check and note what's new.
 
 Offer optional features in this priority sequence — most impactful first:
 
-1. Output primitives (if not in use)
+1. Two-tier memory wiring (if identity block missing or global layer not configured)
+2. Output primitives (if not in use)
 2. Garden (if missing or empty)
 3. Morning check-in / daily routine (if not scheduled)
 4. Autodream (if not scheduled)
