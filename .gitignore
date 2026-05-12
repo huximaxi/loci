@@ -25,3 +25,23 @@ src-tauri/target/
 *.ntvs*
 *.njsproj
 *.sln
+
+# ── LOCAL ONLY — never push to public repo ─────────────────────
+# JUMP-IN prompts + local planning docs (Loci Dev on Hux local)
+pipeline/features/JUMP-IN-*.md
+pipeline/features/LONGLIST.md
+pipeline/features/session-start-gate.md
+pipeline/features/node-entry-ritual.md
+pipeline/features/1A-ollama/NYX-DESIGN-PROMPTS.md
+
+# Local pipeline state + logs
+pipeline/rune-funnel-l1/
+pipeline/watcher/
+pipeline/ROADMAP-TRACKER.md.bak
+watcher/
+
+# Tauri generated files
+desktop/src-tauri/gen/
+
+# Claude Cowork local session
+.claude/
