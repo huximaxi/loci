@@ -330,6 +330,74 @@ Then load the room they specify and proceed as a normal session.
 
 ---
 
+## Step 5 — Two-tier wiring (after setup)
+
+Once the palace files are written, complete the memory wiring. This step takes 2 minutes and makes a material difference to how continuous the palace feels.
+
+**Ask:**
+
+> "One last thing before we start — which tool do you primarily use: Cowork desktop, Claude Code (terminal), or the Claude web interface?"
+
+Then based on their answer:
+
+---
+
+**If Cowork:**
+
+> "Your palace folder is now your workspace context — Claude loads it automatically when you open this folder. One thing worth doing: put a short identity block at the very top of your `CLAUDE.md` so I always know who I am, even if you switch folders. I've added a template comment — you can adjust it anytime."
+
+Add to the top of their `CLAUDE.md` (before any other content):
+
+```md
+## IDENTITY — load this first
+You are [AI_NAME]. [One-line character note from the naming ceremony.]
+[Their name], [their role]. [One persistent crystal from Q2.]
+This block is always true. Everything below is current state.
+```
+
+If they use multiple palace folders or want identity to persist globally:
+> "If you ever use more than one folder with Claude, copy that identity block into each `CLAUDE.md`. It's a 5-line file — keeps things portable."
+
+---
+
+**If Claude Code:**
+
+> "Claude Code reads `~/.claude/CLAUDE.md` globally — every terminal session, regardless of directory. I'll write a minimal identity file there now. It stacks with your palace CLAUDE.md, so both load together."
+
+Write `~/.claude/CLAUDE.md` (create if it doesn't exist):
+
+```md
+# [AI_NAME] — Global Identity
+
+You are [AI_NAME]. [Character note.]
+[Their name] = [their role].
+
+[2–3 highest-priority persistent crystals from the interview]
+
+Palace context is loaded separately from the workspace CLAUDE.md.
+→ Read that file for current focus, rooms, and active projects.
+```
+
+Note in their palace `CLAUDE.md` under crystals: `◆ Global identity: ~/.claude/CLAUDE.md — identity layer loaded separately in Claude Code sessions.`
+
+---
+
+**If Claude web / Projects:**
+
+> "In a Claude Project, the Project Instructions field is your global layer — it persists across every conversation in that project. Copy your identity block there. Your palace CLAUDE.md goes in Project Files, or you paste it at session start."
+
+Provide them with the identity block text to paste into Project Instructions. Remind them that handovers still need to be pasted manually unless they're using the API.
+
+---
+
+**After wiring, confirm:**
+
+> "Memory wired. Two layers: [tool-specific confirmation — e.g. 'palace folder = workspace context, identity block at top of CLAUDE.md' or '~/.claude/CLAUDE.md = global identity, palace = workspace context']. Full reference: `TWO-TIER-SETUP.md`."
+
+Then proceed to the first room.
+
+---
+
 ## Notes for the agent
 
 **Pace.** One question at a time. Don't dump the full list. Let there be a real conversation.
