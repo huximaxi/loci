@@ -4,6 +4,15 @@ All notable changes to loci are documented here.
 
 ---
 
+## v1.1 - 2026-05-12 (palace)
+- **Two-tier memory setup** — `TWO-TIER-SETUP.md` added. Full reference for wiring a palace into Claude's memory system across all three surfaces: Cowork desktop (workspace folder = Tier 2, identity block at top of CLAUDE.md), Claude Code (`~/.claude/CLAUDE.md` = Tier 1 global identity, palace CLAUDE.md = Tier 2), Claude web/Projects (Project Instructions = Tier 1, palace CLAUDE.md in Project Files). Quick-reference table: which context belongs in which tier.
+- **Identity block pattern** — canonical 4-line identity block documented. Goes at the top of every palace CLAUDE.md. Makes the palace portable across folder switches and provides a Tier 1 fallback for Cowork setups.
+- **Local vs non-local palace model** — local palace (working memory, session deltas, private) vs non-local palace (shipped artifacts, published outputs) formally documented. Bridge: tracker + review gate controls what moves to production.
+- **Step 5 in AGENT-SETUP.md** — two-tier wiring added as the final onboarding step. Agent asks which tool the user is on, then writes the correct global identity layer before opening the first room.
+- **`scripts/check-two-tier.py`** — stdlib Python checker. Runs from the palace root. Reports ✅/⚠️/❌ across six checks: CLAUDE.md present, identity block, global layer configured, soul file, rooms, session history. Exit 0 if all pass, exit 1 if any fail.
+
+---
+
 ## desktop v0.5.0 - 2026-05-12 — Welcome Screen + Design Refresh
 
 First-run experience and unified design system.
