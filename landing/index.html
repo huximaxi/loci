@@ -161,7 +161,7 @@ body {
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  background: radial-gradient(ellipse at 50% 50%, transparent 52%, rgba(0,0,0,0.70) 100%);
+  background: radial-gradient(ellipse at 50% 50%, transparent 60%, rgba(0,0,0,0.40) 100%);
 }
 
 /* LLMAGE scanline overlay */
@@ -191,12 +191,23 @@ body {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
-  padding: 0 32px;
+  padding: 0;
   height: 60px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   transition: background 0.35s, border-color 0.35s;
+}
+
+/* inner wrapper — aligns nav edges with section max-width */
+.nav-inner {
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
 }
 
 [data-theme="wizard"] .nav {
@@ -346,11 +357,11 @@ section.hero-section {
   text-align: center;
 }
 
-/* Wizard hero background image */
+/* Wizard hero background image — right-side atmospheric, visible not dominant */
 .wizard-hero-bg {
   position: absolute;
-  top: 0; left: 0;
-  width: 68%;
+  top: 0; right: 0;
+  width: 44%;
   height: 100%;
   overflow: hidden;
   z-index: 0;
@@ -361,18 +372,37 @@ section.hero-section {
   height: 100%;
   object-fit: cover;
   object-position: center top;
-  filter: saturate(0.8) brightness(0.65);
+  filter: saturate(0.75) brightness(0.6);
 }
 .wizard-hero-bg::after {
   content: '';
   position: absolute;
   inset: 0;
   background: linear-gradient(
-    to right,
-    transparent 25%,
-    rgba(13,13,14,0.6) 65%,
-    #0d0d0e 90%
+    to left,
+    transparent 20%,
+    rgba(6,8,16,0.55) 55%,
+    #060810 82%
   );
+}
+
+/* Mobile: full-bleed background, text stays readable */
+@media (max-width: 640px) {
+  .wizard-hero-bg {
+    left: 0; right: 0;
+    width: 100%;
+  }
+  .wizard-hero-bg::after {
+    background: linear-gradient(
+      to bottom,
+      rgba(6,8,16,0.55) 0%,
+      rgba(6,8,16,0.82) 60%,
+      #060810 90%
+    );
+  }
+  .wizard-hero-img {
+    filter: saturate(0.5) brightness(0.45);
+  }
 }
 
 /* Ensure hero text sits above the image */
@@ -486,15 +516,16 @@ section.hero-section {
 }
 
 [data-theme="wizard"] .hero-title {
-  font-size: clamp(16px, 2.2vw, 24px);
-  letter-spacing: 0.02em;
-  line-height: 1.6;
-  color: var(--accent-xlight);
+  font-size: clamp(30px, 4.5vw, 52px);
+  font-family: 'Georgia', 'Times New Roman', serif;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  color: #f5e8c8;
   text-shadow:
-    0 0 6px rgba(255,200,80,0.4),
-    0 0 20px rgba(200,124,44,0.25);
-  white-space: nowrap;
-  word-break: keep-all;
+    0 0 8px rgba(255,200,80,0.25),
+    0 1px 0 rgba(0,0,0,0.6);
+  white-space: normal;
+  word-break: normal;
   overflow-wrap: normal;
 }
 
@@ -516,9 +547,10 @@ section.hero-section {
 }
 
 [data-theme="wizard"] .hero-sub {
-  font-size: 14px;
-  line-height: 1.8;
+  font-size: 15px;
+  line-height: 1.75;
   max-width: 500px;
+  color: #bfb89a;
 }
 
 [data-theme="llmage"] .hero-sub {
@@ -1489,7 +1521,7 @@ footer {
    RESPONSIVE
 ═══════════════════════════════════════════════════════ */
 @media (max-width: 640px) {
-  .nav { padding: 0 16px; }
+  .nav-inner { padding: 0 16px; }
   section { padding: 60px 20px; }
   .theme-btn { padding: 5px 8px; font-size: 10px; }
   [data-theme="wizard"] .theme-btn { font-size: 10px; padding: 6px 10px; }
@@ -1782,6 +1814,7 @@ footer {
 
 <!-- ═══════════════════ NAV ═══════════════════════════ -->
 <nav class="nav">
+  <div class="nav-inner">
 
   <!-- Logo -->
   <a href="/" class="nav-logo" aria-label="loci.garden home">
@@ -1871,6 +1904,8 @@ footer {
     <button class="theme-btn" id="btn-wizard"  onclick="setTheme('wizard')"  aria-pressed="false">⚔ Wizard</button>
     <button class="theme-btn" id="btn-llmage"  onclick="setTheme('llmage')"  aria-pressed="false">◈ LLMAGE</button>
   </div>
+
+  </div><!-- /.nav-inner -->
 </nav>
 
 <!-- ═══════════════════ MAIN ══════════════════════════ -->
