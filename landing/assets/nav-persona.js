@@ -8,6 +8,11 @@
   function setPersonaAndReturn(theme) {
     try { localStorage.setItem('loci-theme', theme); }
     catch (_) { /* private mode or storage disabled — still navigate */ }
+    try {
+      if (window.umami && typeof window.umami.track === 'function') {
+        window.umami.track('persona-switch', { persona: theme, source: 'mini-switcher' });
+      }
+    } catch (_) { /* tracking is best-effort, never block navigation */ }
     window.location.href = '/';
   }
 

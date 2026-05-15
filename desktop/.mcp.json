@@ -1,0 +1,17 @@
+{
+  "_comment": "Loci MCP server reference config. Surfaced via the landing LLMAGE one-liner (`git clone … && cd loci/desktop && cat .mcp.json`). Apache 2.0.",
+  "_version": "0.1",
+  "_status": "open beta — moves with the desktop app release cadence",
+  "mcpServers": {
+    "loci": {
+      "command": "loci-mcp",
+      "args": ["--config", "~/.loci/config.json"],
+      "_note": "Provided by the Loci Desktop app (https://github.com/huximaxi/loci/releases). Until 1B-goose-mcp lands, this entry is a config target — the Loci Desktop app exposes the MCP server when running."
+    }
+  },
+  "_resources": [
+    "https://loci.garden/install/wizard.sh — installer that merges this into your Claude Desktop config",
+    "https://loci.garden/roadmap.html — what's shipped, what's coming",
+    "https://github.com/huximaxi/loci — source"
+  ]
+}
