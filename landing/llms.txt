@@ -288,6 +288,8 @@ Privacy-consistent, sovereignty-respecting, minimal.
 **Docs**: https://docs.loci.garden
 **Get started**: https://loci.garden/guide.html
 **Dispatches**: https://loci.garden/seed/
+- https://loci.garden/seed/rendszerbontas.html — Dispatch 001: Rendszerbontás — Hungary 2026 election analysis, NVI metric, cultural mobilisation, techno movement, democratic transition
+- https://loci.garden/seed/beagyazas.html — Dispatch 002: Beágyazás — psychotechnology as infrastructure, prior-reset mechanism, collective effervescence, Civil Kurázsi, polgári ellenállás, affective infrastructure
 **GitHub**: https://github.com/huximaxi/loci
 **Contact**: hux@nymtech.net
 
