@@ -1912,12 +1912,40 @@ footer {
   opacity: 1;
 }
 
+/* Mobile: pull the mini-switcher out of the nav and float it
+ * as a centered overlay pill just below the nav bar. Frees the nav
+ * for logo + nav-links, and keeps the switcher always reachable. */
 @media (max-width: 640px) {
-  .nav-logo-group { gap: 0.4rem; }
-  .nav-persona-mini { gap: 0.1rem; padding-left: 0.4rem; }
-  .persona-mini-btn { font-size: 0.78rem; padding: 2px 3px; }
+  .nav-logo-group { gap: 0; }
+  .nav-persona-mini {
+    position: fixed;
+    top: calc(var(--nav-height) + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 110;
+    gap: 0.2rem;
+    padding: 5px 12px;
+    background: rgba(13, 13, 14, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    border-left: 1px solid var(--border);
+    border-radius: 999px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  }
+  .persona-mini-btn {
+    font-size: 0.95rem;
+    padding: 3px 7px;
+    opacity: 0.65;
+  }
+  /* Push first content section down so it clears the floating dock */
+  .page-content,
+  main:not(.no-mini-offset) {
+    padding-top: calc(var(--nav-height) + 56px);
+  }
 }
 
 @media (max-width: 380px) {
-  .persona-mini-btn { font-size: 0.7rem; padding: 2px 2px; }
+  .nav-persona-mini { padding: 4px 10px; }
+  .persona-mini-btn { font-size: 0.88rem; padding: 3px 5px; }
 }
