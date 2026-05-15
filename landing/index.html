@@ -2210,7 +2210,7 @@ footer {
         </div>
         <p class="persona-card-desc">A regular user who chats with AI tools and wants their work to stick. Browser extension + native app, full-text search, private local index. No config. No cloud. No re-explaining yourself from scratch every session.</p>
         <div class="persona-card-feel">Feels like: your AI finally knows who you are.</div>
-        <a href="#" class="persona-card-cta" onclick="openWaitlist('scholar-card'); return false;">Join early access →</a>
+        <a href="#" class="persona-card-cta" data-umami-event="persona-cta" data-umami-event-persona="scholar" onclick="openWaitlist('scholar-card'); return false;">Join early access →</a>
       </div>
 
       <!-- Wizard card -->
@@ -2221,7 +2221,7 @@ footer {
         </div>
         <p class="persona-card-desc">A technically curious builder, gamer, or power user. Run a single curl one-liner to wire loci into Claude Desktop (or your favourite MCP-aware client). Optional Tauri palace app for the full RPG view. Works with local or remote LLMs.</p>
         <div class="persona-card-feel">Feels like: building a dungeon your AI lives in.</div>
-        <a href="#start" class="persona-card-cta" onclick="setTheme('wizard')">See the one-liner →</a>
+        <a href="#start" class="persona-card-cta" data-umami-event="persona-cta" data-umami-event-persona="wizard" onclick="setTheme('wizard')">See the one-liner →</a>
       </div>
 
       <!-- LLMAGE card -->
@@ -2232,7 +2232,7 @@ footer {
         </div>
         <p class="persona-card-desc">A developer or researcher who wants full control over the context layer. One-liner: <code>git clone</code> + inspect the MCP server, config, and primitives. The sovereignty stack (Nostr identity, Nym sync) lands across Q3/Q4 — see the roadmap for honest status.</p>
         <div class="persona-card-feel">Feels like: the infrastructure, finally yours.</div>
-        <a href="#start" class="persona-card-cta" onclick="setTheme('llmage')">Read the spec →</a>
+        <a href="#start" class="persona-card-cta" data-umami-event="persona-cta" data-umami-event-persona="llmage" onclick="setTheme('llmage')">Read the spec →</a>
       </div>
 
     </div>
@@ -2482,12 +2482,12 @@ footer {
         </div>
 
         <div class="tauri-download-row">
-          <a href="#" class="tauri-btn" onclick="openBetaWarning('tauri-mac'); return false;">
+          <a href="#" class="tauri-btn" data-umami-event="tauri-download-attempt" data-umami-event-platform="mac" onclick="openBetaWarning('tauri-mac'); return false;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
             <span class="t-wizard">Download for Mac</span>
             <span class="t-llmage">macOS (.dmg)</span>
           </a>
-          <a href="#" class="tauri-btn" onclick="openBetaWarning('tauri-win'); return false;">
+          <a href="#" class="tauri-btn" data-umami-event="tauri-download-attempt" data-umami-event-platform="win" onclick="openBetaWarning('tauri-win'); return false;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/></svg>
             <span class="t-wizard">Download for Windows</span>
             <span class="t-llmage">Windows (.exe)</span>
@@ -2739,15 +2739,15 @@ footer {
             <span class="t-llmage"><code>git clone https://github.com/huximaxi/loci && cd loci/desktop && cat .mcp.json</code></span>
           </p>
           <div class="install-pills tb-scholar">
-              <a href="#" class="install-pill" onclick="openWaitlist('scholar-extension'); return false;">
+              <a href="#" class="install-pill" data-umami-event="install-attempt" data-umami-event-target="scholar-extension" onclick="openWaitlist('scholar-extension'); return false;">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
                 Browser extension (early access)
               </a>
-              <a href="#" class="install-pill" onclick="openWaitlist('scholar-mac'); return false;">
+              <a href="#" class="install-pill" data-umami-event="install-attempt" data-umami-event-target="scholar-mac" onclick="openWaitlist('scholar-mac'); return false;">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
                 Mac (early access)
               </a>
-              <a href="#" class="install-pill" onclick="openWaitlist('scholar-win'); return false;">
+              <a href="#" class="install-pill" data-umami-event="install-attempt" data-umami-event-target="scholar-win" onclick="openWaitlist('scholar-win'); return false;">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/></svg>
                 Windows (early access)
               </a>
@@ -2792,7 +2792,7 @@ footer {
       <div class="wi-comment">// 2. run one line in your terminal:</div>
       <br>
       <span class="wi-cmd" id="wizard-curl-cmd">curl -fsSL https://loci.garden/install/wizard.sh | bash</span>
-      <button class="wi-copy-btn" onclick="copyWizardCurl(this)" aria-label="Copy command">copy</button>
+      <button class="wi-copy-btn" data-umami-event="wizard-curl-copy" onclick="copyWizardCurl(this)" aria-label="Copy command">copy</button>
       <br><br>
       <div class="wi-comment">// 3. restart Claude Desktop — loci tools appear in your toolbox</div>
       <div class="wi-comment">// open beta · macOS · backs up your config before any write</div>
@@ -2952,8 +2952,8 @@ footer {
       Stable releases land on the <strong>GitHub releases page</strong> when they're ready.
     </p>
     <div class="beta-warning-actions">
-      <a id="beta-warning-continue" href="#" target="_blank" rel="noopener" class="beta-warning-btn primary">Continue to the beta build →</a>
-      <a href="https://github.com/huximaxi/loci/releases" target="_blank" rel="noopener" class="beta-warning-btn">Take me to GitHub releases instead</a>
+      <a id="beta-warning-continue" href="#" target="_blank" rel="noopener" class="beta-warning-btn primary" data-umami-event="beta-warning-continue">Continue to the beta build →</a>
+      <a href="https://github.com/huximaxi/loci/releases" target="_blank" rel="noopener" class="beta-warning-btn" data-umami-event="beta-warning-opt-out">Take me to GitHub releases instead</a>
     </div>
   </div>
 </div>
@@ -3109,5 +3109,6 @@ footer {
   }
 </script>
 
+  <script defer src="https://analytics.195-246-230-118.sslip.io/script.js" data-website-id="e00d2f0a-fbd7-40bf-8740-cb1ab2a82b86"></script>
 </body>
 </html>
