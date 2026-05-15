@@ -1516,6 +1516,104 @@ footer {
 .wizard-install-block .wi-comment { color: var(--text-3); font-family: 'Press Start 2P', monospace; font-size: 8px; }
 .wizard-install-block .wi-cmd { color: var(--accent-xlight); }
 .wizard-install-block .wi-sep { color: var(--text-3); margin: 4px 0; display: block; }
+.wizard-install-block .wi-copy-btn {
+  display: inline-block;
+  margin-left: 10px;
+  padding: 2px 8px;
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-3);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.wizard-install-block .wi-copy-btn:hover { color: var(--text); border-color: var(--accent); background: rgba(200,124,44,0.06); }
+.wizard-install-block .wi-copy-btn.copied { color: var(--accent-light); border-color: var(--accent); }
+
+/* ── Open-beta warning modal ───────────────────────────── */
+.beta-warning-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.beta-warning-overlay.open { display: flex; }
+.beta-warning-box {
+  background: var(--bg-2, #15151a);
+  border: 1px solid var(--border-2, rgba(255,255,255,0.1));
+  border-radius: var(--radius, 6px);
+  max-width: 460px;
+  width: 100%;
+  padding: 32px 28px 24px;
+  position: relative;
+  animation: modal-in 0.22s cubic-bezier(0.4,0,0.2,1);
+}
+.beta-warning-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  background: none;
+  border: none;
+  color: var(--text-3);
+  font-size: 18px;
+  cursor: pointer;
+}
+.beta-warning-close:hover { color: var(--text); }
+.beta-warning-icon {
+  font-size: 28px;
+  color: #e8974a;
+  margin-bottom: 12px;
+  text-align: center;
+}
+.beta-warning-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+  margin-bottom: 10px;
+}
+.beta-warning-body {
+  font-size: 13px;
+  color: var(--text-2);
+  line-height: 1.6;
+  margin-bottom: 18px;
+}
+.beta-warning-body strong { color: var(--text); }
+.beta-warning-actions {
+  display: flex;
+  gap: 10px;
+  flex-direction: column;
+}
+.beta-warning-btn {
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+  transition: all 0.15s;
+}
+.beta-warning-btn:hover { color: var(--text); border-color: var(--text-3); }
+.beta-warning-btn.primary {
+  background: rgba(232,151,74,0.12);
+  border-color: rgba(232,151,74,0.4);
+  color: #e8974a;
+}
+.beta-warning-btn.primary:hover { background: rgba(232,151,74,0.2); color: #f5b070; }
 
 /* ═══════════════════════════════════════════════════════
    RESPONSIVE
@@ -1616,6 +1714,22 @@ footer {
 }
 .persona-card.llmage-accent .persona-card-mode { color: #9C9C9C; }
 .persona-card.llmage-accent .persona-card-cta  { color: #9C9C9C; }
+.persona-card-chip {
+  display: inline-block;
+  font-family: var(--font-mono, monospace);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin-left: 8px;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.persona-card-chip.chip-early { color: var(--accent, #c87c2c); background: rgba(200,124,44,0.14); }
+.persona-card-chip.chip-beta  { color: #e8974a; background: rgba(232,151,74,0.12); }
+.persona-card-chip.chip-wip   { color: #b8b8b8; background: rgba(255,255,255,0.06); }
 @media (max-width: 700px) {
   .persona-cards { grid-template-columns: 1fr; }
 }
@@ -2091,32 +2205,32 @@ footer {
       <!-- Scholar card (current mode — highlighted) -->
       <div class="persona-card">
         <div>
-          <div class="persona-card-mode">◆ Scholar</div>
+          <div class="persona-card-mode">◆ Scholar<span class="persona-card-chip chip-early">early access</span></div>
           <div class="persona-card-role">Your AI finally remembers you.</div>
         </div>
-        <p class="persona-card-desc">A regular user who chats with AI tools and wants their work to stick. Browser extension, full-text search, private local index. No config. No cloud. No re-explaining yourself from scratch every session.</p>
+        <p class="persona-card-desc">A regular user who chats with AI tools and wants their work to stick. Browser extension + native app, full-text search, private local index. No config. No cloud. No re-explaining yourself from scratch every session.</p>
         <div class="persona-card-feel">Feels like: your AI finally knows who you are.</div>
-        <a href="#start" class="persona-card-cta">Install the extension →</a>
+        <a href="#" class="persona-card-cta" onclick="openWaitlist('scholar-card'); return false;">Join early access →</a>
       </div>
 
       <!-- Wizard card -->
       <div class="persona-card wizard-accent">
         <div>
-          <div class="persona-card-mode">⚔ Wizard</div>
-          <div class="persona-card-role">Build your own RPG world.</div>
+          <div class="persona-card-mode">⚔ Wizard<span class="persona-card-chip chip-beta">open beta</span></div>
+          <div class="persona-card-role">Open your AI desktop app, paste one line.</div>
         </div>
-        <p class="persona-card-desc">A technically curious builder, gamer, or power user who wants a configurable environment. Desktop app with palace rooms, IDE overlay, quest-style onboarding, and MCP integration. Works with local or remote LLMs.</p>
+        <p class="persona-card-desc">A technically curious builder, gamer, or power user. Run a single curl one-liner to wire loci into Claude Desktop (or your favourite MCP-aware client). Optional Tauri palace app for the full RPG view. Works with local or remote LLMs.</p>
         <div class="persona-card-feel">Feels like: building a dungeon your AI lives in.</div>
-        <a href="#start" class="persona-card-cta" onclick="setTheme('wizard')">Enter the Palace →</a>
+        <a href="#start" class="persona-card-cta" onclick="setTheme('wizard')">See the one-liner →</a>
       </div>
 
       <!-- LLMAGE card -->
       <div class="persona-card llmage-accent">
         <div>
-          <div class="persona-card-mode">◈ LLMAGE</div>
-          <div class="persona-card-role">Write your own memory spec.</div>
+          <div class="persona-card-mode">◈ LLMAGE<span class="persona-card-chip chip-wip">WIP</span></div>
+          <div class="persona-card-role">Clone the repo. Read the spec. Own the stack.</div>
         </div>
-        <p class="persona-card-desc">A developer, researcher, or practitioner who wants full control over the context layer. Bare metal: raw MCP server, config files, composable context primitives. Your schema, your terms.</p>
+        <p class="persona-card-desc">A developer or researcher who wants full control over the context layer. One-liner: <code>git clone</code> + inspect the MCP server, config, and primitives. The sovereignty stack (Nostr identity, Nym sync) lands across Q3/Q4 — see the roadmap for honest status.</p>
         <div class="persona-card-feel">Feels like: the infrastructure, finally yours.</div>
         <a href="#start" class="persona-card-cta" onclick="setTheme('llmage')">Read the spec →</a>
       </div>
@@ -2368,20 +2482,20 @@ footer {
         </div>
 
         <div class="tauri-download-row">
-          <a href="#" class="tauri-btn" onclick="openWaitlist('tauri-mac'); return false;">
+          <a href="#" class="tauri-btn" onclick="openBetaWarning('tauri-mac'); return false;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
             <span class="t-wizard">Download for Mac</span>
             <span class="t-llmage">macOS (.dmg)</span>
           </a>
-          <a href="#" class="tauri-btn" onclick="openWaitlist('tauri-win'); return false;">
+          <a href="#" class="tauri-btn" onclick="openBetaWarning('tauri-win'); return false;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/></svg>
             <span class="t-wizard">Download for Windows</span>
             <span class="t-llmage">Windows (.exe)</span>
           </a>
         </div>
         <p class="tauri-meta">
-          <span class="t-wizard">Wizard build · v0.1 · Tauri v2 · Universal binary · Coming Phase 4</span>
-          <span class="t-llmage">Tauri v2 · Rust backend · arm64 + x86_64 · Build from source: github.com/huximaxi/Loci</span>
+          <span class="t-wizard">Wizard palace · v0.5.0 · Tauri v2 · Open beta — for testing, not production</span>
+          <span class="t-llmage">Tauri v2 · Rust backend · arm64 + x86_64 · Build from source: github.com/huximaxi/loci</span>
         </p>
       </div>
     </section>
@@ -2620,14 +2734,14 @@ footer {
             <span class="t-llmage">clone + configure</span>
           </h4>
           <p>
-            <span class="t-scholar">Install the browser extension (free, 30 seconds) or grab the Mac/Windows installer if you prefer a local setup. No account required.</span>
-            <span class="t-wizard">Choose your first room — Dev, Design, or Research. Each comes pre-configured with the right tools and memory zones.</span>
-            <span class="t-llmage"><code>git clone https://github.com/huximaxi/Loci && cp config.example.json config.json</code></span>
+            <span class="t-scholar">Join the early-access list. The browser extension and native app are landing in waves — we'll send your invite when your spot opens. No account, no cloud lock-in, no re-explaining your context.</span>
+            <span class="t-wizard">Open Claude Desktop (or your MCP client). The one-liner below writes a backup-protected config entry that loci satisfies as soon as the desktop app is running.</span>
+            <span class="t-llmage"><code>git clone https://github.com/huximaxi/loci && cd loci/desktop && cat .mcp.json</code></span>
           </p>
           <div class="install-pills tb-scholar">
-              <a href="https://github.com/huximaxi/Loci/blob/main/extension/INSTALL.md" class="install-pill" target="_blank" rel="noopener">
+              <a href="#" class="install-pill" onclick="openWaitlist('scholar-extension'); return false;">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
-                Chrome Extension (dev preview) →
+                Browser extension (early access)
               </a>
               <a href="#" class="install-pill" onclick="openWaitlist('scholar-mac'); return false;">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
@@ -2674,18 +2788,18 @@ footer {
 
     <!-- Wizard autoinstaller block -->
     <div class="wizard-install-block tb-wizard">
-      <div class="wi-comment">// one-line install — terminal</div>
+      <div class="wi-comment">// 1. open Claude Desktop (or your favourite MCP-aware client)</div>
+      <div class="wi-comment">// 2. run one line in your terminal:</div>
       <br>
-      <span class="wi-cmd">brew install loci-garden</span>
-      <span class="wi-sep">— or —</span>
-      <span class="wi-cmd">curl -sSL https://loci.garden/install.sh | bash</span>
+      <span class="wi-cmd" id="wizard-curl-cmd">curl -fsSL https://loci.garden/install/wizard.sh | bash</span>
+      <button class="wi-copy-btn" onclick="copyWizardCurl(this)" aria-label="Copy command">copy</button>
       <br><br>
-      <div class="wi-comment">// then follow the palace setup guide at loci.garden/docs</div>
+      <div class="wi-comment">// 3. restart Claude Desktop — loci tools appear in your toolbox</div>
+      <div class="wi-comment">// open beta · macOS · backs up your config before any write</div>
     </div>
     <p class="tb-wizard" style="margin-top:12px;font-size:12px;color:var(--text-3);">
-      Developer install: <a href="https://github.com/huximaxi/Loci/blob/main/extension/INSTALL.md"
-      style="color:var(--accent-light);">github.com/huximaxi/Loci</a>
-      → extension/INSTALL.md
+      Prefer the GUI? Grab the Tauri palace app below (open beta) or build from source:
+      <a href="https://github.com/huximaxi/loci" style="color:var(--accent-light);">github.com/huximaxi/loci</a>.
     </p>
 
     <!-- LLMAGE code block -->
@@ -2826,6 +2940,24 @@ footer {
   </div>
 </div>
 
+<!-- ═══════════════════ OPEN-BETA WARNING MODAL ═════════ -->
+<div id="beta-warning-modal" class="beta-warning-overlay" onclick="handleBetaBackdrop(event)">
+  <div class="beta-warning-box">
+    <button class="beta-warning-close" onclick="closeBetaWarning()" aria-label="Close">✕</button>
+    <div class="beta-warning-icon">⚠</div>
+    <div class="beta-warning-title">Open beta — testing channel</div>
+    <p class="beta-warning-body">
+      The desktop palace app is in <strong>open beta</strong> — built fresh, breaks fresh.
+      It's safe to install (signed binary, sandboxed), but expect rough edges and missing pieces.
+      Stable releases land on the <strong>GitHub releases page</strong> when they're ready.
+    </p>
+    <div class="beta-warning-actions">
+      <a id="beta-warning-continue" href="#" target="_blank" rel="noopener" class="beta-warning-btn primary">Continue to the beta build →</a>
+      <a href="https://github.com/huximaxi/loci/releases" target="_blank" rel="noopener" class="beta-warning-btn">Take me to GitHub releases instead</a>
+    </div>
+  </div>
+</div>
+
 <!-- ═══════════════════ SCRIPT ════════════════════════ -->
 <script>
   const THEMES = ['scholar', 'wizard', 'llmage'];
@@ -2880,8 +3012,54 @@ footer {
     if (e.target === document.getElementById('contact-modal')) closeContactModal();
   }
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') { closeContactModal(); closeWaitlist(); }
+    if (e.key === 'Escape') { closeContactModal(); closeWaitlist(); closeBetaWarning(); }
   });
+
+  // ── Open-beta warning modal ───────────────────────────
+  // GitHub releases URLs. Update once asset filenames are stable.
+  var BETA_RELEASE_URLS = {
+    'tauri-mac': 'https://github.com/huximaxi/loci/releases/latest',
+    'tauri-win': 'https://github.com/huximaxi/loci/releases/latest'
+  };
+  function openBetaWarning(source) {
+    var url = BETA_RELEASE_URLS[source] || 'https://github.com/huximaxi/loci/releases/latest';
+    var cont = document.getElementById('beta-warning-continue');
+    if (cont) cont.setAttribute('href', url);
+    document.getElementById('beta-warning-modal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeBetaWarning() {
+    var m = document.getElementById('beta-warning-modal');
+    if (!m) return;
+    m.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  function handleBetaBackdrop(e) {
+    if (e.target === document.getElementById('beta-warning-modal')) closeBetaWarning();
+  }
+
+  // ── Copy Wizard curl one-liner ────────────────────────
+  function copyWizardCurl(btn) {
+    var cmd = document.getElementById('wizard-curl-cmd');
+    if (!cmd) return;
+    var text = cmd.textContent.trim();
+    var done = function() {
+      btn.textContent = 'copied';
+      btn.classList.add('copied');
+      setTimeout(function() { btn.textContent = 'copy'; btn.classList.remove('copied'); }, 1600);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function() {
+        // Fallback: select the text so user can copy manually
+        var r = document.createRange(); r.selectNodeContents(cmd);
+        var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      });
+    } else {
+      var r = document.createRange(); r.selectNodeContents(cmd);
+      var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      done();
+    }
+  }
 
   // ── Waitlist modal ─────────────────────────────────────
   function openWaitlist(source) {
