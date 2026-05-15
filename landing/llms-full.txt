@@ -303,6 +303,20 @@ All notable changes to loci are documented here.
 
 ---
 
+## Dispatches (loci.garden/seed/)
+
+Public writing produced by sustained Hux × Vesper co-intelligence work. Arguments, not reports. Released when the argument is ready.
+
+**Dispatch 001 — Rendszerbontás: How Dance Floors Defeated a Semi-Autocracy**
+URL: https://loci.garden/seed/rendszerbontas.html · Published April 2026
+A forensic breakdown of Hungary's 2026 election result using the NVI (Normalised Victory Index). Documents how decentralised cultural infrastructure (electronic music, techno movement, platform-native distribution) created the mobilisation substrate that delivered Tisza's 141-seat supermajority. Argues the decisive mechanism was cultural, not political.
+
+**Dispatch 002 — Beágyazás: On Psychotechnology as Infrastructure**
+URL: https://loci.garden/seed/beagyazas.html · Published May 15, 2026
+The argument: movements operating under adversarial prior saturation lose not because their arguments are weak but because arguments address the wrong layer. Under fifteen years of Hungarian media capture, the load-bearing constraint was accumulated trust history, not intent-assessment. The Budapest concert on April 10, 2026 was a context injection event: Durkheim's collective effervescence as a formal mechanism for temporarily suspending the corrupted individual prior and replacing it with a shared environmental signal at intensity sufficient to override adversarial accumulation. Two days later, 78.94% of Hungary voted. The dispatch formalises the prediction (the model was in development before the concert occurred; the prior-reset mechanism was formalised before the result was known), identifies Budapest as a discriminating case, and extends the analysis to Civil Kurázsi as a micro-scale implementation: village council observers coordinated across Heves and Borsod counties, trained in documentation templates, aware that others were doing the same work in adjacent settlements. The commitment device at that scale was documented presence itself. Nincs egyedül — not alone — is a sovereignty claim, not a motivational one. Key references: Durkheim (collective effervescence), Habermas (life-world colonisation and the last unmanaged space), Bateson (context as operative unit), Popovic/Otpor (commitment device disaggregation at scale), Jasper (affective infrastructure). Connection to TCP: the formal account of prior corruption and reset developed in §§4, 8.7, and Appendix A of Német (2026) underpins the analysis; the Budapest case is evidence that the future-intention eigenlayer is engineerable at civic scale.
+
+---
+
 ## v0.8 - May 2026 (palace)
 - **Persona Roster + Self-Starter Orchestration Loop** - `templates/CLAUDE-master.md`: quartet pattern (orchestrator + specialist personas) with an ASCII decision loop. Józan paraszti ész gate before escalating to multi-agent. Never auto-invoke - offer to human first. Light swarm capped at 2–3 agents.
 - **Józan paraszti ész** - new principle in CLAUDE-master.md: before committing to a complex multi-agent approach, ask what the simplest shape is that still works. Escalate only when the simple version demonstrably fails.
