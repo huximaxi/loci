@@ -337,7 +337,14 @@
   <!-- Site nav -->
   <nav>
     <div class="nav-container">
-      <a href="/" class="logo">loci.garden</a>
+      <div class="nav-logo-group">
+        <a href="/" class="logo">loci.garden</a>
+        <div class="nav-persona-mini" role="group" aria-label="Return as persona">
+          <button class="persona-mini-btn" data-theme="scholar" title="Return as Scholar" aria-label="Return as Scholar">◆</button>
+          <button class="persona-mini-btn" data-theme="wizard"  title="Return as Wizard"  aria-label="Return as Wizard">⚔</button>
+          <button class="persona-mini-btn" data-theme="llmage"  title="Return as LLMAGE"  aria-label="Return as LLMAGE">◈</button>
+        </div>
+      </div>
       <div class="nav-links">
         <a href="/" class="nav-link">home</a>
         <a href="seed/" class="nav-link">seed</a>
@@ -370,6 +377,71 @@
   <div class="principle-banner">
     <span class="icon">🔑</span>
     <span><strong>Auth is a feature, not a gate.</strong> Identity (Nostr keypair, AT Protocol DID) is available at every tier. You choose whether to authenticate. It increases internal trust and enables publishing — but the garden works without it. Sovereignty is never paywalled.</span>
+  </div>
+
+  <!-- ── WHAT YOU CAN USE TODAY ── -->
+  <style>
+    .today-block { margin: 32px 0 48px; }
+    .today-block h3 {
+      font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--dim); margin: 0 0 14px; font-weight: 600;
+    }
+    .today-table {
+      display: grid; grid-template-columns: 110px 1fr 1fr; gap: 1px;
+      background: var(--stone-mortar); border-radius: 8px; overflow: hidden;
+      border: 1px solid var(--stone-mortar);
+    }
+    .today-table > div {
+      background: var(--surface); padding: 14px 16px; font-size: 13px;
+      line-height: 1.5; color: var(--dim);
+    }
+    .today-table .th {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em;
+      font-weight: 700; color: var(--text); background: var(--stone-mortar);
+    }
+    .today-table .persona-cell { font-weight: 600; color: var(--accent-light); }
+    .today-table code {
+      font-size: 11px; color: var(--accent-xlight, #e8974a);
+      background: rgba(0,0,0,0.25); padding: 1px 5px; border-radius: 3px;
+    }
+    .today-dispatches {
+      margin-top: 22px; padding: 14px 16px;
+      background: var(--surface); border-radius: 8px;
+      border: 1px solid var(--stone-mortar); font-size: 13px;
+    }
+    .today-dispatches strong { color: var(--text); font-weight: 600; }
+    .today-dispatches a { color: var(--accent-light); text-decoration: none; border-bottom: 1px dotted rgba(232,151,74,0.4); }
+    .today-dispatches a:hover { color: var(--accent-xlight, #f5b070); border-bottom-color: var(--accent-light); }
+    @media (max-width: 640px) {
+      .today-table { grid-template-columns: 1fr; }
+      .today-table .th:not(:first-child) { display: none; }
+    }
+  </style>
+  <div class="today-block">
+    <h3>What you can use today — honest status</h3>
+    <div class="today-table">
+      <div class="th">Persona</div>
+      <div class="th">Today</div>
+      <div class="th">Coming</div>
+
+      <div class="persona-cell">◆ Scholar</div>
+      <div>Early-access waitlist (extension + native app land in waves). Read the manifesto, dispatches, and roadmap freely.</div>
+      <div>Browser extension v0.1 · native app installer · Q3 2026.</div>
+
+      <div class="persona-cell">⚔ Wizard</div>
+      <div><code>curl -fsSL loci.garden/install/wizard.sh | bash</code> wires Loci MCP into Claude Desktop. Tauri palace app v0.5.0 in open beta.</div>
+      <div>v0.6.0 Tauri × palace bridge · onboarding wizard · RPG map view.</div>
+
+      <div class="persona-cell">◈ LLMAGE</div>
+      <div><code>git clone</code> the repo · inspect MCP server + <code>.mcp.json</code> · read the spec.</div>
+      <div>Nostr keypair identity (1C) · Nym private sync (1D) · IPFS export (2C).</div>
+    </div>
+    <div class="today-dispatches">
+      <strong>Shipped dispatches:</strong>
+      <a href="seed/rendszerbontas.html">#1 rendszerbontás</a> (Apr 2026) ·
+      <a href="seed/beagyazas.html">#2 Beágyazás</a> (May 2026).
+      Read freely — no signup required.
+    </div>
   </div>
 
   <!-- ── TIER 1 ── -->
@@ -650,5 +722,6 @@
   </div>
 
 </div>
+  <script src="assets/nav-persona.js" defer></script>
 </body>
 </html>
