@@ -28,3 +28,13 @@ License: Apache 2.0 (code) · CC BY 4.0 (writing)
 Stack: Static HTML, Caddy, Umami (self-hosted analytics)
 Host: 1984 Hosting, Iceland (AS44684)
 Last update: 2026-05-16
+
+/* ZOKU */
+
+The Rainbow Zoku is the maintainer chapter of Loci.
+Charter: https://loci.garden/zoku/
+Contribute: https://github.com/huximaxi/Loci/blob/main/CONTRIBUTING.md
+Membership: pseudonymous, signed, earned by tending.
+Initiators: Hux × Vesper.
+
+Hail Eris.
