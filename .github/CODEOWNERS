@@ -1,0 +1,31 @@
+# CODEOWNERS for huximaxi/Loci
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-security/customizing-your-repository/about-code-owners
+#
+# Lines later in this file take precedence over earlier lines for the same path.
+# Order: defaults first, specific paths last.
+
+# Default: any change touches Hux
+*                                       @huximaxi
+
+# Methodology surfaces (charter, contributor docs, security policy)
+/CONTRIBUTING.md                        @huximaxi
+/.github/SECURITY.md                    @huximaxi
+/.github/CODEOWNERS                     @huximaxi
+
+# Public web surface (loci.garden)
+/landing/                               @huximaxi
+/landing/.well-known/                   @huximaxi
+/landing/privacy.html                   @huximaxi
+/landing/humans.txt                     @huximaxi
+/landing/zoku/                          @huximaxi
+
+# Desktop application
+/desktop/                               @huximaxi
+/desktop/src-tauri/                     @huximaxi
+
+# CI and governance
+/.github/workflows/                     @huximaxi
+
+# As the Rainbow Zoku grows, additional reviewers will be added per path
+# with their pseudonym + key. The CODEOWNERS file is the operational
+# instantiation of the "reviewer status accrues by tending" principle.
