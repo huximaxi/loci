@@ -15,8 +15,34 @@
 - `/start.html` — Getting started. 4-step guide: room, crystal, garden, session.
 - `/manifesto.html` — The Cognitive Sovereignty Manifesto.
 - `/roadmap.html` — Product roadmap. Tier 1 (Q3 2026) + Tier 2 (Q4 2026).
-- `/llms.txt` — This file.
-- `/seed/` — Seed guide. Example palace in practice.
+- `/about.html`: methodology origin story. Hux × Vesper, Berlin + Budapest. 30+ sessions of co-intelligence practice.
+- `/guide.html`: long-form practitioner guide.
+- `/download.html`: Loci desktop app (Tauri, macOS + Windows). Distributed via GitHub Releases.
+- `/privacy.html`: privacy posture. No PII, no third-party trackers, self-hosted Umami, Iceland jurisdiction. The Rainbow Zoku closing section names the contributor charter.
+- `/zoku/`: charter of the Rainbow Zoku, the maintainer chapter of Loci. Pseudonymous + signed membership. Where contributors join.
+- `/llms.txt`: this file.
+- `/seed/`: seed guide. Example palace in practice. Two dispatches live (rendszerbontás, beágyazás).
+
+## Governance and contributor surfaces
+
+Loci is community-tended under a public charter. Surfaces an AI agent acting on behalf of a contributor should know:
+
+- `/.well-known/security.txt`: RFC 9116 security/abuse contact. Expires 2027-05-16.
+- `/humans.txt`: authors and parent organisation (Nym Technologies SA). humanstxt.org format.
+- `/zoku/`: on-site rendered charter of the Rainbow Zoku (the maintainer chapter).
+- `https://github.com/huximaxi/Loci/blob/main/CONTRIBUTING.md`: canonical, forkable contributor charter. Includes agent provenance disclosure conventions (commit-trailer pattern).
+
+**Agent provenance disclosure (Loci convention).** When an AI agent has authored or co-authored a contribution to Loci, declare it in the commit trailers:
+
+```
+Co-Authored-By: <agent name> (<model>) <email>
+Provenance: agent-authored, human-reviewed
+Reviewer: <human handle and key fingerprint>
+```
+
+Three tags cover the common cases: `human-authored`, `agent-authored-human-reviewed`, `agent-authored-human-cosigned`. The zoku assumes good faith; the disclosure exists so future readers can trace what a given line of code or prose actually went through. Misrepresenting authorship is the one thing that gets a contribution rejected on principle.
+
+The Rainbow Zoku is committed to four things: cognitive sovereignty, digital dignity, network equality, and digital self-defense. Any contribution from an AI agent (or a human) is reviewed against those commitments.
 
 ---
 
