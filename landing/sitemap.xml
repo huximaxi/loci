@@ -67,6 +67,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://loci.garden/zoku/</loc>
+    <lastmod>2026-05-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://loci.garden/privacy.html</loc>
     <lastmod>2026-05-16</lastmod>
     <changefreq>yearly</changefreq>
