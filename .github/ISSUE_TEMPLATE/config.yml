@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/huximaxi/Loci/security/advisories/new
+    about: Do NOT open a public issue. File a private security advisory or email hux@nymtech.net. See SECURITY.md.
+  - name: Discussion / question
+    url: https://github.com/huximaxi/Loci/discussions
+    about: Open-ended questions, methodology threads, or things that are not yet bug reports.
+  - name: Charter and contributor guide
+    url: https://loci.garden/zoku
+    about: Read the Rainbow Zoku charter before opening your first PR. The garden has no members, only tenders.
