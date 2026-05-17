@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy · loci.garden</title>
+  <meta name="description" content="What loci.garden does and does not collect. No accounts. No third-party trackers. No cookies. Self-hosted analytics, anonymised by design.">
+  <meta name="keywords" content="loci.garden privacy, privacy policy, no tracking, self-hosted analytics, Umami">
+  <link rel="canonical" href="https://loci.garden/privacy.html">
+  <meta name="robots" content="index, follow">
+  <link rel="alternate" type="text/plain" href="/llms.txt" title="AI context declaration for loci.garden">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style-wizard.css">
+  <script src="skin-toggle.js" defer></script>
+  <script defer src="https://analytics.195-246-230-118.sslip.io/script.js" data-website-id="e00d2f0a-fbd7-40bf-8740-cb1ab2a82b86"></script>
+  <meta property="og:image" content="https://loci.garden/assets/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Privacy · loci.garden" />
+  <meta name="twitter:description" content="No accounts. No third-party trackers. No cookies. Self-hosted analytics, anonymised by design." />
+  <meta name="twitter:image" content="https://loci.garden/assets/og-image.png" />
+</head>
+<body>
+
+  <nav>
+    <div class="nav-container">
+      <div class="nav-logo-group">
+        <a href="/" class="logo">loci.garden</a>
+        <div class="nav-persona-mini" role="group" aria-label="Return as persona">
+          <button class="persona-mini-btn" data-theme="scholar" title="Return as Scholar" aria-label="Return as Scholar">◆</button>
+          <button class="persona-mini-btn" data-theme="wizard"  title="Return as Wizard"  aria-label="Return as Wizard">⚔</button>
+          <button class="persona-mini-btn" data-theme="llmage"  title="Return as LLMAGE"  aria-label="Return as LLMAGE">◈</button>
+        </div>
+      </div>
+      <div class="nav-links">
+        <a href="https://github.com/huximaxi/loci" class="nav-link nav-icon" aria-label="GitHub" title="GitHub">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        </a>
+        <a href="/" class="nav-link">home</a>
+        <a href="seed/" class="nav-link">seed</a>
+        <a href="about.html" class="nav-link">about</a>
+        <a href="manifesto.html" class="nav-link">manifesto</a>
+        <a href="roadmap.html" class="nav-link">roadmap</a>
+        <a href="guide.html" class="nav-link">guide</a>
+        <a href="https://docs.loci.garden" class="nav-link" target="_blank" rel="noopener">docs</a>
+        <a href="llms.txt" class="nav-link">llms.txt</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <div class="about-wrap">
+
+      <h1>Privacy.</h1>
+
+      <p><strong>Short version:</strong> loci.garden collects nothing about you that requires your consent. No accounts. No third-party trackers. No cookies. No advertising network. No data sold, shared, or transferred. The site you are reading is static HTML served from a server in Iceland.</p>
+
+      <h2>What is collected</h2>
+
+      <p>The site uses self-hosted Umami analytics for aggregate page-view counts. Umami runs on the same VPS as the site and does not use cookies. It records the page path, the referrer, the country (derived from IP, then discarded), browser family, and screen size. IP addresses are hashed in memory and never written to disk. No individual visitor is identifiable from the analytics database. The analytics endpoint is <code>analytics.195-246-230-118.sslip.io</code> and the source is at <a href="https://github.com/umami-software/umami">github.com/umami-software/umami</a>.</p>
+
+      <p>If you find Umami too much, your browser's tracker-blocker will block it cleanly and nothing on the site will break. Loci respects the choice.</p>
+
+      <h2>What is not collected</h2>
+
+      <ul>
+        <li>No accounts, no logins, no passwords. There is nothing to register for.</li>
+        <li>No cookies of any kind. The browser developer tools will show this.</li>
+        <li>No third-party trackers. No Google Analytics, no Meta pixel, no advertising SDKs.</li>
+        <li>No email collection beyond the optional waitlist for the desktop app, which stores only the email address you provide plus a salted hash of your IP (for abuse mitigation) and is deletable on request to <a href="mailto:hux@nymtech.net">hux@nymtech.net</a>.</li>
+        <li>No fingerprinting. No session replay. No heatmaps.</li>
+      </ul>
+
+      <h2>The desktop application</h2>
+
+      <p>The Loci desktop application (a Tauri app distributed via GitHub Releases) is local-first by design. Your palace, your sessions, and your conversations stay on your machine. The application does not phone home, does not transmit telemetry, and does not require an account. The source is at <a href="https://github.com/huximaxi/Loci">github.com/huximaxi/Loci</a> (Apache 2.0) and may be audited or built from source.</p>
+
+      <h2>Hosting and jurisdiction</h2>
+
+      <p>The site runs on a VPS provided by 1984 Hosting (AS44684) in Reykjavík, Iceland. Iceland's data-protection regime aligns with the EU GDPR. The choice of host reflects the methodology's bias toward privacy-favourable jurisdictions; it is not a guarantee of legal recourse against any specific actor.</p>
+
+      <h2>Children</h2>
+
+      <p>loci.garden is not directed at children under 16. There is no mechanism by which a child's data could be collected (no forms, no accounts), but the methodology described on the site is written for adults engaged in research or professional work.</p>
+
+      <h2>Changes</h2>
+
+      <p>This page will be updated if anything on the site changes in a way that affects what is collected. Material changes will be noted in the site's <a href="https://github.com/huximaxi/loci/commits/main">commit history</a>, which is the canonical record. The page itself is dated below.</p>
+
+      <h2>Contact</h2>
+
+      <p>Privacy questions, data deletion requests, or security disclosures: <a href="mailto:hux@nymtech.net">hux@nymtech.net</a>. Security advisories may also be filed via <a href="https://github.com/huximaxi/Loci/security/advisories/new">GitHub Security Advisories</a>. The machine-readable contact record is at <a href="/.well-known/security.txt">/.well-known/security.txt</a>.</p>
+
+      <p style="font-family:var(--mono); font-size:0.72rem; color:var(--text-faint); margin-top:2rem;">Last updated: 2026-05-16 · This page versioned at <a href="https://github.com/huximaxi/loci/commits/main/privacy.html" style="color:var(--text-faint);">github.com/huximaxi/loci</a></p>
+
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <span style="font-family:var(--mono); font-size:0.72rem; color:var(--text-faint);">loci.garden · Built by Hux × Vesper</span>
+      <span style="font-family:var(--mono); font-size:0.72rem; color:var(--text-faint);"><a href="/.well-known/security.txt" style="color:var(--text-faint);">security.txt</a> · <a href="humans.txt" style="color:var(--text-faint);">humans.txt</a> · <a href="llms.txt" style="color:var(--text-faint);">llms.txt</a></span>
+    </div>
+  </footer>
+
+  <script src="assets/nav-persona.js" defer></script>
+</body>
+</html>
