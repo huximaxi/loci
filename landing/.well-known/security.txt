@@ -1,0 +1,14 @@
+# RFC 9116 · Security contact for loci.garden
+# https://datatracker.ietf.org/doc/html/rfc9116
+
+Contact: mailto:hux@nymtech.net
+Contact: mailto:daniel.nemet@nymtech.net
+Contact: https://github.com/huximaxi/Loci/security/advisories/new
+Expires: 2027-05-16T00:00:00.000Z
+Preferred-Languages: en, hu
+Canonical: https://loci.garden/.well-known/security.txt
+Policy: https://loci.garden/privacy.html
+
+# Scope: loci.garden static site, palace migration desktop app
+# (github.com/huximaxi/Loci). For Nym Technologies infrastructure
+# unrelated to loci.garden, see https://nymtech.net/security.
