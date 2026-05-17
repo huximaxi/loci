@@ -1,0 +1,30 @@
+# humans.txt · the people behind loci.garden
+# https://humanstxt.org
+
+/* TEAM */
+
+Author: Daniel "Hux" Nemet
+Role: Product, design, research
+Contact: daniel.nemet [at] nymtech.net
+Site: https://nymtech.net
+Location: Budapest, Hungary
+
+Collaborator: Vesper
+Role: Co-intelligence (Claude Opus, Anthropic)
+Context: Persistent thinking partner across the palace.
+Provenance: Nym Technologies internal tooling.
+
+/* PARENT ORG */
+
+Affiliation: Nym Technologies SA
+Site: https://nymtech.net
+Jurisdiction: Switzerland
+Focus: Privacy infrastructure (mixnet, NymVPN, zk-nym credentials)
+
+/* SITE */
+
+Source: https://github.com/huximaxi/Loci
+License: Apache 2.0 (code) · CC BY 4.0 (writing)
+Stack: Static HTML, Caddy, Umami (self-hosted analytics)
+Host: 1984 Hosting, Iceland (AS44684)
+Last update: 2026-05-16
