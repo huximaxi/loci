@@ -1848,6 +1848,84 @@ footer {
 [data-theme="llmage"] .tauri-meta { font-family: 'Helvetica Neue', monospace; letter-spacing: 0.05em; }
 
 /* ═══════════════════════════════════════════════════════
+   LOCAL-FIRST AGENT CTAs (Goose recipe + Ollama spec)
+═══════════════════════════════════════════════════════ */
+.agent-cta-block {
+  margin-top: 28px;
+  padding: 18px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-2);
+}
+.agent-cta-block .agent-cta-intro {
+  font-size: 12px;
+  color: var(--text-2);
+  margin: 0 0 14px 0;
+  line-height: 1.6;
+}
+[data-theme="wizard"] .agent-cta-block .agent-cta-intro {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  line-height: 2.0;
+  color: var(--text-3);
+}
+[data-theme="llmage"] .agent-cta-block .agent-cta-intro {
+  letter-spacing: 0.03em;
+}
+.agent-cta-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.agent-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-main);
+  color: var(--text);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.agent-cta-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent-light);
+  background: var(--accent-soft);
+}
+[data-theme="wizard"] .agent-cta-btn {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  border-radius: 0;
+  border: 1px solid var(--accent);
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.7);
+}
+[data-theme="wizard"] .agent-cta-btn:hover {
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.7);
+  transform: translate(-1px,-1px);
+}
+[data-theme="llmage"] .agent-cta-btn {
+  border-radius: 0;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  font-size: 11px;
+}
+.agent-cta-sep {
+  font-size: 11px;
+  color: var(--text-3);
+}
+[data-theme="wizard"] .agent-cta-sep {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+}
+
+/* ═══════════════════════════════════════════════════════
    LLMAGE FILE TREE BLOCK
 ═══════════════════════════════════════════════════════ */
 .llmage-filetree {
@@ -2497,6 +2575,40 @@ footer {
           <span class="t-wizard">Wizard palace · v0.5.0 · Tauri v2 · Open beta — for testing, not production</span>
           <span class="t-llmage">Tauri v2 · Rust backend · arm64 + x86_64 · Build from source: github.com/huximaxi/loci</span>
         </p>
+
+        <!-- ── LOCAL-FIRST AGENT CTAs ──────────────────── -->
+        <!-- Goose recipe + Ollama spec: for users who run local AI agents -->
+        <div class="agent-cta-block">
+          <p class="agent-cta-intro">
+            <span class="t-wizard">// Runs local. No account. No cloud.</span>
+            <span class="t-llmage">Runs local. No account. No cloud.</span>
+            <span class="t-scholar">Runs local. No account. No cloud.</span>
+          </p>
+          <div class="agent-cta-row">
+            <!-- TODO: replace href="#" with actual file path once goose-recipe.yaml is deployed to loci.garden/install/ -->
+            <a href="#" class="agent-cta-btn" data-umami-event="agent-cta-click" data-umami-event-target="goose-recipe">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span class="t-wizard">Goose Recipe ↓</span>
+              <span class="t-llmage">goose-recipe.yaml</span>
+              <span class="t-scholar">Goose Recipe ↓</span>
+            </a>
+            <!-- TODO: replace href="#" with actual file path once ollama-spec.json is deployed to loci.garden/install/ -->
+            <a href="#" class="agent-cta-btn" data-umami-event="agent-cta-click" data-umami-event-target="ollama-spec">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span class="t-wizard">Ollama Spec ↓</span>
+              <span class="t-llmage">ollama-spec.json</span>
+              <span class="t-scholar">Ollama Spec ↓</span>
+            </a>
+            <span class="agent-cta-sep">or</span>
+            <a href="#download" class="agent-cta-btn" data-umami-event="agent-cta-click" data-umami-event-target="tauri-anchor">
+              <span class="t-wizard">Tauri app ↓</span>
+              <span class="t-llmage">Start with the Tauri app ↓</span>
+              <span class="t-scholar">Start with the Tauri app ↓</span>
+            </a>
+          </div>
+        </div>
+        <!-- ── / LOCAL-FIRST AGENT CTAs ───────────────── -->
+
       </div>
     </section>
   </div>
