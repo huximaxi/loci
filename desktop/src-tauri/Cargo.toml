@@ -19,6 +19,8 @@ url = "2"
 axum = { version = "0.7", default-features = false, features = ["http1", "json", "tokio"] }
 tower-http = { version = "0.5", features = ["set-header"] }
 tokio-util = { version = "0.7" }
+# v0.6.0 bridge — manifest reader + file watcher
+notify = "6"
 
 [build-dependencies]
 tauri-build = { version = "2.0", features = [] }
