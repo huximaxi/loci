@@ -612,6 +612,236 @@
 
     .ollama-dependent { transition: opacity 200ms ease; }
     .ollama-dependent.off { opacity: 0.3; pointer-events: none; }
+
+    /* ── ONBOARDING VIEW ───────────────────────────────────────────────────── */
+    #onboarding-view {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 28px 40px 20px;
+    }
+
+    .slide {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      width: 100%;
+      max-width: 340px;
+    }
+    .slide.active { display: flex; }
+
+    .slide-icon {
+      font-size: 28px;
+      margin-bottom: 16px;
+      line-height: 1;
+    }
+
+    .slide-title {
+      font-size: 16px;
+      letter-spacing: 0.18em;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+
+    .slide-body {
+      font-size: 10px;
+      color: var(--text-sec);
+      line-height: 1.85;
+      letter-spacing: 0.04em;
+      margin-bottom: 28px;
+      max-width: 280px;
+    }
+
+    .slide-dots {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+
+    .slide-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--border-strong);
+      transition: background 200ms ease;
+    }
+    .slide-dot.active { background: var(--active); }
+
+    .slide-nav {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+      max-width: 280px;
+    }
+
+    /* ── DASHBOARD VIEW ────────────────────────────────────────────────────── */
+    #dashboard-view {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .db-header {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 20px;
+      border-bottom: 1px solid var(--border);
+      font-size: 9px;
+      color: var(--text-faint);
+      letter-spacing: 0.08em;
+    }
+
+    .db-header-left { display: flex; align-items: center; gap: 10px; }
+
+    .db-status-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .db-status-ok     { background: #5BF0A0; }
+    .db-status-warn   { background: #FFCC33; }
+    .db-status-error  { background: #E73E14; }
+
+    .db-scroll {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 14px 20px 20px;
+    }
+    .db-scroll::-webkit-scrollbar { width: 4px; }
+    .db-scroll::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 2px; }
+
+    .db-section-label {
+      font-size: 8px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      margin-bottom: 8px;
+    }
+
+    /* Cron cards */
+    .cron-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .cron-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--border-strong);
+      border-radius: var(--radius);
+      padding: 8px 10px;
+    }
+    .cron-card.ok    { border-left-color: #5BF0A0; }
+    .cron-card.error { border-left-color: #E73E14; }
+    .cron-card.never { border-left-color: rgba(255,255,255,0.18); }
+
+    .cron-card-name {
+      font-size: 9px;
+      color: var(--text);
+      letter-spacing: 0.04em;
+      margin-bottom: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .cron-card-summary {
+      font-size: 8.5px;
+      color: var(--text-sec);
+      line-height: 1.4;
+      margin-bottom: 4px;
+    }
+
+    .cron-card-meta {
+      font-size: 8px;
+      color: var(--text-faint);
+      letter-spacing: 0.03em;
+    }
+
+    /* Current Focus */
+    .focus-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      margin-bottom: 16px;
+      font-size: 9.5px;
+      color: var(--text-sec);
+      line-height: 1.7;
+      white-space: pre-wrap;
+      max-height: 130px;
+      overflow-y: auto;
+    }
+    .focus-block::-webkit-scrollbar { width: 3px; }
+    .focus-block::-webkit-scrollbar-thumb { background: var(--border-strong); }
+
+    /* Pending tasks */
+    .pending-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .pending-item {
+      font-size: 9.5px;
+      color: var(--text-sec);
+      line-height: 1.4;
+      padding: 3px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .pending-item:last-child { border-bottom: 0; }
+
+    .db-empty {
+      font-size: 9.5px;
+      color: var(--text-faint);
+      font-style: italic;
+      padding: 6px 0;
+    }
+
+    /* ── MAP VIEW ──────────────────────────────────────────────────────────── */
+    #map-view {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .map-header {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 20px;
+      border-bottom: 1px solid var(--border);
+      font-size: 9px;
+      color: var(--text-faint);
+      letter-spacing: 0.06em;
+    }
+
+    #palace-map-svg {
+      flex: 1;
+      width: 100%;
+      overflow: visible;
+    }
+
+    #palace-map-svg text {
+      font-family: var(--mono);
+      fill: var(--text);
+    }
+
+    @keyframes crystal-pulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+    #crystal-glow { animation: crystal-pulse 2.8s ease-in-out infinite; }
   </style>
 </head>
 <body>
@@ -629,7 +859,7 @@
     </svg>
     <div class="title-text">loci</div>
     <div class="title-spacer"></div>
-    <div class="title-version">v0.5.0</div>
+    <div class="title-version">v0.6.0</div>
     <button id="titlebarSettingsBtn" title="Settings (⌘,)">⚙</button>
   </div>
 
@@ -722,8 +952,47 @@
     </div>
   </div>
 
+  <!-- Onboarding view (first-launch: no palace_path in config) -->
+  <div id="onboarding-view">
+    <!-- Slide 1 — your palace -->
+    <div class="slide active" id="slide-0">
+      <svg class="slide-icon" viewBox="0 0 32 43" xmlns="http://www.w3.org/2000/svg" style="width:28px;height:37px;margin-bottom:16px;filter:drop-shadow(0 0 8px rgba(200,124,44,0.3));">
+        <polygon points="16,2  23,11 16,8  9,11"  fill="#ffee99"/>
+        <polygon points="9,11  16,8  16,30 3,21"  fill="#e8861a"/>
+        <polygon points="23,11 16,8  16,30 29,21" fill="#ffcc44"/>
+        <polygon points="3,21  16,30 16,38 8,28"  fill="#c87c2c"/>
+        <polygon points="29,21 16,30 16,38 24,28" fill="#e8861a"/>
+        <polygon points="8,28  16,38 24,28 16,42" fill="#7a3a08"/>
+        <polygon points="14,3  18,9  16,8"        fill="rgba(255,255,255,0.6)"/>
+      </svg>
+      <div class="slide-title">your palace</div>
+      <div class="slide-body">A palace is a directory on your machine. It holds rooms, crystals — the living memory of your work across sessions. Nothing leaves this machine.</div>
+    </div>
+    <!-- Slide 2 — rooms & crystals -->
+    <div class="slide" id="slide-1">
+      <div class="slide-icon">🏛</div>
+      <div class="slide-title">rooms &amp; crystals</div>
+      <div class="slide-body">Rooms are workspaces: Dev, Design, Cave. Crystals are established facts that persist across sessions. The palace is your context — not a cloud account.</div>
+    </div>
+    <!-- Slide 3 — two paths -->
+    <div class="slide" id="slide-2">
+      <div class="slide-icon">◈</div>
+      <div class="slide-title">two paths</div>
+      <div class="slide-body">Create a new palace from a template, or load one you already have. Your palace lives wherever you put it — your filesystem, your rules.</div>
+    </div>
+    <div class="slide-dots">
+      <span class="slide-dot active" data-slide="0"></span>
+      <span class="slide-dot" data-slide="1"></span>
+      <span class="slide-dot" data-slide="2"></span>
+    </div>
+    <div class="slide-nav">
+      <button id="slidePrev" class="btn" style="visibility:hidden;flex:1;">← back</button>
+      <button id="slideNext" class="btn btn-primary" style="flex:2;">next →</button>
+    </div>
+  </div>
+
   <!-- Welcome screen -->
-  <div id="welcome-view" style="display:flex;">
+  <div id="welcome-view" style="display:none;">
     <div style="
       flex:1; display:flex; flex-direction:column;
       align-items:center; justify-content:center;
@@ -740,7 +1009,7 @@
       </svg>
 
       <div style="font-size:20px;letter-spacing:0.22em;color:var(--text);margin-bottom:6px;">loci</div>
-      <div style="font-size:9.5px;letter-spacing:0.14em;color:var(--text-faint);margin-bottom:36px;">cognitive defence system · v0.5.0</div>
+      <div style="font-size:9.5px;letter-spacing:0.14em;color:var(--text-faint);margin-bottom:36px;">cognitive defence system · v0.6.0</div>
 
       <div style="width:100%;max-width:300px;display:flex;flex-direction:column;gap:8px;">
         <button id="diveInBtn" class="btn btn-primary btn-full" style="padding:12px;font-size:11px;letter-spacing:0.1em;">
@@ -802,6 +1071,116 @@
 
   </div>
 
+  <!-- Setup wizard view (Phase 2) -->
+  <div id="setup-wizard-view" class="main" style="display:none;">
+    <div class="wizard-header">
+      <div class="room-label">palace setup</div>
+      <button id="setupWizardBackBtn">← back</button>
+    </div>
+
+    <!-- Branch picker -->
+    <div id="setup-branch-picker">
+      <div class="card" style="margin-bottom:8px;">
+        <div class="card-label">create new palace</div>
+        <p style="font-size:10px;color:var(--text-sec);line-height:1.6;margin-bottom:12px;">
+          Scaffold a fresh palace from the loci template. Pick a parent folder and we handle the rest.
+        </p>
+        <button id="createPalaceBtn" class="btn btn-primary btn-full">create palace →</button>
+      </div>
+      <div class="card">
+        <div class="card-label">load existing palace</div>
+        <p style="font-size:10px;color:var(--text-sec);line-height:1.6;margin-bottom:12px;">
+          Point to a folder that already has <code style="font-size:9px;color:var(--active);">CLAUDE.md</code> and <code style="font-size:9px;color:var(--active);">_palace/</code>.
+        </p>
+        <button id="loadPalaceBtn" class="btn btn-full">load palace →</button>
+      </div>
+    </div>
+
+    <!-- Branch A: create flow -->
+    <div id="setup-create-flow" style="display:none;">
+      <div class="card">
+        <div class="card-label">choose parent folder</div>
+        <div class="folder-row">
+          <input id="createPalacePath" class="folder-input" type="text" placeholder="~/Documents/loci-palace" readonly>
+          <button id="createBrowseBtn" class="btn">browse</button>
+        </div>
+        <p id="createError" style="font-size:9px;color:#E73E14;display:none;margin-bottom:8px;"></p>
+        <button id="createConfirmBtn" class="btn btn-primary btn-full" disabled>scaffold palace →</button>
+      </div>
+      <button id="createBackBtn" style="all:unset;cursor:pointer;font-family:var(--mono);font-size:10px;color:var(--text-faint);padding:8px 0;letter-spacing:0.06em;" >← back to options</button>
+    </div>
+
+    <!-- Branch B: load flow -->
+    <div id="setup-load-flow" style="display:none;">
+      <div class="card">
+        <div class="card-label">select palace folder</div>
+        <div class="folder-row">
+          <input id="loadPalacePath" class="folder-input" type="text" placeholder="/Users/you/Dev" readonly>
+          <button id="loadBrowseBtn" class="btn">browse</button>
+        </div>
+        <div id="loadResult" style="display:none;margin-bottom:10px;">
+          <div class="badge-row">
+            <span id="loadBadge" class="badge">—</span>
+          </div>
+          <p id="loadResultText" style="font-size:10px;color:var(--text-sec);line-height:1.5;margin-bottom:8px;"></p>
+        </div>
+        <p id="loadError" style="font-size:9px;color:#E73E14;display:none;margin-bottom:8px;"></p>
+        <button id="loadConfirmBtn" class="btn btn-primary btn-full" disabled>load palace →</button>
+      </div>
+      <button id="loadBackBtn" style="all:unset;cursor:pointer;font-family:var(--mono);font-size:10px;color:var(--text-faint);padding:8px 0;letter-spacing:0.06em;">← back to options</button>
+    </div>
+  </div>
+
+  <!-- Dashboard view (Phase 3) -->
+  <div id="dashboard-view" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+    <div class="db-header">
+      <div class="db-header-left">
+        <span id="db-status-dot" class="db-status-dot db-status-ok"></span>
+        <span id="db-meta">loading…</span>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button id="dbChangePalaceBtn" class="btn" style="padding:3px 8px;font-size:9px;">← change</button>
+        <button id="dbMapBtn" class="btn" style="padding:3px 10px;font-size:9px;">map →</button>
+        <button id="dbEigenBtn" class="btn" style="padding:3px 10px;font-size:9px;">eigenlayer →</button>
+      </div>
+    </div>
+    <div class="db-scroll">
+      <div class="db-section-label">cron jobs</div>
+      <div id="db-cron-grid" class="cron-grid"></div>
+
+      <div class="db-section-label">current focus</div>
+      <div id="db-focus" class="focus-block"></div>
+
+      <div id="db-pending-section">
+        <div class="db-section-label">pending</div>
+        <div id="db-pending" class="pending-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Map view (Phase 4) -->
+  <div id="map-view" style="display:none;">
+    <div class="map-header">
+      <button id="mapBackBtn" style="all:unset;cursor:pointer;font-family:var(--mono);font-size:10px;color:var(--text-faint);letter-spacing:0.06em;transition:color 120ms ease;" onmouseover="this.style.color='rgba(232,230,227,0.62)'" onmouseout="this.style.color='rgba(232,230,227,0.22)'">← dashboard</button>
+      <span id="map-meta" style="letter-spacing:0.08em;">—</span>
+      <span style="opacity:0.4;font-size:8px;letter-spacing:0.1em;">MAP · v0.6</span>
+    </div>
+    <svg id="palace-map-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+
+  <!-- Eigenlayer view (demo: embed tesseract from design-room/eigenlayer/stage1.html) -->
+  <div id="eigenlayer-view" style="display:none;flex-direction:column;flex:1;overflow:hidden;background:#0a0a0c;">
+    <div class="map-header">
+      <button id="eigenBackBtn" style="all:unset;cursor:pointer;font-family:var(--mono);font-size:10px;color:var(--text-faint);letter-spacing:0.06em;transition:color 120ms ease;" onmouseover="this.style.color='rgba(232,230,227,0.62)'" onmouseout="this.style.color='rgba(232,230,227,0.22)'">← dashboard</button>
+      <span style="letter-spacing:0.08em;opacity:0.6;">eigenlayer · stage 1</span>
+      <span style="opacity:0.4;font-size:8px;letter-spacing:0.1em;">24-CELL · v0.1</span>
+    </div>
+    <iframe src="/eigenlayer.html"
+            style="width:100%;height:100%;border:0;background:#0a0a0c;flex:1;"
+            sandbox="allow-scripts allow-same-origin"
+            title="eigenlayer stage 1 — 24-cell projection"></iframe>
+  </div>
+
   <!-- Scholar status bar -->
   <div class="scholar-bar">
     <span class="ai-badge" id="ai-badge" style="display:none;">
@@ -810,7 +1189,7 @@
       <div class="ai-tooltip">ollama not reachable on :11434<br>open settings → local AI</div>
     </span>
     <span class="scholar-bar-center" id="bar-center"></span>
-    <span class="scholar-bar-right">v0.5.0</span>
+    <span class="scholar-bar-right">v0.6.0</span>
   </div>
 
   <script type="module" src="/src/main.ts"></script>
