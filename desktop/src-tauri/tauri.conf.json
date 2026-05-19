@@ -1,13 +1,13 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "loci wizard",
-  "version": "0.5.0",
-  "identifier": "garden.loci.app",
+  "version": "0.6.0",
+  "identifier": "garden.loci.desktop",
   "build": {
-    "beforeDevCommand": "npm run dev",
+    "beforeDevCommand": "cd ../src-leptos && trunk serve --port 1420",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "npm run build",
-    "frontendDist": "../dist"
+    "beforeBuildCommand": "cd ../src-leptos && trunk build --release",
+    "frontendDist": "../src-leptos/dist"
   },
   "bundle": {
     "active": true,
@@ -32,6 +32,7 @@
     }
   },
   "app": {
+    "withGlobalTauri": true,
     "windows": [
       {
         "title": "loci wizard",
