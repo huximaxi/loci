@@ -4,6 +4,50 @@ All notable changes to loci are documented here.
 
 ---
 
+## desktop v0.6.0-rc.1 - 2026-05-19 · Tauri x palace bridge dashboard
+
+First release candidate for the Tauri x palace bridge buildout. Phase 3 of the Leptos rewrite lands the desktop v0.6.0 shell. PR [#51](https://github.com/huximaxi/loci/pull/51) merged at `2c7129a`.
+
+### Frontend (Leptos)
+
+- **Dashboard view** with KPI strip, cron table, handovers list, and file-watcher wiring for live updates. Replaces the placeholder `dashboard_stub`.
+- **Onboarding view** for first-run experience.
+- **Setup wizard** with two paths: `setup_create` (new palace) and `setup_load` (existing palace).
+- **About view**.
+- **Dialog handling** (`dialog.rs`) and Tauri-bindings layer (`tauri_bindings.rs`).
+- Data models: `CronJobSnapshot` and `HandoverEntry` with `Serialize`/`Deserialize`.
+
+### Backend (Tauri)
+
+- New commands: `read_cron_states` reads live cron job state from `_palace/cron/`; `read_handovers` returns latest handover entries.
+- `bridge_tests` for command coverage.
+
+### Build / Workspace
+
+- Cargo workspace restructure: `desktop/` is now the workspace root; `src-tauri` becomes a workspace member.
+- New sibling crate: `desktop/src-leptos/` with Trunk build config.
+
+### Preserved
+
+- Post-v0.5.0 TS frontend WIP preserved in commit `343cf67` (`desktop/index.html` and `desktop/src/main.ts`). Coexists with the new Leptos shell pending a deprecation decision.
+
+### Bundle ID
+
+- Fixed: `garden.loci.app` to `garden.loci.desktop` (per palace pending pre-notarisation task).
+
+### Known issues (planned for rc.2)
+
+- CSP is `null` in `tauri.conf.json`; set explicit policy before notarisation.
+- `start_state_watcher` accepts arbitrary paths; add `validate_palace_path` gate.
+- Watcher TOCTOU on palace switch (low impact, dedup tick counter handles it).
+
+### Not in scope
+
+- RPG-map view (deferred to a follow-up PR).
+- Memory Bank pattern + Quarantine Protocol v1.1 (loci-core v1.3, separate JUMP-IN brief at `Dev/nym-stone/vesper/handovers/JUMP-IN-kilo-recon-v1.3.md`).
+
+---
+
 ## v1.1 - 2026-05-12 (palace)
 - **Two-tier memory setup** — `TWO-TIER-SETUP.md` added. Full reference for wiring a palace into Claude's memory system across all three surfaces: Cowork desktop (workspace folder = Tier 2, identity block at top of CLAUDE.md), Claude Code (`~/.claude/CLAUDE.md` = Tier 1 global identity, palace CLAUDE.md = Tier 2), Claude web/Projects (Project Instructions = Tier 1, palace CLAUDE.md in Project Files). Quick-reference table: which context belongs in which tier.
 - **Identity block pattern** — canonical 4-line identity block documented. Goes at the top of every palace CLAUDE.md. Makes the palace portable across folder switches and provides a Tier 1 fallback for Cowork setups.
