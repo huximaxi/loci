@@ -44,7 +44,8 @@ First release candidate for the Tauri x palace bridge buildout. Phase 3 of the L
 ### Not in scope
 
 - RPG-map view (deferred to a follow-up PR).
-- Memory Bank pattern + Quarantine Protocol v1.1 (loci-core v1.3, separate JUMP-IN brief at `Dev/nym-stone/vesper/handovers/JUMP-IN-kilo-recon-v1.3.md`).
+- Memory Bank pattern (deferred to a follow-up release).
+- Quarantine Protocol v1.1 shipped separately at [`QUARANTINE-PROTOCOL.md`](./QUARANTINE-PROTOCOL.md) on `main`, not bundled with this rc.
 
 ---
 
