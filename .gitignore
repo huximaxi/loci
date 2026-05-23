@@ -45,3 +45,6 @@ desktop/src-tauri/gen/
 
 # Claude Cowork local session
 .claude/
+
+# Palace (Vesper × Hux local-only memory, must never leave the dev machine)
+_palace/
