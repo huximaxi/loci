@@ -1,4 +1,4 @@
-# Deployment — loci.garden
+# Deploying loci.garden
 
 ## Infrastructure
 
@@ -15,10 +15,10 @@ After merging a PR that touches `landing/**`, update the VPS checkout to the new
 ```bash
 # On the VPS, inside the site checkout:
 git fetch origin
-git reset --hard origin/main   # not `git pull` — see note below
+git reset --hard origin/main   # not `git pull` (see note below)
 ```
 
-Caddy serves the files live, so no restart or reload is required for a content change. (Operator specifics — host alias, checkout path, credentials — live in the private ops notes, not in this public repo.)
+Caddy serves the files live, so no restart or reload is required for a content change. Operator specifics (host alias, checkout path, credentials) live in the private ops notes, not in this public repo.
 
 ### Why `reset --hard`, not `git pull`
 
@@ -26,8 +26,8 @@ The repo history was rewritten once (a `git filter-repo` pass to scrub a leaked 
 
 ## Branch strategy
 
-- `main` — production
-- `feature/*` — feature branches, PR into `main`
+- `main`: production
+- `feature/*`: feature branches, PR into `main`
 - Never push directly to `main` (branch protection enforces this)
 
 ## Rollback
