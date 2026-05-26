@@ -3,69 +3,36 @@
 ## Infrastructure
 
 - **VPS**: 1984 Hosting, Iceland
-- **Web server**: Caddy (automatic HTTPS)
-- **Domain**: loci.garden
+- **Web server**: Caddy (automatic HTTPS, multi-tenant via `import sites/*.caddy`)
+- **Domains**: loci.garden, docs.loci.garden
 - **Repo**: https://github.com/huximaxi/loci
-- **Site root**: `landing/` subdirectory (NOT repo root)
-
-## Directory Structure
-
-```
-/var/www/loci.garden/    # VPS site root
-├── index.html           # Main landing page
-├── start.html           # Getting started guide
-├── about.html           # About page
-├── llms.txt             # AI agent context declaration
-├── llms-full.txt        # Full context declaration
-├── robots.txt           # Search engine directives
-├── sitemap.xml          # Site map for SEO
-├── assets/              # Images, icons
-├── seed/                # Dispatches
-└── ...
-```
+- **Served root**: the `landing/` subdirectory of a git checkout on the VPS. Caddy's `file_server` serves it straight off disk, so a content deploy is just updating that checkout. No build step.
 
 ## Deploy after PR merge
 
-After merging a PR that touches `landing/**`:
+After merging a PR that touches `landing/**`, update the VPS checkout to the new `main`:
 
 ```bash
-# SSH into VPS
-ssh loci-vps
-
-# Navigate to site root
-cd /var/www/loci.garden
-
-# Pull latest (landing/ maps to site root)
-git pull origin main
-
-# If using sparse checkout:
-# git sparse-checkout set landing
-# git pull origin main
-
-# Caddy auto-reloads on file changes, but to force:
-sudo systemctl reload caddy
+# On the VPS, inside the site checkout:
+git fetch origin
+git reset --hard origin/main   # not `git pull` — see note below
 ```
 
-## GitHub Actions (future)
+Caddy serves the files live, so no restart or reload is required for a content change. (Operator specifics — host alias, checkout path, credentials — live in the private ops notes, not in this public repo.)
 
-When CI is set up, the deploy rule will be:
-- Changes to `landing/**` → trigger site deploy to VPS
-- Changes to `extension/**` → trigger Chrome Web Store build
+### Why `reset --hard`, not `git pull`
+
+The repo history was rewritten once (a `git filter-repo` pass to scrub a leaked file from history). A long-lived VPS checkout created before that rewrite has a forked history and will not fast-forward, so `git pull` would attempt a divergent merge. `fetch` + `reset --hard origin/main` realigns the checkout cleanly. Copy the served dir to a timestamped backup first if you want an instant rollback.
 
 ## Branch strategy
 
 - `main` — production
-- `feature/*` — feature branches, PR to main
-- Never push directly to main
+- `feature/*` — feature branches, PR into `main`
+- Never push directly to `main` (branch protection enforces this)
 
 ## Rollback
 
-Keep `index-old.html` as backup. To rollback:
-
-```bash
-mv index.html index-broken.html
-mv index-old.html index.html
-```
+Before deploying, copy the served `landing/` directory to a timestamped backup. To roll back, restore that copy in place. No Caddy change needed.
 
 ## Contact
 
