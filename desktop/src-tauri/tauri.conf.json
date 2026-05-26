@@ -4,9 +4,9 @@
   "version": "0.6.0",
   "identifier": "garden.loci.desktop",
   "build": {
-    "beforeDevCommand": "cd ../src-leptos && trunk serve --port 1420",
+    "beforeDevCommand": "cd src-leptos && trunk serve --port 1420",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "cd ../src-leptos && trunk build --release",
+    "beforeBuildCommand": "cd src-leptos && trunk build --release",
     "frontendDist": "../src-leptos/dist"
   },
   "bundle": {
@@ -36,9 +36,11 @@
     "windows": [
       {
         "title": "loci wizard",
-        "width": 680,
-        "height": 520,
-        "resizable": false,
+        "width": 1200,
+        "height": 860,
+        "minWidth": 720,
+        "minHeight": 520,
+        "resizable": true,
         "fullscreen": false
       }
     ],

@@ -7,11 +7,13 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
 #[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
 struct PathArg<'a> {
     palace_path: &'a str,
 }
 
 #[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
 struct HandoversArg<'a> {
     palace_path: &'a str,
     limit: usize,
