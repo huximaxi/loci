@@ -1,11 +1,13 @@
 use crate::dialog::open_directory;
 use crate::models::{ActivePalace, PalaceManifest};
 use crate::tauri_bindings::invoke;
+use crate::views::greeter::mark_palace_greeted;
 use leptos::*;
 use leptos_router::{use_navigate, A};
 use serde::Serialize;
 
 #[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
 struct ParentPathArg<'a> {
     parent_path: &'a str,
 }
@@ -18,6 +20,7 @@ struct PathArg<'a> {
 #[component]
 pub fn SetupCreate() -> impl IntoView {
     let active = expect_context::<RwSignal<ActivePalace>>();
+    let show_greeter = expect_context::<RwSignal<bool>>();
     let (status, set_status) = create_signal::<CreateStatus>(CreateStatus::Idle);
     let navigate = use_navigate();
 
@@ -72,6 +75,10 @@ pub fn SetupCreate() -> impl IntoView {
     let go_dashboard: Callback<()> = Callback::new({
         let navigate = navigate.clone();
         move |_: ()| {
+            if let CreateStatus::Done(path) = status.get_untracked() {
+                mark_palace_greeted(&path);
+                show_greeter.set(true);
+            }
             navigate("/dashboard", Default::default());
         }
     });

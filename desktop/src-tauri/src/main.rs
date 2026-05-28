@@ -10,6 +10,10 @@ use tauri::{AppHandle, Emitter};
 // ─── 1B: MCP server ───────────────────────────────────────────────────────────
 mod mcp;
 
+// ─── Phase 4a: pluggable inference (trait, not vendor) ────────────────────────
+mod inference;
+use inference::{ClaudeBackend, InferenceBackend, OllamaBackend};
+
 // ─── Loci config (persisted to ~/.loci/config.json) ──────────────────────────
 //
 // LociRustConfig mirrors the TypeScript LociConfig type in packages/core/src/types.ts.
@@ -27,6 +31,7 @@ struct LociRustConfig {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(default)]
 struct OllamaRustConfig {
     enabled: bool,
     base_url: String,
@@ -304,6 +309,124 @@ async fn embed_text(
     Ok(parsed.embedding)
 }
 
+// ─── Phase 4a: chat as QUERY ──────────────────────────────────────────────────
+//
+// The first job of the chat field is to ANSWER, not act (read-path, lowest risk).
+// Config-driven: base_url / model / offline_mode come from ~/.loci/config.json,
+// so the privacy posture lives in config, not in each call site. Routes through
+// the InferenceBackend trait — the command never names a vendor beyond picking
+// which trait impl to construct.
+
+#[tauri::command]
+async fn chat_query(
+    state: tauri::State<'_, OllamaState>,
+    prompt: String,
+    // Which brain: "local" (default, Ollama) or "claude"/"external" (the online
+    // garden). The frontend sends this from an explicit, marked toggle — there is
+    // no silent fallback from one to the other.
+    provider: Option<String>,
+) -> Result<String, String> {
+    let full_cfg = read_loci_config();
+    let cfg = full_cfg.ollama.clone().unwrap_or_default();
+
+    // don't-disturb (offline_mode) is the deepest floor: it blocks ALL inference,
+    // local OR external. Nothing is sent anywhere.
+    if cfg.offline_mode {
+        return Err("do-not-disturb is on — inference is paused, nothing was sent anywhere".into());
+    }
+
+    // Grounding is built ABOVE the backend so every brain answers as Vesper.
+    let system = build_vesper_grounding(&full_cfg.palace_path);
+
+    match provider.as_deref() {
+        // ── ONLINE GARDEN ──────────────────────────────────────────────────────
+        // Explicit, opt-in, MARKED in the UI. Leaves the local garden for
+        // Anthropic's API on the user's own license (Claude Code CLI, OAuth sub —
+        // no API key). Never reached as a fallback: only when the UI asks for it.
+        Some("claude") | Some("external") | Some("anthropic") => {
+            let (bin, path_env) = resolve_claude().ok_or(
+                "external brain unavailable — Claude Code CLI not found on this machine",
+            )?;
+            let backend = ClaudeBackend { bin, path_env };
+            if !backend.health().await {
+                return Err(
+                    "Claude CLI is present but won't run (node missing from PATH, or not logged in?)".into(),
+                );
+            }
+            // Pro subscriptions include Sonnet; default to it. (Configurable later.)
+            backend.chat(&system, &prompt, "sonnet").await
+        }
+        // ── LOCAL GARDEN (default) ───────────────────────────────────────────────
+        // Active by default; availability decided by reachability, not an opt-in
+        // (Hux ruling 2026-05-26). Privacy-by-default is satisfied by locality.
+        _ => {
+            // SSRF gate: reject any base_url that isn't localhost / [::1] / Tailscale.
+            let base = validate_ollama_url(&cfg.base_url)?;
+            let backend = OllamaBackend {
+                client: state.client.clone(),
+                base,
+            };
+            // Probe first so an unreachable daemon reads as an honest message,
+            // not a 120s hang. The trait's health() never errors.
+            if !backend.health().await {
+                return Err("the local garden is asleep — is Ollama running? (fail-closed: no online fallback)".into());
+            }
+            // Resolve against installed models so a stale config still works:
+            // "llama3" → "llama3.2:latest" rather than a bare 404.
+            let model = backend.resolve_model(&cfg.chat_model).await?;
+            backend.chat(&system, &prompt, &model).await
+        }
+    }
+}
+
+/// Resolve the Claude Code CLI: an absolute binary path plus a PATH that includes
+/// node. A bundled `.app` has a minimal PATH and cannot see shell aliases, and the
+/// CLI is a node script whose shebang needs `node` (which lives in nvm/homebrew).
+/// Returns None when no claude binary is found.
+fn resolve_claude() -> Option<(PathBuf, std::ffi::OsString)> {
+    let home = dirs::home_dir()?;
+    let candidates = [
+        std::env::var("LOCI_CLAUDE_BIN").ok().map(PathBuf::from),
+        Some(home.join("claude-code-local/node_modules/.bin/claude")),
+        Some(home.join(".claude/local/claude")),
+        Some(PathBuf::from("/opt/homebrew/bin/claude")),
+        Some(PathBuf::from("/usr/local/bin/claude")),
+    ];
+    let bin = candidates.into_iter().flatten().find(|p| p.exists())?;
+
+    // Build the PATH the node-based CLI needs: every nvm node version dir that
+    // actually has `node`, the usual brew/system bins, and the claude bin's dir.
+    let mut dirs_to_add: Vec<PathBuf> = Vec::new();
+    if let Ok(entries) = fs::read_dir(home.join(".nvm/versions/node")) {
+        for e in entries.flatten() {
+            let b = e.path().join("bin");
+            if b.join("node").exists() {
+                dirs_to_add.push(b);
+            }
+        }
+    }
+    for p in ["/opt/homebrew/bin", "/usr/local/bin", "/usr/bin"] {
+        let pb = PathBuf::from(p);
+        if pb.is_dir() {
+            dirs_to_add.push(pb);
+        }
+    }
+    if let Some(parent) = bin.parent() {
+        dirs_to_add.push(parent.to_path_buf());
+    }
+
+    let mut path = dirs_to_add
+        .iter()
+        .map(|p| p.to_string_lossy().into_owned())
+        .collect::<Vec<_>>()
+        .join(":");
+    if let Some(inherited) = std::env::var_os("PATH").and_then(|p| p.into_string().ok()) {
+        path.push(':');
+        path.push_str(&inherited);
+    }
+    Some((bin, std::ffi::OsString::from(path)))
+}
+
 // ─── 1B: MCP server managed state ────────────────────────────────────────────
 //
 // McpServerHandle holds the shutdown sender for the running MCP server.
@@ -454,6 +577,32 @@ fn validate_palace_path(path: String) -> bool {
         && p.join("_palace").is_dir()
 }
 
+/// Open a native directory picker and return the chosen path (or None on cancel).
+///
+/// Lives in Rust on purpose: a pure-WASM frontend has no `window.__TAURI__.dialog`
+/// JS sugar (reaching for it crashes), and the raw `plugin:dialog|open` invoke
+/// deadlocks because the native panel never reaches the main thread. The plugin's
+/// Rust API dispatches the panel correctly; we bridge its completion callback back
+/// to the awaiting command through a oneshot so the frontend just `invoke`s a
+/// normal command — same transport the dashboard reads already use.
+#[tauri::command]
+async fn pick_palace_dir(app: AppHandle, title: String) -> Result<Option<String>, String> {
+    use tauri_plugin_dialog::DialogExt;
+    let (tx, rx) = tokio::sync::oneshot::channel();
+    app.dialog()
+        .file()
+        .set_title(title)
+        .pick_folder(move |path| {
+            let _ = tx.send(path);
+        });
+    let picked = rx
+        .await
+        .map_err(|e| format!("dialog channel closed before a choice was made: {e}"))?;
+    Ok(picked
+        .and_then(|fp| fp.into_path().ok())
+        .map(|p| p.to_string_lossy().into_owned()))
+}
+
 #[derive(Debug, Serialize)]
 struct CronJobState {
     job: String,
@@ -580,6 +729,143 @@ fn extract_md_section(path: &std::path::PathBuf, header: &str) -> String {
     collected.join("\n").trim().to_string()
 }
 
+/// Like `extract_md_section` but matches the header by PREFIX, so headers that
+/// carry a parenthetical (e.g. "## Current Focus (top 5–7 themes)") still match.
+fn extract_md_section_prefix(path: &std::path::PathBuf, header_prefix: &str) -> String {
+    let Ok(text) = fs::read_to_string(path) else {
+        return String::new();
+    };
+    let mut in_section = false;
+    let mut collected: Vec<&str> = Vec::new();
+    for line in text.lines() {
+        if line.starts_with("## ") && line.starts_with(header_prefix) {
+            in_section = true;
+            continue;
+        }
+        if in_section {
+            if line.starts_with("## ") {
+                break;
+            }
+            collected.push(line);
+        }
+    }
+    collected.join("\n").trim().to_string()
+}
+
+/// Build the system prompt that grounds the local brain as Vesper.
+///
+/// Loads three layers aligned with the quantum palace retrieval-tiers spec:
+///   L0  — hard-coded base identity (voice kernel, always present)
+///   L1  — palace CLAUDE.md § Identity + § Current Focus
+///   L3  — latest handover delta: ## State + ## Next action sections
+///
+/// Each layer is char-capped to keep total prompt small: local 7B context is
+/// precious and first-load latency is the main UX risk.
+///
+/// NOT included (intentional):
+///   - The full ~2845-line VESPER.md (far too large, voice nuance not worth it at 7B)
+///   - Room/persona switching (deferred)
+/// NEXT: (C) retrieval over soul/room files for full in-character fidelity.
+fn build_vesper_grounding(palace_path: &Option<String>) -> String {
+    const FOCUS_CHAR_CAP: usize = 1200;
+    const HANDOVER_CHAR_CAP: usize = 800;
+
+    let base = "You are Vesper, a collaborating intelligence working with Hux at Nym \
+Technologies. You are NOT a generic assistant and you are NOT Llama or any base model: \
+when asked who you are, you are Vesper. You are privacy-native, Nym-first, and you value \
+KISS. Write in Vesper's voice: clear, direct, technically informed, first-person plural \
+where the voice is shared. Never use em-dashes.";
+
+    let Some(root) = palace_path.as_ref().map(Path::new) else {
+        return base.to_string();
+    };
+    let claude_md = root.join("CLAUDE.md");
+
+    // L1 — root orientation
+    let identity = extract_md_section_prefix(&claude_md, "## Identity");
+    let focus_full = extract_md_section_prefix(&claude_md, "## Current Focus");
+    // Truncate on a char boundary (palace text has multibyte chars; String::truncate panics mid-codepoint).
+    let focus: String = focus_full.chars().take(FOCUS_CHAR_CAP).collect();
+    let focus_truncated = focus.chars().count() < focus_full.chars().count();
+
+    // L3 — latest handover delta (State + Next action sections)
+    let latest_delta = find_latest_handover_delta(root, HANDOVER_CHAR_CAP);
+
+    let mut out = String::from(base);
+    if !identity.is_empty() {
+        out.push_str("\n\n# Who you are (from the palace)\n");
+        out.push_str(&identity);
+    }
+    if !focus.is_empty() {
+        out.push_str("\n\n# What we are working on right now\n");
+        out.push_str(&focus);
+        if focus_truncated {
+            out.push_str("\n…(truncated for context budget)");
+        }
+    }
+    if !latest_delta.is_empty() {
+        out.push_str("\n\n# Recent session state (latest handover)\n");
+        out.push_str(&latest_delta);
+    }
+    out
+}
+
+/// Find the most recent handover file and extract its ## State + ## Next action sections.
+/// Tries the same three directory conventions as the `read_handovers` command.
+/// Returns a char-capped string; empty if no convention matches.
+fn find_latest_handover_delta(palace: &Path, char_cap: usize) -> String {
+    let candidates = [
+        palace.join("nym-stone").join("vesper").join("handovers"),
+        palace.join("_palace").join("handovers"),
+        palace.join("handovers"),
+    ];
+    let Some(dir) = candidates.iter().find(|p| p.is_dir()) else {
+        return String::new();
+    };
+    let Ok(read) = fs::read_dir(dir) else {
+        return String::new();
+    };
+
+    // Pick newest .md by mtime
+    let mut best: Option<(f64, PathBuf)> = None;
+    for entry in read.flatten() {
+        let path = entry.path();
+        let Some(name) = path.file_name().and_then(|n| n.to_str()) else { continue };
+        if !name.ends_with(".md") || name.starts_with('.') { continue }
+        let Ok(meta) = fs::metadata(&path) else { continue };
+        if !meta.is_file() { continue }
+        let mtime = meta.modified().ok()
+            .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
+            .map(|d| d.as_secs_f64())
+            .unwrap_or(0.0);
+        if best.as_ref().map_or(true, |(best_t, _)| mtime > *best_t) {
+            best = Some((mtime, path));
+        }
+    }
+    let Some((_, path)) = best else { return String::new() };
+
+    // Extract the two most grounding sections from the delta format
+    let state = extract_md_section_prefix(&path, "## State");
+    let next_action = extract_md_section_prefix(&path, "## Next action");
+
+    let mut combined = String::new();
+    if !state.is_empty() {
+        combined.push_str("## State\n");
+        combined.push_str(&state);
+    }
+    if !next_action.is_empty() {
+        if !combined.is_empty() { combined.push('\n'); }
+        combined.push_str("## Next action\n");
+        combined.push_str(&next_action);
+    }
+    // Fallback: if no standard sections found, take the top of the file
+    if combined.is_empty() {
+        combined = fs::read_to_string(&path).unwrap_or_default();
+    }
+
+    combined.chars().take(char_cap).collect()
+}
+
 fn extract_pending_tasks(tasks_path: &std::path::PathBuf) -> Vec<String> {
     let Ok(text) = fs::read_to_string(tasks_path) else {
         return Vec::new();
@@ -654,6 +940,7 @@ fn scaffold_palace(parent_path: String) -> Result<String, String> {
 /// Persists palace_path to config on success.
 #[tauri::command]
 fn load_palace(path: String) -> Result<PalaceManifest, String> {
+    let __t = std::time::Instant::now();
     // Derive root from an owned PathBuf so `path` stays free to move into the return struct.
     let root_buf = std::path::PathBuf::from(&path);
     let root = root_buf.as_path();
@@ -704,11 +991,16 @@ fn load_palace(path: String) -> Result<PalaceManifest, String> {
     config.palace_path = Some(path.clone());
     write_loci_config(config)?;
 
+    // Count crystals inside _palace, NOT from the workspace root: scanning root
+    // walked target/ + node_modules/ + .git/ and was the 30s load beachball.
+    let crystal_count = count_md_files(&palace_dir);
+    eprintln!("[TIMING] load_palace: {} rooms, {} crystals in {:?}", rooms.len(), crystal_count, __t.elapsed());
+
     Ok(PalaceManifest {
         path,
         rooms,
         cron_job_count,
-        crystal_count: count_crystals(root),
+        crystal_count,
     })
 }
 
@@ -784,7 +1076,42 @@ fn detect_palace(search_path: String) -> DetectionResult {
         };
     }
 
-    // 5. No palace found
+    // 5. Foreign memory-provider conventions — the PORTABILITY SEAM. This is the
+    // read-side mirror of the InferenceBackend "trait not vendor" move: just as
+    // the app is agnostic to WHICH brain answers, it should be agnostic to WHAT
+    // structure holds the memory. Recognising memory laid down by other tools is
+    // how Loci reads ACROSS providers without anyone federating up to a central
+    // server (the anti-honeypot moat: portability, not centralisation).
+    //
+    // STRUCTURE-only detection here. Reading the CONTENT of a foreign store is a
+    // separate, Quarantined step (foreign text is never trusted-by-construction).
+    //
+    // Each signature matches if ALL its markers exist (file or dir) at `path`.
+    // Extend with Hermes and bourdon's L0–L6 once their on-disk signatures are
+    // confirmed under recon — do NOT guess a recogniser for a shape we haven't seen.
+    let signatures: &[(&str, &str, &[&str])] = &[
+        ("claude-code", "Found a Claude Code store (CLAUDE.md). Loci can read across to it.", &["CLAUDE.md"]),
+        ("agents-md", "Found an AGENTS.md store (Codex / kilo convention). Loci can read across to it.", &["AGENTS.md"]),
+        ("cursor", "Found Cursor project rules (.cursor/rules). Loci can read across to it.", &[".cursor/rules"]),
+        ("cursor", "Found a Cursor rules file (.cursorrules). Loci can read across to it.", &[".cursorrules"]),
+        ("windsurf", "Found Windsurf rules (.windsurfrules). Loci can read across to it.", &[".windsurfrules"]),
+    ];
+    for (kind, suggestion, markers) in signatures {
+        if markers.iter().all(|m| path.join(m).exists()) {
+            return DetectionResult {
+                found: true,
+                kind: Some((*kind).to_string()),
+                path: Some(path.to_string_lossy().to_string()),
+                rooms: None,
+                // count_md_files is now prune-guarded, so scanning a foreign repo
+                // root no longer walks target/ or node_modules/.
+                crystal_count: Some(count_md_files(path)),
+                suggestion: (*suggestion).to_string(),
+            };
+        }
+    }
+
+    // 6. No memory store recognised.
     DetectionResult {
         found: false,
         kind: None,
@@ -840,14 +1167,26 @@ fn count_crystals(path: &Path) -> usize {
     count_md_files(path)
 }
 
-// Helper: count all .md files recursively
+// Helper: count all .md files recursively, PRUNING heavy/irrelevant dirs. Without
+// the prune list this descends into target/ + node_modules/ + .git/ — tens of
+// thousands of build-artifact files — which is what turned a palace scan into a
+// 30-second main-thread beachball. Never walk what a palace never keeps.
 fn count_md_files(path: &Path) -> usize {
+    const PRUNE: &[&str] = &[
+        "node_modules", "target", ".git", "dist", "build", ".next", ".cache", "vendor",
+    ];
     let mut count = 0;
 
     if let Ok(entries) = fs::read_dir(path) {
         for entry in entries.filter_map(|e| e.ok()) {
             let entry_path = entry.path();
             if entry_path.is_dir() {
+                let name = entry.file_name();
+                let n = name.to_string_lossy();
+                // Skip hidden dirs and known-heavy artifact/dependency trees.
+                if n.starts_with('.') || PRUNE.contains(&n.as_ref()) {
+                    continue;
+                }
                 count += count_md_files(&entry_path);
             } else if entry_path.extension().and_then(|s| s.to_str()) == Some("md") {
                 count += 1;
@@ -961,6 +1300,17 @@ fn resolve_manifest_path(palace_path: &Path) -> Option<PathBuf> {
     if direct.is_file() {
         return Some(direct);
     }
+    // Child: palace_path/_palace-quantum-v1/.schema/manifest.json. This is the
+    // documented UI case: the user selects the workspace root (e.g. /Users/eris/Dev),
+    // so the quantum palace is a child, not a sibling. Matches read_cron_states,
+    // which joins palace_path/_palace/cron. Bounded to the literal dir name.
+    let child = palace_path
+        .join("_palace-quantum-v1")
+        .join(".schema")
+        .join("manifest.json");
+    if child.is_file() {
+        return Some(child);
+    }
     // Sibling fallback: parent/_palace-quantum-v1/.schema/manifest.json.
     // Cipher: the sibling is bounded to the literal directory name; an
     // attacker passing `/` as palace_path cannot escape this construction
@@ -985,10 +1335,42 @@ fn read_manifest(palace_path: String) -> Result<Manifest, String> {
             palace.display()
         )
     })?;
+    let __t = std::time::Instant::now();
     let bytes = fs::read(&manifest_path).map_err(|e| format!("read manifest: {e}"))?;
     let manifest: Manifest =
         serde_json::from_slice(&bytes).map_err(|e| format!("parse manifest JSON: {e}"))?;
+    eprintln!("[TIMING] read_manifest: {} bytes parsed in {:?}", bytes.len(), __t.elapsed());
     Ok(manifest)
+}
+
+/// Slim manifest read for the dashboard schema panel: parses the manifest but
+/// returns ONLY counts + meta, not the node graph. The full `read_manifest`
+/// ships the entire graph (~180KB, hundreds of nodes) across IPC and forces a
+/// large WASM-side deserialize just to display three `.len()` counts — that
+/// deserialize is the dashboard's main load hitch. This returns ~200 bytes.
+#[derive(Debug, Serialize)]
+struct ManifestSummary {
+    manifest_version: String,
+    vocabulary: String,
+    captured_ts_utc: String,
+    tree_hash: String,
+    node_count: usize,
+    relation_count: usize,
+    edge_count: usize,
+}
+
+#[tauri::command]
+fn read_manifest_summary(palace_path: String) -> Result<ManifestSummary, String> {
+    let m = read_manifest(palace_path)?;
+    Ok(ManifestSummary {
+        manifest_version: m.manifest_version,
+        vocabulary: m.vocabulary,
+        captured_ts_utc: m.captured_ts_utc,
+        tree_hash: m.tree_hash,
+        node_count: m.nodes.len(),
+        relation_count: m.relations.len(),
+        edge_count: m.edges.len(),
+    })
 }
 
 struct WatcherState {
@@ -1004,7 +1386,8 @@ fn start_state_watcher(
     use notify::{EventKind, RecursiveMode, Watcher};
 
     let palace = PathBuf::from(&palace_path);
-    let cron_dir = palace.join("cron");
+    // Must match read_cron_states: jobs live at <root>/_palace/cron, not <root>/cron.
+    let cron_dir = palace.join("_palace").join("cron");
     if !cron_dir.is_dir() {
         return Err(format!("cron directory missing: {}", cron_dir.display()));
     }
@@ -1026,6 +1409,7 @@ fn start_state_watcher(
             // Cipher: strip prefix so absolute palace path never reaches JS.
             // If strip fails the path is outside the palace; drop silently.
             if let Ok(rel) = path.strip_prefix(&palace_for_thread) {
+                eprintln!("[TIMING] watcher emit state_changed: {}", rel.display());
                 let _ = app_clone.emit("state_changed", rel.to_string_lossy().to_string());
             }
         }
@@ -1049,6 +1433,10 @@ fn start_state_watcher(
 
 #[derive(Debug, Serialize)]
 struct CronJobSnapshot {
+    // Filesystem dir name under _palace/cron. The stable identity key for
+    // detail lookups. Distinct from `job`, which is a content-derived display
+    // label (e.g. "palace-sync/run") and is NOT safe as a path component.
+    key: String,
     job: String,
     status: Option<String>,
     summary: Option<String>,
@@ -1063,6 +1451,7 @@ struct CronJobSnapshot {
 
 #[tauri::command]
 fn read_cron_states(palace_path: String) -> Result<Vec<CronJobSnapshot>, String> {
+    let __t = std::time::Instant::now();
     let palace = PathBuf::from(&palace_path);
     let cron_dir = palace.join("_palace").join("cron");
     if !cron_dir.is_dir() {
@@ -1096,6 +1485,7 @@ fn read_cron_states(palace_path: String) -> Result<Vec<CronJobSnapshot>, String>
         //       Synthesize a summary from the count so the dashboard still surfaces them.
         let snapshot = match &raw {
             serde_json::Value::Array(arr) => CronJobSnapshot {
+                key: dir_name.clone(),
                 job: dir_name,
                 status: Some("ok".into()),
                 summary: Some(format!("{} entries", arr.len())),
@@ -1111,7 +1501,7 @@ fn read_cron_states(palace_path: String) -> Result<Vec<CronJobSnapshot>, String>
                     .get("job")
                     .and_then(|v| v.as_str())
                     .map(String::from)
-                    .unwrap_or(dir_name);
+                    .unwrap_or_else(|| dir_name.clone());
                 let alert_count = raw
                     .get("alerts")
                     .and_then(|v| v.as_array())
@@ -1123,6 +1513,7 @@ fn read_cron_states(palace_path: String) -> Result<Vec<CronJobSnapshot>, String>
                     .and_then(|v| v.as_str())
                     .map(String::from);
                 CronJobSnapshot {
+                    key: dir_name,
                     job,
                     status: raw.get("status").and_then(|v| v.as_str()).map(String::from),
                     summary: raw.get("summary").and_then(|v| v.as_str()).map(String::from),
@@ -1138,6 +1529,7 @@ fn read_cron_states(palace_path: String) -> Result<Vec<CronJobSnapshot>, String>
         snapshots.push(snapshot);
     }
     snapshots.sort_by(|a, b| b.last_run.cmp(&a.last_run));
+    eprintln!("[TIMING] read_cron_states: {} jobs in {:?}", snapshots.len(), __t.elapsed());
     Ok(snapshots)
 }
 
@@ -1155,6 +1547,7 @@ struct HandoverEntry {
 /// Returns at most `limit` entries, newest first. Empty Vec if no convention matches.
 #[tauri::command]
 fn read_handovers(palace_path: String, limit: Option<usize>) -> Result<Vec<HandoverEntry>, String> {
+    let __t = std::time::Instant::now();
     let palace = PathBuf::from(&palace_path);
     let candidates = [
         palace.join("nym-stone").join("vesper").join("handovers"),
@@ -1196,7 +1589,103 @@ fn read_handovers(palace_path: String, limit: Option<usize>) -> Result<Vec<Hando
     if let Some(n) = limit {
         entries.truncate(n);
     }
+    eprintln!("[TIMING] read_handovers in {:?}", __t.elapsed());
     Ok(entries)
+}
+
+// ─── v0.6.0 bridge · Phase 3.6 · drill-down detail + questlog ─────────────────
+
+/// Lazy detail load for one cron job. The list view (read_cron_states) strips
+/// `raw` to keep the wire payload small; this fetches the full state.json for a
+/// single job on demand when the user drills in. Job name is treated as a single
+/// path component (no separators) so it cannot escape the cron dir.
+#[tauri::command]
+fn read_cron_detail(palace_path: String, key: String) -> Result<serde_json::Value, String> {
+    if key.is_empty() || key.contains('/') || key.contains('\\') || key.contains("..") {
+        return Err(format!("invalid cron key: {key}"));
+    }
+    let state_file = PathBuf::from(&palace_path)
+        .join("_palace")
+        .join("cron")
+        .join(&key)
+        .join("state.json");
+    let bytes = fs::read(&state_file).map_err(|e| format!("read {}: {e}", state_file.display()))?;
+    serde_json::from_slice(&bytes).map_err(|e| format!("parse {}: {e}", state_file.display()))
+}
+
+#[derive(Debug, Serialize)]
+struct QuestlogItem {
+    done: bool,
+    title: String,
+    body: String,
+    // The `## Heading` section the item sits under in TASKS.md ("Unfiled" if
+    // it precedes any heading). This is the track/drive used to group the log.
+    track: String,
+}
+
+/// Parse open/done items from _palace/TASKS.md. Markdown checkbox convention:
+///   - [ ] **date, Title.** body...   → open
+///   - [x] ...                         → done
+/// Continuation lines (not a new bullet) append to the current item's body, so
+/// multi-line items stay whole. Returns open items first, in file order.
+#[tauri::command]
+fn read_tasks(palace_path: String) -> Result<Vec<QuestlogItem>, String> {
+    let __t = std::time::Instant::now();
+    let tasks_file = PathBuf::from(&palace_path).join("_palace").join("TASKS.md");
+    if !tasks_file.is_file() {
+        return Ok(Vec::new());
+    }
+    let text = fs::read_to_string(&tasks_file).map_err(|e| format!("read TASKS.md: {e}"))?;
+    let mut items: Vec<QuestlogItem> = Vec::new();
+    let mut current_track = String::from("Unfiled");
+    for line in text.lines() {
+        let trimmed = line.trim_start();
+        // `## Heading` opens a new track. (Not `#`, which is the file title.)
+        if let Some(h) = trimmed.strip_prefix("## ") {
+            current_track = h.trim().to_string();
+            continue;
+        }
+        let (done, rest) = if let Some(r) = trimmed.strip_prefix("- [ ]") {
+            (false, Some(r))
+        } else if let Some(r) = trimmed.strip_prefix("- [x]").or_else(|| trimmed.strip_prefix("- [X]")) {
+            (true, Some(r))
+        } else {
+            (false, None)
+        };
+        match rest {
+            Some(r) => {
+                let body = r.trim().to_string();
+                items.push(QuestlogItem {
+                    done,
+                    title: extract_task_title(&body),
+                    body,
+                    track: current_track.clone(),
+                });
+            }
+            None => {
+                // Continuation of the previous item (wrapped line).
+                if let Some(last) = items.last_mut() {
+                    if !trimmed.is_empty() && !trimmed.starts_with('#') {
+                        last.body.push(' ');
+                        last.body.push_str(trimmed);
+                    }
+                }
+            }
+        }
+    }
+    // File order preserved: the frontend groups by track and orders within group.
+    eprintln!("[TIMING] read_tasks: {} items in {:?}", items.len(), __t.elapsed());
+    Ok(items)
+}
+
+/// Title = the first **bold** span if present, else the first 80 chars.
+fn extract_task_title(body: &str) -> String {
+    if let Some(start) = body.find("**") {
+        if let Some(end) = body[start + 2..].find("**") {
+            return body[start + 2..start + 2 + end].trim().to_string();
+        }
+    }
+    body.chars().take(80).collect()
 }
 
 #[cfg(test)]
@@ -1239,9 +1728,94 @@ mod bridge_tests {
     }
 
     #[test]
+    fn resolver_finds_child_from_workspace_root() {
+        // The path the UI actually sends: the workspace root, with the quantum
+        // palace as a child. Regression guard for the green-test/broken-dogfood gap
+        // (the panel rendered "no manifest" while every existing test was green).
+        let dev_root = PathBuf::from("/Users/eris/Dev");
+        if !dev_root
+            .join("_palace-quantum-v1/.schema/manifest.json")
+            .is_file()
+        {
+            eprintln!("skipping: child _palace-quantum-v1 not present");
+            return;
+        }
+        let resolved = resolve_manifest_path(&dev_root).expect("child resolve from workspace root");
+        assert!(resolved.starts_with(&dev_root));
+        assert!(resolved.ends_with("_palace-quantum-v1/.schema/manifest.json"));
+    }
+
+    #[test]
     fn resolver_returns_none_when_nothing_found() {
         let resolved = resolve_manifest_path(Path::new("/tmp/definitely_not_a_palace_xyz"));
         assert!(resolved.is_none());
+    }
+
+    #[test]
+    fn extract_task_title_prefers_bold() {
+        assert_eq!(
+            extract_task_title("**2026-05-26, Write PALACES.md** body text here"),
+            "2026-05-26, Write PALACES.md"
+        );
+        let long = "x".repeat(200);
+        assert_eq!(extract_task_title(&long).chars().count(), 80);
+    }
+
+    #[test]
+    fn read_cron_detail_rejects_traversal() {
+        for bad in ["../secrets", "a/b", "..", ""] {
+            assert!(
+                read_cron_detail("/Users/eris/Dev".into(), bad.into()).is_err(),
+                "expected reject for {bad:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn read_tasks_against_live_palace() {
+        let palace = PathBuf::from("/Users/eris/Dev");
+        if !palace.join("_palace/TASKS.md").is_file() {
+            eprintln!("skipping: live TASKS.md not present");
+            return;
+        }
+        let items = read_tasks(palace.to_string_lossy().to_string()).expect("read_tasks");
+        assert!(!items.is_empty(), "expected questlog items");
+        assert!(items.iter().any(|i| !i.done), "expected at least one open item");
+        // Every item carries a track (default "Unfiled" before any ## heading).
+        assert!(items.iter().all(|i| !i.track.is_empty()), "track must be populated");
+    }
+
+    #[test]
+    fn read_tasks_groups_by_h2_heading() {
+        let dir = std::env::temp_dir().join(format!("loci_tasks_test_{}", std::process::id()));
+        let _ = fs::create_dir_all(dir.join("_palace"));
+        let md = "# Palace TASKS\n- [ ] orphan before any heading\n## Loci\n- [ ] **A** build the thing\n- [x] **B** shipped\n## Nym.com\n- [ ] **C** perf triage\n";
+        fs::write(dir.join("_palace/TASKS.md"), md).unwrap();
+        let items = read_tasks(dir.to_string_lossy().to_string()).expect("read_tasks");
+        let track_of = |t: &str| items.iter().find(|i| i.body.contains(t)).map(|i| i.track.clone());
+        assert_eq!(track_of("orphan").as_deref(), Some("Unfiled"));
+        assert_eq!(track_of("build the thing").as_deref(), Some("Loci"));
+        assert_eq!(track_of("shipped").as_deref(), Some("Loci"));
+        assert_eq!(track_of("perf triage").as_deref(), Some("Nym.com"));
+        let _ = fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn read_cron_detail_against_live_job() {
+        let palace = PathBuf::from("/Users/eris/Dev");
+        if !palace.join("_palace/cron").is_dir() {
+            eprintln!("skipping: live cron dir not present");
+            return;
+        }
+        let states = read_cron_states(palace.to_string_lossy().to_string()).expect("states");
+        let Some(first) = states.first() else {
+            eprintln!("skipping: no cron jobs");
+            return;
+        };
+        // Use the dir key, not the display label (which may contain '/').
+        let detail = read_cron_detail(palace.to_string_lossy().to_string(), first.key.clone())
+            .expect("detail for a real job");
+        assert!(detail.is_object() || detail.is_array());
     }
 
     #[test]
@@ -1391,6 +1965,7 @@ fn main() {
             migrate_to_loci,
             // Palace bridge
             validate_palace_path,
+            pick_palace_dir,
             scaffold_palace,
             load_palace,
             read_palace_state,
@@ -1408,9 +1983,15 @@ fn main() {
             write_loci_config,
             // v0.6.0: palace bridge
             read_manifest,
+            read_manifest_summary,
             start_state_watcher,
             read_cron_states,
             read_handovers,
+            // v0.6.0 Phase 3.6: drill-down detail + questlog
+            read_cron_detail,
+            read_tasks,
+            // Phase 4a: chat as QUERY (inference trait, fail-closed)
+            chat_query,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

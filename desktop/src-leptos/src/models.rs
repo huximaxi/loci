@@ -77,6 +77,19 @@ pub struct Manifest {
     pub errors: Vec<serde_json::Value>,
 }
 
+/// Slim schema-panel payload from `read_manifest_summary`: counts + meta only,
+/// so the dashboard doesn't deserialize the whole node graph in WASM.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ManifestSummary {
+    pub manifest_version: String,
+    pub vocabulary: String,
+    pub captured_ts_utc: String,
+    pub tree_hash: String,
+    pub node_count: usize,
+    pub relation_count: usize,
+    pub edge_count: usize,
+}
+
 /// Application-wide active palace. Held in a Leptos signal via provide_context.
 #[derive(Debug, Clone, Default)]
 pub struct ActivePalace {
@@ -86,6 +99,9 @@ pub struct ActivePalace {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CronJobSnapshot {
+    // Filesystem dir key: stable identity for detail lookups. Distinct from
+    // `job`, the content-derived display label which may contain '/'.
+    pub key: String,
     pub job: String,
     pub status: Option<String>,
     pub summary: Option<String>,
@@ -103,4 +119,28 @@ pub struct HandoverEntry {
     pub filename: String,
     pub mtime: f64,
     pub size: u64,
+}
+
+/// One alert surfaced by alert-watcher-daily. Parsed from the `alerts` array in
+/// that job's state.json (lazily, via read_cron_detail). Read-only for now: the
+/// "solve/action" affordance is deferred to Phase 4c (write-path) per the roadmap.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct AlertItem {
+    pub job: String,
+    pub condition: String,
+    #[serde(default)]
+    pub severity: String,
+    #[serde(default)]
+    pub topic: String,
+    #[serde(default)]
+    pub posted: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct QuestlogItem {
+    pub done: bool,
+    pub title: String,
+    pub body: String,
+    // The `## Heading` track this quest sits under in TASKS.md.
+    pub track: String,
 }
