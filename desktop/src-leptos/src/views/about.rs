@@ -1,8 +1,15 @@
+use crate::views::greeter::reset_greeter;
 use leptos::*;
 use leptos_router::A;
 
 #[component]
 pub fn About() -> impl IntoView {
+    let show_greeter = expect_context::<RwSignal<bool>>();
+    let probe = move |_| {
+        reset_greeter();
+        show_greeter.set(true);
+    };
+
     view! {
         <main class="about">
             <header class="wizard-header">
@@ -28,6 +35,11 @@ pub fn About() -> impl IntoView {
                 <p class="muted">
                     "Your palace is yours. The wizard is a lens, not a landlord."
                 </p>
+
+                <div style="margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--scholar-border);">
+                    <p class="muted" style="font-size: 11px; margin-bottom: 6px;">"dev probe"</p>
+                    <button on:click=probe>"show greeter"</button>
+                </div>
             </section>
         </main>
     }

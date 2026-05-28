@@ -14,13 +14,23 @@ pub fn Onboarding() -> impl IntoView {
                 <A href="/load" attr:class="card card-primary">
                     <span class="card-eyebrow">"open"</span>
                     <span class="card-title">"a palace I keep"</span>
-                    <span class="card-body">"Point at a directory with a "<code>"CLAUDE.md"</code>" and a "<code>"_palace/"</code>" inside."</span>
+                    <span class="card-body">
+                        "Point at a directory with a "
+                        <code>"CLAUDE.md"</code>
+                        " and a "
+                        <code>"_palace/"</code>
+                        " inside."
+                    </span>
                 </A>
 
                 <A href="/create" attr:class="card">
                     <span class="card-eyebrow">"start"</span>
                     <span class="card-title">"a palace I do not yet keep"</span>
-                    <span class="card-body">"Choose a parent directory. A fresh "<code>"_palace/"</code>" will take root there."</span>
+                    <span class="card-body">
+                        "Choose a parent directory. A fresh "
+                        <code>"_palace/"</code>
+                        " will take root there."
+                    </span>
                 </A>
 
                 <A href="/about" attr:class="card card-quiet">

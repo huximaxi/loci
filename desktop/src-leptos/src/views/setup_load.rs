@@ -1,6 +1,7 @@
 use crate::dialog::open_directory;
 use crate::models::{ActivePalace, PalaceManifest};
 use crate::tauri_bindings::invoke;
+use crate::views::greeter::{has_greeted_palace, mark_palace_greeted};
 use leptos::*;
 use leptos_router::{use_navigate, A};
 use serde::Serialize;
@@ -13,6 +14,7 @@ struct PathArg<'a> {
 #[component]
 pub fn SetupLoad() -> impl IntoView {
     let active = expect_context::<RwSignal<ActivePalace>>();
+    let show_greeter = expect_context::<RwSignal<bool>>();
     let (status, set_status) = create_signal::<LoadStatus>(LoadStatus::Idle);
     let navigate = use_navigate();
 
@@ -66,6 +68,10 @@ pub fn SetupLoad() -> impl IntoView {
                     manifest: Some(manifest),
                 });
                 set_status.set(LoadStatus::Loaded);
+                if !has_greeted_palace(&picked) {
+                    mark_palace_greeted(&picked);
+                    show_greeter.set(true);
+                }
                 navigate("/dashboard", Default::default());
             });
         }

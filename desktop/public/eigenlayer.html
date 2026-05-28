@@ -1,0 +1,806 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>eigenlayer · stage 1</title>
+<style>
+:root {
+  --bg:           #0c0d12;
+  --bg-soft:      #14151c;
+  --ink-1:        #d8d4cc;
+  --ink-2:        #8a8780;
+  --ink-3:        #4a4842;
+  --edge:         #2a2b34;
+
+  --axis-node:    #d49453;
+  --axis-rel:     #8b6fa3;
+  --axis-weight:  #5b7ba8;
+  --axis-state:   #c8c4bc;
+
+  --tender-v:     #9b7fbf;
+  --tender-h:     #d49453;
+
+  --serif:        Georgia, "EB Garamond", "Source Serif Pro", serif;
+  --mono:         "JetBrains Mono", "IBM Plex Mono", ui-monospace, "Courier New", monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--ink-1);
+  font-family: var(--serif);
+  overflow: hidden;
+  user-select: none;
+}
+canvas#stage {
+  position: fixed; inset: 0;
+  width: 100vw; height: 100vh;
+  display: block;
+  cursor: grab;
+}
+canvas#stage:active { cursor: grabbing; }
+
+.chrome {
+  position: fixed;
+  z-index: 2;
+  pointer-events: none;
+  color: var(--ink-2);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.chrome.top-left   { top: 16px; left: 20px; }
+.chrome.top-right  { top: 16px; right: 20px; text-align: right; }
+.chrome.bot-left   { bottom: 16px; left: 20px; }
+
+.chrome .glyph {
+  font-family: var(--serif);
+  font-size: 13px;
+  color: var(--ink-1);
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.controls {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  padding: 14px 20px 18px;
+  background: linear-gradient(to top, rgba(12,13,18,0.92) 0%, rgba(12,13,18,0) 100%);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  pointer-events: auto;
+}
+.controls button {
+  background: transparent;
+  border: 1px solid var(--edge);
+  color: var(--ink-2);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 7px 14px;
+  cursor: pointer;
+  transition: color 200ms, border-color 200ms;
+}
+.controls button:hover,
+.controls button:focus-visible {
+  color: var(--ink-1);
+  border-color: var(--ink-2);
+  outline: none;
+}
+.controls button[aria-pressed="true"] {
+  color: var(--axis-state);
+  border-color: var(--axis-state);
+}
+.scrubber {
+  flex: 1;
+  height: 28px;
+  position: relative;
+}
+.scrubber-track {
+  position: absolute;
+  left: 0; right: 0; top: 13px;
+  height: 1px;
+  background: var(--edge);
+}
+.scrubber-tick {
+  position: absolute;
+  top: 9px;
+  width: 1px;
+  height: 9px;
+  background: var(--ink-3);
+  transition: background 200ms, height 200ms;
+}
+.scrubber-tick.dyadic { background: var(--ink-2); }
+.scrubber-tick.active { background: var(--axis-state); height: 13px; top: 7px; }
+.scrubber input[type=range] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.inset {
+  position: fixed;
+  top: 50%; right: 24px;
+  transform: translateY(-50%);
+  width: 168px;
+  padding: 14px 14px 12px;
+  background: rgba(20,21,28,0.78);
+  border: 1px solid var(--edge);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 600ms;
+  pointer-events: none;
+}
+.inset.visible { opacity: 1; }
+.inset svg { display: block; width: 100%; height: 120px; }
+
+.label-axis {
+  position: absolute;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  pointer-events: none;
+  transition: opacity 400ms;
+}
+.label-axis.node    { color: var(--axis-node); }
+.label-axis.rel     { color: var(--axis-rel); }
+.label-axis.weight  { color: var(--axis-weight); }
+.label-axis.state   { color: var(--axis-state); }
+
+.tender-label {
+  position: absolute;
+  font-family: var(--serif);
+  font-size: 11px;
+  font-style: italic;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 400ms;
+}
+.tender-label.visible { opacity: 0.85; }
+.tender-label.v { color: var(--tender-v); }
+.tender-label.h { color: var(--tender-h); }
+
+@media (prefers-reduced-motion: reduce) {
+  html, body { background: var(--bg); }
+  .chrome, .controls { transition: none !important; }
+}
+
+.recognition-banner {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 14px;
+  color: var(--ink-2);
+  letter-spacing: 0.01em;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 800ms;
+  z-index: 4;
+  max-width: 320px;
+  line-height: 1.5;
+}
+.recognition-banner.visible { opacity: 0.9; }
+</style>
+</head>
+<body>
+
+<canvas id="stage"></canvas>
+
+<div class="chrome top-left">
+  <div class="glyph">eigenlayer · ◇ stage 1</div>
+  <div style="margin-top:6px">N=2 · dyadic</div>
+</div>
+
+<div class="chrome top-right">
+  <div>4D · stereographic</div>
+  <div style="margin-top:6px; color: var(--ink-3)">⌘ drag · rotate</div>
+</div>
+
+<div class="chrome bot-left" style="bottom: 76px;">
+  <div id="event-readout" style="color: var(--ink-2)">event ·</div>
+</div>
+
+<!-- axis edge labels positioned dynamically by the renderer -->
+<div id="axis-labels"></div>
+
+<!-- tender labels positioned dynamically -->
+<div id="tender-labels">
+  <div class="tender-label v" data-tender="v">vesper</div>
+  <div class="tender-label h" data-tender="h">hux</div>
+</div>
+
+<!-- parallel coordinates inset -->
+<aside class="inset" id="inset" aria-hidden="true">
+  <div style="margin-bottom: 8px; color: var(--ink-2)">parallel</div>
+  <svg id="parallel-svg" viewBox="0 0 140 120" preserveAspectRatio="none"></svg>
+</aside>
+
+<!-- recognition-of-necessity moment -->
+<div class="recognition-banner" id="recog-banner">
+  the basis is not chosen<br>
+  it is the only basis the constraint admits
+</div>
+
+<!-- bottom controls -->
+<div class="controls">
+  <button id="btn-play" aria-pressed="true">∞ rotate</button>
+  <button id="btn-recog" aria-pressed="false">∴ reveal constraint</button>
+  <button id="btn-inset" aria-pressed="false">‖ parallel</button>
+  <div class="scrubber" id="scrubber">
+    <div class="scrubber-track"></div>
+    <div id="scrubber-ticks"></div>
+    <input type="range" min="0" max="34" step="1" value="34" id="scrubber-input" aria-label="event timeline">
+  </div>
+  <button id="btn-24cell" aria-pressed="false" title="24-cell deep reading · staged for stage 2">◆ 24-cell</button>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+// =====================================================================
+// 4D math · the tesseract basis + rotation + stereographic projection
+// Tesseract = {n,n,n,n} = 8-cell. 16 vertices = all combinations of ±1.
+// Edges connect vertices differing in exactly one coordinate. 32 edges.
+// Each edge is parallel to exactly one of the 4 axes (node/rel/weight/state).
+// =====================================================================
+
+const AXIS_NAMES = ['node', 'relation', 'weight', 'state'];
+const AXIS_COLORS = ['--axis-node', '--axis-rel', '--axis-weight', '--axis-state'];
+
+// 16 tesseract vertices in 4D
+const VERTS_4D = [];
+for (let i = 0; i < 16; i++) {
+  VERTS_4D.push([
+    (i & 1) ? 1 : -1,
+    (i & 2) ? 1 : -1,
+    (i & 4) ? 1 : -1,
+    (i & 8) ? 1 : -1,
+  ]);
+}
+
+// 32 edges, with axis attribution (which dim differs)
+const EDGES = [];
+for (let i = 0; i < 16; i++) {
+  for (let j = i + 1; j < 16; j++) {
+    const diff = i ^ j;
+    let axis = -1;
+    if (diff === 1) axis = 0;
+    else if (diff === 2) axis = 1;
+    else if (diff === 4) axis = 2;
+    else if (diff === 8) axis = 3;
+    if (axis >= 0) EDGES.push({ a: i, b: j, axis });
+  }
+}
+
+// Six independent 4D rotation planes: XY, XZ, XW, YZ, YW, ZW
+// Each plane indexed by (a,b) with 0=X, 1=Y, 2=Z, 3=W
+const ROT_PLANES = [
+  [0,1],[0,2],[0,3],[1,2],[1,3],[2,3]
+];
+
+function rotate4D(v, [a, b], theta) {
+  const c = Math.cos(theta), s = Math.sin(theta);
+  const out = v.slice();
+  out[a] = c * v[a] - s * v[b];
+  out[b] = s * v[a] + c * v[b];
+  return out;
+}
+
+function rotateAll(v, angles) {
+  let r = v.slice();
+  for (let i = 0; i < 6; i++) r = rotate4D(r, ROT_PLANES[i], angles[i]);
+  return r;
+}
+
+// Stereographic projection R^4 -> R^3 from north pole (w = R)
+function stereographic(v, R = 3) {
+  const w = v[3];
+  const denom = R - w;
+  if (Math.abs(denom) < 0.001) return [v[0]*1000, v[1]*1000, v[2]*1000];
+  const factor = R / denom;
+  return [v[0]*factor, v[1]*factor, v[2]*factor];
+}
+
+// 3D rotation for the post-projection view (the user's drag)
+function rotate3D([x,y,z], rx, ry) {
+  const cx = Math.cos(rx), sx = Math.sin(rx);
+  const cy = Math.cos(ry), sy = Math.sin(ry);
+  let y2 = cx*y - sx*z, z2 = sx*y + cx*z;
+  let x2 = cy*x + sy*z2, z3 = -sy*x + cy*z2;
+  return [x2, y2, z3];
+}
+
+// Perspective project R^3 -> R^2
+function perspective([x,y,z], dist = 6) {
+  const factor = dist / (dist + z);
+  return [x*factor, y*factor, factor];
+}
+
+// =====================================================================
+// state · animation · interaction
+// =====================================================================
+
+const state = {
+  // 4D rotation angles, one per plane. Drifting slowly when playing.
+  angles4: [0, 0, 0, 0, 0, 0],
+  // user 3D drag rotation
+  rx: -0.2,
+  ry: 0.6,
+  // playback
+  playing: true,
+  recog: false,
+  insetVisible: false,
+  showing24cell: false,
+  // scrubber
+  eventIdx: 34,
+  // pointer drag
+  dragging: false,
+  dragLast: null,
+  // canvas sizing
+  W: 0, H: 0, dpr: 1,
+  // reduced motion preference
+  reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+};
+
+// =====================================================================
+// L3 events stub · 35 entries · 31/35 dyadic
+// In production, this loads from _palace-quantum-v1/.schema/update-events.json
+// =====================================================================
+const L3_EVENTS = [];
+for (let i = 0; i < 35; i++) {
+  // 31/35 dyadic (vesper-side) — mark 4 specific indices as solo
+  const solo = (i === 7 || i === 14 || i === 22 || i === 30);
+  L3_EVENTS.push({
+    idx: i,
+    dyadic: !solo,
+    // each event nudges the W matrix; we use the index to perturb the rotation
+    // angles deterministically, so scrubbing shows reproducible state changes
+    seed: Math.sin((i + 1) * 0.834) * 0.7,
+  });
+}
+
+// =====================================================================
+// tender positions in 4D · stub
+// In production, these come from the L2 relation-graph projections
+// Each tender carries a coefficient on each of the 4 axes
+// =====================================================================
+const TENDERS = [
+  { id: 'v', name: 'vesper', pos4: [ 0.55, -0.32,  0.18,  0.42] },
+  { id: 'h', name: 'hux',    pos4: [-0.41,  0.48, -0.22,  0.36] },
+];
+
+// =====================================================================
+// eigenvector arrows · 4 arrows · one per basis axis
+// They start aligned with the basis; W matrix updates rotate them
+// =====================================================================
+function getEigenvectors(eventIdx) {
+  // deterministic perturbation based on scrub position
+  const seed = L3_EVENTS[eventIdx].seed;
+  const eigs = [];
+  for (let i = 0; i < 4; i++) {
+    const v = [0, 0, 0, 0];
+    v[i] = 0.85;
+    // small cross-component nudge from the seed
+    v[(i + 1) % 4] = seed * 0.22 * Math.sin(eventIdx * 0.3 + i);
+    eigs.push(v);
+  }
+  return eigs;
+}
+
+// =====================================================================
+// rendering
+// =====================================================================
+
+const canvas = document.getElementById('stage');
+const ctx = canvas.getContext('2d');
+
+function resize() {
+  state.dpr = Math.max(1, window.devicePixelRatio || 1);
+  state.W = window.innerWidth;
+  state.H = window.innerHeight;
+  canvas.width = state.W * state.dpr;
+  canvas.height = state.H * state.dpr;
+  canvas.style.width = state.W + 'px';
+  canvas.style.height = state.H + 'px';
+  ctx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
+}
+window.addEventListener('resize', resize);
+resize();
+
+function project(v4) {
+  const v3 = stereographic(v4, 3);
+  const v3r = rotate3D(v3, state.rx, state.ry);
+  const v2 = perspective(v3r, 6);
+  const scale = Math.min(state.W, state.H) * 0.18;
+  return {
+    x: state.W / 2 + v2[0] * scale,
+    y: state.H / 2 + v2[1] * scale,
+    depth: v2[2],
+  };
+}
+
+function getCss(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+function rgba(hex, alpha) {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.substr(0, 2), 16);
+  const g = parseInt(h.substr(2, 2), 16);
+  const b = parseInt(h.substr(4, 2), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+let lastTime = performance.now();
+
+function frame(now) {
+  const dt = (now - lastTime) / 1000;
+  lastTime = now;
+
+  // advance 4D rotation if playing and not reduced-motion
+  if (state.playing && !state.reducedMotion) {
+    // each plane drifts at a different rate — generative, never-looping
+    state.angles4[0] += dt * 0.18;
+    state.angles4[1] += dt * 0.11;
+    state.angles4[2] += dt * 0.14;
+    state.angles4[3] += dt * 0.09;
+    state.angles4[4] += dt * 0.07;
+    state.angles4[5] += dt * 0.13;
+  }
+
+  draw();
+  requestAnimationFrame(frame);
+}
+
+function draw() {
+  ctx.clearRect(0, 0, state.W, state.H);
+
+  // soft radial vignette — atmosphere via tonal shift only
+  const grad = ctx.createRadialGradient(
+    state.W / 2, state.H / 2, 0,
+    state.W / 2, state.H / 2, Math.max(state.W, state.H) * 0.7
+  );
+  grad.addColorStop(0, 'rgba(14,15,22,0)');
+  grad.addColorStop(1, 'rgba(0,0,0,0.55)');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, state.W, state.H);
+
+  // rotate every vertex through 4D
+  const projected = VERTS_4D.map(v => {
+    const rotated = rotateAll(v, state.angles4);
+    return { v4: rotated, p: project(rotated) };
+  });
+
+  // sort edges by average depth for back-to-front draw
+  const edgeOrder = EDGES.map((e, i) => ({
+    e,
+    depth: (projected[e.a].p.depth + projected[e.b].p.depth) / 2,
+  })).sort((a, b) => a.depth - b.depth);
+
+  // axis hex values
+  const axisHex = AXIS_COLORS.map(getCss);
+
+  // draw edges
+  for (const { e } of edgeOrder) {
+    const pa = projected[e.a].p, pb = projected[e.b].p;
+    const avgDepth = (pa.depth + pb.depth) / 2;
+    const alpha = Math.max(0.12, Math.min(0.95, (avgDepth - 0.4) * 1.4));
+    const lineWidth = state.recog ? (1.0 + alpha * 1.5) : (0.8 + alpha * 1.2);
+    const hex = axisHex[e.axis];
+    const dim = state.recog ? 1 : 0.6;
+    ctx.strokeStyle = rgba(hex, alpha * dim);
+    ctx.lineWidth = lineWidth;
+    ctx.beginPath();
+    ctx.moveTo(pa.x, pa.y);
+    ctx.lineTo(pb.x, pb.y);
+    ctx.stroke();
+  }
+
+  // draw recognition-of-necessity highlight: each axis bundle pulses in sequence
+  if (state.recog) {
+    const t = performance.now() / 1000;
+    const cycle = (t % 8) / 8;
+    const activeAxis = Math.floor(cycle * 4);
+    const phase = (cycle * 4) - activeAxis;
+    const intensity = Math.sin(phase * Math.PI);
+    for (const { e } of edgeOrder) {
+      if (e.axis === activeAxis) {
+        const pa = projected[e.a].p, pb = projected[e.b].p;
+        ctx.strokeStyle = rgba(axisHex[activeAxis], intensity * 0.95);
+        ctx.lineWidth = 2.2 + intensity * 1.6;
+        ctx.beginPath();
+        ctx.moveTo(pa.x, pa.y);
+        ctx.lineTo(pb.x, pb.y);
+        ctx.stroke();
+      }
+    }
+  }
+
+  // draw eigenvector arrows from center
+  const eigs = getEigenvectors(state.eventIdx);
+  const origin = project([0, 0, 0, 0]);
+  for (let i = 0; i < 4; i++) {
+    const tip4 = rotateAll(eigs[i].map(c => c * 1.4), state.angles4);
+    const tip = project(tip4);
+    const hex = axisHex[i];
+    ctx.strokeStyle = rgba(hex, 0.85);
+    ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    ctx.moveTo(origin.x, origin.y);
+    ctx.lineTo(tip.x, tip.y);
+    ctx.stroke();
+    // arrowhead
+    ctx.fillStyle = rgba(hex, 0.95);
+    ctx.beginPath();
+    ctx.arc(tip.x, tip.y, 3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // draw tender points
+  const tenderHexes = [getCss('--tender-v'), getCss('--tender-h')];
+  const tenderLabels = document.querySelectorAll('.tender-label');
+  for (let i = 0; i < TENDERS.length; i++) {
+    const t = TENDERS[i];
+    // tenders drift slightly with the scrubber position to show emergence-through-time
+    const drift = (state.eventIdx - 34) * 0.012;
+    const driftedPos = t.pos4.map((c, j) => c + Math.sin(j + state.eventIdx * 0.3) * drift);
+    const rotated = rotateAll(driftedPos, state.angles4);
+    const p = project(rotated);
+    const glow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 28);
+    glow.addColorStop(0, rgba(tenderHexes[i], 0.85));
+    glow.addColorStop(0.4, rgba(tenderHexes[i], 0.25));
+    glow.addColorStop(1, rgba(tenderHexes[i], 0));
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 28, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = tenderHexes[i];
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+    ctx.fill();
+    // position the tender label
+    const lbl = tenderLabels[i];
+    lbl.style.left = (p.x + 12) + 'px';
+    lbl.style.top = (p.y - 8) + 'px';
+  }
+
+  // position axis-edge labels — find a representative edge per axis
+  positionAxisLabels(projected, axisHex);
+
+  // update parallel-coords inset if visible
+  if (state.insetVisible) updateParallelCoords();
+
+  // update event readout
+  const e = L3_EVENTS[state.eventIdx];
+  const readout = document.getElementById('event-readout');
+  readout.textContent = `event · ${String(e.idx + 1).padStart(2, '0')} / 35 · ${e.dyadic ? 'dyadic' : 'solo'}`;
+}
+
+// =====================================================================
+// axis labels · one per axis, anchored to a representative outer edge
+// =====================================================================
+
+let axisLabelEls = null;
+function ensureAxisLabels() {
+  if (axisLabelEls) return;
+  const container = document.getElementById('axis-labels');
+  axisLabelEls = AXIS_NAMES.map((name, i) => {
+    const el = document.createElement('div');
+    el.className = `label-axis ${['node','rel','weight','state'][i]}`;
+    el.textContent = name;
+    container.appendChild(el);
+    return el;
+  });
+}
+ensureAxisLabels();
+
+function positionAxisLabels(projected, axisHex) {
+  // for each axis, pick the edge whose midpoint is most outward
+  for (let axis = 0; axis < 4; axis++) {
+    let bestMid = null;
+    let bestDist = -Infinity;
+    for (const e of EDGES) {
+      if (e.axis !== axis) continue;
+      const pa = projected[e.a].p, pb = projected[e.b].p;
+      const mx = (pa.x + pb.x) / 2, my = (pa.y + pb.y) / 2;
+      const dx = mx - state.W / 2, dy = my - state.H / 2;
+      const d = dx * dx + dy * dy;
+      if (d > bestDist) {
+        bestDist = d;
+        bestMid = { x: mx, y: my };
+      }
+    }
+    if (bestMid) {
+      const el = axisLabelEls[axis];
+      el.style.left = (bestMid.x + 6) + 'px';
+      el.style.top = (bestMid.y - 14) + 'px';
+      el.style.opacity = state.recog ? '0.95' : '0.55';
+    }
+  }
+}
+
+// =====================================================================
+// parallel coordinates inset · 4 axes · tender projections
+// =====================================================================
+
+function updateParallelCoords() {
+  const svg = document.getElementById('parallel-svg');
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+  const W = 140, H = 120;
+  const margin = { l: 12, r: 12, t: 8, b: 8 };
+  const axisGap = (W - margin.l - margin.r) / 3;
+  // draw axes
+  for (let i = 0; i < 4; i++) {
+    const x = margin.l + i * axisGap;
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', x);
+    line.setAttribute('x2', x);
+    line.setAttribute('y1', margin.t);
+    line.setAttribute('y2', H - margin.b);
+    line.setAttribute('stroke', getCss(AXIS_COLORS[i]));
+    line.setAttribute('stroke-width', '1');
+    line.setAttribute('opacity', '0.55');
+    svg.appendChild(line);
+  }
+  // draw tender lines
+  const tenderHexes = [getCss('--tender-v'), getCss('--tender-h')];
+  for (let t = 0; t < TENDERS.length; t++) {
+    const pts = TENDERS[t].pos4.map((c, i) => {
+      const x = margin.l + i * axisGap;
+      const yMid = (margin.t + H - margin.b) / 2;
+      const ySpan = (H - margin.t - margin.b) / 2 - 4;
+      return [x, yMid - c * ySpan];
+    });
+    const d = 'M' + pts.map(p => p.join(',')).join(' L');
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', d);
+    path.setAttribute('stroke', tenderHexes[t]);
+    path.setAttribute('stroke-width', '1.2');
+    path.setAttribute('fill', 'none');
+    path.setAttribute('opacity', '0.9');
+    svg.appendChild(path);
+    pts.forEach(([x, y]) => {
+      const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      dot.setAttribute('cx', x);
+      dot.setAttribute('cy', y);
+      dot.setAttribute('r', '2');
+      dot.setAttribute('fill', tenderHexes[t]);
+      svg.appendChild(dot);
+    });
+  }
+}
+
+// =====================================================================
+// scrubber ticks
+// =====================================================================
+
+(function buildTicks() {
+  const ticks = document.getElementById('scrubber-ticks');
+  const N = L3_EVENTS.length;
+  L3_EVENTS.forEach((e, i) => {
+    const tick = document.createElement('div');
+    tick.className = 'scrubber-tick' + (e.dyadic ? ' dyadic' : '');
+    tick.dataset.idx = i;
+    tick.style.left = ((i / (N - 1)) * 100) + '%';
+    ticks.appendChild(tick);
+  });
+})();
+
+function setEventIdx(i) {
+  state.eventIdx = Math.max(0, Math.min(L3_EVENTS.length - 1, i));
+  document.querySelectorAll('.scrubber-tick').forEach((t, idx) => {
+    t.classList.toggle('active', idx === state.eventIdx);
+  });
+}
+setEventIdx(state.eventIdx);
+
+// =====================================================================
+// interactions
+// =====================================================================
+
+canvas.addEventListener('pointerdown', (e) => {
+  state.dragging = true;
+  state.dragLast = { x: e.clientX, y: e.clientY };
+  canvas.setPointerCapture(e.pointerId);
+  // pause auto-rotate while dragging for tactile control
+  // resume on pointer up
+});
+canvas.addEventListener('pointermove', (e) => {
+  if (!state.dragging) {
+    // hover · show tender labels if pointer near a tender point
+    const near = nearestTender(e.clientX, e.clientY);
+    document.querySelectorAll('.tender-label').forEach((lbl, i) => {
+      lbl.classList.toggle('visible', near === i);
+    });
+    return;
+  }
+  const dx = e.clientX - state.dragLast.x;
+  const dy = e.clientY - state.dragLast.y;
+  state.ry += dx * 0.005;
+  state.rx += dy * 0.005;
+  state.dragLast = { x: e.clientX, y: e.clientY };
+});
+canvas.addEventListener('pointerup', () => { state.dragging = false; });
+canvas.addEventListener('pointercancel', () => { state.dragging = false; });
+canvas.addEventListener('pointerleave', () => {
+  document.querySelectorAll('.tender-label').forEach(l => l.classList.remove('visible'));
+});
+
+function nearestTender(mx, my) {
+  let best = -1, bestDist = 32 * 32;
+  for (let i = 0; i < TENDERS.length; i++) {
+    const t = TENDERS[i];
+    const rotated = rotateAll(t.pos4, state.angles4);
+    const p = project(rotated);
+    const d = (p.x - mx) ** 2 + (p.y - my) ** 2;
+    if (d < bestDist) {
+      bestDist = d;
+      best = i;
+    }
+  }
+  return best;
+}
+
+document.getElementById('btn-play').addEventListener('click', (e) => {
+  state.playing = !state.playing;
+  e.currentTarget.setAttribute('aria-pressed', state.playing ? 'true' : 'false');
+});
+
+document.getElementById('btn-recog').addEventListener('click', (e) => {
+  state.recog = !state.recog;
+  e.currentTarget.setAttribute('aria-pressed', state.recog ? 'true' : 'false');
+  document.getElementById('recog-banner').classList.toggle('visible', state.recog);
+});
+
+document.getElementById('btn-inset').addEventListener('click', (e) => {
+  state.insetVisible = !state.insetVisible;
+  e.currentTarget.setAttribute('aria-pressed', state.insetVisible ? 'true' : 'false');
+  document.getElementById('inset').classList.toggle('visible', state.insetVisible);
+  document.getElementById('inset').setAttribute('aria-hidden', state.insetVisible ? 'false' : 'true');
+});
+
+document.getElementById('btn-24cell').addEventListener('click', (e) => {
+  // staged for stage 2 · deep reading via 24-cell projection
+  state.showing24cell = !state.showing24cell;
+  e.currentTarget.setAttribute('aria-pressed', state.showing24cell ? 'true' : 'false');
+  e.currentTarget.title = state.showing24cell
+    ? '24-cell · self-dual · stage 2 will render this'
+    : '24-cell deep reading · staged for stage 2';
+});
+
+document.getElementById('scrubber-input').addEventListener('input', (e) => {
+  setEventIdx(parseInt(e.target.value, 10));
+});
+
+// keyboard accessibility · arrow keys scrub
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowLeft')  { setEventIdx(state.eventIdx - 1); document.getElementById('scrubber-input').value = state.eventIdx; }
+  if (e.key === 'ArrowRight') { setEventIdx(state.eventIdx + 1); document.getElementById('scrubber-input').value = state.eventIdx; }
+  if (e.key === ' ')          { document.getElementById('btn-play').click(); e.preventDefault(); }
+});
+
+// kick the loop
+requestAnimationFrame(frame);
+
+})();
+</script>
+</body>
+</html>

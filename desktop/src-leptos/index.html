@@ -251,10 +251,10 @@
         .kpi-delta.up { color: #4a8b54; }
         .kpi-delta.down { color: var(--scholar-warn); }
 
-        .cron-section, .handovers-section {
+        .cron-section, .handovers-section, .questlog-section, .manifest-section {
             margin-top: 14px;
         }
-        .cron-section h3, .handovers-section h3 {
+        .cron-section h3, .handovers-section h3, .questlog-section h3, .manifest-section h3 {
             font-family: var(--font-serif);
             font-weight: 400;
             font-size: 14px;
@@ -324,7 +324,376 @@
         }
         .handovers-list li:last-child { border: 0; }
         .handover-name { color: var(--scholar-ink); }
+
+        /* Phase 3.6: drill-down interactivity */
+        .row-clickable { cursor: pointer; }
+        .row-clickable:hover { background: rgba(74, 107, 84, 0.07); }
+        .questlog-list { list-style: none; margin: 0; padding: 0; }
+        .questlog-list li {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 4px;
+            font-size: 12px;
+            border-bottom: 1px solid rgba(31, 42, 35, 0.05);
+        }
+        .questlog-list li:last-child { border: 0; }
+        .quest-title { color: var(--scholar-ink); }
+        .detail-pane {
+            position: fixed;
+            top: 0; right: 0; bottom: 0;
+            width: min(440px, 70vw);
+            background: var(--scholar-cream);
+            border-left: 1px solid var(--scholar-border-strong);
+            box-shadow: -8px 0 24px rgba(31, 42, 35, 0.10);
+            padding: 16px 18px;
+            overflow-y: auto;
+            z-index: 20;
+        }
+        .detail-close {
+            background: none;
+            border: 1px solid var(--scholar-border);
+            border-radius: 5px;
+            font-size: 11px;
+            color: var(--scholar-muted);
+            cursor: pointer;
+            padding: 3px 8px;
+            float: right;
+        }
+        .detail-title { font-family: var(--font-serif); font-weight: 400; margin: 0 0 10px 0; }
+        .detail-json {
+            background: rgba(31, 42, 35, 0.04);
+            border: 1px solid var(--scholar-border);
+            border-radius: 6px;
+            padding: 10px;
+            font-size: 11px;
+            line-height: 1.45;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        /* Selected row (single-click preview) */
+        .row-selected { background: rgba(74, 107, 84, 0.13) !important; }
+        /* Done quests settle: recede, stay as trace, no strike-through */
+        .questlog-list li.done { opacity: 0.48; }
+        .questlog-list li.done:hover { opacity: 0.7; }
+        /* Quest detail body + cross-reference chips */
+        .detail-body {
+            font-size: 12px;
+            line-height: 1.55;
+            white-space: pre-wrap;
+            word-break: break-word;
+            color: var(--scholar-ink);
+        }
+        .detail-chips {
+            margin-top: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+        }
+        .detail-chip {
+            background: rgba(74, 107, 84, 0.10);
+            border: 1px solid var(--scholar-border);
+            border-radius: 5px;
+            font-size: 11px;
+            font-family: ui-monospace, "SF Mono", Menlo, monospace;
+            color: var(--scholar-green);
+            cursor: pointer;
+            padding: 2px 7px;
+        }
+        .detail-chip:hover { background: rgba(74, 107, 84, 0.20); }
+        /* Track groups in the questlog */
+        .quest-track { margin-top: 12px; }
+        .quest-track:first-child { margin-top: 2px; }
+        .quest-track-head {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            padding: 2px 0 3px 0;
+            border-bottom: 1px solid var(--scholar-border);
+            margin-bottom: 3px;
+        }
+        .quest-track-name {
+            font-family: var(--font-serif);
+            font-size: 12px;
+            color: var(--scholar-green-dim);
+            letter-spacing: 0.02em;
+        }
+        /* Inline-formatted quest body */
+        .detail-body code {
+            background: rgba(31, 42, 35, 0.06);
+            padding: 0 3px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        }
+        .detail-body strong { color: var(--scholar-ink); font-weight: 600; }
+
+        /* ─── Phase 4a + feature pass: clickable KPIs, CiQ modal, alerts, chat ── */
+        .kpi-clickable { cursor: pointer; transition: border-color 120ms ease, background 120ms ease; }
+        .kpi-clickable:hover { border-color: var(--scholar-green-dim); background: rgba(74, 107, 84, 0.04); }
+        .kpi-info { font-size: 9px; color: var(--scholar-muted); margin-left: 3px; vertical-align: super; }
+
+        /* CiQ explainer modal */
+        .modal-backdrop {
+            position: fixed; inset: 0;
+            background: rgba(31, 42, 35, 0.32);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 40;
+        }
+        .modal-card {
+            background: var(--scholar-cream);
+            border: 1px solid var(--scholar-border-strong);
+            border-radius: 8px;
+            box-shadow: 0 12px 40px rgba(31, 42, 35, 0.22);
+            padding: 18px 20px;
+            width: min(440px, 88vw);
+            max-height: 82vh;
+            overflow-y: auto;
+        }
+        .modal-lede { font-size: 12px; line-height: 1.55; color: var(--scholar-ink); margin: 4px 0 14px; }
+        .ciq-total { margin-bottom: 10px; }
+        .ciq-table { width: 100%; font-size: 11px; border-collapse: collapse; }
+        .ciq-table th {
+            text-align: left; color: var(--scholar-muted); font-weight: 400;
+            text-transform: uppercase; letter-spacing: 0.06em; font-size: 9px;
+            padding: 4px 6px; border-bottom: 1px solid var(--scholar-border);
+        }
+        .ciq-table td { padding: 5px 6px; border-bottom: 1px solid rgba(31, 42, 35, 0.05); vertical-align: middle; }
+        .ciq-bar-wrap { position: relative; background: rgba(31, 42, 35, 0.06); border-radius: 3px; height: 16px; min-width: 90px; }
+        .ciq-bar { background: var(--scholar-green); height: 100%; border-radius: 3px; max-width: 100%; }
+        .ciq-bar-label { position: absolute; right: 5px; top: 0; line-height: 16px; font-size: 9px; color: var(--scholar-ink); }
+        .ciq-history { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+        .ciq-hist-pt {
+            font-size: 10px; font-family: ui-monospace, "SF Mono", Menlo, monospace;
+            background: rgba(74, 107, 84, 0.10); border-radius: 3px; padding: 1px 5px; color: var(--scholar-green);
+        }
+
+        /* Alert list (side detail-pane) */
+        .detail-note { margin: 0 0 10px; line-height: 1.5; }
+        .alert-list { list-style: none; margin: 0; padding: 0; }
+        .alert-row {
+            display: flex; align-items: center; gap: 10px;
+            padding: 7px 4px; border-bottom: 1px solid rgba(31, 42, 35, 0.06);
+        }
+        .alert-row:last-child { border: 0; }
+        .alert-sev { font-size: 15px; line-height: 1; }
+        .alert-meta { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+        .alert-cond { font-size: 10px; color: var(--scholar-muted); }
+
+        /* Chat query box (Phase 4a) */
+        .chat-query { margin: 4px 0 14px; }
+        .chat-row { display: flex; gap: 8px; }
+        .chat-input {
+            flex: 1; font: inherit; font-size: 13px;
+            padding: 8px 12px; border: 1px solid var(--scholar-border-strong);
+            border-radius: 4px; background: white; color: var(--scholar-ink);
+        }
+        .chat-input:focus { outline: none; border-color: var(--scholar-green-dim); }
+        .chat-input:disabled { background: rgba(31, 42, 35, 0.04); color: var(--scholar-muted); }
+        .brain-label {
+            font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em;
+            color: var(--scholar-muted); white-space: nowrap; align-self: center;
+        }
+        .chat-pause {
+            font-size: 11px; padding: 6px 10px; white-space: nowrap;
+            color: var(--scholar-muted); border-color: var(--scholar-border);
+        }
+        .brain-chip {
+            display: inline-flex; align-items: center; align-self: center;
+            font-size: 9px; text-transform: uppercase; letter-spacing: 0.04em;
+            padding: 2px 7px; border-radius: 10px; white-space: nowrap;
+        }
+        .brain-chip::before {
+            content: ""; width: 6px; height: 6px; border-radius: 50%;
+            margin-right: 5px; background: currentColor;
+        }
+        .brain-awake { background: rgba(74, 139, 84, 0.14); color: #2f6d3a; }
+        .brain-asleep { background: rgba(204, 142, 50, 0.16); color: #8c5a16; }
+        .brain-paused { background: rgba(31, 42, 35, 0.08); color: var(--scholar-muted); }
+        .brain-checking { background: rgba(31, 42, 35, 0.05); color: var(--scholar-muted); }
+        .chat-answer {
+            margin-top: 8px; padding: 10px 12px;
+            background: rgba(74, 107, 84, 0.05); border: 1px solid var(--scholar-border);
+            border-radius: 6px; font-size: 12px; line-height: 1.55; white-space: pre-wrap; word-break: break-word;
+        }
+        .chat-error { background: rgba(163, 80, 62, 0.06); border-left: 3px solid var(--scholar-warn); }
+        /* Brain switch + external marker. Amber = you have left the green local garden. */
+        .brain-toggle {
+            font-size: 11px; padding: 6px 10px; white-space: nowrap; align-self: center;
+            color: var(--scholar-muted); border: 1px solid var(--scholar-border);
+            border-radius: 4px; background: white; cursor: pointer;
+        }
+        .brain-toggle-ext {
+            color: #8c5a16; border-color: rgba(204, 142, 50, 0.55);
+            background: rgba(204, 142, 50, 0.12);
+        }
+        .brain-ext-badge {
+            align-self: center; font-size: 9px; text-transform: uppercase; letter-spacing: 0.04em;
+            padding: 2px 8px; border-radius: 10px; white-space: nowrap;
+            background: rgba(204, 142, 50, 0.16); color: #8c5a16;
+        }
+        .chat-input-ext { border-color: rgba(204, 142, 50, 0.55); }
+        .chat-input-ext:focus { border-color: #cc8e32; }
+        .chat-attrib {
+            margin-top: 8px; font-size: 9px; text-transform: uppercase; letter-spacing: 0.06em;
+            color: var(--scholar-muted);
+        }
+        .chat-attrib-ext { color: #8c5a16; font-weight: 600; }
+        /* Engine-room boot: a progress strip + per-box light-up while sections load. */
+        @keyframes boot-pulse { 0%, 100% { opacity: 0.35; } 50% { opacity: 0.9; } }
+        .boot-strip {
+            margin: 4px 0 14px; padding: 10px 12px;
+            background: rgba(74, 107, 84, 0.05);
+            border: 1px solid var(--scholar-border); border-radius: 6px;
+        }
+        .boot-head { display: flex; justify-content: space-between; align-items: center; }
+        .boot-title {
+            font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
+            color: var(--scholar-green-dim);
+        }
+        .boot-count { font-size: 10px; color: var(--scholar-muted); }
+        .boot-bar {
+            margin: 8px 0; height: 4px; border-radius: 2px;
+            background: rgba(31, 42, 35, 0.08); overflow: hidden;
+        }
+        .boot-bar-fill { height: 100%; background: var(--scholar-green-dim); transition: width 0.35s ease; }
+        .boot-systems { display: flex; flex-wrap: wrap; gap: 6px; }
+        .boot-chip {
+            font-size: 9px; text-transform: uppercase; letter-spacing: 0.04em;
+            padding: 2px 8px; border-radius: 10px; white-space: nowrap;
+        }
+        .boot-online { background: rgba(74, 139, 84, 0.14); color: #2f6d3a; }
+        .boot-loading {
+            background: rgba(31, 42, 35, 0.05); color: var(--scholar-muted);
+            animation: boot-pulse 1.2s ease-in-out infinite;
+        }
+        .boot-box {
+            margin: 8px 0; padding: 14px 12px; display: flex; align-items: center; gap: 10px;
+            background: rgba(31, 42, 35, 0.03);
+            border: 1px dashed var(--scholar-border); border-radius: 6px;
+        }
+        .boot-box-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--scholar-green-dim);
+            animation: boot-pulse 1.2s ease-in-out infinite;
+        }
+        .boot-box-label {
+            font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;
+            color: var(--scholar-muted);
+        }
+
+        /* ─── Greeter overlay (first-run anamnetic gate) ──────────────── */
+        @keyframes greeter-emerge {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+        @keyframes greeter-ambient-pulse {
+            0%, 100% { transform: scale(1.0); opacity: 0.18; }
+            50%       { transform: scale(1.14); opacity: 0.40; }
+        }
+        @keyframes greeter-breathe {
+            0%, 100% { transform: scale(1.0); opacity: 0.60; box-shadow: 0 0 40px 10px rgba(200,124,44,0.18); }
+            50%       { transform: scale(1.09); opacity: 1.0;  box-shadow: 0 0 80px 28px rgba(200,124,44,0.40); }
+        }
+        @keyframes greeter-halo-pulse {
+            0%, 100% { opacity: 0.18; transform: scale(1.0);  }
+            50%       { opacity: 0.55; transform: scale(1.10); }
+        }
+        @keyframes greeter-phrase-in {
+            from { opacity: 0; transform: translateY(5px); }
+            to   { opacity: 1; transform: translateY(0);   }
+        }
+        .greeter-overlay {
+            position: fixed; inset: 0; z-index: 100;
+            background: #1a1a16;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 28px;
+            animation: greeter-emerge 0.9s ease-out;
+        }
+        .greeter-orb-wrap {
+            position: relative; width: 160px; height: 160px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        /* Three layers: ambient glow / core orb / halo ring.
+           Periods 28s / 18s / 5.5s share no short common period — they never lock step.
+           Animations gate on .greeter-anim added after first rAF (WKWebView fix). */
+        .greeter-orb-ambient {
+            position: absolute; inset: 0; border-radius: 50%;
+            background: radial-gradient(circle at 50% 50%, rgba(200,124,44,0.22), transparent 70%);
+            will-change: transform, opacity;
+            -webkit-backface-visibility: hidden;
+        }
+        .greeter-orb-ambient.greeter-anim {
+            animation: greeter-ambient-pulse 28s cubic-bezier(0.37,0,0.63,1) infinite;
+            animation-delay: -7s;
+        }
+        .greeter-orb {
+            position: relative; z-index: 1;
+            width: 68px; height: 68px; border-radius: 50%;
+            background: radial-gradient(circle at 38% 36%, rgb(230,158,65), rgb(176,96,24));
+            will-change: transform, opacity;
+            -webkit-backface-visibility: hidden;
+        }
+        .greeter-orb.greeter-anim {
+            animation: greeter-breathe 18s cubic-bezier(0.37,0,0.63,1) infinite;
+        }
+        .greeter-orb-halo {
+            position: absolute; inset: 0; border-radius: 50%;
+            border: 1px solid rgba(200,124,44,0.30);
+            will-change: transform, opacity;
+            -webkit-backface-visibility: hidden;
+        }
+        .greeter-orb-halo.greeter-anim {
+            animation: greeter-halo-pulse 5.5s cubic-bezier(0.37,0,0.63,1) infinite;
+            animation-delay: -1.375s;
+        }
+        .greeter-phrase {
+            font-family: var(--font-serif);
+            font-size: 14px; letter-spacing: 0.07em;
+            color: rgba(200,124,44,0.80);
+            text-align: center; max-width: 220px;
+            height: 22px; display: flex; align-items: center; justify-content: center;
+            transition: opacity 0.35s ease;
+        }
+        .greeter-phrase-fading { opacity: 0; }
+        .greeter-phrase:not(.greeter-phrase-fading) { animation: greeter-phrase-in 0.5s ease-out; }
+        .greeter-skip {
+            position: absolute; top: 14px; right: 18px;
+            font-size: 11px; letter-spacing: 0.06em; text-transform: lowercase;
+            color: rgba(200,124,44,0.40); background: none;
+            border: 1px solid rgba(200,124,44,0.18); border-radius: 4px;
+            padding: 3px 10px; cursor: pointer; transition: color 120ms, border-color 120ms;
+        }
+        .greeter-skip:hover {
+            color: rgba(200,124,44,0.80);
+            border-color: rgba(200,124,44,0.40);
+        }
+        .greeter-notice {
+            position: absolute; bottom: 13px;
+            font-size: 10px; color: rgba(200,124,44,0.22);
+            letter-spacing: 0.04em; text-align: center;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .greeter-orb-ambient { animation: none !important; }
+            .greeter-orb         { animation: none !important; }
+            .greeter-orb-halo    { animation: none !important; }
+            .greeter-overlay     { animation: none !important; }
+        }
     </style>
 </head>
+<div id="crash-fallback" style="display:none;padding:32px 24px;font-family:-apple-system,sans-serif;color:#a3503e;">
+    <p style="font-family:'Iowan Old Style',Georgia,serif;font-size:16px;margin:0 0 8px;">"something in the palace broke"</p>
+    <p id="crash-detail" style="font-size:11px;opacity:0.6;font-family:'SF Mono',Menlo,monospace;margin:0 0 14px;"></p>
+    <button onclick="location.reload()" style="font-size:12px;padding:6px 14px;cursor:pointer;">reload</button>
+</div>
+<script>
+    window.addEventListener('error', function(e) {
+        var fb = document.getElementById('crash-fallback');
+        if (fb) { fb.style.display = 'block'; }
+        var d = document.getElementById('crash-detail');
+        if (d) { d.textContent = (e.message || 'unknown panic') + (e.filename ? ' · ' + e.filename.split('/').pop() : ''); }
+    });
+</script>
 <body></body>
 </html>
