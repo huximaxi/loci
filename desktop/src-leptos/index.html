@@ -614,6 +614,12 @@
         .greeter-orb-wrap {
             position: relative; width: 160px; height: 160px;
             display: flex; align-items: center; justify-content: center;
+            /* Purely decorative — WKWebView GPU-composited layers (will-change: transform)
+               use composited layer bounds for hit-testing, not CSS layout bounds. A
+               scale(1.14) ambient pulse extends ~11px below the orb wrap and silently
+               swallows pointer events meant for name-option buttons. Disabling here
+               covers all three child layers in one declaration. */
+            pointer-events: none;
         }
         /* Three layers: ambient glow / core orb / halo ring.
            Periods 28s / 18s / 5.5s share no short common period — they never lock step.
@@ -623,6 +629,7 @@
             background: radial-gradient(circle at 50% 50%, rgba(200,124,44,0.22), transparent 70%);
             will-change: transform, opacity;
             -webkit-backface-visibility: hidden;
+            pointer-events: none;
         }
         .greeter-orb-ambient.greeter-anim {
             animation: greeter-ambient-pulse 28s cubic-bezier(0.37,0,0.63,1) infinite;
@@ -634,6 +641,7 @@
             background: radial-gradient(circle at 38% 36%, rgb(230,158,65), rgb(176,96,24));
             will-change: transform, opacity;
             -webkit-backface-visibility: hidden;
+            pointer-events: none;
         }
         .greeter-orb.greeter-anim {
             animation: greeter-breathe 18s cubic-bezier(0.37,0,0.63,1) infinite;
@@ -643,6 +651,7 @@
             border: 1px solid rgba(200,124,44,0.30);
             will-change: transform, opacity;
             -webkit-backface-visibility: hidden;
+            pointer-events: none;
         }
         .greeter-orb-halo.greeter-anim {
             animation: greeter-halo-pulse 5.5s cubic-bezier(0.37,0,0.63,1) infinite;
@@ -680,6 +689,308 @@
             .greeter-orb-halo    { animation: none !important; }
             .greeter-overlay     { animation: none !important; }
         }
+
+        /* ─── Naming Ceremony (Act 1) ─────────────────────────────────
+           Lives inside .greeter-overlay — same dark canvas, same amber.
+           Nyx constraint: the game surface is not the brand surface.
+           Maximalism lives inside the canvas; the brand face stays calm.
+        ──────────────────────────────────────────────────────────────── */
+        @keyframes ceremony-q-in {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes ceremony-wait-pulse {
+            0%, 100% { opacity: 0.28; }
+            50%       { opacity: 0.72; }
+        }
+
+        /* Question block — replaces the phrase line after Arrival */
+        .ceremony-question {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+            width: 100%;
+            max-width: 300px;
+            animation: ceremony-q-in 0.45s ease-out;
+        }
+
+        .ceremony-q {
+            font-family: var(--font-serif);
+            font-size: 16px;
+            letter-spacing: 0.05em;
+            color: rgba(200, 124, 44, 0.90);
+            text-align: center;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        /* Secondary line — Moment3 second sentence */
+        .ceremony-sub {
+            font-family: var(--font-serif);
+            font-size: 13px;
+            color: rgba(200, 124, 44, 0.58);
+            text-align: center;
+            margin: -8px 0 0;
+            font-style: italic;
+            letter-spacing: 0.03em;
+        }
+
+        /* CheckingVagueness / GeneratingNames holding states */
+        .ceremony-waiting {
+            animation: ceremony-wait-pulse 1.6s ease-in-out infinite;
+            font-size: 20px;
+            letter-spacing: 0.25em;
+        }
+
+        /* Bare underline input — sits over the dark canvas */
+        .ceremony-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid rgba(200, 124, 44, 0.32);
+            outline: none;
+            color: rgba(200, 124, 44, 0.92);
+            font-family: var(--font-serif);
+            font-size: 15px;
+            text-align: center;
+            padding: 6px 0;
+            caret-color: rgba(200, 124, 44, 0.80);
+            transition: border-color 180ms ease;
+            letter-spacing: 0.03em;
+        }
+        .ceremony-input::placeholder {
+            color: rgba(200, 124, 44, 0.26);
+            font-style: italic;
+        }
+        .ceremony-input:focus {
+            border-bottom-color: rgba(200, 124, 44, 0.70);
+        }
+
+        /* → button — barely visible until hovered */
+        .ceremony-next {
+            background: none;
+            border: 1px solid rgba(200, 124, 44, 0.20);
+            border-radius: 4px;
+            color: rgba(200, 124, 44, 0.42);
+            font-size: 16px;
+            padding: 4px 14px;
+            cursor: pointer;
+            transition: color 150ms, border-color 150ms;
+        }
+        .ceremony-next:hover {
+            color: rgba(200, 124, 44, 0.85);
+            border-color: rgba(200, 124, 44, 0.52);
+            background: none;
+        }
+
+        /* Naming phase */
+        .ceremony-naming {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            width: 100%;
+            max-width: 320px;
+            animation: ceremony-q-in 0.45s ease-out;
+        }
+
+        .ceremony-name-options {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            width: 100%;
+        }
+
+        .ceremony-name-option {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            background: rgba(200, 124, 44, 0.06);
+            border: 1px solid rgba(200, 124, 44, 0.16);
+            border-radius: 5px;
+            padding: 9px 14px;
+            text-align: left;
+            cursor: pointer;
+            transition: background 140ms ease, border-color 140ms ease;
+        }
+        .ceremony-name-option:hover {
+            background: rgba(200, 124, 44, 0.13);
+            border-color: rgba(200, 124, 44, 0.42);
+        }
+
+        .ceremony-name {
+            font-family: var(--font-serif);
+            font-size: 15px;
+            color: rgba(200, 124, 44, 0.95);
+            letter-spacing: 0.04em;
+            display: block;
+        }
+
+        .ceremony-note {
+            font-size: 11px;
+            color: rgba(200, 124, 44, 0.50);
+            font-style: italic;
+            display: block;
+            letter-spacing: 0.02em;
+        }
+
+        .ceremony-custom-name {
+            width: 100%;
+        }
+
+        /* Confirmed phase — single line, full amber */
+        .ceremony-confirmed {
+            animation: ceremony-q-in 0.5s ease-out;
+        }
+        .ceremony-confirmed .ceremony-q {
+            font-size: 18px;
+            color: rgba(200, 124, 44, 1.0);
+            letter-spacing: 0.06em;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .ceremony-question   { animation: none !important; }
+            .ceremony-naming     { animation: none !important; }
+            .ceremony-confirmed  { animation: none !important; }
+            .ceremony-waiting    { animation: none !important; }
+        }
+
+        /* ─── Settings page ───────────────────────────────────────────── */
+        .settings-body { gap: 0; }
+
+        .settings-section-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--scholar-muted);
+            margin: 0 0 8px;
+        }
+
+        .settings-card {
+            padding: 12px 14px;
+            border: 1px solid var(--scholar-border);
+            border-radius: 6px;
+            background: white;
+            margin-bottom: 8px;
+        }
+
+        .settings-card-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .settings-card-left {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .settings-card-name {
+            font-family: var(--font-serif);
+            font-size: 14px;
+            color: var(--scholar-green);
+        }
+
+        .settings-card-meta {
+            font-size: 10px;
+            color: var(--scholar-muted);
+        }
+
+        .settings-models {
+            margin: 8px 0 0;
+            font-size: 11px;
+            font-family: "SF Mono", Menlo, monospace;
+            color: var(--scholar-muted);
+            line-height: 1.5;
+        }
+
+        .settings-hint {
+            margin: 8px 0 0;
+            font-size: 12px;
+            color: var(--scholar-ink);
+            line-height: 1.5;
+        }
+
+        .settings-actions {
+            margin-top: 14px;
+            display: flex;
+            gap: 8px;
+        }
+
+        /* ─── Model gate (setup_create when no inference available) ───── */
+        .model-gate {
+            padding: 4px 0;
+        }
+
+        .model-gate-lead {
+            font-family: var(--font-serif);
+            font-size: 15px;
+            color: var(--scholar-ink);
+            line-height: 1.5;
+            margin: 0 0 6px;
+        }
+
+        .model-gate-actions {
+            display: flex;
+            gap: 8px;
+            margin: 14px 0 10px;
+            flex-wrap: wrap;
+        }
+
+        /* <A> styled as a primary button */
+        .button.primary {
+            display: inline-block;
+            padding: 8px 16px;
+            background: var(--scholar-green);
+            color: var(--scholar-cream);
+            border-radius: 4px;
+            font-size: 13px;
+            text-decoration: none;
+            border: 1px solid var(--scholar-green);
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .button.primary:hover {
+            background: var(--scholar-green-dim);
+            text-decoration: none;
+        }
+
+        .model-gate-note {
+            font-size: 11px;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        /* ─── Onboarding footer extensions ───────────────────────────── */
+        .onboarding-footer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .onboarding-model-notice {
+            font-size: 10px;
+            color: var(--scholar-warn);
+            letter-spacing: 0.02em;
+        }
+
+        .onboarding-model-notice a {
+            color: var(--scholar-warn);
+            text-decoration: underline;
+        }
+
+        .onboarding-settings-link {
+            font-size: 11px;
+            color: var(--scholar-muted);
+            text-decoration: none;
+            letter-spacing: 0.04em;
+        }
+        .onboarding-settings-link:hover { color: var(--scholar-green); text-decoration: none; }
     </style>
 </head>
 <div id="crash-fallback" style="display:none;padding:32px 24px;font-family:-apple-system,sans-serif;color:#a3503e;">

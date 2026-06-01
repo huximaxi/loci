@@ -1,30 +1,72 @@
 use crate::dialog::open_directory;
-use crate::models::{ActivePalace, PalaceManifest};
-use crate::tauri_bindings::invoke;
+use crate::models::{ActivePalace, InferenceStatus, PalaceManifest};
+use crate::tauri_bindings::{invoke, invoke_unit};
 use crate::views::greeter::mark_palace_greeted;
+use crate::views::naming_ceremony::{CeremonyAnswers, NamingCeremony};
 use leptos::*;
 use leptos_router::{use_navigate, A};
 use serde::Serialize;
-
-#[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
-struct ParentPathArg<'a> {
-    parent_path: &'a str,
-}
 
 #[derive(Serialize)]
 struct PathArg<'a> {
     path: &'a str,
 }
 
+/// New-palace creation flow.
+///
+/// Flow: probe inference → [gate if none] → pick dir → NamingCeremony
+///       → scaffold_palace_from_ceremony → dashboard
+///
+/// If the user has no model and chooses "start without AI", the ceremony is
+/// skipped. A minimal palace scaffolds with defaults and `onboarding_complete:
+/// false`, gating inference features until they complete onboarding later.
 #[component]
 pub fn SetupCreate() -> impl IntoView {
     let active = expect_context::<RwSignal<ActivePalace>>();
-    let show_greeter = expect_context::<RwSignal<bool>>();
-    let (status, set_status) = create_signal::<CreateStatus>(CreateStatus::Idle);
+    let (status, set_status) = create_signal::<CreateStatus>(CreateStatus::CheckingModel);
     let navigate = use_navigate();
 
-    let pick_and_scaffold: Callback<()> = Callback::new(move |_: ()| {
+    // Step 2: ceremony complete OR no-AI scaffold → load → navigate.
+    // Defined first so pick_no_ai can capture a clone.
+    let on_ceremony_complete: Callback<CeremonyAnswers> = Callback::new({
+        let navigate = navigate.clone();
+        move |answers: CeremonyAnswers| {
+            let parent_path = answers.parent_path.clone();
+            set_status.set(CreateStatus::Building(parent_path.clone()));
+            let navigate = navigate.clone();
+            spawn_local(async move {
+                let palace_path: String =
+                    match invoke("scaffold_palace_from_ceremony", &answers).await {
+                        Ok(p) => p,
+                        Err(e) => {
+                            set_status.set(CreateStatus::Error(format!(
+                                "palace build failed: {e}"
+                            )));
+                            return;
+                        }
+                    };
+                let manifest: PalaceManifest =
+                    match invoke("load_palace", &PathArg { path: &palace_path }).await {
+                        Ok(m) => m,
+                        Err(e) => {
+                            set_status.set(CreateStatus::Error(format!(
+                                "load after ceremony: {e}"
+                            )));
+                            return;
+                        }
+                    };
+                active.set(ActivePalace {
+                    path: Some(palace_path.clone()),
+                    manifest: Some(manifest),
+                });
+                mark_palace_greeted(&palace_path);
+                navigate("/dashboard", Default::default());
+            });
+        }
+    });
+
+    // Step 1a: pick directory + show ceremony (normal AI path).
+    let pick_directory: Callback<()> = Callback::new(move |_: ()| {
         spawn_local(async move {
             set_status.set(CreateStatus::Picking);
             let parent = match open_directory("Choose where your palace will live").await {
@@ -38,49 +80,54 @@ pub fn SetupCreate() -> impl IntoView {
                     return;
                 }
             };
-
-            set_status.set(CreateStatus::Scaffolding(parent.clone()));
-            let scaffolded: String = match invoke(
-                "scaffold_palace",
-                &ParentPathArg {
-                    parent_path: &parent,
-                },
-            )
-            .await
-            {
-                Ok(p) => p,
-                Err(e) => {
-                    set_status.set(CreateStatus::Error(format!("scaffold failed: {e}")));
-                    return;
-                }
-            };
-
-            let manifest: PalaceManifest =
-                match invoke("load_palace", &PathArg { path: &scaffolded }).await {
-                    Ok(m) => m,
-                    Err(e) => {
-                        set_status.set(CreateStatus::Error(format!("load after scaffold: {e}")));
-                        return;
-                    }
-                };
-
-            active.set(ActivePalace {
-                path: Some(scaffolded.clone()),
-                manifest: Some(manifest),
-            });
-            set_status.set(CreateStatus::Done(scaffolded));
+            set_status.set(CreateStatus::Ceremony(parent));
         });
     });
 
-    let go_dashboard: Callback<()> = Callback::new({
-        let navigate = navigate.clone();
+    // Step 1b: pick directory + skip ceremony (no-AI path).
+    // Scaffolds a minimal palace with sentinel defaults; onboarding_complete = false.
+    let pick_no_ai: Callback<()> = Callback::new({
+        let on_cc = on_ceremony_complete.clone();
         move |_: ()| {
-            if let CreateStatus::Done(path) = status.get_untracked() {
-                mark_palace_greeted(&path);
-                show_greeter.set(true);
-            }
-            navigate("/dashboard", Default::default());
+            let on_cc = on_cc.clone();
+            spawn_local(async move {
+                set_status.set(CreateStatus::Picking);
+                let parent = match open_directory("Choose where your palace will live").await {
+                    Ok(Some(p)) => p,
+                    Ok(None) => {
+                        // User cancelled: return to gate
+                        set_status.set(CreateStatus::NoModel);
+                        return;
+                    }
+                    Err(e) => {
+                        set_status.set(CreateStatus::Error(e));
+                        return;
+                    }
+                };
+                // Bypass ceremony entirely.
+                on_cc.call(CeremonyAnswers {
+                    parent_path: parent,
+                    holder_name: "unknown".to_string(),
+                    present_answer: String::new(),
+                    present_answer_refined: None,
+                    garden_seed: String::new(),
+                    greeter_name: "unnamed".to_string(),
+                    onboarding_complete: false,
+                });
+            });
         }
+    });
+
+    // On mount: probe inference. Show gate if neither local nor Claude is available.
+    create_effect(move |_| {
+        spawn_local(async move {
+            let result: Result<InferenceStatus, String> =
+                invoke_unit("check_inference_available").await;
+            match result {
+                Ok(s) if s.has_local || s.has_claude => set_status.set(CreateStatus::Idle),
+                _ => set_status.set(CreateStatus::NoModel),
+            }
+        });
     });
 
     view! {
@@ -92,29 +139,69 @@ pub fn SetupCreate() -> impl IntoView {
 
             <section class="wizard-body">
                 {move || match status.get() {
+                    CreateStatus::CheckingModel => view! {
+                        <p class="muted">"Checking for a mind to think with…"</p>
+                    }.into_view(),
+
+                    CreateStatus::NoModel => view! {
+                        <div class="model-gate">
+                            <p class="model-gate-lead">
+                                "The naming ceremony is a conversation. "
+                                "It needs a local model (Ollama) or Claude Code."
+                            </p>
+                            <p class="muted">
+                                "Neither was found. Set one up in settings, then come back."
+                            </p>
+                            <div class="model-gate-actions">
+                                <A href="/settings" attr:class="button primary">
+                                    "set up a model"
+                                </A>
+                                <button class="secondary" on:click=move |_| pick_no_ai.call(())>
+                                    "start without AI"
+                                </button>
+                            </div>
+                            <p class="model-gate-note muted">
+                                "Skipping builds a minimal palace now. "
+                                "The ceremony runs on next open once a model is ready."
+                            </p>
+                        </div>
+                    }.into_view(),
+
                     CreateStatus::Idle => view! {
                         <div>
-                            <p>"Choose a parent directory. A "<code>"_palace/"</code>" will be planted inside, along with five rooms and a top-level "<code>"CLAUDE.md"</code>"."</p>
-                            <p class="muted">"Nothing existing is touched. If a "<code>"CLAUDE.md"</code>" already lives there, it stays."</p>
-                            <button class="primary" on:click=move |_| pick_and_scaffold.call(())>"Choose parent directory"</button>
+                            <p>
+                                "Choose a parent directory. A "<code>"_palace/"</code>
+                                " will grow inside it, shaped by a short conversation."
+                            </p>
+                            <p class="muted">"Nothing existing is touched."</p>
+                            <button class="primary" on:click=move |_| pick_directory.call(())>
+                                "Choose parent directory"
+                            </button>
                         </div>
                     }.into_view(),
-                    CreateStatus::Picking => view! { <p class="muted">"Waiting for your choice…"</p> }.into_view(),
-                    CreateStatus::Scaffolding(p) => view! {
-                        <p class="muted">"Planting palace at "<code>{p}</code>"…"</p>
+
+                    CreateStatus::Picking => view! {
+                        <p class="muted">"Waiting for your choice…"</p>
                     }.into_view(),
-                    CreateStatus::Done(p) => view! {
-                        <div>
-                            <p>"Palace planted at "<code>{p.clone()}</code>"."</p>
-                            <p class="muted">"Rooms: dev-room · hatchery · design-room · engine-room · library."</p>
-                            <button class="primary" on:click=move |_| go_dashboard.call(())>"Enter the palace"</button>
-                        </div>
+
+                    CreateStatus::Ceremony(parent) => view! {
+                        <NamingCeremony
+                            parent_path=parent
+                            on_complete=on_ceremony_complete
+                        />
                     }.into_view(),
+
+                    CreateStatus::Building(p) => view! {
+                        <p class="muted">"Building palace at "<code>{p}</code>"…"</p>
+                    }.into_view(),
+
                     CreateStatus::Error(e) => view! {
                         <div>
                             <p class="warn">"Something is off."</p>
                             <p class="muted">{e}</p>
-                            <button class="primary" on:click=move |_| pick_and_scaffold.call(())>"Try again"</button>
+                            <button class="primary" on:click=move |_| pick_directory.call(())>
+                                "Try again"
+                            </button>
                         </div>
                     }.into_view(),
                 }}
@@ -125,9 +212,11 @@ pub fn SetupCreate() -> impl IntoView {
 
 #[derive(Clone, Debug)]
 enum CreateStatus {
+    CheckingModel,
     Idle,
+    NoModel,
     Picking,
-    Scaffolding(String),
-    Done(String),
+    Ceremony(String),
+    Building(String),
     Error(String),
 }

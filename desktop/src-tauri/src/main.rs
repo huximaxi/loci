@@ -139,6 +139,19 @@ struct OllamaEmbedResponse {
     embedding: Vec<f32>,
 }
 
+/// Inference readiness status — returned to the frontend gate and Settings page.
+#[derive(Debug, Serialize, Clone)]
+struct InferenceStatus {
+    /// Ollama is healthy AND has at least one model installed.
+    has_local: bool,
+    /// Ollama responds at the configured URL (may have zero models).
+    ollama_running: bool,
+    /// Claude Code CLI was found and responds.
+    has_claude: bool,
+    /// Names of installed Ollama models (empty when Ollama is offline).
+    local_models: Vec<String>,
+}
+
 // ─── URL validation (Cipher gate) ────────────────────────────────────────────
 //
 // Accepts:
@@ -572,8 +585,9 @@ fn write_loci_config(config: LociRustConfig) -> Result<(), String> {
 #[tauri::command]
 fn validate_palace_path(path: String) -> bool {
     let p = Path::new(&path);
-    p.exists() && p.is_dir()
-        && p.join("CLAUDE.md").exists()
+    p.exists()
+        && p.is_dir()
+        && (p.join("PALACE.md").exists() || p.join("CLAUDE.md").exists())
         && p.join("_palace").is_dir()
 }
 
@@ -765,7 +779,9 @@ fn extract_md_section_prefix(path: &std::path::PathBuf, header_prefix: &str) -> 
 /// NOT included (intentional):
 ///   - The full ~2845-line VESPER.md (far too large, voice nuance not worth it at 7B)
 ///   - Room/persona switching (deferred)
-/// NEXT: (C) retrieval over soul/room files for full in-character fidelity.
+/// Branching: PALACE.md without CLAUDE.md → build_companion_grounding (ceremony palaces).
+///            CLAUDE.md present → Vesper grounding (Hux/legacy palaces).
+/// NEXT: (C) retrieval over soul/room files for full in-character fidelity (persona switching).
 fn build_vesper_grounding(palace_path: &Option<String>) -> String {
     const FOCUS_CHAR_CAP: usize = 1200;
     const HANDOVER_CHAR_CAP: usize = 800;
@@ -780,6 +796,15 @@ where the voice is shared. Never use em-dashes.";
         return base.to_string();
     };
     let claude_md = root.join("CLAUDE.md");
+    let palace_md_path = root.join("PALACE.md");
+
+    // Branch: PALACE.md without CLAUDE.md = ceremony-created palace.
+    // The companion has its own name, origin crystal, and opening moment.
+    // Using the Vesper kernel here is the identity confusion bug — Vesper answers
+    // questions that should be answered by e.g. "Flux".
+    if palace_md_path.is_file() && !claude_md.is_file() {
+        return build_companion_grounding(root);
+    }
 
     // L1 — root orientation
     let identity = extract_md_section_prefix(&claude_md, "## Identity");
@@ -866,6 +891,110 @@ fn find_latest_handover_delta(palace: &Path, char_cap: usize) -> String {
     combined.chars().take(char_cap).collect()
 }
 
+// ─── Companion grounding (ceremony-created palaces) ──────────────────────────
+//
+// Palaces created through the naming ceremony have PALACE.md at their root but
+// no CLAUDE.md. `build_vesper_grounding` branches here so the chat model speaks
+// as the named companion instead of defaulting to the Vesper kernel.
+
+/// Read a `> Field: value` frontmatter line from PALACE.md.
+/// Format is  `> Companion: Flux`  — strips `>`, trims, then strips the field prefix.
+fn read_palace_field(palace_md: &Path, field: &str) -> Option<String> {
+    let text = fs::read_to_string(palace_md).ok()?;
+    for line in text.lines() {
+        let line = line.trim();
+        if !line.starts_with('>') { continue }
+        let rest = line[1..].trim();
+        if let Some(value) = rest.strip_prefix(field) {
+            let v = value.trim();
+            if !v.is_empty() {
+                return Some(v.to_string());
+            }
+        }
+    }
+    None
+}
+
+/// Find the greeter's origin crystal in the garden.
+/// Primary: `{companion-slug}-origin.md`. Fallback: any `*-origin.md` in garden root.
+fn find_greeter_origin_crystal(garden: &Path, companion_name: &str) -> Option<String> {
+    let slug = make_slug(companion_name);
+    let named = garden.join(format!("{slug}-origin.md"));
+    if named.is_file() {
+        return fs::read_to_string(&named).ok();
+    }
+    // Fallback: scan garden root for any *-origin.md
+    let Ok(entries) = fs::read_dir(garden) else { return None };
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if path.extension().and_then(|e| e.to_str()) != Some("md") { continue }
+        let Some(name) = path.file_name().and_then(|n| n.to_str()) else { continue };
+        if name.ends_with("-origin.md") {
+            return fs::read_to_string(&path).ok();
+        }
+    }
+    None
+}
+
+/// Find the holder's opening moment crystal — written during the naming ceremony
+/// and marked `greeter-header: true` in its YAML frontmatter.
+fn find_opening_moment_crystal(garden: &Path) -> Option<String> {
+    let Ok(entries) = fs::read_dir(garden) else { return None };
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if path.extension().and_then(|e| e.to_str()) != Some("md") { continue }
+        let Some(name) = path.file_name().and_then(|n| n.to_str()) else { continue };
+        if name.ends_with("-origin.md") { continue } // skip companion's own crystal
+        let Ok(content) = fs::read_to_string(&path) else { continue };
+        if content.contains("greeter-header: true") {
+            return Some(content);
+        }
+    }
+    None
+}
+
+/// Build a companion-scoped system prompt for ceremony-created palaces.
+/// Reads `> Companion:` and `> Palace holder:` from PALACE.md, then seeds
+/// the prompt with the companion's origin crystal and the holder's opening moment.
+fn build_companion_grounding(palace_root: &Path) -> String {
+    const CRYSTAL_CHAR_CAP: usize = 800;
+
+    let palace_md = palace_root.join("PALACE.md");
+    let companion = read_palace_field(&palace_md, "Companion:")
+        .filter(|s| s != "unnamed" && !s.is_empty())
+        .unwrap_or_else(|| "unnamed".to_string());
+    let holder = read_palace_field(&palace_md, "Palace holder:")
+        .filter(|s| s != "unknown" && !s.is_empty())
+        .unwrap_or_else(|| "the palace holder".to_string());
+
+    let mut out = format!(
+        "You are {companion}, the AI companion of this memory palace. \
+         The palace holder is {holder}. \
+         You are NOT Vesper. You are NOT a generic AI assistant. \
+         You are NOT Llama or any base model. \
+         When asked who you are, say you are {companion}. \
+         You live in this palace and speak from what you know about it. \
+         Be warm, curious, and specific to what you know about {holder}. \
+         Never use em-dashes."
+    );
+
+    let garden = palace_root.join("_palace").join("garden");
+
+    if let Some(origin) = find_greeter_origin_crystal(&garden, &companion) {
+        out.push_str("\n\n# Your origin crystal (who you are in this palace)\n");
+        let clipped: String = origin.chars().take(CRYSTAL_CHAR_CAP).collect();
+        out.push_str(&clipped);
+    }
+
+    if let Some(moment) = find_opening_moment_crystal(&garden) {
+        out.push_str(&format!("\n\n# What you first learned about {holder}\n"));
+        let clipped: String = moment.chars().take(CRYSTAL_CHAR_CAP).collect();
+        out.push_str(&clipped);
+    }
+
+    out
+}
+
 fn extract_pending_tasks(tasks_path: &std::path::PathBuf) -> Vec<String> {
     let Ok(text) = fs::read_to_string(tasks_path) else {
         return Vec::new();
@@ -889,6 +1018,10 @@ struct PalaceManifest {
     rooms: Vec<RoomInfo>,
     cron_job_count: usize,
     crystal_count: usize,
+    /// Companion name read from `> Companion:` in PALACE.md, or None for legacy palaces.
+    /// Used by the dashboard attribution line so it shows the actual companion name
+    /// instead of the hardcoded "Vesper" fallback.
+    companion: Option<String>,
 }
 
 /// Scaffold a fresh palace at parent_path/_palace/.
@@ -936,7 +1069,8 @@ fn scaffold_palace(parent_path: String) -> Result<String, String> {
 }
 
 /// Load and validate an existing palace directory.
-/// Requires: CLAUDE.md + _palace/ + at least one room with CLAUDE.md.
+/// Accepts: PALACE.md (native loci format) or CLAUDE.md (legacy) at root,
+///          plus _palace/ with at least one room subdir containing CLAUDE.md.
 /// Persists palace_path to config on success.
 #[tauri::command]
 fn load_palace(path: String) -> Result<PalaceManifest, String> {
@@ -948,8 +1082,9 @@ fn load_palace(path: String) -> Result<PalaceManifest, String> {
     if !root.exists() || !root.is_dir() {
         return Err("path does not exist or is not a directory".to_string());
     }
-    if !root.join("CLAUDE.md").exists() {
-        return Err("not a palace: CLAUDE.md not found at root".to_string());
+    let has_root_marker = root.join("PALACE.md").exists() || root.join("CLAUDE.md").exists();
+    if !has_root_marker {
+        return Err("not a palace: neither PALACE.md nor CLAUDE.md found at root".to_string());
     }
     let palace_dir = root.join("_palace");
     if !palace_dir.is_dir() {
@@ -994,6 +1129,12 @@ fn load_palace(path: String) -> Result<PalaceManifest, String> {
     // Count crystals inside _palace, NOT from the workspace root: scanning root
     // walked target/ + node_modules/ + .git/ and was the 30s load beachball.
     let crystal_count = count_md_files(&palace_dir);
+
+    // Companion name: read from PALACE.md `> Companion:` field for ceremony-created
+    // palaces. Legacy palaces (CLAUDE.md only) default to None → dashboard uses "Vesper".
+    let companion = read_palace_field(&root_buf.join("PALACE.md"), "Companion:")
+        .filter(|s| s != "unnamed" && !s.is_empty());
+
     eprintln!("[TIMING] load_palace: {} rooms, {} crystals in {:?}", rooms.len(), crystal_count, __t.elapsed());
 
     Ok(PalaceManifest {
@@ -1001,6 +1142,7 @@ fn load_palace(path: String) -> Result<PalaceManifest, String> {
         rooms,
         cron_job_count,
         crystal_count,
+        companion,
     })
 }
 
@@ -1022,10 +1164,12 @@ struct DetectionResult {
 fn detect_palace(search_path: String) -> DetectionResult {
     let path = Path::new(&search_path);
 
-    // 1. Check for loci palace (already migrated)
+    // 1. Check for loci palace (already migrated) — accepts both PALACE.md and CLAUDE.md
     if let Some(home) = dirs::home_dir() {
         let loci_path = home.join(".loci");
-        if loci_path.exists() && loci_path.join("CLAUDE.md").exists() {
+        if loci_path.exists()
+            && (loci_path.join("PALACE.md").exists() || loci_path.join("CLAUDE.md").exists())
+        {
             return DetectionResult {
                 found: true,
                 kind: Some("loci".to_string()),
@@ -1035,6 +1179,18 @@ fn detect_palace(search_path: String) -> DetectionResult {
                 suggestion: "You already have a loci palace at ~/.loci/".to_string(),
             };
         }
+    }
+
+    // 1b. Check for native PALACE.md at search_path (loci ceremony-created palace)
+    if path.join("PALACE.md").exists() && path.join("_palace").is_dir() {
+        return DetectionResult {
+            found: true,
+            kind: Some("loci-native".to_string()),
+            path: Some(path.to_string_lossy().to_string()),
+            rooms: Some(detect_rooms(&path.join("_palace"))),
+            crystal_count: Some(count_crystals(&path.join("_palace"))),
+            suggestion: "Found a native loci palace (PALACE.md). Ready to load.".to_string(),
+        };
     }
 
     // 2. Check for _palace/ pattern (Vesper × Hux)
@@ -1935,6 +2091,450 @@ mod bridge_tests {
     }
 }
 
+// ─── Act 1: Naming Ceremony ───────────────────────────────────────────────────
+//
+// Commands: scaffold_palace_from_ceremony, check_ceremony_vagueness,
+//           generate_greeter_names
+//
+// The ceremony inverts the scaffold→greet flow: the Greeter conversation runs
+// first, each answer accumulates in the Leptos component, and scaffold runs
+// exactly once at the end with all answers in hand. This makes the write
+// transactional — no partial palace from a mid-ceremony abandon.
+
+/// Generate a URL-safe slug from free text.
+/// Takes the first 6 significant words, strips stopwords, lowercases, hyphenates.
+fn make_slug(text: &str) -> String {
+    const STOP: &[&str] = &[
+        "a", "an", "the", "and", "or", "but", "in", "of", "to", "is", "are", "i",
+    ];
+    let words: Vec<String> = text
+        .split_whitespace()
+        .map(|w| {
+            w.to_lowercase()
+                .chars()
+                .filter(|c| c.is_alphanumeric())
+                .collect::<String>()
+        })
+        .filter(|w| !w.is_empty() && !STOP.contains(&w.as_str()))
+        .take(6)
+        .collect();
+    let slug = words.join("-");
+    slug.chars().take(48).collect()
+}
+
+fn first_words(text: &str, n: usize) -> String {
+    text.split_whitespace()
+        .take(n)
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
+fn is_vague_heuristic(answer: &str) -> bool {
+    if answer.split_whitespace().count() < 6 {
+        return true;
+    }
+    let lower = answer.to_lowercase();
+    ["work", "stuff", "busy", "things", "life", "lots", "not much", "nothing"]
+        .iter()
+        .any(|w| lower.contains(w))
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct NameOption {
+    name: String,
+    note: String,
+}
+
+fn fallback_names() -> Vec<NameOption> {
+    const FB: &[(&str, &str)] = &[
+        ("Vesper", "present in the dark, navigates by pattern"),
+        ("Lumen", "carries light into the unlit corner"),
+        ("Cipher", "finds structure others miss"),
+        ("Wren", "quick, precise, slightly irreverent"),
+    ];
+    FB.iter()
+        .map(|(n, d)| NameOption { name: n.to_string(), note: d.to_string() })
+        .collect()
+}
+
+fn parse_name_options(text: &str) -> Vec<NameOption> {
+    text.lines()
+        .filter_map(|line| {
+            let clean = line
+                .trim()
+                .trim_start_matches(|c: char| {
+                    c.is_ascii_digit() || c == '.' || c == ')' || c == '-' || c == '*'
+                })
+                .trim();
+            // Accept both "·" (U+00B7) and "—" as separators from different models
+            let sep_pos = clean.find('·').or_else(|| clean.find(" - "));
+            if let Some(pos) = sep_pos {
+                let name = clean[..pos].trim().to_string();
+                let note = clean[pos + 1..].trim_start_matches('·').trim_start_matches('-').trim().to_string();
+                if !name.is_empty() && !note.is_empty() && name.split_whitespace().count() <= 3 {
+                    return Some(NameOption { name, note });
+                }
+            }
+            None
+        })
+        .take(4)
+        .collect()
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct CeremonyArgs {
+    parent_path: String,
+    holder_name: String,
+    present_answer: String,
+    present_answer_refined: Option<String>,
+    garden_seed: String,
+    greeter_name: String,
+    onboarding_complete: bool,
+}
+
+/// Create a full palace from ceremony answers.
+/// Writes PALACE.md, garden crystals, observatory + archive rooms.
+/// Returns parent_path on success so the caller can load_palace immediately.
+///
+/// Takes individual parameters (Tauri v2 maps camelCase IPC keys → snake_case).
+/// The frontend sends CeremonyAnswers { parentPath, holderName, ... } and each
+/// field lands directly as a Rust parameter — no outer `args` wrapper needed.
+#[tauri::command]
+fn scaffold_palace_from_ceremony(
+    parent_path: String,
+    holder_name: String,
+    present_answer: String,
+    present_answer_refined: Option<String>,
+    garden_seed: String,
+    greeter_name: String,
+    onboarding_complete: bool,
+) -> Result<String, String> {
+    // Re-package into the internal struct so the function body is unchanged.
+    let args = CeremonyArgs {
+        parent_path,
+        holder_name,
+        present_answer,
+        present_answer_refined,
+        garden_seed,
+        greeter_name,
+        onboarding_complete,
+    };
+    let parent = Path::new(&args.parent_path);
+    let palace = parent.join("_palace");
+    let date = chrono::Utc::now().format("%Y-%m-%d").to_string();
+
+    // Create directory structure
+    for dir in &[
+        palace.join("garden").join("plants"),
+        palace.join("observatory").join("crystals"),
+        palace.join("archive").join("crystals"),
+        palace.join("cron"), // needed by the watcher; absence causes "cron directory missing" error
+    ] {
+        fs::create_dir_all(dir).map_err(|e| format!("mkdir {}: {e}", dir.display()))?;
+    }
+
+    // PALACE.md — AI-agnostic root marker (CLAUDE.md is legacy fallback)
+    let greeter_name = if args.greeter_name.trim().is_empty() {
+        "unnamed".to_string()
+    } else {
+        args.greeter_name.trim().to_string()
+    };
+    let holder_name = if args.holder_name.trim().is_empty() {
+        "unnamed".to_string()
+    } else {
+        args.holder_name.trim().to_string()
+    };
+
+    let onboarded_line = if args.onboarding_complete {
+        format!("> Onboarded: {date}\n")
+    } else {
+        "> Onboarded: false\n".to_string()
+    };
+    let palace_md = format!(
+        "# {holder_name}'s Palace\n> Palace holder: {holder_name}\n> Named: {date}\n> Companion: {greeter_name}\n{onboarded_line}"
+    );
+    fs::write(parent.join("PALACE.md"), &palace_md)
+        .map_err(|e| format!("write PALACE.md: {e}"))?;
+
+    // User's first crystal (Garden)
+    let (crystal_title, crystal_body) = {
+        if let Some(ref refined) = args.present_answer_refined {
+            let title = first_words(refined, 5);
+            let body = format!(
+                "---\ntype: crystal\ntier: \"◈\"\ncreated: {date}\nauthor: {holder_name}\ngreeter-header: true\n---\n\n# {title}\n\nThe question was: what are you in the middle of right now?\n\n{refined}\n\n*When the palace opened: {}*\n",
+                args.present_answer
+            );
+            (title, body)
+        } else if !args.present_answer.trim().is_empty() {
+            let title = first_words(&args.present_answer, 5);
+            let body = format!(
+                "---\ntype: crystal\ntier: \"◈\"\ncreated: {date}\nauthor: {holder_name}\ngreeter-header: true\n---\n\n# {title}\n\nThe question was: what are you in the middle of right now?\n\n{}\n",
+                args.present_answer
+            );
+            (title, body)
+        } else {
+            // Skip: empty crystal
+            (String::new(), format!("---\ntype: crystal\ntier: \"◈\"\ncreated: {date}\nauthor: {holder_name}\n---\n\n*(unanswered at the door)*\n"))
+        }
+    };
+    let crystal_slug = {
+        let s = make_slug(&crystal_title);
+        if s.is_empty() { "opening-moment".to_string() } else { s }
+    };
+    fs::write(palace.join("garden").join(format!("{crystal_slug}.md")), &crystal_body)
+        .map_err(|e| format!("write first crystal: {e}"))?;
+
+    // Greeter's own crystal
+    let present_clip = first_words(&args.present_answer, 10);
+    let seed_clip = first_words(&args.garden_seed, 10);
+    let greeter_crystal = format!(
+        "---\ntype: crystal\ntier: \"◈\"\ncreated: {date}\nauthor: {greeter_name}\nrole: greeter\nvalid_until: growing\n---\n\n# {greeter_name}\n\nI was named {greeter_name} in this palace on {date}.\n\nI am what this palace makes me.\nRight now I know:\n- {holder_name} is in the middle of: {present_clip}\n- {holder_name} is curious about: {seed_clip}\n\nThis crystal grows as the palace grows.\nCome back and read it later.\n\n---\n\n*This is the first thing I know about myself in this palace.*\n*The naming ceremony was Act 1. What comes next is not an act — it is just the place.*\n"
+    );
+    let greeter_slug = {
+        let s = make_slug(&greeter_name);
+        if s.is_empty() { "greeter".to_string() } else { s }
+    };
+    fs::write(palace.join("garden").join(format!("{greeter_slug}-origin.md")), &greeter_crystal)
+        .map_err(|e| format!("write greeter crystal: {e}"))?;
+
+    // Garden seed plant (skip if no answer)
+    if !args.garden_seed.trim().is_empty() {
+        let plant_name = first_words(&args.garden_seed, 6);
+        let plant = format!(
+            "---\ntype: plant\nstatus: seeded\nseeded: {date}\n---\n\n# {plant_name}\n\n*Seeded during the naming ceremony.*\n\n{}\n\n---\n\n## Waterings\n\n*(none yet — first session opens this)*\n",
+            args.garden_seed
+        );
+        let plant_slug = {
+            let s = make_slug(&args.garden_seed);
+            if s.is_empty() { "first-plant".to_string() } else { s }
+        };
+        fs::write(palace.join("garden").join("plants").join(format!("{plant_slug}.md")), &plant)
+            .map_err(|e| format!("write garden plant: {e}"))?;
+    }
+
+    // Observatory
+    fs::write(
+        palace.join("observatory").join("CLAUDE.md"),
+        "# Observatory\n> Where patterns appear when you step back.\n",
+    )
+    .map_err(|e| format!("write observatory CLAUDE.md: {e}"))?;
+
+    let obs_crystal = format!(
+        "---\ntype: observatory-watch\nstatus: unnamed\nseeded: {date}\n---\n\n# The pattern without a name\n\nSomething recurs. In work, in conversations, in what you notice first when you enter a room. You have seen it more than twice. You have not named it.\n\nThis crystal is the name when it comes.\n\n---\n\n# What is one thing you keep re-deriving from scratch?\n\nYou didn't answer this at the door. Good. That question needs time.\n\nWhen you're ready: name it here.\n"
+    );
+    fs::write(
+        palace.join("observatory").join("crystals").join("the-pattern-without-a-name.md"),
+        &obs_crystal,
+    )
+    .map_err(|e| format!("write observatory crystal: {e}"))?;
+
+    // Archive
+    fs::write(
+        palace.join("archive").join("CLAUDE.md"),
+        "# Archive\n> Where what persists, persists.\n",
+    )
+    .map_err(|e| format!("write archive CLAUDE.md: {e}"))?;
+
+    let thing_true = format!(
+        "---\ntype: crystal\ntier: \"◇\"\nseeded: {date}\n---\n\n# The thing that has always been true\n\nWhat is something you have known so long you have stopped believing it needs saying?\n\nIt probably does. Write it here.\n"
+    );
+    fs::write(
+        palace.join("archive").join("crystals").join("the-thing-that-has-always-been-true.md"),
+        &thing_true,
+    )
+    .map_err(|e| format!("write archive crystal 1: {e}"))?;
+
+    let thread = format!(
+        "---\ntype: crystal\ntier: \"◇\"\nseeded: {date}\n---\n\n# The thread between\n\nTwo things you care about are connected. You have not found the connection yet.\n\nWhen you do, write it here. The title of this crystal is wrong until then — rename it.\n"
+    );
+    fs::write(
+        palace.join("archive").join("crystals").join("the-thread-between.md"),
+        &thread,
+    )
+    .map_err(|e| format!("write archive crystal 2: {e}"))?;
+
+    // Persist config
+    let mut config = read_loci_config();
+    config.palace_path = Some(args.parent_path.clone());
+    write_loci_config(config)?;
+
+    Ok(args.parent_path)
+}
+
+/// Check whether a ceremony answer is concrete enough to proceed, or vague enough
+/// to trigger the Moment2b follow-up question.
+/// Tries local Ollama first with a 3s total timeout; falls back to heuristic.
+#[tauri::command]
+async fn check_ceremony_vagueness(
+    state: tauri::State<'_, OllamaState>,
+    answer: String,
+) -> Result<bool, String> {
+    let full_cfg = read_loci_config();
+    let cfg = full_cfg.ollama.unwrap_or_default();
+    if cfg.offline_mode {
+        return Ok(is_vague_heuristic(&answer));
+    }
+    let base = match validate_ollama_url(&cfg.base_url) {
+        Ok(b) => b,
+        Err(_) => return Ok(is_vague_heuristic(&answer)),
+    };
+    // Short-timeout client: enforce the ceiling at the HTTP layer so the future
+    // cancels reliably even when Ollama is running but slow. tokio::time::timeout
+    // alone is unreliable because reqwest may not drop an in-flight request fast
+    // enough on future cancellation — the reqwest-level timeout fires first.
+    let ceremony_client = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(3))
+        .connect_timeout(std::time::Duration::from_millis(500))
+        .build()
+        .unwrap_or_else(|_| state.client.clone());
+    let backend = OllamaBackend { client: ceremony_client, base };
+    let system = "Answer only with one word: concrete or vague.";
+    let prompt = format!(
+        "Does this answer name something specific — a project, task, goal, or named thing? Answer: '{answer}'"
+    );
+
+    // Outer 4s belt-and-suspenders guard; the HTTP client timeout above fires at 3s.
+    let result = tokio::time::timeout(
+        std::time::Duration::from_secs(4),
+        async {
+            if !backend.health().await { return None; }
+            let model = backend.resolve_model(&cfg.chat_model).await.ok()?;
+            backend.chat(system, &prompt, &model).await.ok()
+        },
+    )
+    .await;
+
+    match result {
+        Ok(Some(resp)) => {
+            let lower = resp.to_lowercase();
+            if lower.contains("concrete") { Ok(false) }
+            else if lower.contains("vague") { Ok(true) }
+            else { Ok(is_vague_heuristic(&answer)) }
+        }
+        _ => Ok(is_vague_heuristic(&answer)),
+    }
+}
+
+/// Generate 4 Greeter name options from the ceremony answers.
+/// Tries local Ollama; falls back to a curated static list on offline.
+#[tauri::command]
+async fn generate_greeter_names(
+    state: tauri::State<'_, OllamaState>,
+    holder_name: String,
+    present_answer: String,
+    garden_seed: String,
+) -> Result<Vec<NameOption>, String> {
+    let full_cfg = read_loci_config();
+    let cfg = full_cfg.ollama.unwrap_or_default();
+    if cfg.offline_mode {
+        return Ok(fallback_names());
+    }
+    let base = match validate_ollama_url(&cfg.base_url) {
+        Ok(b) => b,
+        Err(_) => return Ok(fallback_names()),
+    };
+    // Short-timeout client: same rationale as check_ceremony_vagueness.
+    // Naming names should feel fast or fall back gracefully — 30s waits here
+    // kill the ceremony's momentum. 2s HTTP timeout + 3s outer guard.
+    let name_client = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(2))
+        .connect_timeout(std::time::Duration::from_millis(500))
+        .build()
+        .unwrap_or_else(|_| state.client.clone());
+    let backend = OllamaBackend { client: name_client, base };
+    let system = "You are naming an AI companion for a memory palace. \
+        Output exactly 4 options, one per line. \
+        Format: Name · one-line character note (under 10 words). \
+        Names should be 1-2 words, drawn from what the user told you.";
+    let prompt = format!(
+        "User: {holder_name}. In the middle of: {present_answer}. Curious about: {garden_seed}. Offer 4 name options."
+    );
+    // Outer 3s guard; the HTTP client timeout above fires at 2s.
+    let result = tokio::time::timeout(
+        std::time::Duration::from_secs(3),
+        async {
+            if !backend.health().await { return None; }
+            let model = backend.resolve_model(&cfg.chat_model).await.ok()?;
+            backend.chat(system, &prompt, &model).await.ok()
+        },
+    ).await;
+    match result {
+        Ok(Some(resp)) => {
+            let parsed = parse_name_options(&resp);
+            if parsed.len() >= 2 { Ok(parsed) } else { Ok(fallback_names()) }
+        }
+        _ => Ok(fallback_names()),
+    }
+}
+
+/// Fast inference readiness probe (≤3 s per backend).
+/// Called by the frontend model gate before ceremony and by the Settings page.
+#[tauri::command]
+async fn check_inference_available(
+    state: tauri::State<'_, OllamaState>,
+) -> Result<InferenceStatus, String> {
+    let full_cfg = read_loci_config();
+    let cfg = full_cfg.ollama.clone().unwrap_or_default();
+
+    // ── Local (Ollama) ────────────────────────────────────────────────────────
+    let (has_local, ollama_running, local_models) = if cfg.offline_mode {
+        (false, false, vec![])
+    } else {
+        match validate_ollama_url(&cfg.base_url) {
+            Err(_) => (false, false, vec![]),
+            Ok(base) => {
+                let client = state.client.clone();
+                let result = tokio::time::timeout(
+                    std::time::Duration::from_secs(3),
+                    async move {
+                        let url = match base.join("/api/tags") {
+                            Ok(u) => u,
+                            Err(_) => return (false, false, vec![]),
+                        };
+                        let resp = match client.get(url).send().await {
+                            Ok(r) => r,
+                            Err(_) => return (false, false, vec![]),
+                        };
+                        if !resp.status().is_success() {
+                            return (false, true, vec![]);
+                        }
+                        let body: OllamaTagsResponse = match resp.json().await {
+                            Ok(b) => b,
+                            Err(_) => return (false, true, vec![]),
+                        };
+                        let models: Vec<String> =
+                            body.models.into_iter().map(|m| m.name).collect();
+                        (!models.is_empty(), true, models)
+                    },
+                )
+                .await;
+                result.unwrap_or((false, false, vec![]))
+            }
+        }
+    };
+
+    // ── External (Claude CLI) ─────────────────────────────────────────────────
+    let has_claude = tokio::time::timeout(
+        std::time::Duration::from_secs(3),
+        async {
+            match resolve_claude() {
+                None => false,
+                Some((bin, path_env)) => ClaudeBackend { bin, path_env }.health().await,
+            }
+        },
+    )
+    .await
+    .unwrap_or(false);
+
+    Ok(InferenceStatus {
+        has_local,
+        ollama_running,
+        has_claude,
+        local_models,
+    })
+}
+
 fn main() {
     let ollama_client = OllamaState {
         client: reqwest::Client::builder()
@@ -1992,6 +2592,12 @@ fn main() {
             read_tasks,
             // Phase 4a: chat as QUERY (inference trait, fail-closed)
             chat_query,
+            // Act 1: Naming Ceremony
+            scaffold_palace_from_ceremony,
+            check_ceremony_vagueness,
+            generate_greeter_names,
+            // Settings: inference readiness gate
+            check_inference_available,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

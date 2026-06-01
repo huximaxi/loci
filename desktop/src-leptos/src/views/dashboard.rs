@@ -179,7 +179,11 @@ pub fn Dashboard() -> impl IntoView {
                 <p class="warn dashboard-warn">{e}</p>
             })}
 
-            <ChatQuery />
+            <ChatQuery companion=move || {
+                active.get().manifest
+                    .and_then(|m| m.companion)
+                    .unwrap_or_else(|| "Vesper".to_string())
+            } />
 
             // Engine-room boot strip: a progress bar + verbose per-system chips
             // that light up as each read lands. Hides itself once all are online.
@@ -765,7 +769,12 @@ fn render_ciq_breakdown(detail: &serde_json::Value) -> View {
 /// readiness chip probes on open so the brain's state (awake/asleep/paused) is
 /// legible without typing.
 #[component]
-fn ChatQuery() -> impl IntoView {
+fn ChatQuery(
+    /// Companion name for the attribution line. Falls back to "Vesper" for
+    /// legacy palaces that have no `> Companion:` in PALACE.md.
+    #[prop(into)]
+    companion: Signal<String>,
+) -> impl IntoView {
     let (prompt, set_prompt) = create_signal(String::new());
     let (answer, set_answer) = create_signal::<Option<Result<String, String>>>(None);
     let (pending, set_pending) = create_signal(false);
@@ -873,10 +882,13 @@ fn ChatQuery() -> impl IntoView {
                 view! {
                     // A separate line per brain: which brain answered, local vs external.
                     <div class=move || if ext { "chat-attrib chat-attrib-ext" } else { "chat-attrib" }>
-                        {if ext {
-                            "▲ Vesper · Claude · external · Anthropic · your license"
-                        } else {
-                            "◆ Vesper · local garden"
+                        {move || {
+                            let name = companion.get();
+                            if ext {
+                                format!("▲ {name} · Claude · external · Anthropic · your license")
+                            } else {
+                                format!("◆ {name} · local garden")
+                            }
                         }}
                     </div>
                     {match res {

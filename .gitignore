@@ -46,5 +46,19 @@ desktop/src-tauri/gen/
 # Claude Cowork local session
 .claude/
 
-# Palace (Vesper × Hux local-only memory, must never leave the dev machine)
+# Palace memory — local only, must never leave the dev machine
 _palace/
+
+# Session notes — local only
+.session-pov-*.md
+
+# Stale workspace backup files
+Cargo.lock.pre-workspace
+desktop/src-tauri/Cargo.lock.pre-workspace
+
+# Internal design exploration notes (studio ideation)
+desktop/DESIGN-IDEAS-*.md
+
+# Pre-strip/backup files from landing migrations
+landing/*.pre-strip-backup
+landing/_audit.md

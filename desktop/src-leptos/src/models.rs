@@ -17,6 +17,9 @@ pub struct PalaceManifest {
     pub rooms: Vec<RoomInfo>,
     pub cron_job_count: usize,
     pub crystal_count: usize,
+    /// Companion name from PALACE.md, or None for legacy palaces.
+    #[serde(default)]
+    pub companion: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -134,6 +137,15 @@ pub struct AlertItem {
     pub topic: String,
     #[serde(default)]
     pub posted: bool,
+}
+
+/// Mirrors the InferenceStatus struct returned by `check_inference_available`.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct InferenceStatus {
+    pub has_local: bool,
+    pub ollama_running: bool,
+    pub has_claude: bool,
+    pub local_models: Vec<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
