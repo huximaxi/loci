@@ -4,7 +4,7 @@ use std::rc::Rc;
 use wasm_bindgen_futures::spawn_local;
 
 // Phrase pool — random rotation, no immediate repeats.
-const PHRASES: &[&str] = &[
+pub const PHRASES: &[&str] = &[
     "a palace is a place you remember from",
     "you already know this",
     "intelligence, disintermediated",
@@ -18,8 +18,8 @@ const PHRASES: &[&str] = &[
     "knowledge lives where you live",
     "the trace is local, so is the truth",
 ];
-const PHRASE_INTERVAL_MS: u32 = 1400;
-const FIRST_RUN_TOTAL_MS: u32 = 4500;
+pub const PHRASE_INTERVAL_MS: u32 = 1400;
+pub const FIRST_RUN_TOTAL_MS: u32 = 4500;
 
 // ── localStorage helpers ──────────────────────────────────────────────────────
 
@@ -73,7 +73,7 @@ pub fn reset_greeter() {
 
 // ── Async helpers ─────────────────────────────────────────────────────────────
 
-async fn sleep_ms(ms: u32) {
+pub async fn sleep_ms(ms: u32) {
     let promise = js_sys::Promise::new(&mut |resolve, _| {
         web_sys::window()
             .unwrap()
@@ -85,7 +85,7 @@ async fn sleep_ms(ms: u32) {
 
 // Defers until the next compositor frame — ensures GPU layers are created
 // before animations begin. Fixes WKWebView intermittent animation drop.
-async fn next_animation_frame() {
+pub async fn next_animation_frame() {
     let promise = js_sys::Promise::new(&mut |resolve, _| {
         web_sys::window()
             .unwrap()
@@ -95,7 +95,7 @@ async fn next_animation_frame() {
     let _ = wasm_bindgen_futures::JsFuture::from(promise).await;
 }
 
-fn random_other(current: usize, len: usize) -> usize {
+pub fn random_other(current: usize, len: usize) -> usize {
     if len <= 1 { return 0; }
     let r = (js_sys::Math::random() * (len - 1) as f64) as usize;
     if r >= current { r + 1 } else { r }

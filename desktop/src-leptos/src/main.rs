@@ -11,6 +11,7 @@ use views::about::About;
 use views::dashboard::Dashboard;
 use views::greeter::{has_seen_greeter, Greeter};
 use views::onboarding::Onboarding;
+use views::settings::Settings;
 use views::setup_create::SetupCreate;
 use views::setup_load::SetupLoad;
 
@@ -38,6 +39,7 @@ fn App() -> impl IntoView {
                 <Route path="/load" view=SetupLoad />
                 <Route path="/create" view=SetupCreate />
                 <Route path="/about" view=About />
+                <Route path="/settings" view=Settings />
                 <Route path="/dashboard" view=Dashboard />
             </Routes>
         </Router>

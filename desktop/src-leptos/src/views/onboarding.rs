@@ -1,8 +1,21 @@
+use crate::models::InferenceStatus;
+use crate::tauri_bindings::invoke_unit;
 use leptos::*;
 use leptos_router::A;
 
 #[component]
 pub fn Onboarding() -> impl IntoView {
+    // Non-blocking inference probe — shows a quiet notice if neither local nor
+    // Claude is available. Never gates navigation; purely informative.
+    let inference: Resource<(), Option<InferenceStatus>> = create_resource(
+        || (),
+        |_| async move {
+            let r: Result<InferenceStatus, String> =
+                invoke_unit("check_inference_available").await;
+            r.ok()
+        },
+    );
+
     view! {
         <main class="onboarding">
             <header class="onboarding-header">
@@ -16,8 +29,8 @@ pub fn Onboarding() -> impl IntoView {
                     <span class="card-title">"a palace I keep"</span>
                     <span class="card-body">
                         "Point at a directory with a "
-                        <code>"CLAUDE.md"</code>
-                        " and a "
+                        <code>"PALACE.md"</code>
+                        " (or "<code>"CLAUDE.md"</code>") and a "
                         <code>"_palace/"</code>
                         " inside."
                     </span>
@@ -41,7 +54,20 @@ pub fn Onboarding() -> impl IntoView {
             </nav>
 
             <footer class="onboarding-footer">
+                // Model status — only shows when probe has resolved to "no model".
+                {move || {
+                    match inference.get() {
+                        Some(Some(s)) if !s.has_local && !s.has_claude => view! {
+                            <span class="onboarding-model-notice">
+                                "no model detected · "
+                                <A href="/settings">"settings"</A>
+                            </span>
+                        }.into_view(),
+                        _ => view! { <span></span> }.into_view(),
+                    }
+                }}
                 <em>"Not yet is not forever."</em>
+                <A href="/settings" attr:class="onboarding-settings-link">"settings"</A>
             </footer>
         </main>
     }
