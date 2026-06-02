@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Releases — loci.garden</title>
+  <meta name="description" content="What loci has shipped, what has been proven in the field, what is next. Two threads: loci.core and apps.">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Cpolygon%20points='50,5%2020,50%2050,50'%20fill='%23ffcc44'/%3E%3Cpolygon%20points='50,5%2080,50%2050,50'%20fill='%23e8861a'/%3E%3Cpolygon%20points='20,50%2050,95%2050,50'%20fill='%23c87c2c'/%3E%3Cpolygon%20points='80,50%2050,95%2050,50'%20fill='%237a3a08'/%3E%3C/svg%3E">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">  <link rel="stylesheet" href="../loci.css">
+  <link rel="stylesheet" href="releases.css">
+  <script src="../skin-toggle.js" defer></script>
+  <script src="../assets/nav-persona.js" defer></script>
+  <script defer src="https://analytics.195-246-230-118.sslip.io/script.js" data-website-id="e00d2f0a-fbd7-40bf-8740-cb1ab2a82b86"></script>
+</head>
+<body data-page="releases">
+
+  <!-- #include partials/_nav.html -->
+<nav>
+  <div class="nav-container">
+    <div class="nav-logo-group">
+      <a href="/" class="logo">loci.garden</a>
+    </div>
+    <div class="nav-links">
+      <a href="https://github.com/huximaxi/loci" class="nav-link nav-icon" aria-label="GitHub" title="GitHub">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      </a>
+      <a href="/#how-it-works" class="nav-link" data-page="home">how it works</a>
+      <a href="/manifesto.html" class="nav-link" data-page="resources" data-resources-trigger>resources</a>
+      <a href="/comparison.html" class="nav-link" data-page="compare">compare</a>
+      <a href="/releases/" class="nav-link" data-page="releases">releases</a>
+      <a href="/download.html" class="nav-link" data-page="download">download</a>
+    </div>
+  </div>
+</nav>
+<!-- /include -->
+
+  <main class="releases-main">
+
+    <!-- Hero -->
+    <header class="releases-hero">
+      <div class="version-stamp">
+        <span class="vs-label">RELEASES</span>
+        <span class="vs-divider">·</span>
+        <span class="vs-current">desktop/v0.5.0</span>
+        <span class="vs-divider">·</span>
+        <span class="vs-date">2026-05-19</span>
+      </div>
+      <h1>What we have shipped.<br>What has been proven.<br>What is next.</h1>
+      <p class="releases-intro">
+        Two threads. <strong>loci.core</strong> is the substrate — what every loci client builds on. <strong>apps</strong> is what you install. <strong>SHIPPED</strong> is what runs today. <strong>PROVEN</strong> is what has been verified in the field. <strong>NEXT</strong> is the honest gap, with the work that closes it.
+      </p>
+    </header>
+
+    <!-- ════════════════════════════════════════════════════════
+         loci.core
+    ═══════════════════════════════════════════════════════ -->
+    <section class="component">
+      <h2 class="component-title">
+        <span class="component-num">01</span>
+        <span class="component-name">loci.core</span>
+        <span class="component-meta">the substrate · local-first · MCP-native</span>
+      </h2>
+
+      <div class="release-grid">
+
+        <div class="col col-shipped">
+          <h3 class="col-title">Shipped</h3>
+          <ul class="release-list">
+            <li>
+              <div class="rl-tag">conversation capture</div>
+              <div class="rl-body">Every session you have with an AI client is captured and indexed on your machine. No cloud, no account, no upload step.</div>
+            </li>
+            <li>
+              <div class="rl-tag">local full-text search</div>
+              <div class="rl-body">Search every conversation you have ever had, across every client, in milliseconds. The index lives where you live.</div>
+            </li>
+            <li>
+              <div class="rl-tag">MCP-native</div>
+              <div class="rl-body">Works with any MCP-aware client. Claude Code, Claude Desktop, Cursor, anything that speaks the protocol.</div>
+            </li>
+            <li>
+              <div class="rl-tag">keypair-signed entries</div>
+              <div class="rl-body">Your content is signed by your key, not a platform's. Provenance travels with the entry.</div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="col col-proven">
+          <h3 class="col-title">Proven</h3>
+          <ul class="release-list">
+            <li>
+              <div class="rl-tag">zero cloud round-trips</div>
+              <div class="rl-body">End-to-end demo flow runs entirely on local infrastructure. No request leaves the machine for the index, the search, or the retrieval path.</div>
+            </li>
+            <li>
+              <div class="rl-tag">local model integration</div>
+              <div class="rl-body">Ollama backend wired and verified. Whichever model you run locally is the model loci uses for retrieval and summarisation.</div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="col col-next">
+          <h3 class="col-title">Next</h3>
+          <ul class="release-list">
+            <li>
+              <div class="rl-tag">Nostr identity</div>
+              <div class="rl-body">NIP-07 keypair as first auth model. Auth is a feature, not a gate. Sovereignty never paywalled.</div>
+            </li>
+            <li>
+              <div class="rl-tag">bring-your-own-LLM expansion</div>
+              <div class="rl-body">Broader local-model coverage: llama.cpp, MLX on Apple silicon, anything that exposes a chat completion endpoint locally.</div>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════
+         apps
+    ═══════════════════════════════════════════════════════ -->
+    <section class="component">
+      <h2 class="component-title">
+        <span class="component-num">02</span>
+        <span class="component-name">apps</span>
+        <span class="component-meta">desktop · extension · what you install</span>
+      </h2>
+
+      <div class="release-grid">
+
+        <div class="col col-shipped">
+          <h3 class="col-title">Shipped</h3>
+          <ul class="release-list">
+            <li>
+              <div class="rl-tag">desktop · v0.5.0 · 2026-05-12</div>
+              <div class="rl-body">Welcome screen with three-view routing. Design tokens unified across boot, palace, and dialogue views. Tauri v2 capabilities scoped to the smallest set the app needs. Signed DMG (aarch64).</div>
+            </li>
+            <li>
+              <div class="rl-tag">desktop · v0.4.x</div>
+              <div class="rl-body">First runnable build of the wizard. Local Ollama backend wired. Welcome flow stubbed.</div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="col col-proven">
+          <h3 class="col-title">Proven</h3>
+          <ul class="release-list">
+            <li>
+              <div class="rl-tag">signed releases</div>
+              <div class="rl-body">All v0.5.x desktop builds signed and notarised. Pipeline reproducible from the commit hash.</div>
+            </li>
+            <li>
+              <div class="rl-tag">local model through the shell</div>
+              <div class="rl-body">Local model integration verified end-to-end through the desktop app. The path that the user clicks holds.</div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="col col-next">
+          <h3 class="col-title">Next</h3>
+          <ul class="release-list">
+            <li>
+              <div class="rl-tag">desktop · v0.6.0</div>
+              <div class="rl-body">Setup wizard for first run (create new vault or load existing). Live dashboard. File-watcher driven live updates as your conversation archive grows.</div>
+            </li>
+            <li>
+              <div class="rl-tag">extension polish</div>
+              <div class="rl-body">Browser extension capture path hardened for the long tail of web-based AI clients.</div>
+            </li>
+            <li>
+              <div class="rl-tag">mobile</div>
+              <div class="rl-body">Native iOS and Android clients. Read-first, capture-second. Local index over a local model.</div>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Closing -->
+    <section class="releases-close">
+      <p class="close-line">Built in the open. Tended in the quiet.</p>
+      <p class="close-sub">Every entry above carries a date, an owner, or a verifiable artifact. If a claim cannot meet that bar, it does not appear here.</p>
+      <div class="close-links">
+        <a href="https://github.com/huximaxi/loci/commits/main" class="close-link" target="_blank" rel="noopener">↗ full commit history</a>
+        <a href="https://github.com/huximaxi/loci/blob/main/CONTRIBUTING.md" class="close-link" target="_blank" rel="noopener">→ how to contribute</a>
+        <a href="/zoku/" class="close-link">→ tend the garden</a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- #include partials/_footer.html -->
+<footer>
+  <div class="footer-inner">
+    <span style="font-family:var(--mono); font-size:0.72rem; color:var(--text-faint);">loci.garden &middot; Built by Hux &times; Vesper</span>
+    <span style="font-family:var(--mono); font-size:0.72rem; color:var(--text-faint);"><a href="/zoku/" style="color:var(--text-faint);">zoku</a> &middot; <a href="https://github.com/huximaxi/loci/blob/main/CONTRIBUTING.md" style="color:var(--text-faint);" target="_blank" rel="noopener">contribute</a> &middot; <a href="/personas" style="color:var(--text-faint);">personas</a> &middot; <a href="/privacy.html" style="color:var(--text-faint);">privacy</a> &middot; <a href="/.well-known/security.txt" style="color:var(--text-faint);">security.txt</a> &middot; <a href="/humans.txt" style="color:var(--text-faint);">humans.txt</a> &middot; <a href="/llms.txt" style="color:var(--text-faint);">llms.txt</a></span>
+  </div>
+</footer>
+<!-- /include -->
+
+</body>
+</html>

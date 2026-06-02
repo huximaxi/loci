@@ -49,11 +49,13 @@
 2026-05-09  [1A] in-progress — Kata session. Backend complete: OllamaConfig types, 4 Tauri commands, URL validation, fail-closed invariant. Desktop v0.3.0. UI (settings panel + offline badge) pending Hux.
 2026-05-09  [1B] in-progress — Cipher session. Backend complete: axum MCP server, 3 resources (locus/room/search), 2 tools (create_locus/tag_locus), JSON-RPC 2.0, THREAT-01 gate, X-Loci-Content-Trust headers, localhost-only bind. Desktop v0.4.0. UI (toggle + status) pending Hux. Standalone loci-mcp-server + registry listing next.
 2026-05-09  [1A+1B] Ship together as desktop/v0.4.0. feat/1B-goose-mcp is live branch. feat/1A-ollama superseded. desktop/v0.3.0 = CHANGELOG-only milestone, no git tag.
+2026-06-01  [1B + 2F] EXTENSION FRAMING RATIFIED: loci-mcp-server is a memory upgrade for any MCP-compatible local-first AI workspace. First validated external target: Odysseus (pewdiepie-archdaemon/odysseus, 17K stars). Their flat pool (memory.json + ChromaDB) degrades with volume — Loci L0/L1/L2/L3 fills this via one MCP config line addition, no Odysseus source changes. 2F (AnythingLLM Bridge) should be evaluated under this same universal-sidecar framing rather than as a workspace-specific integration. Blocker: loci serve handlers todo!(). Shadow brief: Dev/_palace/observatory/odysseus-shadow-brief.md.
 2026-05-22  Watcher: 1 active, 0 stale, 11 not started
 2026-05-24  Watcher: 0 active, 1 stale, 11 not started
 2026-05-27  Watcher: 0 active, 1 stale, 11 not started
 2026-05-28  Watcher: 0 active, 1 stale, 11 not started
 2026-05-29  Watcher: 0 active, 1 stale, 11 not started
+2026-06-02  Watcher: 0 active, 0 stale, 12 not started
 ```
 
 *Watcher appends here automatically. Manual entries use format: `YYYY-MM-DD  [ID] [action] [detail]`*

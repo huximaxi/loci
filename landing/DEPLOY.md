@@ -5,12 +5,12 @@
 - **VPS**: 1984 Hosting, Iceland
 - **Web server**: Caddy (automatic HTTPS, multi-tenant via `import sites/*.caddy`)
 - **Domains**: loci.garden, docs.loci.garden
-- **Repo**: https://github.com/huximaxi/loci
-- **Served root**: the `landing/` subdirectory of a git checkout on the VPS. Caddy's `file_server` serves it straight off disk, so a content deploy is just updating that checkout. No build step.
+- **Repo**: https://github.com/rainbow-zoku/loci.garden
+- **Served root**: the repo root (this directory). Caddy's `file_server` serves it straight off disk, so a content deploy is just updating that checkout. No build step.
 
 ## Deploy after PR merge
 
-After merging a PR that touches `landing/**`, update the VPS checkout to the new `main`:
+After merging a PR, update the VPS checkout to the new `main`:
 
 ```bash
 # On the VPS, inside the site checkout:

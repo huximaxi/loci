@@ -1,0 +1,2597 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   LOCI.CSS — Single canonical stylesheet for loci.garden
+   Generated 2026-05-19 from style.css + style-wizard.css + Version B + LLMAGE
+
+   Layout:
+   1. :root canonical Wizard tokens (burnt amber × charcoal)
+      + Version B "Garden Immersive" aliases (vine + indigo)
+   2. Base, reset, typography, layout, components (from style.css)
+   3. Wizard-skin per-room palette tokens (html[data-skin="wizard"], dormant
+      until that attribute is set on <html>; reserved for opt-in atmospheric
+      surfaces)
+   4. LLMAGE alternate register ([data-theme="llmage"], easter-egg overlay)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ================================
+   TRUST.XYZ — v2.0
+   Burnt amber · Charcoal · Serif
+   ================================ */
+
+:root {
+  /* ── Version B "Garden Immersive" extensions (Nyx 2026-04-28) ─── */
+  --accent-vine:        #1a3d1f;   /* hover, active, garden anchors */
+  --accent-vine-light:  #2d6b35;
+  --accent-vine-hi:     #4a9a4f;
+  --accent-vine-soft:   rgba(26, 61, 31, 0.18);
+  --accent-indigo:      #0d1b3e;   /* section bg, comparison table */
+  --accent-indigo-soft: rgba(13, 27, 62, 0.55);
+
+  --bg:           #0d0d0e;
+  --bg-surface:   #131315;
+  --bg-card:      #1b1b1e;
+  --border:       #252528;
+  --border-soft:  #1e1e21;
+
+  --accent:       #c87c2c;
+  --accent-light: #e8974a;
+  --accent-dim:   rgba(200, 124, 44, 0.12);
+  --accent-glow:  rgba(200, 124, 44, 0.06);
+
+  --text:         #e8e4dd;
+  --text-dim:     #7a7772;
+  --text-faint:   #45433f;
+  --text-mono:    #9e9a93;
+
+  --serif:        Georgia, 'Times New Roman', Times, serif;
+  --mono:         'Courier New', Courier, monospace;
+  --sans:         -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  --radius:       6px;
+  --radius-lg:    12px;
+  --nav-height:   56px;
+}
+
+/* ================================
+   RESET & BASE
+   ================================ */
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 17px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+body {
+  font-family: var(--serif);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.65;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+a:hover {
+  color: var(--accent-vine-hi);
+}
+
+/* ================================
+   NAVIGATION
+   ================================ */
+
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  height: var(--nav-height);
+  background: rgba(13, 13, 14, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-container {
+  max-width: 800px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  letter-spacing: 0.05em;
+  color: var(--text);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.logo:hover { color: var(--accent); }
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.nav-link {
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.nav-link:hover,
+.nav-link.active { color: var(--text); }
+
+.nav-icon {
+  display: flex;
+  align-items: center;
+}
+
+.nav-icon svg {
+  opacity: 0.5;
+  transition: opacity 0.15s;
+}
+
+.nav-icon:hover svg {
+  opacity: 1;
+}
+
+.dropdown { position: relative; }
+
+.dropdown > .nav-link {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  background: none;
+  border: none;
+  padding: 0;
+  appearance: none;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  min-width: 180px;
+  padding: 0.5rem 0;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  z-index: 101;
+}
+
+/* Invisible bridge to maintain hover across gap */
+.dropdown-content::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 0;
+  right: 0;
+  height: 8px;
+}
+
+/* Show on hover (desktop) and focus-within (click/touch) */
+.dropdown:hover .dropdown-content,
+.dropdown:focus-within .dropdown-content,
+.dropdown.active .dropdown-content { display: block; }
+
+.dropdown-content a {
+  display: block;
+  padding: 0.65rem 1.25rem;
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  text-decoration: none;
+  transition: color 0.12s, background 0.12s;
+}
+
+.dropdown-content a:hover,
+.dropdown-content a:focus {
+  color: var(--text);
+  background: var(--bg-surface);
+  outline: none;
+}
+
+/* ================================
+   HERO — NETWORK
+   ================================ */
+
+.hero-network {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  min-height: 600px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: 3rem;
+}
+
+#network-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  cursor: default;
+}
+
+.hero-label {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  pointer-events: none;
+}
+
+.hero-label h1 {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.6rem;
+  font-weight: normal;
+}
+
+.hero-label p {
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  color: var(--text-dim);
+  max-width: 480px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.network-tooltip {
+  position: fixed;
+  z-index: 200;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.6rem 0.85rem;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+  max-width: 220px;
+}
+
+.network-tooltip.visible { opacity: 1; }
+
+.network-tooltip .tt-label {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--accent);
+  margin-bottom: 0.2rem;
+  letter-spacing: 0.04em;
+}
+
+.network-tooltip .tt-desc {
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  line-height: 1.45;
+}
+
+/* ================================
+   CONTAINER
+   ================================ */
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* ================================
+   INTRO
+   ================================ */
+
+.intro-section {
+  padding: 5rem 0 4rem;
+  max-width: 640px;
+}
+
+.intro-section p {
+  font-size: 1.1rem;
+  color: var(--text-dim);
+  line-height: 1.8;
+  margin-bottom: 1.2rem;
+}
+
+.intro-section p:first-child {
+  color: var(--text);
+  font-size: 1.2rem;
+}
+
+/* ================================
+   SECTION HEADERS
+   ================================ */
+
+.section-header {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.section-header h2 {
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  font-weight: normal;
+  color: var(--text);
+}
+
+.section-tag {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+/* ================================
+   CARDS
+   ================================ */
+
+.experiments-section { padding: 0 0 5rem; }
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.card {
+  display: block;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+  text-decoration: none;
+  transition: border-color 0.2s, background 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent-dim), transparent);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.card:hover {
+  border-color: rgba(200, 124, 44, 0.3);
+  background: #1e1e22;
+}
+
+.card:hover::before { opacity: 1; }
+
+.card-tag {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.75rem;
+  display: block;
+}
+
+.card h3 {
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  font-weight: normal;
+  color: var(--text);
+  margin-bottom: 0.6rem;
+}
+
+.card p {
+  font-family: var(--sans);
+  font-size: 0.84rem;
+  color: var(--text-dim);
+  line-height: 1.6;
+  margin-bottom: 1.2rem;
+}
+
+.card-link {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--accent);
+  letter-spacing: 0.04em;
+  display: block;
+}
+
+.card:hover .card-link { color: var(--accent-light); }
+
+/* ================================
+   DISPATCHES
+   ================================ */
+
+.dispatches-section { padding: 0 0 5rem; }
+
+.dispatch-placeholder {
+  background: var(--bg-surface);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-lg);
+  padding: 3rem 2rem;
+  text-align: center;
+}
+
+.dispatch-placeholder p {
+  font-family: var(--serif);
+  font-size: 1rem;
+  color: var(--text-faint);
+  font-style: italic;
+}
+
+.dispatch-note {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--text-faint);
+  margin-top: 0.5rem;
+  letter-spacing: 0.08em;
+  display: block;
+}
+
+/* ================================
+   LOCI
+   ================================ */
+
+.loci-section { padding: 0 0 5rem; }
+
+.loci-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem 2rem;
+}
+
+.loci-icon {
+  font-family: var(--mono);
+  font-size: 1.4rem;
+  color: var(--text-faint);
+  flex-shrink: 0;
+  padding-top: 3px;
+}
+
+.loci-card-text h3 {
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  font-weight: normal;
+  color: var(--text);
+  margin-bottom: 0.4rem;
+}
+
+.loci-card-text p {
+  font-family: var(--sans);
+  font-size: 0.84rem;
+  color: var(--text-dim);
+  line-height: 1.6;
+  margin-bottom: 0.75rem;
+}
+
+.loci-link {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--accent);
+  letter-spacing: 0.04em;
+}
+
+.loci-link:hover { color: var(--accent-light); }
+
+/* ================================
+   FOOTER
+   ================================ */
+
+footer {
+  border-top: 1px solid var(--border);
+  padding: 2rem 0;
+}
+
+.footer-inner {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.footer-left {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--text-faint);
+  letter-spacing: 0.04em;
+}
+
+.footer-right {
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  color: var(--text-faint);
+}
+
+/* ================================
+   CONTENT PAGES
+   ================================ */
+
+.page-content {
+  padding-top: 120px; /* fallback for older browsers */
+  padding-top: calc(var(--nav-height) + 4rem);
+  padding-bottom: 6rem;
+  min-height: 100vh;
+}
+
+.page-header {
+  margin-bottom: 3rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.page-header h1 {
+  font-family: var(--serif);
+  font-size: 2rem;
+  font-weight: normal;
+  color: var(--text);
+  margin-bottom: 0.4rem;
+}
+
+.page-header .page-subtitle {
+  font-family: var(--sans);
+  font-size: 0.88rem;
+  color: var(--text-dim);
+}
+
+.prose h2 {
+  font-family: var(--serif);
+  font-size: 1.2rem;
+  font-weight: normal;
+  color: var(--text);
+  margin: 2.5rem 0 0.75rem;
+}
+
+.prose p {
+  font-size: 1rem;
+  color: var(--text-dim);
+  line-height: 1.78;
+  margin-bottom: 1.1rem;
+  max-width: 660px;
+}
+
+.prose strong {
+  color: var(--text);
+  font-weight: normal;
+}
+
+.prose ul {
+  list-style: none;
+  margin-bottom: 1.1rem;
+}
+
+.prose ul li {
+  font-family: var(--sans);
+  font-size: 0.88rem;
+  color: var(--text-dim);
+  padding: 0.3rem 0 0.3rem 1.2rem;
+  position: relative;
+  max-width: 560px;
+}
+
+.prose ul li::before {
+  content: '—';
+  position: absolute;
+  left: 0;
+  color: var(--text-faint);
+}
+
+.info-block {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem;
+  margin: 1.5rem 0;
+  max-width: 660px;
+}
+
+.info-block h3 {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.75rem;
+}
+
+.info-block p,
+.info-block li {
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+
+.closing-quote {
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--text-faint);
+  border-top: 1px solid var(--border);
+  padding-top: 2rem;
+  margin-top: 3rem;
+  max-width: 560px;
+}
+
+/* ================================
+   EXPERIMENT PAGES
+   ================================ */
+
+.experiment-page {
+  padding-top: calc(var(--nav-height) + 3rem);
+  padding-bottom: 4rem;
+  min-height: 100vh;
+}
+
+.experiment-header { margin-bottom: 2rem; }
+
+.exp-tag {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.experiment-header h1 {
+  font-family: var(--serif);
+  font-size: 1.75rem;
+  font-weight: normal;
+  color: var(--text);
+  margin-bottom: 0.4rem;
+}
+
+.experiment-header p {
+  font-family: var(--sans);
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  max-width: 560px;
+  line-height: 1.6;
+}
+
+/* ================================
+   RESPONSIVE
+   ================================ */
+
+/* Tablet */
+@media (max-width: 900px) {
+  .nav-links { gap: 1.25rem; }
+  .cards-grid { grid-template-columns: 1fr; }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  html { font-size: 15px; }
+
+  .nav-container, .container, .footer-inner {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .nav-links {
+    gap: 0.75rem;
+  }
+
+  .nav-link {
+    font-size: 0.72rem;
+    letter-spacing: 0.02em;
+  }
+
+  .page-content {
+    padding-top: 100px;
+    padding-top: calc(var(--nav-height) + 2.5rem);
+  }
+
+  .footer-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+  }
+
+  .loci-card { flex-direction: column; gap: 1rem; }
+  .hero-label p { font-size: 0.9rem; }
+
+  .dropdown-content {
+    position: fixed;
+    top: var(--nav-height);
+    left: 0;
+    right: 0;
+    border-radius: 0;
+    min-width: 100%;
+  }
+
+  .dropdown-content::before {
+    display: none;
+  }
+}
+
+/* Small mobile */
+@media (max-width: 400px) {
+  .nav-links { gap: 0.5rem; }
+  .nav-link { font-size: 0.68rem; }
+  .logo { font-size: 0.85rem; }
+}
+
+/* ──────────────────────────────────────────────────────────────
+   Utility: inline accent emphasis
+   Used sparingly — e.g. the first "trust" on the landing page.
+   A touch of burnt amber at normal weight. Not a heading. A candle.
+   ────────────────────────────────────────────────────────────── */
+.accent-word {
+  color: var(--accent);
+}
+/* ─── LOCI.GARDEN — style delta ───────────────────────────────────────────
+   Append to trust.xyz style.css. All vars inherited from :root.
+   ──────────────────────────────────────────────────────────────────────── */
+
+/* ── Palace map ──────────────────────────────────────────────────────────── */
+
+.palace-hero {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 5rem 1.5rem 3rem;
+  text-align: center;
+}
+
+.palace-map {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  line-height: 1.9;
+  color: var(--accent);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 2rem 2.5rem;
+  display: inline-block;
+  text-align: left;
+  margin: 0 auto 2.5rem;
+  letter-spacing: 0.01em;
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.palace-map .dim { color: var(--text-faint); }
+
+.palace-hero h1 {
+  font-family: var(--serif);
+  font-size: 1.9rem;
+  font-weight: normal;
+  color: var(--text);
+  margin: 0 0 1rem;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.palace-hero .tagline {
+  font-family: var(--serif);
+  font-size: 1rem;
+  color: var(--text-dim);
+  max-width: 520px;
+  margin: 0 auto;
+  line-height: 1.65;
+}
+
+/* ── Three doors ─────────────────────────────────────────────────────────── */
+
+.three-doors {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  border: 1px solid var(--border);
+  background: var(--border);
+  max-width: 860px;
+  margin: 3.5rem auto;
+}
+
+.door {
+  background: var(--bg-surface);
+  padding: 2rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.door-label {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.9rem;
+}
+
+.door p {
+  font-family: var(--serif);
+  font-size: 0.88rem;
+  color: var(--text-dim);
+  line-height: 1.65;
+  margin: 0 0 1.25rem;
+}
+
+.door-link {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--accent-light);
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  transition: color 0.15s;
+  margin-top: auto;
+}
+
+.door-link:hover { color: var(--text); }
+
+@media (max-width: 640px) {
+  .three-doors { grid-template-columns: 1fr; }
+}
+
+/* ── Four concepts ───────────────────────────────────────────────────────── */
+
+.concepts {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  max-width: 860px;
+  margin: 0 auto 3.5rem;
+  padding: 0 1.5rem;
+}
+
+.concept {
+  padding: 1.75rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.concept h3 {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 0.75rem;
+  font-weight: normal;
+}
+
+.concept p {
+  font-family: var(--serif);
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  line-height: 1.65;
+  margin: 0;
+}
+
+@media (max-width: 600px) {
+  .concepts { grid-template-columns: 1fr; }
+}
+
+/* ── Key distinction ─────────────────────────────────────────────────────── */
+
+.distinction {
+  max-width: 640px;
+  margin: 0 auto 3.5rem;
+  padding: 0 1.5rem;
+  text-align: center;
+}
+
+.key-line {
+  font-family: var(--serif);
+  font-size: 1.35rem;
+  color: var(--accent-light);
+  border: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  line-height: 1.4;
+  font-style: italic;
+}
+
+.distinction p {
+  font-family: var(--serif);
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* ── Early adopters ──────────────────────────────────────────────────────── */
+
+.adopters {
+  max-width: 860px;
+  margin: 0 auto 3.5rem;
+  padding: 2rem 1.75rem;
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+}
+
+.adopter-label {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 1.25rem;
+}
+
+.adopter {
+  font-family: var(--serif);
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  margin-bottom: 0.6rem;
+  line-height: 1.5;
+}
+
+.adopter:last-child { margin-bottom: 0; }
+
+.adopter-name {
+  color: var(--text);
+}
+
+/* ── CTA section ─────────────────────────────────────────────────────────── */
+
+.cta-section {
+  max-width: 860px;
+  margin: 0 auto 5rem;
+  padding: 0 1.5rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.cta-primary {
+  display: inline-block;
+  padding: 0.7rem 1.5rem;
+  background: var(--accent);
+  color: var(--bg);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  border-radius: 3px;
+  transition: background 0.15s;
+}
+
+.cta-primary:hover { background: var(--accent-light); }
+
+.cta-secondary {
+  display: inline-block;
+  padding: 0.7rem 1.25rem;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  border-radius: 3px;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.cta-secondary:hover { border-color: var(--accent); color: var(--accent-light); }
+
+/* ── Section divider ─────────────────────────────────────────────────────── */
+
+.section-rule {
+  max-width: 860px;
+  margin: 0 auto 3rem;
+  border: none;
+  border-top: 1px solid var(--border);
+}
+
+/* ── Start page ──────────────────────────────────────────────────────────── */
+
+.start-wrap {
+  max-width: 640px;
+  /* Pull up 300px into the banner so GARDEN is visible at step-01 level */
+  margin: -300px auto 0;
+  padding: 0 1.5rem 5rem;
+  position: relative;
+  z-index: 3;
+}
+
+.start-wrap h1 {
+  font-family: var(--serif);
+  font-size: 1.6rem;
+  font-weight: normal;
+  color: var(--text);
+  margin: 0 0 0.5rem;
+  letter-spacing: -0.02em;
+  text-shadow: 0 0 40px #0d0d0e, 0 0 80px #0d0d0e, 0 2px 6px rgba(0,0,0,0.95);
+}
+
+.start-wrap .lead {
+  font-family: var(--serif);
+  font-size: 1rem;
+  color: var(--text-dim);
+  margin: 0 0 2.5rem;
+  line-height: 1.65;
+  text-shadow: 0 0 30px #0d0d0e, 0 2px 4px rgba(0,0,0,0.9);
+}
+
+.soul-note {
+  border-left: 2px solid var(--accent);
+  padding: 1.25rem 0 1.25rem 1.5rem;
+  margin: 0 0 2.5rem;
+}
+
+.soul-note h3 {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 0.75rem;
+}
+
+.soul-note p {
+  font-family: var(--serif);
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  line-height: 1.7;
+  margin: 0 0 0.6rem;
+}
+
+.soul-note p:last-child { margin: 0; }
+
+.step {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+  align-items: flex-start;
+}
+
+.step-num {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  background: var(--accent-dim);
+  border: 1px solid var(--accent);
+  border-radius: 3px;
+  padding: 0.35rem 0.6rem;
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+}
+
+.step-body {
+  min-width: 0; /* prevent flex child from overflowing its container */
+}
+
+.step-body h3 {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text);
+  margin: 0 0 0.5rem;
+  font-weight: normal;
+}
+
+.step-body p {
+  font-family: var(--serif);
+  font-size: 0.92rem;
+  color: var(--text-dim);
+  line-height: 1.65;
+  margin: 0 0 0.75rem;
+}
+
+.step-body code {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 0.15rem 0.4rem;
+  color: var(--accent-light);
+}
+
+.step-body pre {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  line-height: 1.7;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1rem 1.25rem;
+  color: var(--text-mono);
+  overflow-x: auto;
+  margin: 0.75rem 0 0;
+}
+
+.step-body pre .accent { color: var(--accent); }
+
+/* ── About page ──────────────────────────────────────────────────────────── */
+
+/* Tea session illustration — same base as palace-map but mask centered lower
+   (wizard + fire sit at ~55% height vs. palace lantern at 32%) */
+.about-banner-img {
+  width: 580px;
+  -webkit-mask-image: radial-gradient(
+    ellipse 74% 82% at 50% 52%,
+    black 20%,
+    rgba(0,0,0,0.88) 44%,
+    rgba(0,0,0,0.42) 66%,
+    transparent 83%
+  );
+  mask-image: radial-gradient(
+    ellipse 74% 82% at 50% 52%,
+    black 20%,
+    rgba(0,0,0,0.88) 44%,
+    rgba(0,0,0,0.42) 66%,
+    transparent 83%
+  );
+}
+
+.about-wrap {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 4rem 1.5rem 5rem;
+}
+
+/* When about-wrap follows the tea session banner */
+.about-with-banner {
+  margin-top: -160px;
+  position: relative;
+  z-index: 3;
+  padding-top: 2rem;
+}
+
+.about-with-banner h1 {
+  text-shadow: 0 0 40px #0d0d0e, 0 0 80px #0d0d0e, 0 2px 6px rgba(0,0,0,0.95);
+}
+
+.about-wrap h1 {
+  font-family: var(--serif);
+  font-size: 1.6rem;
+  font-weight: normal;
+  color: var(--text);
+  margin: 0 0 2rem;
+  letter-spacing: -0.02em;
+}
+
+.about-wrap h2 {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 2.5rem 0 0.75rem;
+  font-weight: normal;
+}
+
+.about-wrap p {
+  font-family: var(--serif);
+  font-size: 0.95rem;
+  color: var(--text-dim);
+  line-height: 1.75;
+  margin: 0 0 1rem;
+}
+
+.about-wrap a {
+  color: var(--accent-light);
+  text-decoration: none;
+}
+
+.about-wrap a:hover { text-decoration: underline; }
+
+.org-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.org-name {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--text);
+  letter-spacing: 0.06em;
+  margin-bottom: 0.4rem;
+}
+
+.org-desc {
+  font-family: var(--serif);
+  font-size: 0.88rem;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+
+/* ── Seed / dispatch index ───────────────────────────────────────────────── */
+
+.seed-wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 4rem 1.5rem 5rem;
+}
+
+.seed-wrap h1 {
+  font-family: var(--serif);
+  font-size: 1.6rem;
+  font-weight: normal;
+  color: var(--text);
+  margin: 0 0 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+.seed-wrap .lead {
+  font-family: var(--serif);
+  font-size: 0.95rem;
+  color: var(--text-dim);
+  line-height: 1.65;
+  margin: 0 0 2.5rem;
+}
+
+.dispatch-entry {
+  display: block;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  border-radius: 4px;
+  padding: 1.5rem 1.75rem;
+  margin-bottom: 1rem;
+  text-decoration: none;
+  transition: border-color 0.15s;
+}
+
+.dispatch-entry:hover { border-color: var(--accent); }
+
+.dispatch-num {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
+.dispatch-title {
+  font-family: var(--serif);
+  font-size: 1.1rem;
+  color: var(--text);
+  margin-bottom: 0.4rem;
+}
+
+.dispatch-meta {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--text-faint);
+  letter-spacing: 0.04em;
+}
+
+.dispatch-desc {
+  font-family: var(--serif);
+  font-size: 0.88rem;
+  color: var(--text-dim);
+  margin-top: 0.6rem;
+  line-height: 1.6;
+}
+
+/* ── Wizard hero (image mode) ────────────────────────────────────────────── */
+
+.wizard-hero-section {
+  position: relative;
+  width: 100%;
+}
+
+.wizard-hero-image-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/7;
+  overflow: hidden;
+  background: var(--bg-surface);
+}
+
+/* Hide image wrap when image fails to load; show ASCII fallback */
+.wizard-hero-image-wrap.no-image { display: none; }
+.wizard-hero-image-wrap.no-image ~ .palace-fallback { display: block; }
+.palace-fallback { display: none; }
+
+/* When no image exists at all (src 404 before onerror fires),
+   the fallback is also shown via CSS :has() if supported */
+@supports not selector(:has(*)) {
+  /* Fallback for browsers without :has — show both, wizard-img hidden if 404 */
+}
+
+.wizard-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: left center;
+  display: block;
+  /* Dithering / pixelated feel */
+  image-rendering: auto;
+  filter: contrast(1.05) saturate(0.92);
+}
+
+/* CRT scanline overlay */
+.wizard-hero-image-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.08) 2px,
+    rgba(0,0,0,0.08) 4px
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Text overlay — right third */
+.wizard-hero-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  z-index: 2;
+  padding-right: 5%;
+}
+
+.wizard-hero-text {
+  max-width: 320px;
+  text-align: right;
+  background: linear-gradient(to left, rgba(13,13,14,0.88) 60%, transparent);
+  padding: 2rem 2rem 2rem 4rem;
+  border-radius: 4px;
+}
+
+.wizard-eyebrow {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.6rem;
+}
+
+.wizard-h1 {
+  font-family: var(--serif);
+  font-size: 1.9rem;
+  font-weight: normal;
+  color: var(--text);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.75rem;
+}
+
+.wizard-sub {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  line-height: 1.6;
+  letter-spacing: 0.04em;
+  margin: 0 0 1.25rem;
+}
+
+.wizard-cta {
+  display: inline-block;
+  padding: 0.55rem 1.1rem;
+  background: var(--accent);
+  color: var(--bg);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  border-radius: 3px;
+  transition: background 0.15s;
+}
+
+.wizard-cta:hover { background: var(--accent-light); }
+
+/* Mobile: stack, text below image */
+@media (max-width: 600px) {
+  .wizard-hero-image-wrap {
+    aspect-ratio: unset;  /* move ratio to img so overlay isn't clipped */
+    overflow: visible;
+  }
+  .wizard-hero-img {
+    aspect-ratio: 4/3;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+  }
+  .wizard-hero-overlay {
+    position: relative;
+    background: var(--bg-surface);
+    padding: 1.5rem;
+    justify-content: flex-start;
+  }
+  .wizard-hero-text {
+    max-width: 100%;
+    text-align: left;
+    background: none;
+    padding: 0;
+  }
+  .wizard-hero-image-wrap::after { display: none; }
+}
+
+
+/* ── Comparison table ────────────────────────────────────────────────────── */
+
+.compare-wrap {
+  max-width: 860px;
+  margin: 0 auto 3.5rem;
+  padding: 0 1.5rem;
+}
+
+.compare-label {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 0.6rem;
+}
+
+.compare-intro {
+  font-family: var(--serif);
+  font-size: 0.92rem;
+  color: var(--text-dim);
+  margin: 0 0 1.5rem;
+  line-height: 1.6;
+}
+
+.compare-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.84rem;
+  min-width: 560px;
+}
+
+.compare-table thead {
+  background: var(--bg-surface);
+}
+
+.compare-table th {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  font-weight: normal;
+  padding: 0.85rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.compare-table th.col-loci {
+  color: var(--accent);
+}
+
+.compare-table td {
+  font-family: var(--serif);
+  padding: 0.75rem 1rem;
+  color: var(--text-dim);
+  border-bottom: 1px solid var(--border-soft, var(--border));
+  vertical-align: top;
+  line-height: 1.5;
+}
+
+.compare-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.compare-table .row-label {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--text);
+  background: var(--bg-surface);
+  white-space: nowrap;
+}
+
+.compare-table .col-loci {
+  background: var(--accent-glow, rgba(200,124,44,0.05));
+}
+
+.compare-table .dim-cell {
+  color: var(--text-faint);
+}
+
+.compare-table .accent-cell {
+  color: var(--accent-light);
+  font-style: italic;
+}
+
+.compare-footnote {
+  font-family: var(--serif);
+  font-size: 0.82rem;
+  color: var(--text-faint);
+  line-height: 1.65;
+  margin: 1rem 0 0;
+  font-style: italic;
+}
+
+
+/* ── Palace eyebrow (ASCII fallback hero) ────────────────────────────────── */
+
+.palace-eyebrow {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 1rem;
+}
+
+
+
+/* ── Page banner (start.html room illustration) ─────────────────────────── */
+
+.page-banner-section {
+  width: 100%;
+  padding: 2.5rem 0.75rem 0;
+}
+
+.page-banner-wrap {
+  /* Matches nav-container max-width */
+  width: min(800px, 100%);
+  margin: 0 auto;
+  height: 1000px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Bottom fade to bg — gentle so GARDEN stays visible */
+.page-banner-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 73%,
+    rgba(13,13,14,0.5) 84%,
+    #0d0d0e 96%
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+.page-banner-img {
+  /* 720px wide → natural height 960px.
+     RESEARCH ~576px (60%), GARDEN ~816px (85%) — both in the 1000px frame.
+     Radial mask: focuses on lit palace rooms, dims stone exterior/negative space,
+     and fades left+right edges smoothly — no hard cuts. */
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+  width: 720px;
+  height: auto;
+  display: block;
+  filter: contrast(1.0) saturate(0.82) brightness(0.88);
+  -webkit-mask-image: radial-gradient(
+    ellipse 78% 80% at 50% 32%,
+    black 18%,
+    rgba(0,0,0,0.9) 40%,
+    rgba(0,0,0,0.45) 62%,
+    transparent 80%
+  );
+  mask-image: radial-gradient(
+    ellipse 78% 80% at 50% 32%,
+    black 18%,
+    rgba(0,0,0,0.9) 40%,
+    rgba(0,0,0,0.45) 62%,
+    transparent 80%
+  );
+}
+
+@media (max-width: 700px) {
+  .page-banner-wrap { height: 640px; }
+  .page-banner-img  { width: 92%; position: static; transform: none; margin: 0 auto; display: block; }
+  .about-banner-img { width: 88%; }
+}
+
+/* ── Mobile optimisation ─────────────────────────────────────────────────── */
+
+/* Reduce start-wrap negative pull-up on mobile so GARDEN still shows
+   but content doesn't overlap too aggressively with image */
+@media (max-width: 640px) {
+  .start-wrap { margin-top: -160px; }
+  .about-with-banner { margin-top: -100px; }
+  .step { gap: 1rem; }
+  .about-wrap, .seed-wrap { padding: 3rem 1rem 4rem; }
+  .about-wrap h1, .seed-wrap h1 { font-size: 1.35rem; }
+}
+
+/* Small mobile — 480px and below */
+@media (max-width: 480px) {
+  /* Nav: hide least-critical link to prevent overflow; it's in the footer */
+  nav a[href="llms.txt"] { display: none; }
+  .nav-container { padding-left: 0.75rem; padding-right: 0.75rem; }
+
+  /* Banner pull-up: gentler at small sizes */
+  .start-wrap { margin-top: -100px; }
+  .about-with-banner { margin-top: -60px; }
+  .start-wrap h1 { font-size: 1.3rem; }
+  .page-banner-section { padding-top: calc(var(--nav-height) + 0.5rem); }
+
+  /* Spacing */
+  .concepts { padding: 0 1rem; gap: 1rem; }
+  .compare-wrap, .distinction, .section-rule { padding-left: 1rem; padding-right: 1rem; }
+  .adopters { padding: 1.5rem 1.25rem; }
+  .cta-section { padding: 0 1rem; flex-direction: column; align-items: stretch; }
+  .cta-primary, .cta-secondary { text-align: center; }
+
+  /* Homepage hero */
+  .wizard-h1 { font-size: 1.5rem; }
+  .wizard-hero-text { padding: 0; }
+
+  /* Footer */
+  footer { padding: 1.5rem 1rem; }
+}
+
+/* ── Feature grid ────────────────────────────────────────────────────────── */
+
+.features-section {
+  max-width: 860px;
+  margin: 0 auto 3.5rem;
+  padding: 0 1.5rem;
+}
+
+.features-label {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 1.25rem;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.feature-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1.25rem 1.5rem;
+  transition: border-color 0.18s, box-shadow 0.18s;
+}
+
+.feature-card:hover {
+  border-color: rgba(200, 124, 44, 0.35);
+  box-shadow: 0 0 0 1px rgba(200, 124, 44, 0.12), 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.feature-icon {
+  font-family: 'Material Symbols Outlined';
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+  font-size: 2.25rem;
+  color: var(--accent);
+  display: block;
+  margin-bottom: 0.75rem;
+  line-height: 1;
+}
+
+.feature-name {
+  font-family: 'Inter', var(--sans);
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text);
+  margin-bottom: 0.35rem;
+  letter-spacing: -0.01em;
+}
+
+.feature-tagline {
+  font-family: 'Inter', var(--sans);
+  font-weight: 500;
+  font-style: italic;
+  font-size: 0.8rem;
+  color: var(--accent-light);
+  opacity: 0.75;
+  margin-bottom: 0.6rem;
+  line-height: 1.45;
+}
+
+.feature-desc {
+  font-family: 'Inter', var(--sans);
+  font-weight: 400;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  line-height: 1.6;
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  .features-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+  .features-section {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .features-section {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* Feature card — coming soon variant */
+.feature-card--soon {
+  position: relative;
+  opacity: 0.72;
+  border-style: dashed;
+}
+.feature-card--soon:hover {
+  opacity: 0.88;
+}
+.feature-soon-badge {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 0.15em 0.5em;
+}
+
+/* ── Fold sections (collapsible) ─────────────────────────────────────────── */
+
+.fold-trigger {
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 1.75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fold-trigger-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+  transition: background 0.15s;
+}
+
+.fold-trigger:hover .fold-trigger-line {
+  background: var(--accent-dim);
+}
+
+.fold-trigger-label {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: color 0.15s;
+  white-space: nowrap;
+}
+
+.fold-trigger:hover .fold-trigger-label {
+  color: var(--accent);
+}
+
+.fold-trigger:focus {
+  outline: none;
+}
+
+.fold-trigger:focus-visible .fold-trigger-label {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.fold-trigger .material-symbols-outlined {
+  font-size: 1.25rem;
+  transition: transform 0.3s ease;
+}
+
+.fold-trigger[aria-expanded="true"] .material-symbols-outlined {
+  transform: rotate(180deg);
+}
+
+/* Collapsible section — CSS grid animation */
+.fold-section {
+  display: grid;
+  transition: grid-template-rows 0.35s ease;
+}
+
+.fold-section--collapsed {
+  grid-template-rows: 0fr;
+}
+
+.fold-section--open {
+  grid-template-rows: 1fr;
+}
+
+.fold-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* Mobile: full-bleed trigger */
+@media (max-width: 640px) {
+  .fold-trigger {
+    padding: 1.5rem 1rem;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .fold-trigger {
+    padding: 1.25rem 0.75rem;
+  }
+  .fold-trigger-label {
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+  }
+}
+
+/* ── Persona mini-switcher (2nd-level pages) ───────────────
+ * Sits beside the logo. Click writes localStorage['loci-theme']
+ * then routes to '/'. Landing page's setTheme() reads on init. */
+.nav-logo-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.nav-persona-mini {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  padding-left: 0.6rem;
+  border-left: 1px solid var(--border);
+}
+
+.persona-mini-btn {
+  background: none;
+  border: none;
+  padding: 2px 5px;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  line-height: 1;
+  color: var(--text-dim);
+  cursor: pointer;
+  opacity: 0.5;
+  transition: color 0.15s, opacity 0.15s, transform 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.persona-mini-btn:hover {
+  color: var(--text);
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+.persona-mini-btn.active {
+  color: var(--accent);
+  opacity: 1;
+}
+
+/* Mobile: pull the mini-switcher out of the nav and float it
+ * as a centered overlay pill just below the nav bar. Frees the nav
+ * for logo + nav-links, and keeps the switcher always reachable. */
+@media (max-width: 640px) {
+  .nav-logo-group { gap: 0; }
+  .nav-persona-mini {
+    position: fixed;
+    top: calc(var(--nav-height) + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 110;
+    gap: 0.2rem;
+    padding: 5px 12px;
+    background: rgba(13, 13, 14, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    border-left: 1px solid var(--border);
+    border-radius: 999px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  }
+  .persona-mini-btn {
+    font-size: 0.95rem;
+    padding: 3px 7px;
+    opacity: 0.65;
+  }
+  /* Push first content section down so it clears the floating dock */
+  .page-content,
+  main:not(.no-mini-offset) {
+    padding-top: calc(var(--nav-height) + 56px);
+  }
+}
+
+@media (max-width: 380px) {
+  .nav-persona-mini { padding: 4px 10px; }
+  .persona-mini-btn { font-size: 0.88rem; padding: 3px 5px; }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   STYLE-WIZARD.CSS — Per-room atmospheric palette (Nyx, 2026-04-28)
+   Dormant under html[data-skin="wizard"]; activate per-page opt-in.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ══════════════════════════════════════════════════════════════════════════
+   LOCI.GARDEN — WIZARD SKIN v2
+   Nyx × Vesper · 2026-04-28
+   Source: Figma Design System export (loci.css) + palace map pixel art
+   Applied via: html[data-skin="wizard"]
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── TOKENS ────────────────────────────────────────────────────────────────
+   All extracted from the pixel art images. Do not override base palette vars.
+   ─────────────────────────────────────────────────────────────────────────*/
+
+html[data-skin="wizard"] {
+  /* Stone masonry */
+  --stone-darkest: #14141c;
+  --stone-dark:    #252530;
+  --stone-mid:     #353540;
+  --stone-light:   #4a4a58;
+  --stone-mortar:  #1c1c26;
+  --stone-hi:      #5a5a6a;
+
+  /* Ivy */
+  --ivy-dark:   #1a3d1f;
+  --ivy-mid:    #2d6b35;
+  --ivy-bright: #4a9a4f;
+  --ivy-hi:     #6bc26e;
+  --vine-stem:  #5a3010;
+
+  /* Room — HALL */
+  --room-hall-bg:      #160f04;
+  --room-hall-glow:    #ffdd88;
+  --room-hall-lantern: #ff9922;
+
+  /* Room — DEV */
+  --room-dev-bg:      #060b1a;
+  --room-dev-blue:    #1e3a7a;
+  --room-dev-glow:    #4477dd;
+  --room-dev-monitor: #5588ff;
+
+  /* Room — DESIGN */
+  --room-design-bg:     #140c04;
+  --room-design-warm:   #5a3a18;
+  --room-design-glow:   #e8a84a;
+  --room-design-candle: #ffcc66;
+
+  /* Room — RESEARCH */
+  --room-research-bg:    #0c0804;
+  --room-research-brown: #3a2810;
+  --room-research-glow:  #d4891a;
+
+  /* Room — HATCHERY */
+  --room-hatchery-bg:    #100e06;
+  --room-hatchery-earthy:#6a4a18;
+  --room-hatchery-glow:  #c8943a;
+  --room-hatchery-jar:   #d4b060;
+
+  /* Room — GARDEN */
+  --room-garden-bg:    #04080f;
+  --room-garden-teal:  #1a3a5a;
+  --room-garden-glow:  #4a9ab8;
+  --room-garden-moon:  #aaddff;
+  --room-garden-water: #2a5a7a;
+
+  /* Crystal */
+  --crystal-core:   #ffee99;
+  --crystal-bright: #ffcc44;
+  --crystal-mid:    #e8861a;
+  --crystal-outer:  #c87c2c;
+  --crystal-shadow: #7a3a08;
+
+  /* Label tags */
+  --label-bg:     #f0eeea;
+  --label-border: #111111;
+  --label-text:   #111111;
+
+  /* Sky (wizard image backdrop) */
+  --sky-deep:    #060e18;
+  --sky-night:   #0d2535;
+  --castle-blue: #4a7a9b;
+
+  /* Override base surface for wizard */
+  --bg:         #060810;
+  --bg-surface: #0d1018;
+  --bg-card:    #111520;
+  --border:     #2a3045;
+}
+
+/* ── ANIMATIONS ────────────────────────────────────────────────────────── */
+
+@keyframes amber-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0  6px  2px rgba(255, 200,  80, 0.25),
+      0 0 18px  4px rgba(200, 124,  44, 0.15),
+      inset 0 0 20px rgba(200, 124,  44, 0.06);
+  }
+  50% {
+    box-shadow:
+      0 0 14px  4px rgba(255, 220, 100, 0.55),
+      0 0 36px  8px rgba(200, 124,  44, 0.35),
+      0 0 60px 14px rgba(200, 124,  44, 0.15),
+      inset 0 0 30px rgba(200, 124,  44, 0.16);
+  }
+}
+
+@keyframes dev-pulse {
+  0%, 100% { box-shadow: 0 0 6px 2px rgba(68,119,221,0.25), 0 0 18px 4px rgba(30,58,122,0.15); }
+  50%       { box-shadow: 0 0 14px 4px rgba(68,119,221,0.55), 0 0 36px 8px rgba(68,119,221,0.30); }
+}
+
+@keyframes garden-pulse {
+  0%, 100% { box-shadow: 0 0 6px 2px rgba(74,154,184,0.20), 0 0 18px 4px rgba(26,58,90,0.15); }
+  50%       { box-shadow: 0 0 14px 4px rgba(74,154,184,0.50), 0 0 36px 8px rgba(74,154,184,0.28); }
+}
+
+@keyframes crystal-glow {
+  0%, 100% {
+    filter:
+      drop-shadow(0 0  4px rgba(255,200, 80,0.60))
+      drop-shadow(0 0 12px rgba(200,124, 44,0.40));
+  }
+  50% {
+    filter:
+      drop-shadow(0 0  8px rgba(255,238,153,0.90))
+      drop-shadow(0 0 24px rgba(200,124, 44,0.70))
+      drop-shadow(0 0 40px rgba(232,134, 26,0.40));
+  }
+}
+
+@keyframes crystallize {
+  0% {
+    clip-path: ellipse(50% 50% at 50% 50%);
+    filter: blur(3px) brightness(0.7);
+    opacity: 0.7;
+  }
+  35% {
+    clip-path: polygon(50% 8%, 80% 35%, 76% 64%, 50% 92%, 24% 64%, 20% 35%);
+    filter: blur(1.5px) brightness(0.85);
+    opacity: 0.85;
+  }
+  70% {
+    clip-path: polygon(50% 2%, 84% 28%, 75% 68%, 50% 98%, 25% 68%, 16% 28%);
+    filter: blur(0.5px) brightness(1.05);
+  }
+  100% {
+    clip-path: polygon(50% 0%, 85% 30%, 75% 70%, 50% 100%, 25% 70%, 15% 30%);
+    filter: blur(0) brightness(1);
+    opacity: 1;
+  }
+}
+
+@keyframes crt-flicker {
+  0%, 96%, 100% { opacity: 1; }
+  97%  { opacity: 0.97; }
+  98%  { opacity: 0.99; }
+  99%  { opacity: 0.96; }
+}
+
+@keyframes ivy-sway {
+  0%, 100% { transform: rotate(0deg)   translateY(0px); }
+  33%       { transform: rotate(1.5deg) translateY(-1px); }
+  66%       { transform: rotate(-1deg)  translateY(1px); }
+}
+
+@keyframes moonpulse {
+  0%, 100% { opacity: 0.55; transform: translateX(-50%) scale(1); }
+  50%       { opacity: 0.85; transform: translateX(-50%) scale(1.12); }
+}
+
+@keyframes star-blink {
+  0%, 100% { opacity: 0.4; }
+  50%       { opacity: 1.0; }
+}
+
+/* ── GLOBAL RESETS ─────────────────────────────────────────────────────── */
+
+html[data-skin="wizard"] * {
+  border-radius: 0 !important;
+  image-rendering: pixelated;
+}
+
+/* CRT vignette layer */
+html[data-skin="wizard"] body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  background: radial-gradient(ellipse at 50% 50%, transparent 52%, rgba(0,0,0,0.75) 100%);
+}
+
+/* CRT scanlines layer */
+html[data-skin="wizard"] body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent, transparent 3px,
+    rgba(0,0,8,0.42) 3px,
+    rgba(0,0,8,0.42) 4px
+  );
+  animation: crt-flicker 9s infinite;
+  mix-blend-mode: multiply;
+}
+
+/* ── STONE TEXTURE UTILITY ─────────────────────────────────────────────── */
+/* 32×16 px brick tile with mortar lines and subtle block variation */
+
+html[data-skin="wizard"] nav,
+html[data-skin="wizard"] footer,
+html[data-skin="wizard"] .three-doors,
+html[data-skin="wizard"] .adopters {
+  background-color: var(--stone-dark);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='16'%3E%3Crect width='32' height='16' fill='%23252530'/%3E%3Crect x='0' y='0' width='14' height='7' fill='%232e2e3c'/%3E%3Crect x='16' y='0' width='16' height='7' fill='%23292938'/%3E%3Crect x='1' y='1' width='12' height='5' fill='%23313145'/%3E%3Crect x='17' y='1' width='14' height='5' fill='%232c2c3e'/%3E%3Crect x='0' y='9' width='8' height='7' fill='%232a2a3a'/%3E%3Crect x='10' y='9' width='22' height='7' fill='%23303046'/%3E%3Crect x='14' y='0' width='2' height='8' fill='%231c1c28'/%3E%3Crect x='8' y='8' width='2' height='8' fill='%231c1c28'/%3E%3Crect x='0' y='7' width='32' height='2' fill='%231c1c28'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+}
+
+/* ── IVY OVERLAY UTILITY ───────────────────────────────────────────────── */
+
+html[data-skin="wizard"] .section-rule {
+  position: relative;
+  height: 20px;
+  border: none;
+  overflow: visible;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='20'%3E%3Crect x='6' y='4' width='5' height='5' fill='%232d6b35' opacity='.7'/%3E%3Crect x='7' y='5' width='3' height='3' fill='%234a9a4f' opacity='.5'/%3E%3Crect x='52' y='6' width='5' height='5' fill='%232d6b35' opacity='.6'/%3E%3Crect x='53' y='7' width='3' height='3' fill='%234a9a4f' opacity='.5'/%3E%3Crect x='28' y='10' width='8' height='1' fill='%231c1c26'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-position: center;
+  margin: 2rem auto;
+  max-width: 860px;
+}
+
+html[data-skin="wizard"] .section-rule::after {
+  content: '— ✦ —';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--ivy-mid);
+  background: var(--bg);
+  padding: 0 0.75rem;
+  letter-spacing: 0.3em;
+}
+
+/* ── NAV ───────────────────────────────────────────────────────────────── */
+
+html[data-skin="wizard"] nav {
+  border-bottom: 2px solid var(--stone-mortar);
+  box-shadow: 0 2px 0 var(--stone-dark), 0 4px 16px rgba(0,0,0,0.6);
+}
+
+html[data-skin="wizard"] .logo::before {
+  content: '';
+  display: inline-block;
+  width: 13px;
+  height: 18px;
+  margin-right: 5px;
+  vertical-align: middle;
+  position: relative;
+  top: -1px;
+  /* Crystal shape via clip-path */
+  background: linear-gradient(135deg, var(--crystal-bright) 0%, var(--crystal-outer) 60%, var(--crystal-shadow) 100%);
+  clip-path: polygon(50% 0%, 85% 30%, 75% 70%, 50% 100%, 25% 70%, 15% 30%);
+  animation: crystal-glow 2.4s ease-in-out infinite;
+  transition: clip-path 0.35s ease-in-out, filter 0.35s;
+}
+
+html[data-skin="wizard"] .logo:hover::before {
+  animation: crystallize 0.5s ease-in-out forwards, crystal-glow 2.4s ease-in-out 0.5s infinite;
+}
+
+/* Active nav = pixel label tag */
+html[data-skin="wizard"] .nav-link.active {
+  background: var(--label-bg);
+  color: var(--label-border) !important;
+  padding: 0.15rem 0.4rem;
+  font-weight: 700;
+  box-shadow: 2px 2px 0 var(--label-border);
+  outline: 1px solid var(--label-border);
+}
+
+/* ── PIXEL LABEL TAGS ──────────────────────────────────────────────────── */
+
+html[data-skin="wizard"] .door-label,
+html[data-skin="wizard"] .concept h3,
+html[data-skin="wizard"] .adopter-label,
+html[data-skin="wizard"] .compare-label,
+html[data-skin="wizard"] .wizard-eyebrow,
+html[data-skin="wizard"] .palace-eyebrow {
+  display: inline-block;
+  background: var(--label-bg) !important;
+  color: var(--label-text) !important;
+  border: 2px solid var(--label-border) !important;
+  font-family: var(--mono) !important;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.5rem;
+  box-shadow: 2px 2px 0 var(--label-border), 3px 3px 0 rgba(0,0,0,0.55);
+  margin-bottom: 0.6rem;
+  line-height: 1.4;
+}
+
+/* ── THREE DOORS — ROOM CARDS ──────────────────────────────────────────── */
+
+html[data-skin="wizard"] .three-doors {
+  gap: 2px;
+  border: 2px solid var(--stone-mortar);
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.7);
+  background: var(--stone-mortar);
+}
+
+/* Door 1: AI Agents → Dev Room */
+html[data-skin="wizard"] .door:nth-child(1) {
+  background-color: var(--room-dev-bg);
+  border-left: 3px solid var(--room-dev-glow);
+}
+html[data-skin="wizard"] .door:nth-child(1):hover {
+  animation: dev-pulse 2.4s ease-in-out infinite;
+  filter: brightness(1.2);
+}
+
+/* Door 2: Practitioners → The Hall */
+html[data-skin="wizard"] .door:nth-child(2) {
+  background-color: var(--room-hall-bg);
+  border-left: 3px solid var(--room-hall-lantern);
+}
+html[data-skin="wizard"] .door:nth-child(2):hover {
+  animation: amber-pulse 2.4s ease-in-out infinite;
+  filter: brightness(1.2);
+}
+
+/* Door 3: Teams → Research */
+html[data-skin="wizard"] .door:nth-child(3) {
+  background-color: var(--room-research-bg);
+  border-left: 3px solid var(--room-research-glow);
+}
+html[data-skin="wizard"] .door:nth-child(3):hover {
+  animation: amber-pulse 2.4s ease-in-out infinite;
+  filter: brightness(1.2);
+}
+
+/* ── CONCEPT CARDS ─────────────────────────────────────────────────────── */
+
+html[data-skin="wizard"] .concept {
+  border: 2px solid var(--stone-mortar);
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.6);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+html[data-skin="wizard"] .concept:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.6);
+}
+
+html[data-skin="wizard"] .concept:nth-child(1) { background: var(--room-hall-bg); border-color: var(--room-hall-lantern); }
+html[data-skin="wizard"] .concept:nth-child(2) { background: var(--room-garden-bg); border-color: var(--room-garden-teal); }
+html[data-skin="wizard"] .concept:nth-child(3) { background: var(--room-hatchery-bg); border-color: var(--room-hatchery-glow); }
+html[data-skin="wizard"] .concept:nth-child(4) { background: var(--room-research-bg); border-color: var(--room-research-glow); }
+
+/* ── GARDEN SECTION (THE GARDEN room atmosphere) ───────────────────────── */
+
+html[data-skin="wizard"] .distinction {
+  background: var(--room-garden-bg);
+  border: 2px solid var(--room-garden-teal);
+  padding: 2.5rem 2rem;
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.7);
+  position: relative;
+  overflow: hidden;
+  animation: garden-pulse 3s ease-in-out infinite;
+}
+
+/* Moonlight radial glow */
+html[data-skin="wizard"] .distinction::before {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70px;
+  height: 35px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(170,221,255,0.45) 0%,
+    rgba(170,221,255,0.12) 40%,
+    transparent 70%
+  );
+  animation: moonpulse 3.5s ease-in-out infinite;
+}
+
+/* Ivy overlay on garden section */
+html[data-skin="wizard"] .distinction::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Crect x='6' y='4' width='5' height='5' fill='%232d6b35' opacity='.35'/%3E%3Crect x='7' y='5' width='3' height='3' fill='%234a9a4f' opacity='.25'/%3E%3Crect x='52' y='8' width='4' height='4' fill='%231a3d1f' opacity='.4'/%3E%3Crect x='28' y='54' width='5' height='5' fill='%232d6b35' opacity='.3'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  opacity: 0.6;
+}
+
+html[data-skin="wizard"] .key-line {
+  color: var(--room-garden-moon);
+  text-shadow: 0 0 14px rgba(74,154,184,0.5);
+}
+
+/* ── WIZARD HERO SECTION ───────────────────────────────────────────────── */
+
+html[data-skin="wizard"] .wizard-hero-image-wrap {
+  border-bottom: 2px solid var(--stone-mortar);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+}
+
+/* Pixel-art the wizard image */
+html[data-skin="wizard"] .wizard-hero-img {
+  filter: contrast(1.08) saturate(0.88);
+  mix-blend-mode: normal;
+}
+
+/* ── PALACE MAP (ASCII fallback) ───────────────────────────────────────── */
+
+html[data-skin="wizard"] .palace-map {
+  border: 2px solid var(--stone-mortar);
+  background: var(--room-hall-bg);
+  box-shadow:
+    4px 4px 0 rgba(0,0,0,0.7),
+    inset 0 0 40px rgba(200,124,44,0.06);
+  animation: amber-pulse 3s ease-in-out infinite;
+}
+
+/* ── COMPARISON TABLE ──────────────────────────────────────────────────── */
+
+html[data-skin="wizard"] .compare-scroll {
+  border: 2px solid var(--stone-mortar);
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.7);
+}
+
+html[data-skin="wizard"] .compare-table thead {
+  background-color: var(--stone-dark);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='16'%3E%3Crect width='32' height='16' fill='%23252530'/%3E%3Crect x='0' y='0' width='14' height='7' fill='%232e2e3c'/%3E%3Crect x='16' y='0' width='16' height='7' fill='%23292938'/%3E%3C/svg%3E");
+}
+
+html[data-skin="wizard"] .compare-table .col-loci {
+  background: rgba(200,124,44,0.12);
+  animation: amber-pulse 3.5s ease-in-out infinite;
+}
+
+html[data-skin="wizard"] .compare-table td,
+html[data-skin="wizard"] .compare-table th {
+  border-bottom: 1px solid var(--stone-mortar);
+}
+
+/* ── BUTTONS — PIXEL STYLE ─────────────────────────────────────────────── */
+
+html[data-skin="wizard"] .cta-primary {
+  background: var(--accent);
+  border: 2px solid var(--crystal-shadow);
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.8);
+  letter-spacing: 0.1em;
+  transition: transform 0.08s, box-shadow 0.08s, background 0.1s;
+}
+html[data-skin="wizard"] .cta-primary:hover {
+  background: var(--accent-light);
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.8);
+}
+html[data-skin="wizard"] .cta-primary:active {
+  transform: translate(1px, 1px);
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.8);
+}
+
+html[data-skin="wizard"] .cta-secondary {
+  border: 2px solid var(--stone-light);
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.7);
+  transition: transform 0.08s, box-shadow 0.08s;
+}
+html[data-skin="wizard"] .cta-secondary:hover {
+  border-color: var(--accent);
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.7);
+}
+
+/* ── DISPATCH ENTRIES ──────────────────────────────────────────────────── */
+
+html[data-skin="wizard"] .dispatch-entry {
+  border: 2px solid var(--stone-mortar);
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.6);
+  background: var(--room-research-bg);
+}
+html[data-skin="wizard"] .dispatch-entry:hover {
+  border-color: var(--accent);
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.6);
+}
+
+/* ── ORG CARDS / ABOUT PAGE ────────────────────────────────────────────── */
+
+html[data-skin="wizard"] .org-card {
+  background: var(--room-hall-bg);
+  border: 2px solid var(--stone-mortar);
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.6);
+}
+
+/* ── STEP NUMBERS (start page) ─────────────────────────────────────────── */
+
+html[data-skin="wizard"] .step-num {
+  border: 2px solid var(--accent);
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.7);
+  background: rgba(200,124,44,0.12);
+}
+
+html[data-skin="wizard"] .step-body pre {
+  border: 2px solid var(--stone-mortar);
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.6);
+  background: var(--room-dev-bg);
+  border-left: 3px solid var(--room-dev-glow);
+}
+
+/* ── SKIN TOGGLE BUTTON ────────────────────────────────────────────────── */
+
+.skin-toggle {
+  position: fixed;
+  bottom: 1.25rem;
+  right: 1.25rem;
+  z-index: 9997;       /* below CRT overlay */
+  background: var(--bg-surface, #131315);
+  border: 1px solid var(--border, #252528);
+  color: var(--text-dim, #7a7772);
+  font-family: 'Courier New', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.45rem 0.7rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: border-color 0.15s, color 0.15s;
+  border-radius: 3px;
+}
+
+.skin-toggle:hover {
+  border-color: var(--accent, #c87c2c);
+  color: var(--accent-light, #e8974a);
+}
+
+html[data-skin="wizard"] .skin-toggle {
+  background: var(--stone-dark);
+  border: 2px solid var(--stone-mortar);
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.7);
+  border-radius: 0;
+  color: var(--text, #e8e4dd);
+}
+
+html[data-skin="wizard"] .skin-toggle:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.7);
+  color: var(--accent-light);
+}
+
+/* Crystal mark in toggle button */
+.toggle-crystal {
+  display: inline-block;
+  width: 10px;
+  height: 14px;
+  background: linear-gradient(135deg, #ffcc44 0%, #c87c2c 60%, #7a3a08 100%);
+  clip-path: polygon(50% 0%, 85% 30%, 75% 70%, 50% 100%, 25% 70%, 15% 30%);
+  animation: crystal-glow 2.4s ease-in-out infinite;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LLMAGE ALTERNATE REGISTER — monochrome, austere
+   Activated on /personas (Step 8); preserved here so toggle works site-wide.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+[data-theme="llmage"] {
+  --bg:           #080808;
+  --bg-surface:   #0f0f0f;
+  --bg-card:      #141414;
+  --border:       #2a2a2a;
+  --border-soft:  #1a1a1a;
+  --accent:       #ebebeb;
+  --accent-light: #ffffff;
+  --accent-dim:   rgba(235, 235, 235, 0.10);
+  --accent-glow:  rgba(235, 235, 235, 0.05);
+  --accent-vine:        #2a2a2a;
+  --accent-vine-hi:     #4a4a4a;
+  --accent-vine-soft:   rgba(40, 40, 40, 0.18);
+  --accent-indigo:      #1a1a1a;
+  --accent-indigo-soft: rgba(20, 20, 20, 0.55);
+  --text:         #ebebeb;
+  --text-dim:     #888888;
+  --text-faint:   #444444;
+  --text-mono:    #aaaaaa;
+  --serif:        'Helvetica Neue', 'Inter', sans-serif;
+  --mono:         'Helvetica Neue', monospace;
+  --sans:         'Helvetica Neue', sans-serif;
+}
+
+[data-theme="llmage"] body {
+  font-family: var(--mono);
+  letter-spacing: 0.02em;
+}
+
+[data-theme="llmage"] .nav-link,
+[data-theme="llmage"] .nav-logo,
+[data-theme="llmage"] h1,
+[data-theme="llmage"] h2,
+[data-theme="llmage"] h3 {
+  font-family: var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}

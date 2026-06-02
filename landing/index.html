@@ -2071,11 +2071,9 @@ footer {
       <span class="t-wizard">The Palace</span>
       <span class="t-llmage">Spec</span>
     </a>
-    <a href="#start" class="nav-link">
-      <span class="t-scholar">Install</span>
-      <span class="t-wizard">Enter</span>
-      <span class="t-llmage">Install</span>
-    </a>
+    <a href="start.html" class="nav-link tb-scholar">Get started</a>
+    <a href="download.html" class="nav-link tb-wizard">Get the app</a>
+    <a href="https://github.com/huximaxi/Loci" class="nav-link tb-llmage" target="_blank" rel="noopener">Clone ↗</a>
     <a href="manifesto.html" class="nav-link">
       <span class="t-scholar">Manifesto</span>
       <span class="t-wizard">The Spell</span>
@@ -2092,7 +2090,7 @@ footer {
 
   <!-- Theme Switcher -->
   <div class="theme-switcher" role="group" aria-label="Choose experience mode">
-    <button class="theme-btn" id="btn-scholar" onclick="setTheme('scholar')" aria-pressed="true">◆ Scholar</button>
+    <button class="theme-btn" id="btn-scholar" onclick="setTheme('scholar')" aria-pressed="true">◆ ELI-5</button>
     <button class="theme-btn" id="btn-wizard"  onclick="setTheme('wizard')"  aria-pressed="false">⚔ Wizard</button>
     <button class="theme-btn" id="btn-llmage"  onclick="setTheme('llmage')"  aria-pressed="false">◈ LLMAGE</button>
   </div>
@@ -2166,7 +2164,7 @@ footer {
     <span class="hero-tag">
       <span class="t-scholar">Free · Open · Local-first · Keypair-signed</span>
       <span class="t-wizard">Adventure awaits ✦</span>
-      <span class="t-llmage">v0.1 · local context layer · sovereignty stack</span>
+      <span class="t-llmage">v0.6.0 · local context layer · sovereignty stack</span>
     </span>
 
     <!-- Title -->
@@ -2185,11 +2183,9 @@ footer {
 
     <!-- CTAs -->
     <div class="hero-cta">
-      <a href="#start" class="btn-primary">
-        <span class="t-scholar">Bring it home →</span>
-        <span class="t-wizard">Enter the Palace →</span>
-        <span class="t-llmage">Install →</span>
-      </a>
+      <a href="start.html" class="btn-primary tb-scholar">Start building →</a>
+      <a href="download.html" class="btn-primary tb-wizard">Enter the Palace →</a>
+      <a href="https://github.com/huximaxi/Loci" class="btn-primary tb-llmage" target="_blank" rel="noopener">Clone →</a>
       <a href="#features" class="btn-secondary">
         <span class="t-scholar">See how it works</span>
         <span class="t-wizard">Explore the Rooms</span>
@@ -2283,12 +2279,12 @@ footer {
       <!-- Scholar card (current mode — highlighted) -->
       <div class="persona-card">
         <div>
-          <div class="persona-card-mode">◆ Scholar<span class="persona-card-chip chip-early">early access</span></div>
+          <div class="persona-card-mode">◆ ELI-5<span class="persona-card-chip chip-early">early access</span></div>
           <div class="persona-card-role">Your AI finally remembers you.</div>
         </div>
-        <p class="persona-card-desc">A regular user who chats with AI tools and wants their work to stick. Browser extension + native app, full-text search, private local index. No config. No cloud. No re-explaining yourself from scratch every session.</p>
+        <p class="persona-card-desc">A regular user who chats with AI tools and wants their work to stick. Local index, full-text search, private. No config. No cloud. No re-explaining yourself from scratch every session.</p>
         <div class="persona-card-feel">Feels like: your AI finally knows who you are.</div>
-        <a href="#" class="persona-card-cta" data-umami-event="persona-cta" data-umami-event-persona="scholar" onclick="openWaitlist('scholar-card'); return false;">Join early access →</a>
+        <a href="#" class="persona-card-cta" data-umami-event="persona-cta" data-umami-event-persona="eli5" onclick="openWaitlist('eli5-card'); return false;">Join early access →</a>
       </div>
 
       <!-- Wizard card -->
@@ -2305,7 +2301,7 @@ footer {
       <!-- LLMAGE card -->
       <div class="persona-card llmage-accent">
         <div>
-          <div class="persona-card-mode">◈ LLMAGE<span class="persona-card-chip chip-wip">WIP</span></div>
+          <div class="persona-card-mode">◈ LLMAGE<span class="persona-card-chip chip-beta">open beta</span></div>
           <div class="persona-card-role">Clone the repo. Read the spec. Own the stack.</div>
         </div>
         <p class="persona-card-desc">A developer or researcher who wants full control over the context layer. One-liner: <code>git clone</code> + inspect the MCP server, config, and primitives. The sovereignty stack (Nostr identity, Nym sync) lands across Q3/Q4 — see the roadmap for honest status.</p>
@@ -2572,7 +2568,7 @@ footer {
           </a>
         </div>
         <p class="tauri-meta">
-          <span class="t-wizard">Wizard palace · v0.5.0 · Tauri v2 · Open beta — for testing, not production</span>
+          <span class="t-wizard">Wizard palace · v0.6.0 · Tauri v2 · open beta — for testing, not production</span>
           <span class="t-llmage">Tauri v2 · Rust backend · arm64 + x86_64 · Build from source: github.com/huximaxi/loci</span>
         </p>
 
@@ -2750,7 +2746,7 @@ footer {
           <rect x="498" y="258" width="14" height="40" fill="#0a0a0c"/>
 
           <!-- Map footer label -->
-          <text x="350" y="352" font-family="'Press Start 2P',monospace" font-size="5.5" fill="#353540" text-anchor="middle" letter-spacing="0.08em">LOCI.GARDEN · PALACE FLOOR PLAN · v0.1</text>
+          <text x="350" y="352" font-family="'Press Start 2P',monospace" font-size="5.5" fill="#353540" text-anchor="middle" letter-spacing="0.08em">LOCI.GARDEN · PALACE FLOOR PLAN · v0.6.0</text>
         </svg><!-- end fallback SVG -->
       </div>
     </div>
@@ -2768,8 +2764,8 @@ footer {
       <div class="code-block" style="margin-top:28px;">
         <span class="comment"># config.json — full Wizard/LLMAGE tier</span><br>
         {<br>
-        &nbsp;&nbsp;<span class="string">"version"</span>: <span class="string">"0.1.0"</span>,<br>
-        &nbsp;&nbsp;<span class="string">"tier"</span>: <span class="string">"wizard"</span>, <span class="comment">// "scholar" | "wizard" | "llmage"</span><br>
+        &nbsp;&nbsp;<span class="string">"version"</span>: <span class="string">"0.6.0"</span>,<br>
+        &nbsp;&nbsp;<span class="string">"tier"</span>: <span class="string">"wizard"</span>, <span class="comment">// "eli5" | "wizard" | "llmage"</span><br>
         &nbsp;&nbsp;<span class="string">"index"</span>: {<br>
         &nbsp;&nbsp;&nbsp;&nbsp;<span class="string">"auto_sync"</span>: <span class="keyword">true</span>,<br>
         &nbsp;&nbsp;&nbsp;&nbsp;<span class="string">"sync_interval"</span>: <span class="string">"5m"</span>,<br>
@@ -2846,15 +2842,11 @@ footer {
             <span class="t-llmage">clone + configure</span>
           </h4>
           <p>
-            <span class="t-scholar">Join the early-access list. The browser extension and native app are landing in waves — we'll send your invite when your spot opens. No account, no cloud lock-in, no re-explaining your context.</span>
+            <span class="t-scholar">Join the early-access list. loci is landing in waves — we'll send your invite when your spot opens. No account, no cloud lock-in, no re-explaining your context.</span>
             <span class="t-wizard">Open Claude Desktop (or your MCP client). The one-liner below writes a backup-protected config entry that loci satisfies as soon as the desktop app is running.</span>
             <span class="t-llmage"><code>git clone https://github.com/huximaxi/loci && cd loci/desktop && cat .mcp.json</code></span>
           </p>
           <div class="install-pills tb-scholar">
-              <a href="#" class="install-pill" data-umami-event="install-attempt" data-umami-event-target="scholar-extension" onclick="openWaitlist('scholar-extension'); return false;">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
-                Browser extension (early access)
-              </a>
               <a href="#" class="install-pill" data-umami-event="install-attempt" data-umami-event-target="scholar-mac" onclick="openWaitlist('scholar-mac'); return false;">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
                 Mac (early access)
@@ -2927,13 +2919,13 @@ footer {
 
     <!-- Final CTA -->
     <div style="margin-top: 40px; display: flex; gap: 12px; flex-wrap: wrap;">
-      <a href="https://github.com/huximaxi/Loci/blob/main/extension/INSTALL.md" class="btn-primary tb-scholar" target="_blank" rel="noopener">
-        <span class="t-scholar">Get the extension →</span>
+      <a href="start.html" class="btn-primary tb-scholar">
+        <span class="t-scholar">Get started →</span>
       </a>
-      <a href="https://loci.garden/start.html" class="btn-primary tb-wizard">
-        <span class="t-wizard">Begin the Ritual →</span>
+      <a href="download.html" class="btn-primary tb-wizard">
+        <span class="t-wizard">Get the app →</span>
       </a>
-      <a href="https://docs.loci.garden" class="btn-primary tb-llmage">
+      <a href="https://docs.loci.garden" class="btn-primary tb-llmage" target="_blank" rel="noopener">
         <span class="t-llmage">Full documentation →</span>
       </a>
     </div>
@@ -2947,7 +2939,7 @@ footer {
   <span class="footer-text">
     <span class="t-scholar">loci.garden — your AI memory, finally yours.</span>
     <span class="t-wizard">loci.garden · The palace grows with every session. ✦</span>
-    <span class="t-llmage">loci.garden · v0.1.0 · MIT license</span>
+    <span class="t-llmage">loci.garden · v0.6.0 · MIT license</span>
   </span>
   <!-- Footer nav links -->
   <div class="footer-links">
@@ -3005,7 +2997,7 @@ footer {
     <p class="contact-modal-sub">
       <span class="t-scholar">loci is in early development. Questions, ideas, feedback, or just a hello — all welcome.</span>
       <span class="t-wizard">The palace is under construction. Ideas, conjurations, questions — send them through.</span>
-      <span class="t-llmage">loci v0.1. Feedback, integration questions, architecture discussions.</span>
+      <span class="t-llmage">loci v0.6.0. Feedback, integration questions, architecture discussions.</span>
     </p>
     <a href="mailto:hux@nymtech.net?subject=loci.garden" class="contact-modal-email">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
@@ -3024,12 +3016,12 @@ footer {
       <div class="waitlist-title">
         <span class="t-scholar">Desktop app — early access</span>
         <span class="t-wizard">The forge is running.</span>
-        <span class="t-llmage">Tauri build · pre-release</span>
+        <span class="t-llmage">open beta · v0.6.0</span>
       </div>
       <p class="waitlist-sub">
         <span class="t-scholar">The desktop app is coming. Join the list — we'll reach you when it's ready to download.</span>
         <span class="t-wizard">The Tauri build is taking shape. Leave your mark — we'll summon you when the gates open.</span>
-        <span class="t-llmage">v0.4.0 not yet public. Early access list — email only. Signal incoming on ship date.</span>
+        <span class="t-llmage">open beta · v0.6.0. Clone the repo or grab the Tauri build. Full sovereignty stack.</span>
       </p>
       <form class="waitlist-form" id="waitlist-form" onsubmit="submitWaitlist(event)">
         <input type="email" class="waitlist-input" id="waitlist-email"
@@ -3080,7 +3072,7 @@ footer {
     </p>
     <div class="beta-warning-actions">
       <a id="beta-warning-continue" href="#" target="_blank" rel="noopener" class="beta-warning-btn primary" data-umami-event="beta-warning-continue">Continue to the beta build →</a>
-      <a href="https://github.com/huximaxi/loci/releases" target="_blank" rel="noopener" class="beta-warning-btn" data-umami-event="beta-warning-opt-out">Take me to GitHub releases instead</a>
+      <a href="https://github.com/rainbow-zoku/loci-garden/releases" target="_blank" rel="noopener" class="beta-warning-btn" data-umami-event="beta-warning-opt-out">Take me to GitHub releases instead</a>
     </div>
   </div>
 </div>

@@ -1,0 +1,292 @@
+/* ═══════════════════════════════════════════════════════════
+   RELEASES — scoped stylesheet
+   Inherits tokens from ../style.css (--bg, --accent, --text, --serif, --mono)
+   Self-contained for everything below the nav.
+   Replaced by /loci.css in Step 4.
+═══════════════════════════════════════════════════════════ */
+
+.releases-main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: calc(var(--nav-height) + 64px) 2rem 4rem;
+}
+
+/* ─── Hero ─────────────────────────────────────────────── */
+
+.releases-hero {
+  max-width: 720px;
+  margin: 0 auto 5rem;
+  text-align: center;
+}
+
+.version-stamp {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0.9rem;
+  margin-bottom: 1.75rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg-surface);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-mono);
+}
+
+.vs-label {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.vs-divider {
+  color: var(--text-faint);
+}
+
+.vs-current,
+.vs-date {
+  color: var(--text-dim);
+}
+
+.releases-hero h1 {
+  font-family: var(--serif);
+  font-size: clamp(1.85rem, 4vw, 2.6rem);
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 1.5rem;
+}
+
+.releases-intro {
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  line-height: 1.75;
+  color: var(--text-dim);
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.releases-intro strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* ─── Component sections ──────────────────────────────── */
+
+.component {
+  margin: 0 auto 5rem;
+  max-width: 1040px;
+}
+
+.component-title {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-bottom: 1.25rem;
+  margin-bottom: 2.25rem;
+  border-bottom: 1px solid var(--border-soft);
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 1.5rem;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.component-num {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  color: var(--accent);
+  letter-spacing: 0.06em;
+}
+
+.component-name {
+  font-size: 1.5rem;
+}
+
+.component-meta {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--text-faint);
+  margin-left: auto;
+  text-transform: lowercase;
+  letter-spacing: 0.04em;
+}
+
+/* ─── Three-column grid ───────────────────────────────── */
+
+.release-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.75rem;
+}
+
+.col {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  padding: 1.6rem 1.4rem 1.4rem;
+  min-height: 200px;
+}
+
+.col-shipped {
+  border-top: 2px solid var(--accent);
+}
+
+.col-proven {
+  border-top: 2px solid #5a8a3a;
+}
+
+.col-next {
+  border-top: 2px solid var(--text-faint);
+}
+
+.col-title {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.col-shipped .col-title { color: var(--accent-light); }
+.col-proven  .col-title { color: #88b66a; }
+.col-next    .col-title { color: var(--text-dim); }
+
+/* ─── Release list ────────────────────────────────────── */
+
+.release-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.release-list li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding-bottom: 1.1rem;
+  border-bottom: 1px dashed var(--border-soft);
+}
+
+.release-list li:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.rl-tag {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  text-transform: lowercase;
+}
+
+.rl-body {
+  font-family: var(--serif);
+  font-size: 0.92rem;
+  line-height: 1.65;
+  color: var(--text-dim);
+}
+
+.rl-body code {
+  font-family: var(--mono);
+  font-size: 0.84rem;
+  background: rgba(200, 124, 44, 0.08);
+  padding: 0.05rem 0.35rem;
+  border-radius: 3px;
+  color: var(--accent-light);
+}
+
+.rl-body a {
+  color: var(--accent);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 1px;
+}
+
+.rl-body a:hover {
+  color: var(--accent-light);
+  border-bottom-color: var(--accent-light);
+}
+
+/* ─── Closing ──────────────────────────────────────────── */
+
+.releases-close {
+  max-width: 640px;
+  margin: 6rem auto 0;
+  text-align: center;
+  padding-top: 3rem;
+  border-top: 1px solid var(--border-soft);
+}
+
+.close-line {
+  font-family: var(--serif);
+  font-size: clamp(1.4rem, 3vw, 1.85rem);
+  font-weight: 600;
+  font-style: italic;
+  line-height: 1.3;
+  color: var(--text);
+  margin-bottom: 1rem;
+  letter-spacing: -0.01em;
+}
+
+.close-sub {
+  font-family: var(--serif);
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--text-dim);
+  margin-bottom: 2rem;
+}
+
+.close-links {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.close-link {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  color: var(--text-mono);
+  text-transform: lowercase;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid transparent;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.close-link:hover {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+/* ─── Responsive ──────────────────────────────────────── */
+
+@media (max-width: 880px) {
+  .release-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .component-meta {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .releases-main {
+    padding: calc(var(--nav-height) + 40px) 1.25rem 3rem;
+  }
+
+  .component {
+    margin-bottom: 3.5rem;
+  }
+}

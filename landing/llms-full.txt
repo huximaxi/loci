@@ -2011,12 +2011,12 @@ Writes a structured session delta (handover) at the close of a working session. 
 ## Artifact listing
 
 ### Created
-- `Dev/_palace/trust-cp/work/thesis/ch09-non-local/CHAPTER.md` — §9.6 Altafini + §9.7 llms.txt fragments
+- `<palace>/trust-cp/work/thesis/ch09-non-local/CHAPTER.md` — §9.6 Altafini + §9.7 llms.txt fragments
 - `Dev/workshop-dont-trust-verify.html` — 30min brand alignment workshop HTML
 
 ### Edited
 - `Dev/TCP-thesis-SOCIOLOGY-v2.2-2026-04-22.md` — Tarde §2.5 paragraph, §4.1 sentence, "exactly three" softened ×2
-- `Dev/_palace/trust-cp/work/thesis/INDEX.md` — changelog table, version corrected, priorities updated
+- `<palace>/trust-cp/work/thesis/INDEX.md` — changelog table, version corrected, priorities updated
 
 ### In-session only (not filed)
 - Dispatch #3 "Before the Argument" — 3-round draft, 12-section structure, opening + close
@@ -3826,13 +3826,13 @@ Add to `Dev/CLAUDE.md` or `Dev/nym-stone/vesper/VESPER.md`:
 - Run: every 5 sessions (or on demand)
 - Verbosity: verbose
 - Sessions to review: 5
-- Output: `Dev/_palace/synthesis/`
+- Output: `<palace>/synthesis/`
 - Gate: Hux reviews before any write
 ```
 
 Then create the output directory:
 ```bash
-mkdir -p ~/Dev/_palace/synthesis/
+mkdir -p <palace-root>/synthesis/
 ```
 
 The agent will propose synthesis reports and save them to this directory. Hux reviews, modifies, approves. Then the crystal table and garden files update.
