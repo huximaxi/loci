@@ -1,24 +1,25 @@
 <!DOCTYPE html>
-<html lang="en" data-skin="wizard">
+<html lang="en" data-theme="scholar">
 <head>
+<script>
+(function(){try{var t=localStorage.getItem("loci-theme");if(["scholar","wizard","llmage"].indexOf(t)===-1)t="scholar";document.documentElement.setAttribute("data-theme",t);}catch(e){document.documentElement.setAttribute("data-theme","scholar");}})();
+</script>
   <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Cpolygon%20points='50,5%2020,50%2050,50'%20fill='%23ffcc44'/%3E%3Cpolygon%20points='50,5%2080,50%2050,50'%20fill='%23e8861a'/%3E%3Cpolygon%20points='20,50%2050,95%2050,50'%20fill='%23c87c2c'/%3E%3Cpolygon%20points='80,50%2050,95%2050,50'%20fill='%237a3a08'/%3E%3C/svg%3E">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Download loci wizard — loci.garden</title>
-  <meta name="description" content="Download loci wizard v0.2.0 — palace migration desktop app for macOS and Windows. Detect, migrate, and inhabit your AI memory palace.">
-  <meta property="og:title" content="Download loci wizard — loci.garden">
-  <meta property="og:description" content="loci wizard v0.2.0. macOS Universal + Windows. Detect and migrate your AI memory palace.">
+  <title>Download loci, local-first AI memory</title>
+  <meta name="description" content="Download loci v0.6.0, the palace-migration desktop app for macOS and Windows. Detect, migrate, and inhabit your AI memory palace.">
+  <meta property="og:title" content="Download loci, local-first AI memory">
+  <meta property="og:description" content="loci v0.6.0. macOS Universal and Windows. Detect and migrate your AI memory palace.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://loci.garden/download.html">
   <meta property="og:site_name" content="loci.garden">
   <link rel="canonical" href="https://loci.garden/download.html">
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="style-wizard.css">
-  <!-- NO skin-toggle.js — download page is always wizard skin -->
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="loci.css">
+  <!-- theme follows the user's choice via tokens.css + the head pre-paint -->
   <script defer src="https://analytics.195-246-230-118.sslip.io/script.js" data-website-id="e00d2f0a-fbd7-40bf-8740-cb1ab2a82b86"></script>
   <style>
-    /* Force wizard skin — override any stored scholar preference */
-    html { --skin: wizard; }
-
     /* ── DOWNLOAD PAGE SPECIFIC ─────────────────────────────────── */
     .download-wrap {
       max-width: 680px;
@@ -58,13 +59,13 @@
     }
 
     .dl-crystal-hero svg {
-      filter: drop-shadow(0 0 18px rgba(200,124,44,0.55));
+      filter: drop-shadow(0 0 18px var(--accent-glow));
       animation: crystal-ambient 2.5s ease-in-out infinite;
     }
 
     @keyframes crystal-ambient {
-      0%, 100% { filter: drop-shadow(0 0 10px rgba(200,124,44,0.55)); }
-      50%       { filter: drop-shadow(0 0 24px rgba(200,124,44,0.85)); }
+      0%, 100% { filter: drop-shadow(0 0 10px var(--accent-glow)); }
+      50%       { filter: drop-shadow(0 0 24px var(--accent-glow)); }
     }
 
     .dl-crystal-tagline {
@@ -253,6 +254,48 @@
       color: var(--text-dim);
       line-height: 1.45;
     }
+
+    /* ── LLMAGE CLI section ────────────────────────────── */
+    .dl-section-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 3rem 0 2.5rem;
+    }
+
+    .dl-install-block {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      padding: 0.9rem 1.2rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .dl-install-label {
+      font-family: var(--mono);
+      font-size: 0.58rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      margin-bottom: 0.5rem;
+    }
+
+    .dl-install-cmd {
+      margin: 0;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--accent);
+      overflow-x: auto;
+      white-space: pre;
+      background: none;
+      padding: 0;
+      border: none;
+    }
+
+    .dl-install-note {
+      font-family: var(--mono);
+      font-size: 0.58rem;
+      color: var(--text-faint);
+      margin-top: 0.6rem;
+    }
   </style>
   <meta property="og:image" content="https://loci.garden/assets/og-image.png" />
   <meta name="twitter:card" content="summary_large_image" />
@@ -260,54 +303,52 @@
   <meta name="twitter:description" content="Download the Loci palace desktop app (open beta) or wire Loci MCP into Claude Desktop with one curl line." />
   <meta name="twitter:image" content="https://loci.garden/assets/og-image.png" />
 </head>
-<body>
+<body data-page="download">
 
-  <nav>
-    <div class="nav-container">
-      <div class="nav-logo-group">
-        <a href="/" class="logo">loci.garden</a>
-        <div class="nav-persona-mini" role="group" aria-label="Return as persona">
-          <button class="persona-mini-btn" data-theme="scholar" title="Return as Scholar" aria-label="Return as Scholar">◆</button>
-          <button class="persona-mini-btn" data-theme="wizard"  title="Return as Wizard"  aria-label="Return as Wizard">⚔</button>
-          <button class="persona-mini-btn" data-theme="llmage"  title="Return as LLMAGE"  aria-label="Return as LLMAGE">◈</button>
-        </div>
-      </div>
+<!-- #include partials/_nav.html -->
+<nav>
+  <div class="nav-container">
+    <div class="nav-logo-group">
+      <a href="/" class="logo">loci.garden</a>
+    </div>
+    <div class="nav-right">
       <div class="nav-links">
-        <a href="https://github.com/huximaxi/loci" class="nav-link nav-icon" aria-label="GitHub" title="GitHub">
+        <a href="https://github.com/rainbow-zoku/loci-garden" class="nav-link nav-icon" aria-label="GitHub" title="GitHub">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
         </a>
-        <a href="/" class="nav-link">home</a>
-        <a href="seed/" class="nav-link">seed</a>
-        <a href="about.html" class="nav-link">about</a>
-        <a href="manifesto.html" class="nav-link">manifesto</a>
-        <a href="roadmap.html" class="nav-link">roadmap</a>
-        <a href="guide.html" class="nav-link">guide</a>
-        <a href="https://docs.loci.garden" class="nav-link" target="_blank" rel="noopener">docs</a>
-        <a href="/zoku/" class="nav-link">zoku</a>
-        <a href="download.html" class="nav-link active">download ✦</a>
-        <a href="llms.txt" class="nav-link">llms.txt</a>
+        <a href="/download.html" class="nav-link" data-page="download">download</a>
+        <a href="/guide.html" class="nav-link" data-page="guide">guide</a>
+        <a href="/manifesto.html" class="nav-link" data-page="manifesto">manifesto</a>
+      </div>
+      <div class="theme-switcher" role="group" aria-label="Choose experience mode">
+        <button class="theme-btn" id="btn-scholar" onclick="setTheme('scholar')" aria-pressed="true">◆ ELI-5</button>
+        <button class="theme-btn" id="btn-wizard"  onclick="setTheme('wizard')"  aria-pressed="false">⚔ Wizard</button>
+        <button class="theme-btn" id="btn-llmage"  onclick="setTheme('llmage')"  aria-pressed="false">◈ LLMAGE</button>
       </div>
     </div>
-  </nav>
+  </div>
+  <script defer src="/theme.js"></script>
+</nav>
+<!-- /include -->
 
   <main>
     <div class="download-wrap">
 
-      <div class="dl-eyebrow">loci wizard · desktop app</div>
-      <div class="dl-title">Download</div>
-      <div class="dl-version">v0.2.0 · 2026-05-06 · Apache 2.0 &nbsp;<span style="display:inline-block;font-family:var(--mono);font-size:0.58rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);background:rgba(200,124,44,0.1);border:1px solid rgba(200,124,44,0.3);padding:0.1rem 0.4rem;vertical-align:middle;">public beta</span></div>
+      <div class="dl-eyebrow">loci · desktop app</div>
+      <div class="dl-title">Bring the palace home</div>
+      <div class="dl-version">v0.6.0 · Apache 2.0 &nbsp;<span style="display:inline-block;font-family:var(--mono);font-size:0.58rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);background:rgba(200,124,44,0.1);border:1px solid rgba(200,124,44,0.3);padding:0.1rem 0.4rem;vertical-align:middle;">public beta</span></div>
 
       <div class="dl-crystal-hero">
         <svg viewBox="0 0 32 43" width="72" height="97" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated;">
-          <polygon points="16,2  23,11 16,8  9,11"  fill="#ffee99"/>
-          <polygon points="9,11  16,8  16,30 3,21"  fill="#e8861a"/>
-          <polygon points="23,11 16,8  16,30 29,21" fill="#ffcc44"/>
-          <polygon points="3,21  16,30 16,38 8,28"  fill="#c87c2c"/>
-          <polygon points="29,21 16,30 16,38 24,28" fill="#e8861a"/>
-          <polygon points="8,28  16,38 24,28 16,42" fill="#7a3a08"/>
+          <polygon points="16,2  23,11 16,8  9,11"  fill="var(--accent-xlight)"/>
+          <polygon points="9,11  16,8  16,30 3,21"  fill="var(--accent)"/>
+          <polygon points="23,11 16,8  16,30 29,21" fill="var(--accent-light)"/>
+          <polygon points="3,21  16,30 16,38 8,28"  fill="var(--accent)"/>
+          <polygon points="29,21 16,30 16,38 24,28" fill="var(--accent-light)"/>
+          <polygon points="8,28  16,38 24,28 16,42" fill="var(--accent)"/>
           <polygon points="14,3  18,9  16,8"        fill="rgba(255,255,255,0.55)"/>
           <polygon points="11,13 15,10 13,20"       fill="rgba(255,255,255,0.25)"/>
-          <rect    x="15" y="15" width="2" height="4" fill="rgba(255,238,153,0.6)"/>
+          <rect    x="15" y="15" width="2" height="4" fill="rgba(255,255,255,0.6)"/>
         </svg>
         <div class="dl-crystal-tagline">Detect · Migrate · Inhabit</div>
       </div>
@@ -316,7 +357,7 @@
         <a
           href="https://github.com/rainbow-zoku/loci-garden/releases"
           class="dl-btn-card"
-          title="Download loci wizard for macOS (Universal)"
+          title="Download loci for macOS (Universal)"
         >
           <div class="dl-os">macOS</div>
           <div class="dl-format">Universal Binary</div>
@@ -326,7 +367,7 @@
         <a
           href="https://github.com/rainbow-zoku/loci-garden/releases"
           class="dl-btn-card"
-          title="Download loci wizard for Windows"
+          title="Download loci for Windows"
         >
           <div class="dl-os">Windows</div>
           <div class="dl-format">x64 Installer</div>
@@ -338,15 +379,15 @@
       <div class="dl-footnote">
         <strong>macOS:</strong> If Gatekeeper blocks the app, right-click → Open, then confirm.
         Apple notarization is in progress for future releases.<br>
-        <strong>Windows:</strong> SmartScreen may warn on first run — click "More info" → "Run anyway".
+        <strong>Windows:</strong> SmartScreen may warn on first run, click "More info" → "Run anyway".
         This is expected for unsigned installers.
       </div>
 
       <div class="dl-source-row">
-        <a href="https://github.com/huximaxi/loci/releases" class="dl-source-link">All releases</a>
-        <a href="https://github.com/rainbow-zoku/loci-garden/releases" class="dl-source-link">v0.2.0 release notes</a>
-        <a href="https://github.com/huximaxi/loci" class="dl-source-link">Build from source</a>
-        <a href="https://github.com/huximaxi/loci/blob/main/CHANGELOG.md" class="dl-source-link">Changelog</a>
+        <a href="https://github.com/rainbow-zoku/loci-garden/releases" class="dl-source-link">All releases</a>
+        <a href="https://github.com/rainbow-zoku/loci-garden/releases" class="dl-source-link">v0.6.0 release notes</a>
+        <a href="https://github.com/rainbow-zoku/loci-garden" class="dl-source-link">Build from source</a>
+        <a href="https://github.com/rainbow-zoku/loci-garden/blob/main/CHANGELOG.md" class="dl-source-link">Changelog</a>
       </div>
 
       <div class="dl-what">
@@ -367,15 +408,75 @@
         </div>
       </div>
 
+      <hr class="dl-section-divider">
+
+      <div class="dl-eyebrow">LLMAGE · terminal CLI</div>
+      <div class="dl-title">Your palace at the prompt</div>
+      <div class="dl-version">v0.1.0-beta.1 · Apache 2.0 &nbsp;<span style="display:inline-block;font-family:var(--mono);font-size:0.58rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);background:rgba(200,124,44,0.1);border:1px solid rgba(200,124,44,0.3);padding:0.1rem 0.4rem;vertical-align:middle;">public beta</span></div>
+
+      <div class="dl-install-block">
+        <div class="dl-install-label">Install via cargo</div>
+        <pre class="dl-install-cmd">cargo install --git https://github.com/rainbow-zoku/loci --tag v0.1.0-beta.1 loci-cli</pre>
+        <div class="dl-install-note">Requires Rust. Install at rustup.rs if needed.</div>
+      </div>
+
+      <div class="dl-source-row">
+        <a href="https://github.com/rainbow-zoku/loci" class="dl-source-link">Source (rainbow-zoku/loci)</a>
+        <a href="https://github.com/rainbow-zoku/loci/releases/tag/v0.1.0-beta.1" class="dl-source-link">v0.1.0-beta.1 tag</a>
+        <a href="https://github.com/rainbow-zoku/loci/blob/main/README.md" class="dl-source-link">README</a>
+      </div>
+
+      <div class="dl-what">
+        <div class="dl-what-label">▸ Commands in v0.1</div>
+        <div class="dl-what-grid">
+          <div class="dl-what-item">
+            <div class="dl-what-verb">loci status</div>
+            <div class="dl-what-desc">Palace detection, room and crystal counts, backend preflight.</div>
+          </div>
+          <div class="dl-what-item">
+            <div class="dl-what-verb">loci -z "…"</div>
+            <div class="dl-what-desc">One-shot inference with palace context injected. Pipes cleanly.</div>
+          </div>
+          <div class="dl-what-item">
+            <div class="dl-what-verb">loci crystals</div>
+            <div class="dl-what-desc">List your full knowledge base. Filter by room. JSON output.</div>
+          </div>
+          <div class="dl-what-item">
+            <div class="dl-what-verb">loci handover</div>
+            <div class="dl-what-desc">Print the latest session handover. Your daily start ritual.</div>
+          </div>
+          <div class="dl-what-item">
+            <div class="dl-what-verb">loci read &lt;slug&gt;</div>
+            <div class="dl-what-desc">Full crystal content by slug. Disambiguate with <code>--room</code>.</div>
+          </div>
+          <div class="dl-what-item">
+            <div class="dl-what-verb">loci init</div>
+            <div class="dl-what-desc">Interactive setup: backend, palace path, verify. Safe to re-run.</div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </main>
 
-  <footer>
-    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
-      <span style="font-family:var(--mono); font-size:0.72rem; color:var(--text-faint);">loci.garden · Built by Hux × Vesper</span>
-      <span style="font-family:var(--mono); font-size:0.72rem; color:var(--text-faint);">Umami · No tracking · <a href="/zoku/" style="color:var(--text-faint);">zoku</a> · <a href="privacy.html" style="color:var(--text-faint);">privacy</a> · <a href="/.well-known/security.txt" style="color:var(--text-faint);">security.txt</a> · <a href="llms.txt" style="color:var(--text-faint);">llms.txt</a></span>
-    </div>
-  </footer>
+<!-- #include partials/_footer.html -->
+<footer>
+  <div class="footer-inner">
+    <span style="font-family:var(--mono); font-size:0.72rem; color:var(--text-faint);">loci.garden &middot; built by Hux &times; Vesper</span>
+    <span style="font-family:var(--mono); font-size:0.72rem; color:var(--text-faint);">
+      <a href="/about.html" style="color:var(--text-faint);">about</a> &middot;
+      <a href="/roadmap.html" style="color:var(--text-faint);">roadmap</a> &middot;
+      <a href="/seed/" style="color:var(--text-faint);">seed</a> &middot;
+      <a href="/releases/" style="color:var(--text-faint);">releases</a> &middot;
+      <a href="/zoku/" style="color:var(--text-faint);">zoku</a> &middot;
+      <a href="https://github.com/rainbow-zoku/loci-garden/blob/main/CONTRIBUTING.md" style="color:var(--text-faint);" target="_blank" rel="noopener">contribute</a> &middot;
+      <a href="/privacy.html" style="color:var(--text-faint);">privacy</a> &middot;
+      <a href="/.well-known/security.txt" style="color:var(--text-faint);">security.txt</a> &middot;
+      <a href="/llms.txt" style="color:var(--text-faint);">llms.txt</a>
+    </span>
+  </div>
+</footer>
+<!-- /include -->
 
   <script src="assets/nav-persona.js" defer></script>
 </body>
