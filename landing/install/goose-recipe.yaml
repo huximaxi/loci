@@ -1,0 +1,28 @@
+# loci palace — Goose recipe
+# Adds the loci MCP server as a Goose extension so Goose can query
+# your local palace (rooms, crystals, session logs) as context.
+#
+# Usage: load this recipe in Goose Desktop or pass to `goose session --recipe`
+# Requires: loci desktop app running (https://loci.garden/download.html)
+#
+# Source: https://github.com/huximaxi/loci
+# License: Apache 2.0
+
+id: loci-palace
+name: loci palace memory
+version: "0.1"
+description: >
+  Connects Goose to your loci palace via MCP. Goose can read your rooms,
+  crystals, and session handovers as context — locally, no cloud required.
+
+extensions:
+  - name: loci
+    type: stdio
+    cmd: loci-mcp
+    args:
+      - --config
+      - ~/.loci/config.json
+    description: >
+      Local palace MCP server. Exposes rooms and crystals as MCP resources.
+      The loci desktop app must be running to satisfy this endpoint.
+      See: https://loci.garden/roadmap.html (feature 1B — shipped)

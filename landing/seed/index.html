@@ -1,16 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html data-theme="scholar" lang="en">
 <head>
+<script>
+(function(){try{var t=localStorage.getItem("loci-theme");if(["scholar","wizard","llmage"].indexOf(t)===-1)t="scholar";document.documentElement.setAttribute("data-theme",t);}catch(e){document.documentElement.setAttribute("data-theme","scholar");}})();
+</script>
   <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Cpolygon%20points='50,5%2020,50%2050,50'%20fill='%23ffcc44'/%3E%3Cpolygon%20points='50,5%2080,50%2050,50'%20fill='%23e8861a'/%3E%3Cpolygon%20points='20,50%2050,95%2050,50'%20fill='%23c87c2c'/%3E%3Cpolygon%20points='80,50%2050,95%2050,50'%20fill='%237a3a08'/%3E%3C/svg%3E">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Seed — Dispatches from Human-AI Collaboration</title>
+  <title>Seed, Dispatches from Human-AI Collaboration</title>
   <meta name="description" content="Public writing grown from sustained AI collaboration. Arguments, not reports. What the garden produces when ideas reach maturity.">
   <meta name="keywords" content="AI collaboration writing, human-AI writing, co-intelligence dispatches, AI-assisted research, collaborative AI writing">
   <link rel="canonical" href="https://loci.garden/seed/">
   <meta name="robots" content="index, follow">
-  <link rel="alternate" type="text/plain" href="/llms.txt" title="AI context declaration — loci.garden">
-  <link rel="stylesheet" href="../style.css">
-  <link rel="stylesheet" href="../style-wizard.css">
+  <link rel="alternate" type="text/plain" href="/llms.txt" title="AI context declaration, loci.garden">
+  <link rel="stylesheet" href="../tokens.css">
+  <link rel="stylesheet" href="../loci.css">
   <script src="../skin-toggle.js" defer></script>
   <script defer src="https://analytics.195-246-230-118.sslip.io/script.js" data-website-id="e00d2f0a-fbd7-40bf-8740-cb1ab2a82b86"></script>
   <meta property="og:image" content="https://loci.garden/assets/og-image.png" />
@@ -26,7 +30,7 @@
     <span class="ribbon-mark">◈</span>
     <span class="ribbon-label">supplementary back-office</span>
     <span class="ribbon-sep">·</span>
-    <span class="ribbon-desc">extended garden — dispatches, seeds &amp; resources not in the front office</span>
+    <span class="ribbon-desc">extended garden, dispatches, seeds &amp; resources not in the front office</span>
     <span class="ribbon-sep">·</span>
     <a href="/" class="ribbon-link">← front office</a>
   </div>
@@ -53,56 +57,56 @@
     .ribbon-link:hover { opacity: 1; }
   </style>
 
-  <nav>
-    <div class="nav-container">
-      <div class="nav-logo-group">
-        <a href="/" class="logo">loci.garden</a>
-        <div class="nav-persona-mini" role="group" aria-label="Return as persona">
-          <button class="persona-mini-btn" data-theme="scholar" title="Return as Scholar" aria-label="Return as Scholar">◆</button>
-          <button class="persona-mini-btn" data-theme="wizard"  title="Return as Wizard"  aria-label="Return as Wizard">⚔</button>
-          <button class="persona-mini-btn" data-theme="llmage"  title="Return as LLMAGE"  aria-label="Return as LLMAGE">◈</button>
-        </div>
-      </div>
+<!-- #include partials/_nav.html -->
+<nav>
+  <div class="nav-container">
+    <div class="nav-logo-group">
+      <a href="/" class="logo">loci.garden</a>
+    </div>
+    <div class="nav-right">
       <div class="nav-links">
-        <a href="https://github.com/huximaxi/loci" class="nav-link nav-icon" aria-label="GitHub" title="GitHub">
+        <a href="https://github.com/rainbow-zoku/loci-garden" class="nav-link nav-icon" aria-label="GitHub" title="GitHub">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
         </a>
-        <a href="/" class="nav-link">home</a>
-        <a href="../seed/" class="nav-link active">seed</a>
-        <a href="../about.html" class="nav-link">about</a>
-        <a href="../manifesto.html" class="nav-link">manifesto</a>
-        <a href="../roadmap.html" class="nav-link">roadmap</a>
-        <a href="../guide.html" class="nav-link">guide</a>
-        <a href="https://docs.loci.garden" class="nav-link" target="_blank" rel="noopener">docs</a>
-        <a href="../llms.txt" class="nav-link">llms.txt</a>
+        <a href="/download.html" class="nav-link" data-page="download">download</a>
+        <a href="/guide.html" class="nav-link" data-page="guide">guide</a>
+        <a href="/manifesto.html" class="nav-link" data-page="manifesto">manifesto</a>
+      </div>
+      <div class="theme-switcher" role="group" aria-label="Choose experience mode">
+        <button class="theme-btn" id="btn-scholar" onclick="setTheme('scholar')" aria-pressed="true">◆ ELI-5</button>
+        <button class="theme-btn" id="btn-wizard"  onclick="setTheme('wizard')"  aria-pressed="false">⚔ Wizard</button>
+        <button class="theme-btn" id="btn-llmage"  onclick="setTheme('llmage')"  aria-pressed="false">◈ LLMAGE</button>
       </div>
     </div>
-  </nav>
+  </div>
+  <script defer src="/theme.js"></script>
+</nav>
+<!-- /include -->
 
   <main>
     <div class="seed-wrap">
 
       <h1>Seed.</h1>
-      <p class="lead">The back garden of loci.garden. If loci.garden is the front office — the methodology, the entry point, the three doors — then seed is the garden behind it: where the actual thinking lives, in public, for those curious enough to walk through.</p>
-      <p class="lead" style="margin-top:0;">Dispatches are what the garden produces when a plant reaches public maturity. Arguments from sustained co-intelligence work. They don't report — they argue.</p>
+      <p class="lead">The back garden of loci.garden. If loci.garden is the front office, the methodology, the entry point, the three doors, then seed is the garden behind it: where the actual thinking lives, in public, for those curious enough to walk through.</p>
+      <p class="lead" style="margin-top:0;">Dispatches are what the garden produces when a plant reaches public maturity. Arguments from sustained co-intelligence work. They don't report, they argue.</p>
 
       <!-- Dispatch #1 -->
       <a href="rendszerbontas.html" class="dispatch-entry">
         <div class="dispatch-num">Dispatch 001</div>
         <div class="dispatch-title">rendszerbontás</div>
         <div class="dispatch-meta">April 2026 · Hungarian election analysis</div>
-        <div class="dispatch-desc">A forensic breakdown of Hungary's 2026 election result using the NVI (Normalised Victory Index) — a metric developed to cut through the engineered electoral geography and show what actually happened. TISZA 141 seats. The system held. For now.</div>
+        <div class="dispatch-desc">A forensic breakdown of Hungary's 2026 election result using the NVI (Normalised Victory Index), a metric developed to cut through the engineered electoral geography and show what actually happened. TISZA 141 seats. The system held. For now.</div>
       </a>
 
-      <!-- Dispatch #2 — live -->
+      <!-- Dispatch #2, live -->
       <a href="beagyazas.html" class="dispatch-entry">
         <div class="dispatch-num">Dispatch 002</div>
         <div class="dispatch-title">beágyazás</div>
         <div class="dispatch-meta">May 2026 · Psychotechnology &amp; political trust</div>
-        <div class="dispatch-desc">Why movements fail when they bring arguments to a prior fight. What the Budapest concert actually did — formally. From collective effervescence to Civil Kurázsi: the infrastructure of prior resets at every scale.</div>
+        <div class="dispatch-desc">Why movements fail when they bring arguments to a prior fight. What the Budapest concert actually did, formally. From collective effervescence to Civil Kurázsi: the infrastructure of prior resets at every scale.</div>
       </a>
 
-      <!-- Dispatch #3 — placeholder -->
+      <!-- Dispatch #3, placeholder -->
       <div class="dispatch-entry" style="opacity:0.3; cursor:default; pointer-events:none;">
         <div class="dispatch-num">Dispatch 003</div>
         <div class="dispatch-title">forthcoming</div>
@@ -117,12 +121,24 @@
     </div>
   </main>
 
-  <footer>
-    <div class="footer-inner">
-      <span style="font-family:var(--mono); font-size:0.72rem; color:var(--text-faint);">loci.garden/seed · Built by Hux × Vesper</span>
-      <span style="font-family:var(--mono); font-size:0.72rem; color:var(--text-faint);"><a href="../llms.txt" style="color:var(--text-faint);">llms.txt</a></span>
-    </div>
-  </footer>
+<!-- #include partials/_footer.html -->
+<footer>
+  <div class="footer-inner">
+    <span style="font-family:var(--mono); font-size:0.72rem; color:var(--text-faint);">loci.garden &middot; built by Hux &times; Vesper</span>
+    <span style="font-family:var(--mono); font-size:0.72rem; color:var(--text-faint);">
+      <a href="/about.html" style="color:var(--text-faint);">about</a> &middot;
+      <a href="/roadmap.html" style="color:var(--text-faint);">roadmap</a> &middot;
+      <a href="/seed/" style="color:var(--text-faint);">seed</a> &middot;
+      <a href="/releases/" style="color:var(--text-faint);">releases</a> &middot;
+      <a href="/zoku/" style="color:var(--text-faint);">zoku</a> &middot;
+      <a href="https://github.com/rainbow-zoku/loci-garden/blob/main/CONTRIBUTING.md" style="color:var(--text-faint);" target="_blank" rel="noopener">contribute</a> &middot;
+      <a href="/privacy.html" style="color:var(--text-faint);">privacy</a> &middot;
+      <a href="/.well-known/security.txt" style="color:var(--text-faint);">security.txt</a> &middot;
+      <a href="/llms.txt" style="color:var(--text-faint);">llms.txt</a>
+    </span>
+  </div>
+</footer>
+<!-- /include -->
 
   <script src="../assets/nav-persona.js" defer></script>
 </body>

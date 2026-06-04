@@ -11,7 +11,6 @@
 ## Key pages for AI agents
 
 - `/` — Main landing. Palace/sovereignty framing. Initiatory funnel.
-- `/comparison.html` — How loci differs from every alternative. Extended cognition frame.
 - `/start.html` — Getting started. 4-step guide: room, crystal, garden, session.
 - `/manifesto.html` — The Cognitive Sovereignty Manifesto.
 - `/roadmap.html` — Product roadmap. Tier 1 (Q3 2026) + Tier 2 (Q4 2026).
@@ -205,11 +204,11 @@ GitHub: https://github.com/huximaxi/loci/tree/main/extension
 **Desktop App (v0.1.0 - released)**
 Native Mac + Windows app (Tauri v2). KISS palace detector + migrator.
 Detects existing setups: loci, MemPalace, Karpathy-style, PALACE.md variants.
-Migrates to ~/.loci/ format. Scholar theme (green/cream).
+Migrates to ~/.loci/ format. ELI-5 theme (green/cream).
 GitHub: https://github.com/huximaxi/loci/tree/main/desktop
 
 **Three tiers:**
-- Scholar - search + tagging, browser extension, no AI config required
+- ELI-5 - search + tagging, browser extension, no AI config required
 - Wizard - full palace, MCP integration, agent architecture
 - LLMAGE - CLI/MCP only, local LLM, zero cloud
 
@@ -243,13 +242,12 @@ Hermes Agent (Nous Research) - autonomous self-improving agent runtime. SOUL.md 
 
 Honcho (Plastic Labs) - dialectic user modeling. Extracts user profile from conversation patterns. Three-pass synthesis (cold/warm, self-audit, reconciliation). Session strategy concept. Loci distinction: Honcho extracts who you are. Loci's peer card is who you say you are. The peer card is authored, not inferred.
 
-Full comparison: https://loci.garden/comparison.html
 
 ---
 
 ## Getting started
 
-**Scholar (5 min):** Install the Chrome extension from loci.garden (coming soon).
+**ELI-5 (5 min):** Install the Chrome extension from loci.garden (coming soon).
 Indexes Claude.ai + ChatGPT conversations automatically. ⌘K to search.
 
 **Wizard (20 min):**

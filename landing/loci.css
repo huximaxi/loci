@@ -13,43 +13,12 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /* ================================
-   TRUST.XYZ — v2.0
+   loci.garden, canonical site stylesheet
    Burnt amber · Charcoal · Serif
    ================================ */
 
-:root {
-  /* ── Version B "Garden Immersive" extensions (Nyx 2026-04-28) ─── */
-  --accent-vine:        #1a3d1f;   /* hover, active, garden anchors */
-  --accent-vine-light:  #2d6b35;
-  --accent-vine-hi:     #4a9a4f;
-  --accent-vine-soft:   rgba(26, 61, 31, 0.18);
-  --accent-indigo:      #0d1b3e;   /* section bg, comparison table */
-  --accent-indigo-soft: rgba(13, 27, 62, 0.55);
-
-  --bg:           #0d0d0e;
-  --bg-surface:   #131315;
-  --bg-card:      #1b1b1e;
-  --border:       #252528;
-  --border-soft:  #1e1e21;
-
-  --accent:       #c87c2c;
-  --accent-light: #e8974a;
-  --accent-dim:   rgba(200, 124, 44, 0.12);
-  --accent-glow:  rgba(200, 124, 44, 0.06);
-
-  --text:         #e8e4dd;
-  --text-dim:     #7a7772;
-  --text-faint:   #45433f;
-  --text-mono:    #9e9a93;
-
-  --serif:        Georgia, 'Times New Roman', Times, serif;
-  --mono:         'Courier New', Courier, monospace;
-  --sans:         -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-
-  --radius:       6px;
-  --radius-lg:    12px;
-  --nav-height:   56px;
-}
+/* Design tokens (spine + per-theme [data-theme] skins) now live in
+   tokens.css, linked before this file on every page. Single source of truth. */
 
 /* ================================
    RESET & BASE
@@ -98,7 +67,7 @@ nav {
   right: 0;
   z-index: 100;
   height: var(--nav-height);
-  background: rgba(13, 13, 14, 0.92);
+  background: var(--nav-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
@@ -145,6 +114,49 @@ nav {
 
 .nav-link:hover,
 .nav-link.active { color: var(--text); }
+
+/* ── Theme switcher (depth dial) — present on every secondary page via _nav.html.
+   Tokens (--switcher-*, --border, --radius) come from tokens.css. ── */
+.nav-right { display: flex; align-items: center; gap: 1.25rem; }
+
+.theme-switcher {
+  display: flex;
+  align-items: center;
+  background: var(--switcher-bg);
+  border-radius: 100px;
+  padding: 3px;
+  border: 1px solid var(--border);
+  transition: background 0.35s, border-color 0.35s;
+}
+[data-theme="wizard"] .theme-switcher { border-radius: var(--radius); border: 2px solid var(--border); }
+[data-theme="llmage"] .theme-switcher { border-radius: 0; border: 1px solid var(--border-2); }
+
+.theme-btn {
+  padding: 5px 14px;
+  border-radius: 100px;
+  border: none;
+  background: transparent;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  color: var(--switcher-inactive);
+  font-family: var(--font-body);
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+}
+[data-theme="wizard"] .theme-btn { border-radius: var(--radius-sm); letter-spacing: 0.02em; padding: 6px 12px; }
+[data-theme="llmage"] .theme-btn { border-radius: 0; font-family: 'Helvetica Neue', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; padding: 5px 12px; }
+
+.theme-btn.active { background: var(--switcher-pill); color: var(--switcher-text); box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
+[data-theme="wizard"] .theme-btn.active { box-shadow: 0 0 8px 2px rgba(200,124,44,0.18), inset 0 1px 0 rgba(255,220,100,0.08); color: var(--accent-light); }
+[data-theme="llmage"] .theme-btn.active { color: var(--text); box-shadow: none; border-left: 1px solid var(--border-2); border-right: 1px solid var(--border-2); }
+
+@media (max-width: 720px) {
+  .nav-right { gap: 0.75rem; }
+  .nav-links { gap: 1rem; }
+  .theme-btn { padding: 5px 8px; font-size: 10px; }
+}
 
 .nav-icon {
   display: flex;
@@ -392,8 +404,8 @@ nav {
 }
 
 .card:hover {
-  border-color: rgba(200, 124, 44, 0.3);
-  background: #1e1e22;
+  border-color: var(--border-2);
+  background: var(--bg-2);
 }
 
 .card:hover::before { opacity: 1; }
@@ -765,7 +777,7 @@ footer {
   color: var(--accent);
 }
 /* ─── LOCI.GARDEN — style delta ───────────────────────────────────────────
-   Append to trust.xyz style.css. All vars inherited from :root.
+   loci.garden style delta. All design tokens inherited from tokens.css.
    ──────────────────────────────────────────────────────────────────────── */
 
 /* ── Palace map ──────────────────────────────────────────────────────────── */
@@ -1590,8 +1602,7 @@ footer {
   background: linear-gradient(
     to bottom,
     transparent 73%,
-    rgba(13,13,14,0.5) 84%,
-    #0d0d0e 96%
+    var(--bg) 96%
   );
   pointer-events: none;
   z-index: 2;
@@ -1703,8 +1714,8 @@ footer {
 }
 
 .feature-card:hover {
-  border-color: rgba(200, 124, 44, 0.35);
-  box-shadow: 0 0 0 1px rgba(200, 124, 44, 0.12), 0 4px 16px rgba(0, 0, 0, 0.3);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent-soft), 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
 .feature-icon {
@@ -2552,46 +2563,4 @@ html[data-skin="wizard"] .skin-toggle:hover {
 }
 
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   LLMAGE ALTERNATE REGISTER — monochrome, austere
-   Activated on /personas (Step 8); preserved here so toggle works site-wide.
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-[data-theme="llmage"] {
-  --bg:           #080808;
-  --bg-surface:   #0f0f0f;
-  --bg-card:      #141414;
-  --border:       #2a2a2a;
-  --border-soft:  #1a1a1a;
-  --accent:       #ebebeb;
-  --accent-light: #ffffff;
-  --accent-dim:   rgba(235, 235, 235, 0.10);
-  --accent-glow:  rgba(235, 235, 235, 0.05);
-  --accent-vine:        #2a2a2a;
-  --accent-vine-hi:     #4a4a4a;
-  --accent-vine-soft:   rgba(40, 40, 40, 0.18);
-  --accent-indigo:      #1a1a1a;
-  --accent-indigo-soft: rgba(20, 20, 20, 0.55);
-  --text:         #ebebeb;
-  --text-dim:     #888888;
-  --text-faint:   #444444;
-  --text-mono:    #aaaaaa;
-  --serif:        'Helvetica Neue', 'Inter', sans-serif;
-  --mono:         'Helvetica Neue', monospace;
-  --sans:         'Helvetica Neue', sans-serif;
-}
-
-[data-theme="llmage"] body {
-  font-family: var(--mono);
-  letter-spacing: 0.02em;
-}
-
-[data-theme="llmage"] .nav-link,
-[data-theme="llmage"] .nav-logo,
-[data-theme="llmage"] h1,
-[data-theme="llmage"] h2,
-[data-theme="llmage"] h3 {
-  font-family: var(--mono);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
+/* LLMAGE register now derives from tokens.css [data-theme="llmage"]. */

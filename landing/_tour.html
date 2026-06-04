@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="wizard">
+<head>
+  <meta charset="UTF-8">
+  <title>Pack tour — landing lean pass · 2026-05-19</title>
+  <link rel="stylesheet" href="loci.css">
+  <style>
+    body { padding: 4rem 2rem; max-width: 880px; margin: 0 auto; }
+    h1 { font-family: var(--serif); font-size: clamp(1.8rem, 4vw, 2.6rem); margin-bottom: 0.5rem; color: var(--text); letter-spacing: -0.02em; }
+    .lede { font-family: var(--serif); color: var(--text-dim); margin-bottom: 3rem; max-width: 600px; line-height: 1.7; }
+    .stamp { font-family: var(--mono); font-size: 0.72rem; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 1rem; display: inline-block; padding: 0.3rem 0.7rem; border: 1px solid var(--accent-vine); border-radius: 999px; background: var(--accent-vine-soft); }
+    .tour-section { margin-bottom: 3rem; border-top: 1px solid var(--border-soft); padding-top: 2rem; }
+    .tour-section h2 { font-family: var(--serif); font-size: 1.4rem; color: var(--text); margin-bottom: 0.4rem; }
+    .tour-section .step-tag { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.08em; color: var(--accent); text-transform: uppercase; margin-bottom: 0.4rem; display: block; }
+    .tour-section .delta { font-family: var(--mono); font-size: 0.78rem; color: var(--text-dim); margin-bottom: 1.5rem; }
+    .stop { display: block; padding: 1rem 1.25rem; margin-bottom: 0.5rem; border-left: 2px solid var(--border-soft); transition: border-color 0.15s, background 0.15s; text-decoration: none; }
+    .stop:hover { border-left-color: var(--accent-vine-hi); background: var(--accent-vine-soft); }
+    .stop-url { font-family: var(--mono); font-size: 0.85rem; color: var(--accent); display: block; margin-bottom: 0.15rem; }
+    .stop-note { font-family: var(--serif); font-size: 0.92rem; color: var(--text-dim); line-height: 1.6; }
+    .legend { background: var(--bg-surface); border: 1px solid var(--border-soft); border-radius: 6px; padding: 1.25rem 1.5rem; margin-bottom: 3rem; font-family: var(--mono); font-size: 0.78rem; line-height: 1.9; color: var(--text-dim); }
+    .legend strong { color: var(--text); font-weight: 600; }
+    .legend-row { display: flex; gap: 1rem; align-items: baseline; }
+    .legend-key { color: var(--accent); min-width: 6rem; }
+    .closing { margin-top: 4rem; padding: 2rem 0; border-top: 1px solid var(--border-soft); font-family: var(--serif); font-style: italic; color: var(--text); text-align: center; font-size: 1.15rem; }
+  </style>
+</head>
+<body data-page="tour">
+
+  <span class="stamp">Tour · 2026-05-19 · Steps 1–5 complete · uncommitted</span>
+  <h1>The lean pass · localhost walkthrough</h1>
+  <p class="lede">Every stop below is a page that changed this session. Click through in order, or jump where you want. The Wizard register, the vine-on-hover signal, the partials substitution, the persona strip — all live on disk under <code>landing/</code>, currently uncommitted. Walking this tour confirms the work renders before you commit.</p>
+
+  <div class="legend">
+    <div class="legend-row"><span class="legend-key">Hover</span><span>any link to see the Version B vine accent <strong>(#4a9a4f)</strong></span></div>
+    <div class="legend-row"><span class="legend-key">Background</span><span>Wizard charcoal <strong>#0d0d0e</strong>, body in Georgia serif</span></div>
+    <div class="legend-row"><span class="legend-key">Type</span><span>Inter (UI), Georgia (body), Courier mono (tags) — <strong>no Press Start 2P</strong></span></div>
+    <div class="legend-row"><span class="legend-key">Footer</span><span>contributes + personas links + canonical line</span></div>
+    <div class="legend-row"><span class="legend-key">Nav</span><span>5 items + GitHub: how it works · resources · compare · releases · download</span></div>
+  </div>
+
+  <section class="tour-section">
+    <span class="step-tag">Step 1 · new route</span>
+    <h2>/releases — the marquee win</h2>
+    <p class="delta">11.3 KB · scoped releases.css · 4 SHIPPED/PROVEN/NEXT columns originally → trimmed to 2 threads per your call (loci.core + apps)</p>
+    <a class="stop" href="/releases/?cb=1779193942">
+      <span class="stop-url">→ /releases/</span>
+      <span class="stop-note">Two-thread structure (loci.core + apps), SHIPPED/PROVEN/NEXT columns, scrub of all local-machine paths. Closing line: <em>"Built in the open. Tended in the quiet."</em></span>
+    </a>
+  </section>
+
+  <section class="tour-section">
+    <span class="step-tag">Step 5 · index.html persona strip + Wizard canonical</span>
+    <h2>/ — the homepage, leaner</h2>
+    <p class="delta">−498 lines, −28,896 bytes (21% reduction) · Press Start 2P fully extracted · canonical nav substituted</p>
+    <a class="stop" href="/">
+      <span class="stop-url">→ /</span>
+      <span class="stop-note">Homepage now Wizard-only. The triple-spanned persona variants are gone. Hero copy is Wizard register ("Your Palace of Co-Intelligence"). Includes loci.css.</span>
+    </a>
+  </section>
+
+  <section class="tour-section">
+    <span class="step-tag">Step 3 · partials migration · Step 4 · loci.css consolidation</span>
+    <h2>Secondary pages — uniform nav, uniform palette</h2>
+    <p class="delta">13 pages now load only <code>loci.css</code>; nav + footer come from <code>partials/_nav.html</code> + <code>partials/_footer.html</code></p>
+    <a class="stop" href="/about.html?cb=1779193942">
+      <span class="stop-url">→ /about.html</span>
+      <span class="stop-note">The story page. Canonical nav, Wizard register, vine on hover.</span>
+    </a>
+    <a class="stop" href="/manifesto.html?cb=1779193942">
+      <span class="stop-url">→ /manifesto.html</span>
+      <span class="stop-note">Cognitive Sovereignty Manifesto. RUNE-voiced.</span>
+    </a>
+    <a class="stop" href="/comparison.html?cb=1779193942">
+      <span class="stop-url">→ /comparison.html</span>
+      <span class="stop-note">How loci differs. Demiurge frame integration coming in Step 6.</span>
+    </a>
+    <a class="stop" href="/download.html?cb=1779193942">
+      <span class="stop-url">→ /download.html</span>
+      <span class="stop-note">Wizard desktop app install instructions.</span>
+    </a>
+    <a class="stop" href="/guide.html?cb=1779193942">
+      <span class="stop-url">→ /guide.html</span>
+      <span class="stop-note">Deep how-to, relational model building.</span>
+    </a>
+    <a class="stop" href="/roadmap.html?cb=1779193942">
+      <span class="stop-url">→ /roadmap.html</span>
+      <span class="stop-note">Sovereignty Roadmap. Note: this page had no <code>&lt;footer&gt;</code> — global footer added.</span>
+    </a>
+    <a class="stop" href="/start.html?cb=1779193942">
+      <span class="stop-url">→ /start.html</span>
+      <span class="stop-note">10-minute quick-start.</span>
+    </a>
+    <a class="stop" href="/privacy.html?cb=1779193942">
+      <span class="stop-url">→ /privacy.html</span>
+      <span class="stop-note">Privacy declaration. Talos appeal evidence file restored.</span>
+    </a>
+  </section>
+
+  <section class="tour-section">
+    <span class="step-tag">Step 3 + 4 · charter + dispatch pages</span>
+    <h2>/seed/ and /zoku/ — the depth surfaces</h2>
+    <p class="delta">Dispatch index + 2 dispatches + Rainbow Zoku charter, all in canonical register</p>
+    <a class="stop" href="/seed/?cb=1779193942">
+      <span class="stop-url">→ /seed/</span>
+      <span class="stop-note">Dispatch index — Dispatch #1 (Rendszerbontás) + Dispatch #2 (Beágyazás).</span>
+    </a>
+    <a class="stop" href="/seed/rendszerbontas.html?cb=1779193942">
+      <span class="stop-url">→ /seed/rendszerbontas.html</span>
+      <span class="stop-note">Dispatch #1 — long-form Hungarian-election analysis. Now loads loci.css.</span>
+    </a>
+    <a class="stop" href="/seed/beagyazas.html?cb=1779193942">
+      <span class="stop-url">→ /seed/beagyazas.html</span>
+      <span class="stop-note">Dispatch #2 — psychotechnology as infrastructure. Now loads loci.css.</span>
+    </a>
+    <a class="stop" href="/zoku/?cb=1779193942">
+      <span class="stop-url">→ /zoku/</span>
+      <span class="stop-note">Rainbow Zoku charter. <em>"By the time you read this, your garden already remembers."</em></span>
+    </a>
+  </section>
+
+  <section class="tour-section">
+    <span class="step-tag">artifacts · not pages</span>
+    <h2>Files worth knowing about (not walked here)</h2>
+    <a class="stop" href="/loci.css?cb=1779193942">
+      <span class="stop-url">→ /loci.css</span>
+      <span class="stop-note">2,597 lines · single canonical stylesheet · Wizard <code>:root</code> + Version B aliases + LLMAGE overlay</span>
+    </a>
+    <a class="stop" href="/_audit.md?cb=1779193942">
+      <span class="stop-url">→ /_audit.md</span>
+      <span class="stop-note">Step 2 CSS conflict-surface inventory (markdown — your browser may render or download)</span>
+    </a>
+    <a class="stop" href="/partials/_nav.html?cb=1779193942">
+      <span class="stop-url">→ /partials/_nav.html</span>
+      <span class="stop-note">Canonical nav source — edit this, run <code>python3 build.py</code>, all pages sync</span>
+    </a>
+    <a class="stop" href="/partials/_footer.html?cb=1779193942">
+      <span class="stop-url">→ /partials/_footer.html</span>
+      <span class="stop-note">Canonical footer source — contribute + personas links live here</span>
+    </a>
+  </section>
+
+  <p class="closing">Walk it. Then call the ship-word or surface what to adjust.</p>
+
+</body>
+</html>

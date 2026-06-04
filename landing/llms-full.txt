@@ -74,7 +74,7 @@ For detailed setup: [SETUP-GUIDE.md](SETUP-GUIDE.md) · [AGENT-SETUP.md](AGENT-S
 
 ## Three tiers
 
-- **Scholar** - search + tagging, browser extension, no config required
+- **ELI-5** - search + tagging, browser extension, no config required
   *For: anyone who wants searchable AI chat history without setup.*
 
 - **Wizard** - full palace, MCP integration, local LLMs, agent architecture
@@ -85,7 +85,7 @@ For detailed setup: [SETUP-GUIDE.md](SETUP-GUIDE.md) · [AGENT-SETUP.md](AGENT-S
 
 ## Chrome extension
 
-Standalone browser extension for search + tagging (Scholar tier).
+Standalone browser extension for search + tagging (ELI-5 tier).
 
 → See [extension/INSTALL.md](extension/INSTALL.md) for install instructions.
 
@@ -249,7 +249,7 @@ All notable changes to loci are documented here.
 
 ## v0.9 - 2026-05-08 (palace)
 - **Output primitive** - `templates/output-primitive.md`: introduces output primitives as a typed, named loci concept - structured formats for exporting palace work as archivable artifacts. First primitive: `git-log-incident` - session arcs as annotated commit logs. Tags: `[DISCOVERY]` `[FATAL DISCOVERY]` `[PLOT TWIST]` `[FALSE NEGATIVE]` `[SALVATION]` `[FORENSICS]` `[HTTP 400/500]` `[DELIVERED]` `[HUXGATE]` `[NOISE]` `[SIGNAL]`. Vocabulary open. Output: HTML widget or diffable MD. Atomic principle: the 400 before the 200 is part of the record.
-- **Output primitive feature card** - `landing/index.html`: Feature 6 added across Scholar/Wizard/LLMAGE themes.
+- **Output primitive feature card** - `landing/index.html`: Feature 6 added across ELI-5/Wizard/LLMAGE themes.
 - **`loci-feature-release` process** - `PROCESSES.md`: end-to-end release pipeline for palace features - template → feature card → changelog → branch → HuxGATE → PR → VPS deploy.
 - **`PALACE-UPDATE.md`** - agent update script (parallel to `AGENT-SETUP.md`). Entry point for existing palace holders running `palace-update`.
 - **README** - agent section updated with `PALACE-UPDATE.md` pointer.
@@ -268,7 +268,7 @@ All notable changes to loci are documented here.
 - Detects loci, MemPalace, Karpathy-style, PALACE.md variants
 - Migration to ~/.loci/ format
 - Mac + Windows (Tauri v2)
-- Scholar theme (green/cream)
+- ELI-5 theme (green/cream)
 
 ## loci.garden - 2026-05-05 (site)
 - Comparison page vs MemPalace / LLMChronicle / Karpathy
@@ -294,7 +294,7 @@ All notable changes to loci are documented here.
 - Core types package (`@loci/core`)
 
 ## loci.garden v3 - 2026-04-28 (site)
-- Three-theme landing (Scholar, Wizard, LLMAGE)
+- Three-theme landing (ELI-5, Wizard, LLMAGE)
 - Theme switcher in navbar
 - Palace map illustration
 - SEO: meta tags, JSON-LD, sitemap.xml

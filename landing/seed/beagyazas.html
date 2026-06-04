@@ -1,12 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html data-theme="scholar" lang="en">
 <head>
+<script>
+(function(){try{var t=localStorage.getItem("loci-theme");if(["scholar","wizard","llmage"].indexOf(t)===-1)t="scholar";document.documentElement.setAttribute("data-theme",t);}catch(e){document.documentElement.setAttribute("data-theme","scholar");}})();
+</script>
   <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Cpolygon%20points='50,5%2020,50%2050,50'%20fill='%23ffcc44'/%3E%3Cpolygon%20points='50,5%2080,50%2050,50'%20fill='%23e8861a'/%3E%3Cpolygon%20points='20,50%2050,95%2050,50'%20fill='%23c87c2c'/%3E%3Cpolygon%20points='80,50%2050,95%2050,50'%20fill='%237a3a08'/%3E%3C/svg%3E">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Beágyazás: On Psychotechnology as Infrastructure | loci.garden</title>
-  <meta name="description" content="Why political movements fail when they bring arguments to a prior fight — and what the Budapest concert actually did. A formal account of collective effervescence as context injection.">
+  <meta name="description" content="Why political movements fail when they bring arguments to a prior fight, and what the Budapest concert actually did. A formal account of collective effervescence as context injection.">
   <meta property="og:title" content="Beágyazás: On Psychotechnology as Infrastructure">
-  <meta property="og:description" content="Why political movements fail when they bring arguments to a prior fight — and what the Budapest concert actually did. A formal account of collective effervescence as context injection.">
+  <meta property="og:description" content="Why political movements fail when they bring arguments to a prior fight, and what the Budapest concert actually did. A formal account of collective effervescence as context injection.">
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://loci.garden/seed/beagyazas.html">
   <meta property="og:site_name" content="loci.garden">
@@ -18,7 +22,7 @@
     "@context": "https://schema.org",
     "@type": "Article",
     "headline": "Beágyazás: On Psychotechnology as Infrastructure",
-    "description": "Why political movements fail when they bring arguments to a prior fight — and what the Budapest concert actually did.",
+    "description": "Why political movements fail when they bring arguments to a prior fight, and what the Budapest concert actually did.",
     "url": "https://loci.garden/seed/beagyazas.html",
     "datePublished": "2026-05-15",
     "dateModified": "2026-05-15",
@@ -30,9 +34,9 @@
   }
   </script>
   <meta name="robots" content="index, follow">
-  <link rel="alternate" type="text/plain" href="/llms.txt" title="AI context declaration — loci.garden">
-  <link rel="stylesheet" href="../style.css">
-  <link rel="stylesheet" href="../style-wizard.css">
+  <link rel="alternate" type="text/plain" href="/llms.txt" title="AI context declaration, loci.garden">
+  <link rel="stylesheet" href="../tokens.css">
+  <link rel="stylesheet" href="../loci.css">
   <script src="../skin-toggle.js" defer></script>
   <script defer src="https://analytics.195-246-230-118.sslip.io/script.js" data-website-id="e00d2f0a-fbd7-40bf-8740-cb1ab2a82b86"></script>
   <style>
@@ -450,13 +454,13 @@
           color: #888888;
         }
         @bottom-left {
-          content: "© Daniel G. Nemet — loci.garden — 2026";
+          content: "© Daniel G. Nemet, loci.garden, 2026";
           font-size: 6.5pt;
           font-family: 'Courier New', monospace;
           color: #888888;
         }
         @bottom-right {
-          content: "v2.1 — 2026-05-15 — p. " counter(page) " / " counter(pages);
+          content: "v2.1, 2026-05-15, p. " counter(page) " / " counter(pages);
           font-size: 6.5pt;
           font-family: 'Courier New', monospace;
           color: #888888;
@@ -505,31 +509,31 @@
     .ribbon-link:hover { opacity: 1; }
   </style>
 
-  <nav>
-    <div class="nav-container">
-      <div class="nav-logo-group">
-        <a href="/" class="logo">loci.garden</a>
-        <div class="nav-persona-mini" role="group" aria-label="Return as persona">
-          <button class="persona-mini-btn" data-theme="scholar" title="Return as Scholar" aria-label="Return as Scholar">◆</button>
-          <button class="persona-mini-btn" data-theme="wizard"  title="Return as Wizard"  aria-label="Return as Wizard">⚔</button>
-          <button class="persona-mini-btn" data-theme="llmage"  title="Return as LLMAGE"  aria-label="Return as LLMAGE">◈</button>
-        </div>
-      </div>
+  <!-- #include partials/_nav.html -->
+<nav>
+  <div class="nav-container">
+    <div class="nav-logo-group">
+      <a href="/" class="logo">loci.garden</a>
+    </div>
+    <div class="nav-right">
       <div class="nav-links">
-        <a href="https://github.com/huximaxi/loci" class="nav-link nav-icon" aria-label="GitHub" title="GitHub">
+        <a href="https://github.com/rainbow-zoku/loci-garden" class="nav-link nav-icon" aria-label="GitHub" title="GitHub">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
         </a>
-        <a href="/" class="nav-link">home</a>
-        <a href="../seed/" class="nav-link active">seed</a>
-        <a href="../about.html" class="nav-link">about</a>
-        <a href="../manifesto.html" class="nav-link">manifesto</a>
-        <a href="../roadmap.html" class="nav-link">roadmap</a>
-        <a href="../guide.html" class="nav-link">guide</a>
-        <a href="https://docs.loci.garden" class="nav-link" target="_blank" rel="noopener">docs</a>
-        <a href="../llms.txt" class="nav-link">llms.txt</a>
+        <a href="/download.html" class="nav-link" data-page="download">download</a>
+        <a href="/guide.html" class="nav-link" data-page="guide">guide</a>
+        <a href="/manifesto.html" class="nav-link" data-page="manifesto">manifesto</a>
+      </div>
+      <div class="theme-switcher" role="group" aria-label="Choose experience mode">
+        <button class="theme-btn" id="btn-scholar" onclick="setTheme('scholar')" aria-pressed="true">◆ ELI-5</button>
+        <button class="theme-btn" id="btn-wizard"  onclick="setTheme('wizard')"  aria-pressed="false">⚔ Wizard</button>
+        <button class="theme-btn" id="btn-llmage"  onclick="setTheme('llmage')"  aria-pressed="false">◈ LLMAGE</button>
       </div>
     </div>
-  </nav>
+  </div>
+  <script defer src="/theme.js"></script>
+</nav>
+<!-- /include -->
 
   <main class="page-content">
     <div class="article-container">
@@ -555,23 +559,23 @@
               </div>
               <div class="brief-stat">
                 <span class="stat-num">141 / 199</span>
-                <span class="stat-label">Tisza seats — supermajority threshold 133</span>
+                <span class="stat-label">Tisza seats, supermajority threshold 133</span>
               </div>
               <div class="brief-stat">
                 <span class="stat-num">78.94%</span>
-                <span class="stat-label">Turnout — among highest in Hungarian history</span>
+                <span class="stat-label">Turnout, among highest in Hungarian history</span>
               </div>
               <div class="brief-stat">
                 <span class="stat-num">7 hours</span>
-                <span class="stat-label">Concert duration — prior-reset requires duration</span>
+                <span class="stat-label">Concert duration, prior-reset requires duration</span>
               </div>
               <div class="brief-stat">
                 <span class="stat-num">2 days</span>
-                <span class="stat-label">Interval to election — within effervescence window</span>
+                <span class="stat-label">Interval to election, within effervescence window</span>
               </div>
               <div class="brief-stat">
                 <span class="stat-num">0</span>
-                <span class="stat-label">Propositional content at the concert — no arguments, no candidates</span>
+                <span class="stat-label">Propositional content at the concert, no arguments, no candidates</span>
               </div>
             </div>
           </div>
@@ -579,11 +583,11 @@
           <div class="brief-section">
             <h3>Theoretical anchors</h3>
             <ul class="brief-anchors">
-              <li><strong>Durkheim</strong> — collective effervescence as prior-reset mechanism</li>
-              <li><strong>Habermas</strong> — life-world colonisation; the last unmanaged space</li>
-              <li><strong>Popovic / Otpor</strong> — commitment device disaggregation at scale</li>
-              <li><strong>Jasper</strong> — affective infrastructure and moral protest</li>
-              <li><strong>Bateson</strong> — context as the operative unit of analysis</li>
+              <li><strong>Durkheim</strong>, collective effervescence as prior-reset mechanism</li>
+              <li><strong>Habermas</strong>, life-world colonisation; the last unmanaged space</li>
+              <li><strong>Popovic / Otpor</strong>, commitment device disaggregation at scale</li>
+              <li><strong>Jasper</strong>, affective infrastructure and moral protest</li>
+              <li><strong>Bateson</strong>, context as the operative unit of analysis</li>
             </ul>
           </div>
 
@@ -645,7 +649,7 @@
 
   Corrupted:  Δ_raw ──► [ADVERSARIAL FRAME] ──► Δ_inv ──► H_locked
                                │
-                   (not falsification alone —
+                   (not falsification alone,
                     systematic interpretive capture)
 
   Result:   accurate pro-opposition signal → absorbed as
@@ -796,10 +800,8 @@
   <footer>
     <div class="footer-inner">
       <span style="font-family:var(--mono); font-size:0.72rem; color:var(--text-faint);">loci.garden/seed · Beágyazás · Dispatch 002 · Hux × Vesper · May 2026</span>
-      <span style="font-family:var(--mono); font-size:0.72rem; color:var(--text-faint);"><a href="../llms.txt" style="color:var(--text-faint);">llms.txt</a></span>
+      <span style="font-family:var(--mono); font-size:0.72rem; color:var(--text-faint);"><a href="/llms.txt" style="color:var(--text-faint);">llms.txt</a></span>
     </div>
   </footer>
-
-  <script src="../assets/nav-persona.js" defer></script>
 </body>
 </html>

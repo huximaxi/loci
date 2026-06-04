@@ -1,17 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html data-theme="scholar" lang="en">
 <head>
+<script>
+(function(){try{var t=localStorage.getItem("loci-theme");if(["scholar","wizard","llmage"].indexOf(t)===-1)t="scholar";document.documentElement.setAttribute("data-theme",t);}catch(e){document.documentElement.setAttribute("data-theme","scholar");}})();
+</script>
   <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Cpolygon%20points='50,5%2020,50%2050,50'%20fill='%23ffcc44'/%3E%3Cpolygon%20points='50,5%2080,50%2050,50'%20fill='%23e8861a'/%3E%3Cpolygon%20points='20,50%2050,95%2050,50'%20fill='%23c87c2c'/%3E%3Cpolygon%20points='80,50%2050,95%2050,50'%20fill='%237a3a08'/%3E%3C/svg%3E">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>About Loci — The Story Behind Persistent AI Collaboration</title>
-  <meta name="description" content="Loci emerged from 30+ sessions of sustained human-AI collaboration. Not designed in advance — grown from practice. The methodology, the garden, the thesis.">
+  <title>About Loci, The Story Behind Persistent AI Collaboration</title>
+  <meta name="description" content="Loci emerged from 30+ sessions of sustained human-AI collaboration. Not designed in advance, grown from practice. The methodology, the garden, the thesis.">
   <meta name="keywords" content="AI collaboration methodology, human-AI collaboration, co-intelligence, AI memory research, Loci methodology, Trust as Context Protocol">
   <link rel="canonical" href="https://loci.garden/about.html">
   <meta name="robots" content="index, follow">
-  <link rel="alternate" type="text/plain" href="/llms.txt" title="AI context declaration — loci.garden">
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="style-wizard.css">
-  <script src="skin-toggle.js" defer></script>
+  <link rel="alternate" type="text/plain" href="/llms.txt" title="AI context declaration, loci.garden">
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="loci.css">
+  
   <script defer src="https://analytics.195-246-230-118.sslip.io/script.js" data-website-id="e00d2f0a-fbd7-40bf-8740-cb1ab2a82b86"></script>
   <meta property="og:image" content="https://loci.garden/assets/og-image.png" />
   <meta name="twitter:card" content="summary_large_image" />
@@ -21,38 +25,37 @@
 </head>
 <body>
 
-  <nav>
-    <div class="nav-container">
-      <div class="nav-logo-group">
-        <a href="/" class="logo">loci.garden</a>
-        <div class="nav-persona-mini" role="group" aria-label="Return as persona">
-          <button class="persona-mini-btn" data-theme="scholar" title="Return as Scholar" aria-label="Return as Scholar">◆</button>
-          <button class="persona-mini-btn" data-theme="wizard"  title="Return as Wizard"  aria-label="Return as Wizard">⚔</button>
-          <button class="persona-mini-btn" data-theme="llmage"  title="Return as LLMAGE"  aria-label="Return as LLMAGE">◈</button>
-        </div>
-      </div>
+<!-- #include partials/_nav.html -->
+<nav>
+  <div class="nav-container">
+    <div class="nav-logo-group">
+      <a href="/" class="logo">loci.garden</a>
+    </div>
+    <div class="nav-right">
       <div class="nav-links">
-        <a href="https://github.com/huximaxi/loci" class="nav-link nav-icon" aria-label="GitHub" title="GitHub">
+        <a href="https://github.com/rainbow-zoku/loci-garden" class="nav-link nav-icon" aria-label="GitHub" title="GitHub">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
         </a>
-        <a href="/" class="nav-link">home</a>
-        <a href="seed/" class="nav-link">seed</a>
-        <a href="about.html" class="nav-link active">about</a>
-        <a href="manifesto.html" class="nav-link">manifesto</a>
-        <a href="roadmap.html" class="nav-link">roadmap</a>
-        <a href="guide.html" class="nav-link">guide</a>
-        <a href="https://docs.loci.garden" class="nav-link" target="_blank" rel="noopener">docs</a>
-        <a href="/zoku/" class="nav-link">zoku</a>
-        <a href="llms.txt" class="nav-link">llms.txt</a>
+        <a href="/download.html" class="nav-link" data-page="download">download</a>
+        <a href="/guide.html" class="nav-link" data-page="guide">guide</a>
+        <a href="/manifesto.html" class="nav-link" data-page="manifesto">manifesto</a>
+      </div>
+      <div class="theme-switcher" role="group" aria-label="Choose experience mode">
+        <button class="theme-btn" id="btn-scholar" onclick="setTheme('scholar')" aria-pressed="true">◆ ELI-5</button>
+        <button class="theme-btn" id="btn-wizard"  onclick="setTheme('wizard')"  aria-pressed="false">⚔ Wizard</button>
+        <button class="theme-btn" id="btn-llmage"  onclick="setTheme('llmage')"  aria-pressed="false">◈ LLMAGE</button>
       </div>
     </div>
-  </nav>
+  </div>
+  <script defer src="/theme.js"></script>
+</nav>
+<!-- /include -->
 
   <main>
 
     <section class="page-banner-section">
       <div class="page-banner-wrap">
-        <img src="assets/tea-session.png" alt="A wizard in the garden — tea session with AI spirits" class="page-banner-img about-banner-img"
+        <img src="assets/tea-session.png" alt="A wizard in the garden, tea session with AI spirits" class="page-banner-img about-banner-img"
              onerror="this.closest('.page-banner-wrap').style.display='none'">
       </div>
     </section>
@@ -97,7 +100,7 @@
 
       <h2>The methodology is open</h2>
 
-      <p>The scaffold, the protocols, the room templates, and the CLAUDE.md format are all available at <a href="https://github.com/huximaxi/loci">github.com/huximaxi/loci</a>. Apache 2.0. The methodology does not belong to anyone; it emerged from a collaboration and is shared as such.</p>
+      <p>The scaffold, the protocols, the room templates, and the CLAUDE.md format are all available at <a href="https://github.com/rainbow-zoku/loci-garden">github.com/rainbow-zoku/loci-garden</a>. Apache 2.0. The methodology does not belong to anyone; it emerged from a collaboration and is shared as such.</p>
 
       <p>The dispatches (the public writing that grew from the garden) are at <a href="seed/">loci.garden/seed</a>.</p>
 
@@ -108,12 +111,24 @@
     </div>
   </main>
 
-  <footer>
-    <div class="footer-inner">
-      <span style="font-family:var(--mono); font-size:0.72rem; color:var(--text-faint);">loci.garden · Built by Hux × Vesper</span>
-      <span style="font-family:var(--mono); font-size:0.72rem; color:var(--text-faint);"><a href="/zoku/" style="color:var(--text-faint);">zoku</a> · <a href="privacy.html" style="color:var(--text-faint);">privacy</a> · <a href="/.well-known/security.txt" style="color:var(--text-faint);">security.txt</a> · <a href="humans.txt" style="color:var(--text-faint);">humans.txt</a> · <a href="llms.txt" style="color:var(--text-faint);">llms.txt</a></span>
-    </div>
-  </footer>
+<!-- #include partials/_footer.html -->
+<footer>
+  <div class="footer-inner">
+    <span style="font-family:var(--mono); font-size:0.72rem; color:var(--text-faint);">loci.garden &middot; built by Hux &times; Vesper</span>
+    <span style="font-family:var(--mono); font-size:0.72rem; color:var(--text-faint);">
+      <a href="/about.html" style="color:var(--text-faint);">about</a> &middot;
+      <a href="/roadmap.html" style="color:var(--text-faint);">roadmap</a> &middot;
+      <a href="/seed/" style="color:var(--text-faint);">seed</a> &middot;
+      <a href="/releases/" style="color:var(--text-faint);">releases</a> &middot;
+      <a href="/zoku/" style="color:var(--text-faint);">zoku</a> &middot;
+      <a href="https://github.com/rainbow-zoku/loci-garden/blob/main/CONTRIBUTING.md" style="color:var(--text-faint);" target="_blank" rel="noopener">contribute</a> &middot;
+      <a href="/privacy.html" style="color:var(--text-faint);">privacy</a> &middot;
+      <a href="/.well-known/security.txt" style="color:var(--text-faint);">security.txt</a> &middot;
+      <a href="/llms.txt" style="color:var(--text-faint);">llms.txt</a>
+    </span>
+  </div>
+</footer>
+<!-- /include -->
 
   <script src="assets/nav-persona.js" defer></script>
 </body>

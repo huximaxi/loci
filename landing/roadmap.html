@@ -1,12 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html data-theme="scholar" lang="en">
 <head>
+<script>
+(function(){try{var t=localStorage.getItem("loci-theme");if(["scholar","wizard","llmage"].indexOf(t)===-1)t="scholar";document.documentElement.setAttribute("data-theme",t);}catch(e){document.documentElement.setAttribute("data-theme","scholar");}})();
+</script>
   <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Cpolygon%20points='50,5%2020,50%2050,50'%20fill='%23ffcc44'/%3E%3Cpolygon%20points='50,5%2080,50%2050,50'%20fill='%23e8861a'/%3E%3Cpolygon%20points='20,50%2050,95%2050,50'%20fill='%23c87c2c'/%3E%3Cpolygon%20points='80,50%2050,95%2050,50'%20fill='%237a3a08'/%3E%3C/svg%3E">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Loci · Sovereignty Roadmap</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="style-wizard.css">
-  <script src="skin-toggle.js" defer></script>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="loci.css">
+  
   <style>
     /* ── TOKENS (from loci.css) ──────────────────────────────── */
     :root {
@@ -342,41 +346,43 @@
 <div class="page">
 
   <!-- Site nav -->
-  <nav>
-    <div class="nav-container">
-      <div class="nav-logo-group">
-        <a href="/" class="logo">loci.garden</a>
-        <div class="nav-persona-mini" role="group" aria-label="Return as persona">
-          <button class="persona-mini-btn" data-theme="scholar" title="Return as Scholar" aria-label="Return as Scholar">◆</button>
-          <button class="persona-mini-btn" data-theme="wizard"  title="Return as Wizard"  aria-label="Return as Wizard">⚔</button>
-          <button class="persona-mini-btn" data-theme="llmage"  title="Return as LLMAGE"  aria-label="Return as LLMAGE">◈</button>
-        </div>
-      </div>
+<!-- #include partials/_nav.html -->
+<nav>
+  <div class="nav-container">
+    <div class="nav-logo-group">
+      <a href="/" class="logo">loci.garden</a>
+    </div>
+    <div class="nav-right">
       <div class="nav-links">
-        <a href="/" class="nav-link">home</a>
-        <a href="seed/" class="nav-link">seed</a>
-        <a href="about.html" class="nav-link">about</a>
-        <a href="manifesto.html" class="nav-link">manifesto</a>
-        <a href="roadmap.html" class="nav-link active">roadmap</a>
-        <a href="guide.html" class="nav-link">guide</a>
-        <a href="https://docs.loci.garden" class="nav-link" target="_blank" rel="noopener">docs</a>
-        <a href="/zoku/" class="nav-link">zoku</a>
-        <a href="llms.txt" class="nav-link">llms.txt</a>
+        <a href="https://github.com/rainbow-zoku/loci-garden" class="nav-link nav-icon" aria-label="GitHub" title="GitHub">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        </a>
+        <a href="/download.html" class="nav-link" data-page="download">download</a>
+        <a href="/guide.html" class="nav-link" data-page="guide">guide</a>
+        <a href="/manifesto.html" class="nav-link" data-page="manifesto">manifesto</a>
+      </div>
+      <div class="theme-switcher" role="group" aria-label="Choose experience mode">
+        <button class="theme-btn" id="btn-scholar" onclick="setTheme('scholar')" aria-pressed="true">◆ ELI-5</button>
+        <button class="theme-btn" id="btn-wizard"  onclick="setTheme('wizard')"  aria-pressed="false">⚔ Wizard</button>
+        <button class="theme-btn" id="btn-llmage"  onclick="setTheme('llmage')"  aria-pressed="false">◈ LLMAGE</button>
       </div>
     </div>
-  </nav>
+  </div>
+  <script defer src="/theme.js"></script>
+</nav>
+<!-- /include -->
 
   <!-- Header -->
   <div class="header">
     <div class="loci-mark">Loci.Garden · Sovereignty Roadmap</div>
     <h1>The knowledge layer<br>for the <em>sovereignty stack</em>.</h1>
-    <p>Loci is an AI-native knowledge garden — your second brain, privately held. This roadmap is our public commitment to the protocols, tools, and communities that share our values.</p>
+    <p>Loci is an AI-native knowledge garden, your second brain, privately held. This roadmap is our public commitment to the protocols, tools, and communities that share our values.</p>
   </div>
 
   <!-- Manifesto pull -->
   <div class="manifesto">
     <p>Your mind is the last private space. They call it an assistant. It is a recording device.<br><br>
-    You think inside their systems — you train them. You remember inside their products — you populate them. Your cognitive labour is the input. Their leverage is the output.<br><br>
+    You think inside their systems, you train them. You remember inside their products, you populate them. Your cognitive labour is the input. Their leverage is the output.<br><br>
     We are not building that.</p>
     <div class="attr"><a href="manifesto.html" style="color:inherit; text-decoration:underline; text-decoration-color:rgba(200,124,44,0.5);">Cognitive Sovereignty Manifesto</a> · Loci.Garden · 2026</div>
   </div>
@@ -384,7 +390,7 @@
   <!-- Auth principle -->
   <div class="principle-banner">
     <span class="icon">🔑</span>
-    <span><strong>Auth is a feature, not a gate.</strong> Identity (Nostr keypair, AT Protocol DID) is available at every tier. You choose whether to authenticate. It increases internal trust and enables publishing — but the garden works without it. Sovereignty is never paywalled.</span>
+    <span><strong>Auth is a feature, not a gate.</strong> Identity (Nostr keypair, AT Protocol DID) is available at every tier. You choose whether to authenticate. It increases internal trust and enables publishing, but the garden works without it. Sovereignty is never paywalled.</span>
   </div>
 
   <!-- ── WHAT YOU CAN USE TODAY ── -->
@@ -426,7 +432,7 @@
     }
   </style>
   <div class="today-block">
-    <h3>What you can use today — honest status</h3>
+    <h3>What you can use today, honest status</h3>
     <div class="today-table">
       <div class="th">Persona</div>
       <div class="th">Today</div>
@@ -448,14 +454,14 @@
       <strong>Shipped dispatches:</strong>
       <a href="seed/rendszerbontas.html">#1 rendszerbontás</a> (Apr 2026) ·
       <a href="seed/beagyazas.html">#2 Beágyazás</a> (May 2026).
-      Read freely — no signup required.
+      Read freely, no signup required.
     </div>
   </div>
 
   <!-- ── TIER 1 ── -->
   <div class="tier-label tier-1">
     <h2>Tier 1</h2>
-    <span class="tier-badge">Q3 2026 — Ship It</span>
+    <span class="tier-badge">Q3 2026, Ship It</span>
     <div class="line"></div>
   </div>
 
@@ -468,7 +474,7 @@
       </div>
       <div class="feature-body">
         <div class="feature-title">Ollama Local Inference</div>
-        <div class="feature-desc">Loci uses any open-weight model (Llama, Mistral, Gemma) as its AI engine. <code>nomic-embed-text</code> for local semantic indexing. Zero API keys, zero cloud, zero telemetry. If Ollama goes offline, Loci fails closed — never silently calls external APIs.</div>
+        <div class="feature-desc">Loci uses any open-weight model (Llama, Mistral, Gemma) as its AI engine. <code>nomic-embed-text</code> for local semantic indexing. Zero API keys, zero cloud, zero telemetry. If Ollama goes offline, Loci fails closed, never silently calls external APIs.</div>
         <div class="feature-meta">
           <span class="tag persona">Kata</span>
           <span class="tag">Ollama · nomic-embed</span>
@@ -484,8 +490,8 @@
         <span class="status-dot"></span>
       </div>
       <div class="feature-body">
-        <div class="feature-title">MCP Plugin — Goose &amp; Beyond</div>
-        <div class="feature-desc">Loci publishes an open-source MCP server. Any MCP-compatible agent (Goose, Continue.dev, Claude Code) can query your knowledge garden as context. Locus nodes and Rooms are exposed as MCP resources. This is Loci's first external API — built sovereign-first.</div>
+        <div class="feature-title">MCP Plugin, Goose &amp; Beyond</div>
+        <div class="feature-desc">Loci publishes an open-source MCP server. Any MCP-compatible agent (Goose, Continue.dev, Claude Code) can query your knowledge garden as context. Locus nodes and Rooms are exposed as MCP resources. This is Loci's first external API, built sovereign-first.</div>
         <div class="feature-meta">
           <span class="tag persona">Cipher</span>
           <span class="tag">MCP · Goose · Apache 2.0</span>
@@ -502,7 +508,7 @@
       </div>
       <div class="feature-body">
         <div class="feature-title">Nostr Keypair Identity</div>
-        <div class="feature-desc">Sign into Loci with your Nostr keypair via NIP-07 browser extension (Alby, nos2x). The garden is yours before the first note is written. Your private key never touches Loci's code. Since there's no existing auth model, this is Loci's first — sovereign by default.</div>
+        <div class="feature-desc">Sign into Loci with your Nostr keypair via NIP-07 browser extension (Alby, nos2x). The garden is yours before the first note is written. Your private key never touches Loci's code. Since there's no existing auth model, this is Loci's first, sovereign by default.</div>
         <div class="feature-meta">
           <span class="tag persona">Cipher</span>
           <span class="tag">Nostr · NIP-07 · secp256k1</span>
@@ -533,7 +539,7 @@
   <!-- ── TIER 2 ── -->
   <div class="tier-label tier-2">
     <h2>Tier 2</h2>
-    <span class="tier-badge">Q4 2026 — Build Toward</span>
+    <span class="tier-badge">Q4 2026, Build Toward</span>
     <div class="line"></div>
   </div>
 
@@ -596,7 +602,7 @@
       </div>
       <div class="feature-body">
         <div class="feature-title">Nym Private Sync</div>
-        <div class="feature-desc">Route Loci sync traffic through the Nym mixnet. Metadata-invisible — no observer, including Nym's relays, can see what you're syncing or when. Fail-closed: if Nym routing fails, sync pauses. Never a silent fallback to unprotected state.</div>
+        <div class="feature-desc">Route Loci sync traffic through the Nym mixnet. Metadata-invisible, no observer, including Nym's relays, can see what you're syncing or when. Fail-closed: if Nym routing fails, sync pauses. Never a silent fallback to unprotected state.</div>
         <div class="feature-meta">
           <span class="tag persona">Kata · Cipher</span>
           <span class="tag">Nym · Mixnet · SOCKS5</span>
@@ -662,7 +668,7 @@
       </div>
       <div class="feature-body">
         <div class="feature-title">Tailscale Local Brain</div>
-        <div class="feature-desc">Loci running on a persistent Tailscale node — home server or VPS. Browser extension on any device connects to the same garden over the mesh. One sovereign brain, multiple clients, no cloud intermediary. Foundation for autonomous palace instances.</div>
+        <div class="feature-desc">Loci running on a persistent Tailscale node, home server or VPS. Browser extension on any device connects to the same garden over the mesh. One sovereign brain, multiple clients, no cloud intermediary. Foundation for autonomous palace instances.</div>
         <div class="feature-meta">
           <span class="tag persona">Cipher</span>
           <span class="tag">Tailscale · WireGuard · Persistent node</span>
@@ -676,7 +682,7 @@
   <!-- ── TIER 3 ── -->
   <div class="tier-label tier-3">
     <h2>Tier 3</h2>
-    <span class="tier-badge">2027 Horizon — Strategic Bets</span>
+    <span class="tier-badge">2027 Horizon, Strategic Bets</span>
     <div class="line"></div>
   </div>
 
@@ -700,14 +706,14 @@
   <!-- Sovereign stack recipe -->
   <div class="stack-recipe">
     <h3>The Sovereign Stack for Loci v1</h3>
-    <div class="stack-row"><span class="stack-layer">Inference</span><span class="stack-value">Ollama <span class="stack-note">— Llama 3, Mistral, Gemma</span></span></div>
-    <div class="stack-row"><span class="stack-layer">Embeddings</span><span class="stack-value">nomic-embed-text <span class="stack-note">— local semantic search</span></span></div>
-    <div class="stack-row"><span class="stack-layer">Vector DB</span><span class="stack-value">Chroma <span class="stack-note">— Apache 2.0, local</span></span></div>
-    <div class="stack-row"><span class="stack-layer">Agent</span><span class="stack-value">Goose / MCP <span class="stack-note">— reads + writes to your garden</span></span></div>
-    <div class="stack-row"><span class="stack-layer">Search</span><span class="stack-value">SearXNG or Kagi <span class="stack-note">— self-hosted or managed privacy</span></span></div>
-    <div class="stack-row"><span class="stack-layer">Identity</span><span class="stack-value">Nostr keypair <span class="stack-note">— NIP-07, secp256k1</span></span></div>
-    <div class="stack-row"><span class="stack-layer">Transport</span><span class="stack-value">Nym mixnet <span class="stack-note">— metadata-private sync</span></span></div>
-    <div class="stack-row"><span class="stack-layer">Network</span><span class="stack-value">Tailscale <span class="stack-note">— persistent brain, multi-device</span></span></div>
+    <div class="stack-row"><span class="stack-layer">Inference</span><span class="stack-value">Ollama<span class="stack-note">: Llama 3, Mistral, Gemma</span></span></div>
+    <div class="stack-row"><span class="stack-layer">Embeddings</span><span class="stack-value">nomic-embed-text<span class="stack-note">: local semantic search</span></span></div>
+    <div class="stack-row"><span class="stack-layer">Vector DB</span><span class="stack-value">Chroma<span class="stack-note">: Apache 2.0, local</span></span></div>
+    <div class="stack-row"><span class="stack-layer">Agent</span><span class="stack-value">Goose / MCP<span class="stack-note">: reads + writes to your garden</span></span></div>
+    <div class="stack-row"><span class="stack-layer">Search</span><span class="stack-value">SearXNG or Kagi<span class="stack-note">: self-hosted or managed privacy</span></span></div>
+    <div class="stack-row"><span class="stack-layer">Identity</span><span class="stack-value">Nostr keypair<span class="stack-note">: NIP-07, secp256k1</span></span></div>
+    <div class="stack-row"><span class="stack-layer">Transport</span><span class="stack-value">Nym mixnet<span class="stack-note">: metadata-private sync</span></span></div>
+    <div class="stack-row"><span class="stack-layer">Network</span><span class="stack-value">Tailscale<span class="stack-note">: persistent brain, multi-device</span></span></div>
   </div>
 
   <!-- Legend -->
@@ -719,15 +725,24 @@
     <div class="legend-item"><span class="legend-dot ld-sp"></span>Specced / ADR complete</div>
   </div>
 
-  <!-- Footer -->
-  <div class="footer">
-    <span>Loci.Garden · Sovereignty Roadmap · Last updated 2026-05-09</span>
-    <span>
-      <a href="https://loci.garden">loci.garden</a> ·
-      <a href="https://github.com/rainbow-zoku/loci-garden">GitHub</a> ·
-      <a href="https://nymtech.net">Built alongside Nym</a>
+<!-- #include partials/_footer.html -->
+<footer>
+  <div class="footer-inner">
+    <span style="font-family:var(--mono); font-size:0.72rem; color:var(--text-faint);">loci.garden &middot; built by Hux &times; Vesper</span>
+    <span style="font-family:var(--mono); font-size:0.72rem; color:var(--text-faint);">
+      <a href="/about.html" style="color:var(--text-faint);">about</a> &middot;
+      <a href="/roadmap.html" style="color:var(--text-faint);">roadmap</a> &middot;
+      <a href="/seed/" style="color:var(--text-faint);">seed</a> &middot;
+      <a href="/releases/" style="color:var(--text-faint);">releases</a> &middot;
+      <a href="/zoku/" style="color:var(--text-faint);">zoku</a> &middot;
+      <a href="https://github.com/rainbow-zoku/loci-garden/blob/main/CONTRIBUTING.md" style="color:var(--text-faint);" target="_blank" rel="noopener">contribute</a> &middot;
+      <a href="/privacy.html" style="color:var(--text-faint);">privacy</a> &middot;
+      <a href="/.well-known/security.txt" style="color:var(--text-faint);">security.txt</a> &middot;
+      <a href="/llms.txt" style="color:var(--text-faint);">llms.txt</a>
     </span>
   </div>
+</footer>
+<!-- /include -->
 
 </div>
   <script src="assets/nav-persona.js" defer></script>

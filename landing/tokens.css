@@ -1,0 +1,249 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   TOKENS.CSS — Single canonical design-token contract for loci.garden
+   Linked first on every page (landing + secondary). One source of truth.
+
+   Structure:
+     1. :root  — theme-INVARIANT spine (space, type scale, line-heights,
+                 weights, layout widths, nav height). Themes never touch these.
+     2. [data-theme="scholar"|"wizard"|"llmage"] — pure skins: colour + font +
+                 radius only. Each block also bridges the legacy loci.css token
+                 names (--bg-card, --text-dim, --serif, …) → canonical, so the
+                 existing component CSS in index.css + loci.css renders themed
+                 with no per-reference edits.
+
+   The legacy-alias bridge (marked ⟶ legacy) is intentional and TEMPORARY.
+   Phase 2 renames component references to canonical names and deletes the
+   aliases. Until then, this is what lets one switcher theme the whole site.
+
+   Themes are a depth ramp: scholar/ELI-5 (light) → wizard (charcoal) →
+   llmage (near-black). Spacing tightens and ground darkens down the ramp.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ───────────────────────────────────────────────────────────────────────────
+   1. THEME-INVARIANT SPINE  (geometry & rhythm — constant across all themes)
+   ─────────────────────────────────────────────────────────────────────────── */
+:root {
+  /* Spacing scale (8px base, 4 & 12 half-steps) */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+  --sp-8: 80px;
+
+  /* Type scale (body = 16px) */
+  --fs-xs:  12px;
+  --fs-sm:  14px;
+  --fs-md:  16px;
+  --fs-lg:  20px;
+  --fs-xl:  28px;
+  --fs-2xl: clamp(36px, 6vw, 64px);
+
+  /* Line-heights */
+  --lh-tight: 1.15;
+  --lh-body:  1.6;
+  --lh-prose: 1.78;
+  --lh-mono:  1.8;
+
+  /* Weights */
+  --fw-light:    300;
+  --fw-regular:  400;
+  --fw-medium:   500;
+  --fw-semibold: 600;
+  --fw-bold:     700;
+
+  /* Layout */
+  --maxw:       900px;   /* content + nav + footer outer width */
+  --maxw-prose: 660px;   /* long-form reading column (~66 chars) */
+  --nav-h:      60px;
+  --page-pad:   32px;
+
+  /* Radius fallbacks (themes override) */
+  --radius:    8px;
+  --radius-sm: 4px;
+
+  /* Font fallbacks (themes override) */
+  --font-body:    'Inter', system-ui, -apple-system, sans-serif;
+  --font-display: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono:    ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+   2a. ELI-5  ◆  [data-theme="scholar"]  — LIGHT  (cream paper, forest green)
+       The only light theme. Calm, legible, no texture. Friendliest radius.
+   ─────────────────────────────────────────────────────────────────────────── */
+[data-theme="scholar"] {
+  --bg:            #F7F5F0;
+  --bg-2:          #EEEAE1;
+  --surface:       #FFFFFF;
+  --border:        rgba(59,109,17,0.15);
+  --border-2:      rgba(59,109,17,0.25);
+  --text:          #1A2A0A;
+  --text-2:        #4A6020;
+  --text-3:        #8AAA60;
+  --accent:        #3B6D11;
+  --accent-light:  #97C459;
+  --accent-xlight: #C0DD97;
+  --accent-soft:   rgba(59,109,17,0.08);
+  --accent-glow:   rgba(151,196,89,0.3);
+  --nav-bg:        rgba(247,245,240,0.92);
+  --tag-bg:        rgba(59,109,17,0.08);
+  --tag-text:      #3B6D11;
+  --btn-bg:        #3B6D11;
+  --btn-text:      #FFFFFF;
+  --btn-hover:     #2d5408;
+  --switcher-bg:       #E8E3D8;
+  --switcher-pill:     #FFFFFF;
+  --switcher-text:     #3B6D11;
+  --switcher-inactive: #8AAA60;
+  --font-body:    'Inter', system-ui, sans-serif;
+  --font-display: 'Inter', system-ui, sans-serif;
+  --font-mono:    ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --radius:       12px;
+  --radius-sm:    8px;
+  --logo-filter:  none;
+
+  /* ⟶ legacy bridge */
+  --font-main:        var(--font-body);
+  --card-bg:          var(--surface);
+  --bg-surface:       var(--bg-2);
+  --bg-card:          var(--surface);
+  --border-soft:      var(--border);
+  --accent-dim:       var(--accent-soft);
+  --text-dim:         var(--text-2);
+  --text-faint:       var(--text-3);
+  --text-mono:        var(--text-2);
+  --serif:            var(--font-body);   /* serif body retired → sans */
+  --mono:             var(--font-mono);
+  --sans:             var(--font-body);
+  --radius-lg:        var(--radius);
+  --nav-height:       var(--nav-h);
+  --accent-vine:      var(--accent);
+  --accent-vine-light:var(--accent-light);
+  --accent-vine-hi:   var(--accent-light);
+  --accent-vine-soft: var(--accent-soft);
+  --accent-indigo:    var(--bg-2);
+  --accent-indigo-soft:var(--bg-2);
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+   2b. WIZARD  ⚔  [data-theme="wizard"]  — DARK  (charcoal, burnt amber)
+       Inter body + Press Start 2P display. Hero <h1> keeps Georgia (the one
+       intentional serif moment) via index.css's .hero-title override.
+   ─────────────────────────────────────────────────────────────────────────── */
+[data-theme="wizard"] {
+  --bg:            #0d0d0e;
+  --bg-2:          #131315;
+  --surface:       #14141c;
+  --border:        #252530;
+  --border-2:      #353540;
+  --text:          #e8e4dd;
+  --text-2:        #a09880;
+  --text-3:        #5a5a6a;
+  --accent:        #c87c2c;
+  --accent-light:  #e8974a;
+  --accent-xlight: #ffdd88;
+  --accent-soft:   rgba(200,124,44,0.10);
+  --accent-glow:   rgba(200,124,44,0.35);
+  --nav-bg:        rgba(13,13,14,0.92);
+  --tag-bg:        rgba(200,124,44,0.12);
+  --tag-text:      #e8974a;
+  --btn-bg:        #c87c2c;
+  --btn-text:      #0d0d0e;
+  --btn-hover:     #e8974a;
+  --switcher-bg:       #252530;
+  --switcher-pill:     #353540;
+  --switcher-text:     #e8974a;
+  --switcher-inactive: #5a5a6a;
+  --font-body:    'Inter', system-ui, sans-serif;
+  --font-display: 'Press Start 2P', monospace;
+  --font-mono:    'Courier New', Courier, monospace;
+  --radius:       4px;
+  --radius-sm:    2px;
+  --logo-filter:  none;
+
+  /* ⟶ legacy bridge */
+  --font-main:        var(--font-body);
+  --card-bg:          var(--surface);
+  --bg-surface:       var(--bg-2);
+  --bg-card:          var(--surface);
+  --border-soft:      var(--border);
+  --accent-dim:       var(--accent-soft);
+  --text-dim:         var(--text-2);
+  --text-faint:       var(--text-3);
+  --text-mono:        var(--text-2);
+  --serif:            var(--font-body);   /* serif body retired → sans */
+  --mono:             var(--font-mono);
+  --sans:             var(--font-body);
+  --radius-lg:        var(--radius);
+  --nav-height:       var(--nav-h);
+  --accent-vine:      var(--accent);
+  --accent-vine-light:var(--accent-light);
+  --accent-vine-hi:   var(--accent-light);
+  --accent-vine-soft: var(--accent-soft);
+  --accent-indigo:    var(--bg-2);
+  --accent-indigo-soft:var(--bg-2);
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+   2c. LLMAGE  ◈  [data-theme="llmage"]  — NEAR-BLACK  (mono, neutral grey)
+       Austere terminal. Austerity lives in chroma & ornament, NOT in dim text:
+       body --text-2 raised #9C9C9C → #B4B4B4 (≈9.6:1 on #080808) so the spec,
+       which IS the sell for devs, reads carved-not-whispered. --text-3 stays
+       sub-AA by design (decorative meta only, never body).
+   ─────────────────────────────────────────────────────────────────────────── */
+[data-theme="llmage"] {
+  --bg:            #080808;
+  --bg-2:          #0f0f0f;
+  --surface:       #111111;
+  --border:        rgba(255,255,255,0.07);
+  --border-2:      rgba(255,255,255,0.12);
+  --text:          #F0F0F0;
+  --text-2:        #B4B4B4;
+  --text-3:        #4A4A4A;
+  --accent:        #EBEBEB;
+  --accent-light:  #FFFFFF;
+  --accent-xlight: #FFFFFF;
+  --accent-soft:   rgba(255,255,255,0.05);
+  --accent-glow:   rgba(255,255,255,0.08);
+  --nav-bg:        rgba(8,8,8,0.95);
+  --tag-bg:        rgba(255,255,255,0.05);
+  --tag-text:      #B4B4B4;
+  --btn-bg:        #F0F0F0;
+  --btn-text:      #080808;
+  --btn-hover:     #FFFFFF;
+  --switcher-bg:       #1a1a1a;
+  --switcher-pill:     #2a2a2a;
+  --switcher-text:     #F0F0F0;
+  --switcher-inactive: #4A4A4A;
+  --font-body:    'Helvetica Neue', 'Arial', system-ui, sans-serif;
+  --font-display: 'Helvetica Neue', 'Arial', system-ui, sans-serif;
+  --font-mono:    ui-monospace, 'SF Mono', Menlo, 'Courier New', monospace;
+  --radius:       2px;
+  --radius-sm:    1px;
+  --logo-filter:  none;
+
+  /* ⟶ legacy bridge */
+  --font-main:        var(--font-body);
+  --card-bg:          var(--surface);
+  --bg-surface:       var(--bg-2);
+  --bg-card:          var(--surface);
+  --border-soft:      var(--border);
+  --accent-dim:       var(--accent-soft);
+  --text-dim:         var(--text-2);
+  --text-faint:       var(--text-3);
+  --text-mono:        var(--text-2);
+  --serif:            var(--font-body);   /* serif body retired → sans */
+  --mono:             var(--font-mono);
+  --sans:             var(--font-body);
+  --radius-lg:        var(--radius);
+  --nav-height:       var(--nav-h);
+  --accent-vine:      var(--accent);
+  --accent-vine-light:var(--accent-light);
+  --accent-vine-hi:   var(--accent-light);
+  --accent-vine-soft: var(--accent-soft);
+  --accent-indigo:    var(--bg-2);
+  --accent-indigo-soft:var(--bg-2);
+}

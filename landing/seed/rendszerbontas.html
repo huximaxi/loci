@@ -1,7 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html data-theme="scholar" lang="en">
 <head>
+<script>
+(function(){try{var t=localStorage.getItem("loci-theme");if(["scholar","wizard","llmage"].indexOf(t)===-1)t="scholar";document.documentElement.setAttribute("data-theme",t);}catch(e){document.documentElement.setAttribute("data-theme","scholar");}})();
+</script>
   <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Cpolygon%20points='50,5%2020,50%2050,50'%20fill='%23ffcc44'/%3E%3Cpolygon%20points='50,5%2080,50%2050,50'%20fill='%23e8861a'/%3E%3Cpolygon%20points='20,50%2050,95%2050,50'%20fill='%23c87c2c'/%3E%3Cpolygon%20points='80,50%2050,95%2050,50'%20fill='%237a3a08'/%3E%3C/svg%3E">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rendszerbontás: How Dance Floors Defeated a Semi-Autocracy | loci.garden</title>
   <meta name="description" content="A technosocial analysis of how decentralised cultural strategies and embodied politics defeated authoritarian institutional power in Hungary's 2026 democratic transition.">
@@ -44,9 +48,9 @@
   }
   </script>
   <meta name="robots" content="index, follow">
-  <link rel="alternate" type="text/plain" href="/llms.txt" title="AI context declaration — loci.garden">
-  <link rel="stylesheet" href="../style.css">
-  <link rel="stylesheet" href="../style-wizard.css">
+  <link rel="alternate" type="text/plain" href="/llms.txt" title="AI context declaration, loci.garden">
+  <link rel="stylesheet" href="../tokens.css">
+  <link rel="stylesheet" href="../loci.css">
   <script src="../skin-toggle.js" defer></script>
   <style>
 
@@ -218,7 +222,7 @@
       opacity: 0.7;
     }
 
-    /* Lightweight tabulation — responsive across all viewports.
+    /* Lightweight tabulation, responsive across all viewports.
        .table-wrap allows horizontal scroll when a table overflows.
        .data-table.compare stacks into a vertical list on narrow screens. */
     .table-wrap {
@@ -379,7 +383,7 @@
       margin-bottom: 0.5rem;
     }
 
-    /* Dispatch brief — orientation block for scanners and sociologists.
+    /* Dispatch brief, orientation block for scanners and sociologists.
        Sits between lang-toggle and ToC. Sells the piece in under 30 seconds. */
     .dispatch-brief {
       background: var(--bg-card);
@@ -754,13 +758,13 @@
           color: #888888;
         }
         @bottom-left {
-          content: "© Daniel G. Nemet — ELTE Interdisciplinary Doctoral School of Social Sciences — trust.xyz";
+          content: "© Daniel G. Nemet, ELTE Interdisciplinary Doctoral School of Social Sciences, trust.xyz";
           font-size: 6.5pt;
           font-family: 'Courier New', monospace;
           color: #888888;
         }
         @bottom-right {
-          content: "v2.1 — 2026-04-18 — p. " counter(page) " / " counter(pages);
+          content: "v2.1, 2026-04-18, p. " counter(page) " / " counter(pages);
           font-size: 6.5pt;
           font-family: 'Courier New', monospace;
           color: #888888;
@@ -808,34 +812,36 @@
     .ribbon-link:hover { opacity: 1; }
   </style>
 
-  <nav>
-    <div class="nav-container">
-      <div class="nav-logo-group">
-        <a href="/" class="logo">loci.garden</a>
-        <div class="nav-persona-mini" role="group" aria-label="Return as persona">
-          <button class="persona-mini-btn" data-theme="scholar" title="Return as Scholar" aria-label="Return as Scholar">◆</button>
-          <button class="persona-mini-btn" data-theme="wizard"  title="Return as Wizard"  aria-label="Return as Wizard">⚔</button>
-          <button class="persona-mini-btn" data-theme="llmage"  title="Return as LLMAGE"  aria-label="Return as LLMAGE">◈</button>
-        </div>
-      </div>
+  <!-- #include partials/_nav.html -->
+<nav>
+  <div class="nav-container">
+    <div class="nav-logo-group">
+      <a href="/" class="logo">loci.garden</a>
+    </div>
+    <div class="nav-right">
       <div class="nav-links">
-        <a href="https://github.com/huximaxi/loci" class="nav-link nav-icon" aria-label="GitHub" title="GitHub">
+        <a href="https://github.com/rainbow-zoku/loci-garden" class="nav-link nav-icon" aria-label="GitHub" title="GitHub">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
         </a>
-        <a href="/" class="nav-link">home</a>
-        <a href="../seed/" class="nav-link">seed</a>
-        <a href="../about.html" class="nav-link">about</a>
-        <a href="../guide.html" class="nav-link">guide</a>
-        <a href="https://docs.loci.garden" class="nav-link" target="_blank" rel="noopener">docs</a>
-        <a href="../llms.txt" class="nav-link">llms.txt</a>
+        <a href="/download.html" class="nav-link" data-page="download">download</a>
+        <a href="/guide.html" class="nav-link" data-page="guide">guide</a>
+        <a href="/manifesto.html" class="nav-link" data-page="manifesto">manifesto</a>
+      </div>
+      <div class="theme-switcher" role="group" aria-label="Choose experience mode">
+        <button class="theme-btn" id="btn-scholar" onclick="setTheme('scholar')" aria-pressed="true">◆ ELI-5</button>
+        <button class="theme-btn" id="btn-wizard"  onclick="setTheme('wizard')"  aria-pressed="false">⚔ Wizard</button>
+        <button class="theme-btn" id="btn-llmage"  onclick="setTheme('llmage')"  aria-pressed="false">◈ LLMAGE</button>
       </div>
     </div>
-  </nav>
+  </div>
+  <script defer src="/theme.js"></script>
+</nav>
+<!-- /include -->
 
   <main class="page-content">
     <div class="article-container">
       <article class="article-prose">
-        <div class="version-notice" data-i18n="rendszerbontas.en.version_notice_en">Version 2.1 — April 18, 2026 — Post-processing update. Postal, foreign-mission, and transferred votes fully incorporated. Final mandates: Tisza 141, Fidesz-KDNP 52, Mi Hazánk 6.</div>
+        <div class="version-notice" data-i18n="rendszerbontas.en.version_notice_en">Version 2.1, April 18, 2026, Post-processing update. Postal, foreign-mission, and transferred votes fully incorporated. Final mandates: Tisza 141, Fidesz-KDNP 52, Mi Hazánk 6.</div>
         <div class="lang-toggle">
           <button id="lang-en" class="active" data-lang="en">EN</button>
           <button id="lang-hu" data-lang="hu">HU</button>
@@ -847,15 +853,15 @@
 
         <aside class="dispatch-brief" aria-label="Dispatch brief">
           <p class="brief-label">Dispatch brief · 45-min read</p>
-          <h2 class="brief-thesis">Hungary's April 12, 2026 election produced a constitutional supermajority for a party that barely existed 18 months earlier — at the highest turnout in 24 years. The decisive mechanism was not a political campaign but a cultural one.</h2>
-          <p class="brief-lede">The surge came from the return of the <em>politically lapsed</em> — people who had voted before, stopped, and came back. What called them back was a seven-hour concert on Hősök tere, a techno movement in front of Parliament, and the platform-native distribution that made both legible to a generation the state-captured media apparatus had ignored into existence.</p>
+          <h2 class="brief-thesis">Hungary's April 12, 2026 election produced a constitutional supermajority for a party that barely existed 18 months earlier, at the highest turnout in 24 years. The decisive mechanism was not a political campaign but a cultural one.</h2>
+          <p class="brief-lede">The surge came from the return of the <em>politically lapsed</em>, people who had voted before, stopped, and came back. What called them back was a seven-hour concert on Hősök tere, a techno movement in front of Parliament, and the platform-native distribution that made both legible to a generation the state-captured media apparatus had ignored into existence.</p>
 
           <div class="brief-section">
             <h3>By the numbers</h3>
             <div class="brief-stats">
               <div class="brief-stat">
                 <span class="stat-num">79.55%</span>
-                <span class="stat-label">Domestic turnout — highest since 2002</span>
+                <span class="stat-label">Domestic turnout, highest since 2002</span>
               </div>
               <div class="brief-stat">
                 <span class="stat-num">141 / 199</span>
@@ -883,14 +889,14 @@
           <div class="brief-section">
             <h3>Theoretical anchors</h3>
             <ul class="brief-anchors">
-              <li><strong>Luhmann</strong> — trust as complexity reduction</li>
-              <li><strong>Habermas</strong> — system colonising the life-world</li>
-              <li><strong>Rancière</strong> — redistribution of the sensible</li>
-              <li><strong>Popović / Otpor</strong> — humour as authoritarian-incompatible tactic</li>
-              <li><strong>Szendrői</strong> — grains of sand recognised as a golem</li>
-              <li><strong>Dawkins, Blackmore</strong> — memeplex replication</li>
-              <li><strong>Kripal, Davis</strong> — egregore as emergent collective entity</li>
-              <li><strong>Stigmergy</strong> — coordination through environmental traces, no central controller</li>
+              <li><strong>Luhmann</strong>, trust as complexity reduction</li>
+              <li><strong>Habermas</strong>, system colonising the life-world</li>
+              <li><strong>Rancière</strong>, redistribution of the sensible</li>
+              <li><strong>Popović / Otpor</strong>, humour as authoritarian-incompatible tactic</li>
+              <li><strong>Szendrői</strong>, grains of sand recognised as a golem</li>
+              <li><strong>Dawkins, Blackmore</strong>, memeplex replication</li>
+              <li><strong>Kripal, Davis</strong>, egregore as emergent collective entity</li>
+              <li><strong>Stigmergy</strong>, coordination through environmental traces, no central controller</li>
             </ul>
           </div>
 
@@ -935,7 +941,7 @@
           <p>Domestic turnout: 79.55% (5,950,192 of 7,480,060 registered voters). The highest since 2002. The denominator moved.</p>
           <p>Tisza Party: 141 seats. Constitutional supermajority threshold: 133 (2/3 of 199). Cleared. The system Viktor Orbán had engineered for sixteen years, the constitutional lock-in, the media monopoly, the administrative közmunka as voter control, had been dismantled in a single election cycle.</p>
           <p>Fidesz-KDNP: from government to 52 seats. Not a loss. A fracture.</p>
-          <p>The numbers contain a structural paradox that matters for understanding what happened. Hungary uses a dual voting system: 106 seats are determined by individual constituency races (first-past-the-post, one candidate per district), and 93 seats are allocated through a national proportional party list. On the party list, Fidesz-KDNP received 2,355,857 votes (39.45%), earning 42 seats. Tisza received 3,115,323 votes (52.17%), earning 45 seats. A narrow 3-seat edge on the list despite a 12-point gap in list vote share — an artifact of Hungary's fragment-vote compensation, which adds losing constituency ballots to the list count and historically rewarded Fidesz's dispersed rural base. On individual constituencies, the result was 96 to 10 in Tisza's favour after final processing of postal, foreign-mission, and transferred votes (NVI, April 18, 2026, at 99.93% processing; earlier partial counts showed 93:13 on April 14 and 92:14 before that, with each tranche of out-of-country ballots pushing the scales further for Tisza). This is the geometry of gerrymandering unwinding: the system had been optimised to convert dispersed Fidesz rural support into concentrated constituency wins, but when the swing reached threshold, the same architecture delivered a supermajority to the other side.</p>
+          <p>The numbers contain a structural paradox that matters for understanding what happened. Hungary uses a dual voting system: 106 seats are determined by individual constituency races (first-past-the-post, one candidate per district), and 93 seats are allocated through a national proportional party list. On the party list, Fidesz-KDNP received 2,355,857 votes (39.45%), earning 42 seats. Tisza received 3,115,323 votes (52.17%), earning 45 seats. A narrow 3-seat edge on the list despite a 12-point gap in list vote share, an artifact of Hungary's fragment-vote compensation, which adds losing constituency ballots to the list count and historically rewarded Fidesz's dispersed rural base. On individual constituencies, the result was 96 to 10 in Tisza's favour after final processing of postal, foreign-mission, and transferred votes (NVI, April 18, 2026, at 99.93% processing; earlier partial counts showed 93:13 on April 14 and 92:14 before that, with each tranche of out-of-country ballots pushing the scales further for Tisza). This is the geometry of gerrymandering unwinding: the system had been optimised to convert dispersed Fidesz rural support into concentrated constituency wins, but when the swing reached threshold, the same architecture delivered a supermajority to the other side.</p>
           <p>Péter Magyar's victory address: "Mától ez az ország újra él" (From today, this country lives again). Orbán's concession was the shortest of his career: "Mi ellenzékből is a hazánkat fogjuk szolgálni" (We will serve our country from opposition too). Realpolitik, not grandstanding. The forint rallied immediately.</p>
           <p>But the data pose a puzzle for conventional political science. Tisza's campaign was rapid. Péter Magyar was charismatic. Yet the opposition had been organised, polished, and sophisticated for over a decade without moving the needle. What shifted between 2022 and 2026 that produced Hungary's highest turnout in 24 years?</p>
           <p>The constituency-level participation data (reszvetel_oevk_adatok, NVI, April 12, 2026) reveals a striking structural finding: the net change in registered voters who cast a ballot, compared to 2022, was negative 139,794 nationwide. The turnout surge was not driven by first-time or newly registered voters. It was driven by the return of the previously disengaged: people who had voted in earlier cycles, abstained in 2022, and came back in 2026. Budapest alone accounts for 68,369 of those returnees, with the highest concentrations in districts 3, 12, and 2. This distinction matters enormously for understanding the mobilisation mechanism. Concerts and cultural events do not primarily reach people who have never had a political identity. They reach people who had one, lost it, and need permission to reclaim it. <span class="accent-word">The Rendszerbontó's audience was not the politically naive. It was the politically lapsed.</span></p>
@@ -1039,7 +1045,7 @@
           <p>The "macskás fadíszes" (cat ornament) concerts and related events that prefigured the Rendszerbontó began circulating in the summer of 2025, well before the election campaign, establishing the infrastructure of cultural mobilisation that would scale in April 2026. The most prominent venue-closure precedent was Turbina, one of Budapest's largest independent cultural venues, known for hosting events that skewed young, politically aware, and system-critical. Turbina was subject to police operations that its community documented and contested publicly. The closures and their aftermath generated sustained protests and grassroots mobilisation that, in retrospect, served as a rehearsal for the larger movement. Young Budapestians who had mobilised to defend a club space had already practised the muscles of collective civic action. The concert that followed built on those muscles. Specific closure dates and procedural records remain subject to source confirmation from Hungarian-language documentation.</p>
           <h3>Budapest Nightlife Advocacy and the Night Mayor Movement</h3>
           <p>The Night Mayor movement had a prior life before it became invisible. In the years before the COVID pandemic, a grassroots nightlife advocacy infrastructure had been taking shape in Budapest: venue operators, promoters, artists, and nightlife-adjacent communities organising collectively to gain policy standing for a sector the formal political system had consistently treated as a regulatory problem rather than a civic asset. Budapest had been developing its own version of the Night Mayor model, pioneered in Amsterdam, which formalises the relationship between municipal government and nightlife culture as economic and social infrastructure. Budapest Spots, a programme developed in partnership with Magyar Telekom, built digital infrastructure for independent venues, helping them navigate the administrative landscape. Advocacy efforts secured VAT exemptions for digital tipping in hospitality venues. During the pandemic, a successful campaign produced free terrace permits for all hospitality venues for extended periods. Crucially, nightlife and cultural development recommendations were prepared and submitted to several of the legacy political parties, offering a policy architecture the opposition could adopt. The scene had earned enough credibility to recommend legislation.</p>
-          <p>COVID broke the momentum of the formal structures, but not of the networks themselves. The movement's social media communities, managed as groups through the shutdown years, were transferred to two culturally affiliated young organisers who carried that audience forward. Both were subsequently elected as civil servant representatives to the Budapest municipality — in minority positions, but with formal civic standing. The opposition-governed local government that came to power after the 2019 municipal elections, which would go on to host the first official Tisza constituency representation in any election at all, did not formally adopt the nightlife policy framework. The institutional bridge remained unbuilt. The social one did not.</p>
+          <p>COVID broke the momentum of the formal structures, but not of the networks themselves. The movement's social media communities, managed as groups through the shutdown years, were transferred to two culturally affiliated young organisers who carried that audience forward. Both were subsequently elected as civil servant representatives to the Budapest municipality, in minority positions, but with formal civic standing. The opposition-governed local government that came to power after the 2019 municipal elections, which would go on to host the first official Tisza constituency representation in any election at all, did not formally adopt the nightlife policy framework. The institutional bridge remained unbuilt. The social one did not.</p>
           <p>What remained persisted at smaller scale. Localised advocacy around specific squares and neighbourhoods, Madách tér among the more visible examples, kept the networks alive and the arguments rehearsed. Youth culture continued to carry the political valence of the scene even after its formal advocacy apparatus had gone quiet. By the time Polgári Ellenállás (Civil Resistance) was organising what would become the Rendszerbontó Nagykoncert, this residual cultural infrastructure, experienced in collective action, shaped by years of institutional neglect, and internally coherent, was precisely the soil it needed. The concert did not mobilise a passive scene. It reactivated one that had been practising, in reduced form, for years.</p>
           <h3>The Concert as Embodiment, Not Cause</h3>
           <p>This context reframes the Rendszerbontó and Több technót movements. <span class="accent-word">They were not the cause of youth mobilisation. They were its embodiment.</span> The decision to vote had already been forming in the accumulated frustrations of a generation: the forint eroding their savings, home ownership becoming a myth, drug law enforcement closing their spaces, an entire political system that communicated through its every action that their generation's preferences were irrelevant. The concerts gave that pre-existing collective will a form, a moment of recognition. The crowd at Hősök tere was not being convinced of something new; it was recognising something it already knew.</p>
@@ -1181,10 +1187,10 @@
 
           <blockquote>
             <p>"Valószínűleg globálisan is médiatörténelmi a pillanat, demokráciának nevezett országokban pedig biztosan példátlan: egy olyan ember vezetésével nyert kétharmados többséget egy két esztendeje még nem is létező politikai erő, aki – annak ellenére, hogy másfél éve vezet a közvéleménykutatásokban – még soha nem szerepelt a saját hangján a köztévében illetve közrádióban; és akiről az állami tájékoztatási rendszer közönsége csak azt tudja, amit az ellenoldal, ellenérdekelt fél fontosnak tartott közölni róla, leginkább különféle lejáratások formájában."</p>
-            <p><em>"This moment is probably a historic one in media terms globally, and certainly unprecedented in countries that call themselves democracies: a two-thirds majority was won under the leadership of a man — who despite leading opinion polls for a year and a half — has never appeared in his own voice on state television or state radio; and about whom the state information system's audience only knows what the opposing, adversely-interested party considered important to share, mostly in the form of various smear campaigns."</em> (Hargitai, 2026)</p>
+            <p><em>"This moment is probably a historic one in media terms globally, and certainly unprecedented in countries that call themselves democracies: a two-thirds majority was won under the leadership of a man, who despite leading opinion polls for a year and a half, has never appeared in his own voice on state television or state radio; and about whom the state information system's audience only knows what the opposing, adversely-interested party considered important to share, mostly in the form of various smear campaigns."</em> (Hargitai, 2026)</p>
           </blockquote>
 
-          <p>Hargitai's formulation is precise: the blackout was not incidental. It was structural. The state media system produced an electorate that had never heard the winning candidate speak. That electorate voted for him anyway — at the highest turnout in 24 years — because they had been reached through channels the system did not control and did not understand.</p>
+          <p>Hargitai's formulation is precise: the blackout was not incidental. It was structural. The state media system produced an electorate that had never heard the winning candidate speak. That electorate voted for him anyway, at the highest turnout in 24 years, because they had been reached through channels the system did not control and did not understand.</p>
 
           <hr style="border: none; border-top: 1px solid var(--border); margin: 2rem 0;">
         </section>
@@ -1211,7 +1217,7 @@
           <p>The state could not suppress this because it operated outside the channels the state controlled. You cannot shut down TikTok because you do not control it. You cannot prevent artists from posting because they have audiences outside your territory. You cannot prevent dancing because a rave is not a discrete political event; it is pleasure.</p>
           <p>And pleasure, as political technology, is asymmetric. You can suppress a march; you send police. You can suppress a rally; you arrest organisers. You cannot suppress people dancing, because people have a fundamental right to move their bodies to music. <span class="accent-word">The pleasure is the politics. The joy is the resistance.</span></p>
           <table class="data-table compare">
-            <caption>The asymmetry — institutional vs. cultural power</caption>
+            <caption>The asymmetry, institutional vs. cultural power</caption>
             <thead>
               <tr>
                 <th scope="col">Axis</th>
@@ -1306,12 +1312,12 @@
           <p>Macroscale metrics and theoretical frameworks are necessary but not sufficient. We must also ground this analysis in observed reality, on the ground, at polling stations.</p>
           <h3>Field Observation Methodology</h3>
           <p>Field observer Daniel G.N. served as contracted translator for two international Short-Term Observers (STOs) from Poland and Kazakhstan, operating in a strictly passive, inquiry-only role as defined by contractual conditions with each representative. In addition to translation duties, Daniel G.N. coordinated logistics including accommodation changes across the observation period. The observation day began at 05:00 with opening procedures at the translator's own voting station (Salgótarján, Station #043), continued across 15 polling stations throughout Nógrád OEVK 01 (electoral district 01, Nógrád County), and concluded at approximately 04:00 the following morning at the central electoral office in Salgótarján, where the head-secretary walked the team through the final steps of results tabulation. A 23-hour observation window. The team moved through polling stations observing delegate behaviour, voter sentiment, administrative conduct, and the broader affective atmosphere, with the translator providing cultural and linguistic context for the international observers throughout.</p>
-          <p>The 15 stations visited covered urban, peri-urban, and rural contexts across Nógrád County: from Salgótarján (county seat, urban) to smaller towns and villages where közmunka employment was widespread and where voter suppression had historically been more severe. Nógrád County's overall turnout reached 76.10% (constituency-level data shows 74.71% in OEVK 01 and 76.75% in OEVK 02), roughly three percentage points below the national domestic figure of 79.55% — consistent with the historical pattern of lower participation in economically marginalised, közmunka-dependent communities. The county's party list vote, covering both constituencies, was closer than the OEVK 01 single-seat result suggests: TISZA 46.82%, Fidesz-KDNP 44.12%, Mi Hazánk 7.49% — a 2.7-point margin on the list, compared to the 10.6-point constituency margin in OEVK 01. Nógrád OEVK 02 was in fact retained by Fidesz (Balla Mihály, 45.84%), making it one of the ten constituencies nationally where Fidesz held on after final post-processing (down from thirteen in the April 14 partial count, as out-of-country ballots pushed three further districts to Tisza). The county was genuinely contested territory, not a clean flip.</p>
+          <p>The 15 stations visited covered urban, peri-urban, and rural contexts across Nógrád County: from Salgótarján (county seat, urban) to smaller towns and villages where közmunka employment was widespread and where voter suppression had historically been more severe. Nógrád County's overall turnout reached 76.10% (constituency-level data shows 74.71% in OEVK 01 and 76.75% in OEVK 02), roughly three percentage points below the national domestic figure of 79.55%, consistent with the historical pattern of lower participation in economically marginalised, közmunka-dependent communities. The county's party list vote, covering both constituencies, was closer than the OEVK 01 single-seat result suggests: TISZA 46.82%, Fidesz-KDNP 44.12%, Mi Hazánk 7.49%, a 2.7-point margin on the list, compared to the 10.6-point constituency margin in OEVK 01. Nógrád OEVK 02 was in fact retained by Fidesz (Balla Mihály, 45.84%), making it one of the ten constituencies nationally where Fidesz held on after final post-processing (down from thirteen in the April 14 partial count, as out-of-country ballots pushed three further districts to Tisza). The county was genuinely contested territory, not a clean flip.</p>
           <h3>Delegated Observation at Station #034, Déryné út 1, Salgótarján</h3>
           <p>Station #034 in Salgótarján provides a precise quantitative focal point, but it requires contextualisation to be legible.</p>
           <p>The station registered 876 eligible voters. Of these, 427 appeared to vote (48.74% turnout), producing 416 valid ballots. The station counted ballots four separate times, each arriving at identical results. Distribution: Fidesz 250 (60.10%), Tisza 137 (32.93%), Mi Hazánk 24 (5.77%), Szolidaritás 5 (1.20%).</p>
           <p>At first glance this appears to show a comfortable Fidesz victory at a single station. But three pieces of context make it analytically interesting.</p>
-          <p>First: the turnout. National domestic turnout on election day was 79.55%. Station #034's turnout was 48.74%, a deviation of nearly 31 percentage points below the national figure. This is not random variation. This station sits in a közmunka-heavy neighbourhood where administered vote buying had historically driven artificially high Fidesz turnout. In previous election cycles, this type of station would see buses arrive carrying voters whose ballots had been effectively pre-arranged. On this election day, civilian activists from DE! (Demokratikus Ellenállás) and local volunteers stood outside polling stations across Salgótarján, filming, asking questions, and distributing printed excerpts of Hungarian law noting that both selling and purchasing votes are criminal offences. This likely deterred or at minimum complicated the organised transport of coerced voters that characterised previous cycles in this type of neighbourhood — a common enough pattern in közmunka-dependent areas to be historically documented, even where individual instances resist legal proof. The turnout depression was consistent with the signature of successful vote-buying deterrence, though causal attribution at the station level remains inferential. Fewer people appeared precisely because the coercion mechanism had been interrupted.</p>
+          <p>First: the turnout. National domestic turnout on election day was 79.55%. Station #034's turnout was 48.74%, a deviation of nearly 31 percentage points below the national figure. This is not random variation. This station sits in a közmunka-heavy neighbourhood where administered vote buying had historically driven artificially high Fidesz turnout. In previous election cycles, this type of station would see buses arrive carrying voters whose ballots had been effectively pre-arranged. On this election day, civilian activists from DE! (Demokratikus Ellenállás) and local volunteers stood outside polling stations across Salgótarján, filming, asking questions, and distributing printed excerpts of Hungarian law noting that both selling and purchasing votes are criminal offences. This likely deterred or at minimum complicated the organised transport of coerced voters that characterised previous cycles in this type of neighbourhood, a common enough pattern in közmunka-dependent areas to be historically documented, even where individual instances resist legal proof. The turnout depression was consistent with the signature of successful vote-buying deterrence, though causal attribution at the station level remains inferential. Fewer people appeared precisely because the coercion mechanism had been interrupted.</p>
           <p>Second: what the 60% Fidesz figure actually means. Nógrád OEVK 01 as a whole was a traditional Fidesz stronghold. In previous cycles, individual stations in közmunka-dependent neighbourhoods typically recorded Fidesz support in the 70-90% range. A 60% figure, in this context, represents a meaningful erosion of the coerced bloc. The authentic Fidesz vote, once the fraudulent component was reduced, appears to be considerably lower than the historical numbers suggested.</p>
           <p>Third: the constituency outcome. Despite stations like #034, Nógrád OEVK 01 as a whole flipped: Tisza's candidate Szafkó Zoltán Péter won with 25,891 votes (51.02%) against Fidesz's Becsó Zsolt with 20,523 votes (40.44%), a margin of 10.58 percentage points. The station's result reflects a concentrated Fidesz remnant in a specific neighbourhood; the constituency surrounding it had moved.</p>
           <p>The analytical point is not that this single station "cracked Fidesz." It is that the combination of civic deterrence (reducing the fraudulent bloc), authentic voter shift (Tisza gaining genuine support across the district), and the broader constituency result together demonstrate how the systemic mechanisms of Fidesz voter control began to fail when faced with organised, decentralised civilian resistance on the ground.</p>
@@ -1401,7 +1407,7 @@
           <h3>Affect Theory and the Politics of Feeling</h3>
           <p>Sara Ahmed's work on "orientation" and collective movement (Ahmed, 2006) provides a foundation. Ahmed argues that what we call "politics" is fundamentally about feeling oriented toward something, moving toward it collectively. The Rendszerbontó was not rhetoric about change; it was the embodied experience of moving together toward something. The crowd itself was the political subject. The seven hours of dancing, singing, moving was not entertainment supplementary to politics; it was politics itself.</p>
           <p>Sianne Ngai's concept of "ugly feelings" and "strangeness" (Ngai, 2007) also applies. The affect produced by sixteen years of soft authoritarianism is not rage or clear anger; it is a strange, disorienting mixture of contempt, exhaustion, and suppressed hope. The Rendszerbontó converted that strange affect into joy and possibility. It transformed contempt into agency. The transformation itself was the politics.</p>
-          <p>Erich Fromm, in The Art of Loving (1956), drawing on Nietzsche, identifies the beat concert as an expression of "orgiastic togetherness" — a temporary but profound dissolution of the separateness that characterises modern individualism. Fromm argues that human beings experience loneliness as the fundamental condition of being a self, and seek its resolution through various forms of union. The orgiastic state, induced by rhythm, collective movement, and shared ecstasy, produces the experience of dissolving individual boundary into collective body. Friedrich Nietzsche's original account of the Dionysian experience, in The Birth of Tragedy (1872), captures this with near-reportorial precision: the suspension of the principium individuationis, the merger of the individual into the larger being of community and world, the ecstatic recognition that one belongs to something that exceeds oneself. Nietzsche's evocation, written about Greek tragedy and festival, reads almost as contemporary reportage from a beat concert.</p>
+          <p>Erich Fromm, in The Art of Loving (1956), drawing on Nietzsche, identifies the beat concert as an expression of "orgiastic togetherness", a temporary but profound dissolution of the separateness that characterises modern individualism. Fromm argues that human beings experience loneliness as the fundamental condition of being a self, and seek its resolution through various forms of union. The orgiastic state, induced by rhythm, collective movement, and shared ecstasy, produces the experience of dissolving individual boundary into collective body. Friedrich Nietzsche's original account of the Dionysian experience, in The Birth of Tragedy (1872), captures this with near-reportorial precision: the suspension of the principium individuationis, the merger of the individual into the larger being of community and world, the ecstatic recognition that one belongs to something that exceeds oneself. Nietzsche's evocation, written about Greek tragedy and festival, reads almost as contemporary reportage from a beat concert.</p>
           <p>At Hősök tere, 80,000 to 100,000 people moved together for seven hours. This was not entertainment supplementary to politics. It was, in Fromm's and Nietzsche's terms, the phenomenological creation of a collective political subject: the experience of being, for a sustained duration, one body rather than many dispersed individuals. The memeplex/egregore framework describes the structural consequences of that experience. Fromm and Nietzsche describe it from the inside.</p>
           <h3>Distribution of the Sensible (Rancière)</h3>
           <p>Jacques Rancière's "distribution of the sensible" (Rancière, 2004) directly illuminates these events. Rancière argues that politics is fundamentally about who is visible, audible, countable, and thinkable as a political subject. In Orbán's Hungary, young voters were visible as a demographic, audible through platform algorithms, but not countable or thinkable as legitimate political actors. The state media did not show them as political subjects. The institutional frame rendered them as consumable products, not political citizens.</p>
@@ -1491,7 +1497,7 @@
           <p><strong>Social Media Reach Analysis:</strong> The "Rendszerbontó Nagykoncert Social Media Reach Analysis, compiled April 14, 2026" is a dataset compiled by cross-referencing artist Instagram, TikTok, YouTube, and Facebook follower counts (captured April 10-12, 2026 for consistency) with verified reach metrics from platform analytics where accessible. For the Szélsőközép YouTube livestream, viewership metrics were accessed from YouTube's public view counter and concurrent viewer data visible during the broadcast. For artists' social media reach, follower counts are verified through platform APIs where possible; where not possible, screenshotted from the platforms themselves.</p>
           <p>Overlap and deduplication: The challenge with combined reach analysis is that individuals appear across multiple platforms and follow multiple artists. The 40-60% overlap rate used in this essay is derived from industry studies on multi-platform usage. For Hungary specifically, Statista data on social media penetration indicates approximately 85% of internet users aged 18-35 maintain accounts on both Instagram and TikTok, approximately 75% use Facebook, and approximately 55% watch YouTube regularly. The 40-60% figure conservatively accounts for this overlap at the level of the artist audience specifically, rather than general population.</p>
           <p><strong>Attendance and Livestream Data:</strong> Physical attendance figures (80,000-100,000) are derived from independent news reports by 444.hu, Index.hu, and HVG.hu. These outlets independently estimated capacity and overflow. No single source provided the estimate; the range reflects the variation across these independent reports. The livestream concurrent viewer peak (122,000 on Szélsőközép YouTube, 25,000+ on Telex) is drawn from publicly visible YouTube concurrent viewer data during the April 10, 2026 broadcast. The extrapolation from peak concurrent to unique viewers (400,000-700,000) uses the 3-5x multiplier standard in digital media analysis; this accounts for viewers who joined at different times, watched for partial durations, or watched multiple segments.</p>
-          <p><strong>Turnout and Electoral Data:</strong> Domestic turnout figures are sourced from the official Hungarian electoral commission results page (NVI/Nemzeti Választási Iroda, vtr.valasztas.hu). The domestic turnout figure used throughout this essay — 79.55% (5,950,192 of 7,480,060 registered domestic voters) — is drawn from the official NVI results at 99.09% of stations processed (April 14, 2026). A separate JSON export from the same source at 98.47% processing showed a blended overall figure of 77.88% that included outstanding postal votes from approximately 251,000 postal registrants; the domestic figure of 79.55% is the correct comparator for conventional electoral analysis. Constituency-level participation data (reszvetel_oevk_adatok.csv, NVI) provides turnout per OEVK at 19:00 poll close, covering all 106 constituencies; national aggregate from this dataset: 78.99% (5,716,721 of 7,236,993), consistent with the domestic figure after accounting for postal registrants excluded from the OEVK-level file. Station #034 turnout (48.74%) is from the official signed protocol document (OGY-EK-13-103-034). National party list results: TISZA 3,115,323 votes (52.17%), Fidesz-KDNP 2,355,857 (39.45%), Mi Hazánk 342,973 (5.74%), sourced from NVI JSON export. Final seat allocation (NVI, April 18, 2026, 14:43 CET, at 99.93% processing, after postal, foreign-mission, and transferred votes were fully counted): TISZA 141 (96 constituency + 45 list), Fidesz-KDNP 52 (10 constituency + 42 list), Mi Hazánk 6 (0 + 6) — constituency wins confirmed from oevk_single_eredmenyek.csv (NVI); list seat allocation from NVI JSON. An earlier snapshot at 99.09% processing on April 14 had shown TISZA 136 (93 + 43) / Fidesz-KDNP 57 (13 + 44) / Mi Hazánk 6 before out-of-country and postal ballots were fully incorporated; the three constituency shifts (Tisza +3, Fidesz −3) trace directly to foreign-mission and transferred-vote tranches. List vote totals and percentages quoted in §1 reflect the April 14 snapshot. Nógrád OEVK 01 constituency results: TISZA 51.02%, Fidesz-KDNP 40.44%, Mi Hazánk 7.90%, turnout 74.71%. Nógrád OEVK 02: Fidesz-KDNP 45.84%, TISZA 42.75%, turnout 76.75%. Nógrád county list vote: TISZA 46.82%, Fidesz-KDNP 44.12%. Nógrád county overall turnout: 76.10%.</p>
+          <p><strong>Turnout and Electoral Data:</strong> Domestic turnout figures are sourced from the official Hungarian electoral commission results page (NVI/Nemzeti Választási Iroda, vtr.valasztas.hu). The domestic turnout figure used throughout this essay, 79.55% (5,950,192 of 7,480,060 registered domestic voters), is drawn from the official NVI results at 99.09% of stations processed (April 14, 2026). A separate JSON export from the same source at 98.47% processing showed a blended overall figure of 77.88% that included outstanding postal votes from approximately 251,000 postal registrants; the domestic figure of 79.55% is the correct comparator for conventional electoral analysis. Constituency-level participation data (reszvetel_oevk_adatok.csv, NVI) provides turnout per OEVK at 19:00 poll close, covering all 106 constituencies; national aggregate from this dataset: 78.99% (5,716,721 of 7,236,993), consistent with the domestic figure after accounting for postal registrants excluded from the OEVK-level file. Station #034 turnout (48.74%) is from the official signed protocol document (OGY-EK-13-103-034). National party list results: TISZA 3,115,323 votes (52.17%), Fidesz-KDNP 2,355,857 (39.45%), Mi Hazánk 342,973 (5.74%), sourced from NVI JSON export. Final seat allocation (NVI, April 18, 2026, 14:43 CET, at 99.93% processing, after postal, foreign-mission, and transferred votes were fully counted): TISZA 141 (96 constituency + 45 list), Fidesz-KDNP 52 (10 constituency + 42 list), Mi Hazánk 6 (0 + 6), constituency wins confirmed from oevk_single_eredmenyek.csv (NVI); list seat allocation from NVI JSON. An earlier snapshot at 99.09% processing on April 14 had shown TISZA 136 (93 + 43) / Fidesz-KDNP 57 (13 + 44) / Mi Hazánk 6 before out-of-country and postal ballots were fully incorporated; the three constituency shifts (Tisza +3, Fidesz −3) trace directly to foreign-mission and transferred-vote tranches. List vote totals and percentages quoted in §1 reflect the April 14 snapshot. Nógrád OEVK 01 constituency results: TISZA 51.02%, Fidesz-KDNP 40.44%, Mi Hazánk 7.90%, turnout 74.71%. Nógrád OEVK 02: Fidesz-KDNP 45.84%, TISZA 42.75%, turnout 76.75%. Nógrád county list vote: TISZA 46.82%, Fidesz-KDNP 44.12%. Nógrád county overall turnout: 76.10%.</p>
           <p><strong>OSCE Assessment:</strong> Quotes from the ODIHR Statement are accurate reproductions from the April 13, 2026 ODIHR Statement on the Hungarian Election (publicly available from the OSCE website). Observer names (Khandanyan, Hispán, Murphy) are verified from the statement's signatory list.</p>
           <h3>Limitations and Uncertainties</h3>
           <p>The reach analysis carries inherent uncertainty. Social media reach cannot be directly measured across platforms with perfect accuracy; the figures presented are estimates based on published follower counts, reported algorithmic distribution, and industry conversion factors. The true reach could be higher or lower by 20-30% without invalidating the essay's central arguments.</p>
@@ -1520,7 +1526,7 @@
           <p>But something fundamental has shifted. A generation that grew up in a system they did not believe in, that had no faith in institutions, that had been trained in contempt for democracy; that generation danced together, saw a million of their peers do the same, and voted. The possibility was rewritten. The distribution of the sensible expanded.</p>
           <p>In the morning after, young voters told each other: <span class="accent-word">we did that. We moved the denominator.</span> Not through petitions or lobbying, but through joy and presence and culture.</p>
           <p>That feeling, that knowledge, that they can create political change through collective embodied practice, is the structural consequence of the Rendszerbontó and Több technót movements. Whether the Tisza government makes democracy real or simply alternates back to authoritarianism, that knowledge persists. The generation knows now that it can move the world.</p>
-          <p>One final observation, offered tentatively: political scientists who resisted the explanatory power of "vibes defeated the machine" tended to be those still working within frameworks treating rational choice and institutional organisation as the only legitimate causal variables. Those frameworks are not wrong; they are incomplete. Affect, embodiment, and collective pleasure are not irrational residues. They are the mechanism by which dispersed individuals become political actors. This moment may also be part of something larger: the slow emancipation of feeling from its subordination to the post-Enlightenment clockwork model of politics — emotions entering, at last, the domain of legitimate political causation from which they had long been excluded as frivolous. The Rendszerbontó may be, among other things, a data point in that longer history.</p>
+          <p>One final observation, offered tentatively: political scientists who resisted the explanatory power of "vibes defeated the machine" tended to be those still working within frameworks treating rational choice and institutional organisation as the only legitimate causal variables. Those frameworks are not wrong; they are incomplete. Affect, embodiment, and collective pleasure are not irrational residues. They are the mechanism by which dispersed individuals become political actors. This moment may also be part of something larger: the slow emancipation of feeling from its subordination to the post-Enlightenment clockwork model of politics, emotions entering, at last, the domain of legitimate political causation from which they had long been excluded as frivolous. The Rendszerbontó may be, among other things, a data point in that longer history.</p>
           <hr style="border: none; border-top: 1px solid var(--border); margin: 2rem 0;">
           <section class="references-section">
             <h2 data-i18n="rendszerbontas.en.references_title">REFERENCES</h2>
@@ -1548,7 +1554,7 @@
               <li>Rancière, Jacques. (2004). <em>The Politics of Aesthetics: The Distribution of the Sensible</em>. Bloomsbury Academic.</li>
               <li>Rendszerbontó Nagykoncert Social Media Reach Analysis. (2026). Compiled April 14, 2026. Cross-platform follower, engagement, and algorithmic reach data from Instagram, TikTok, YouTube, and Facebook.</li>
               <li>Ropolyi, László. (2006). <em>Az internet természete: Internet és szabadság</em> [The Nature of the Internet: Internet and Freedom]. Typotex.</li>
-              <li>Statista Research Department. (2024). <em>Social media usage in Hungary — statistics and facts</em>. Statista. statista.com/topics/hungary-social-media [Figures on platform penetration among 18–35 cohort used in Section 11 deduplication methodology.]</li>
+              <li>Statista Research Department. (2024). <em>Social media usage in Hungary, statistics and facts</em>. Statista. statista.com/topics/hungary-social-media [Figures on platform penetration among 18–35 cohort used in Section 11 deduplication methodology.]</li>
               <li>Tufekci, Zeynep. (2017). <em>Twitter and Tear Gas: The Power and Fragility of Networked Protest</em>. Yale University Press.</li>
             </ul>
           </section>
@@ -1560,7 +1566,7 @@
           <h2 data-i18n="rendszerbontas.en.acknowledgments_title">ACKNOWLEDGMENTS</h2>
           <p>This essay benefited enormously from the generosity and rigour of three readers who engaged with it in the hours immediately following its first publication.</p>
           <p><strong>Claudia Diaz</strong>, chief researcher and methodological conscience, whose close reading of the original draft identified the critical errors in electoral data handling and the logical weaknesses in the Station #034 analysis. The version of this essay that is worth reading exists because of those corrections.</p>
-          <p><strong>László Ropolyi</strong>, Professor of Philosophy at ELTE Budapest and philosopher of technology — author of Az internet természete (The Nature of the Internet, 2006), among the foundational works in Hungarian internet philosophy — offered theoretical deepening that substantially expanded the essay's framework. His pointing to Fromm's account of orgiastic togetherness, Nietzsche's Dionysian, and Habermas's life-world versus system gave the embodied politics argument its proper philosophical grounding. Professor Ropolyi was also a formal academic supervisor of the author, and his willingness to take this fieldwork-derived analysis seriously is characteristic of the intellectual generosity he brought to everything.</p>
+          <p><strong>László Ropolyi</strong>, Professor of Philosophy at ELTE Budapest and philosopher of technology, author of Az internet természete (The Nature of the Internet, 2006), among the foundational works in Hungarian internet philosophy, offered theoretical deepening that substantially expanded the essay's framework. His pointing to Fromm's account of orgiastic togetherness, Nietzsche's Dionysian, and Habermas's life-world versus system gave the embodied politics argument its proper philosophical grounding. Professor Ropolyi was also a formal academic supervisor of the author, and his willingness to take this fieldwork-derived analysis seriously is characteristic of the intellectual generosity he brought to everything.</p>
           <p><strong>Zsófia Kollány</strong>, teacher at ELTE and applied researcher in self-organisation and complex systems, offered the most directly challenging feedback: careful about evidence, sharp about framing, and unsparing about where the argument overreached. Her flags on the vote-buying deterrence language, on the student protests as precondition, and on the broader emancipation of affect from Enlightenment rationality all left visible marks on this revision. The essay is more honest because of her.</p>
           <p>Any remaining errors of fact, inference, or framing are the author's alone.</p>
         </section>
@@ -1598,7 +1604,7 @@
         "nav_dispatches": "Dispatches ▾",
         "nav_semantic": "Semantic Network",
         "nav_organism": "The Organism",
-        "version_notice_en": "Version 2.1 — April 18, 2026 — Post-processing update. Postal, foreign-mission, and transferred votes fully incorporated. Final mandates: Tisza 141, Fidesz-KDNP 52, Mi Hazánk 6.",
+        "version_notice_en": "Version 2.1, April 18, 2026, Post-processing update. Postal, foreign-mission, and transferred votes fully incorporated. Final mandates: Tisza 141, Fidesz-KDNP 52, Mi Hazánk 6.",
         "toc_title": "Contents",
         "section_1_title": "1. INTRODUCTION: THE 10-POINT SWING",
         "section_2_title": "2. CONTEXT: THE ANATOMY OF SOFT AUTOCRACY",
@@ -1623,7 +1629,7 @@
         "nav_dispatches": "Küldöttségek ▾",
         "nav_semantic": "Szemantikus hálózat",
         "nav_organism": "Az organizmus",
-        "version_notice_en": "2.1 verzió — 2026. április 18. — Utófeldolgozás: postai, külképviseleti és átszállított szavazatok teljesen beszámítva. Végleges mandátumok: Tisza 141, Fidesz-KDNP 52, Mi Hazánk 6.",
+        "version_notice_en": "2.1 verzió, 2026. április 18., Utófeldolgozás: postai, külképviseleti és átszállított szavazatok teljesen beszámítva. Végleges mandátumok: Tisza 141, Fidesz-KDNP 52, Mi Hazánk 6.",
         "toc_title": "Tartalomjegyzék",
         "section_1_title": "1. BEVEZETÉS: A 10 PONTOS LENDÜLET",
         "section_2_title": "2. KONTEXTUS: A PUHA AUTOKRÁCIA ANATÓMIÁJA",
@@ -1981,7 +1987,5 @@
     }
   })();
   </script>
-
-  <script src="../assets/nav-persona.js" defer></script>
 </body>
 </html>
