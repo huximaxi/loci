@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>loci wizard</title>
+    <link data-trunk rel="rust" data-wasm-opt="z" />
+    <style>
+        :root {
+            color-scheme: light;
+            --scholar-green: #4a6b54;
+            --scholar-green-dim: #6b8b75;
+            --scholar-cream: #faf9f6;
+            --scholar-ink: #1f2a23;
+            --scholar-muted: #6f7670;
+            --scholar-warn: #a3503e;
+            --scholar-border: rgba(31, 42, 35, 0.12);
+            --scholar-border-strong: rgba(31, 42, 35, 0.28);
+            --font-serif: "Iowan Old Style", "Charter", Georgia, serif;
+        }
+        * { box-sizing: border-box; }
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--scholar-cream);
+            color: var(--scholar-ink);
+            -webkit-font-smoothing: antialiased;
+        }
+        body {
+            min-height: 100vh;
+        }
+        code {
+            font-family: "SF Mono", Menlo, monospace;
+            font-size: 0.85em;
+            background: rgba(74, 107, 84, 0.08);
+            padding: 1px 5px;
+            border-radius: 3px;
+        }
+        a { color: var(--scholar-green); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        button {
+            font: inherit;
+            cursor: pointer;
+            border-radius: 4px;
+            padding: 8px 16px;
+            border: 1px solid var(--scholar-border-strong);
+            background: var(--scholar-cream);
+            color: var(--scholar-ink);
+            transition: background 120ms ease;
+        }
+        button:hover { background: rgba(74, 107, 84, 0.06); }
+        button.primary {
+            background: var(--scholar-green);
+            color: var(--scholar-cream);
+            border-color: var(--scholar-green);
+        }
+        button.primary:hover { background: var(--scholar-green-dim); }
+
+        /* ─── Onboarding ──────────────────────────────────────────────── */
+        .onboarding {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .onboarding-header {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        .onboarding-header h1 {
+            font-family: var(--font-serif);
+            font-weight: 400;
+            font-size: 24px;
+            margin: 0 0 4px 0;
+            color: var(--scholar-green);
+        }
+        .lede {
+            margin: 0;
+            font-style: italic;
+            color: var(--scholar-muted);
+            font-size: 13px;
+        }
+        .card-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex: 1;
+        }
+        .card {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 12px 14px;
+            border: 1px solid var(--scholar-border);
+            border-radius: 6px;
+            background: white;
+            color: var(--scholar-ink);
+            text-decoration: none;
+            transition: border-color 120ms ease, background 120ms ease;
+        }
+        .card:hover {
+            border-color: var(--scholar-green-dim);
+            background: rgba(74, 107, 84, 0.03);
+            text-decoration: none;
+        }
+        .card-primary {
+            border-color: var(--scholar-green-dim);
+        }
+        .card-quiet { opacity: 0.85; }
+        .card-eyebrow {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--scholar-muted);
+        }
+        .card-title {
+            font-family: var(--font-serif);
+            font-size: 16px;
+            color: var(--scholar-green);
+        }
+        .card-body {
+            font-size: 12px;
+            color: var(--scholar-ink);
+            opacity: 0.85;
+            line-height: 1.4;
+        }
+        .onboarding-footer {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 11px;
+            color: var(--scholar-muted);
+            letter-spacing: 0.02em;
+        }
+
+        /* ─── Wizard pages (load / create / about / dashboard) ─────────── */
+        .wizard, .about, .dashboard-stub {
+            padding: 20px 24px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .wizard-header {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            margin-bottom: 14px;
+            border-bottom: 1px solid var(--scholar-border);
+            padding-bottom: 10px;
+        }
+        .wizard-header h2 {
+            font-family: var(--font-serif);
+            font-weight: 400;
+            color: var(--scholar-green);
+            margin: 0;
+            font-size: 18px;
+        }
+        .back {
+            font-size: 12px;
+            color: var(--scholar-muted);
+        }
+        .wizard-body, .about-body {
+            font-size: 13px;
+            line-height: 1.55;
+        }
+        .wizard-body p, .about-body p { margin: 0 0 10px 0; }
+        .wizard-body .primary { margin-top: 6px; }
+        .wizard-body .secondary {
+            margin-left: 8px;
+            font-size: 12px;
+            color: var(--scholar-muted);
+        }
+        .muted { color: var(--scholar-muted); }
+        .warn { color: var(--scholar-warn); }
+
+        /* ─── Dashboard stub ──────────────────────────────────────────── */
+        .palace-stats {
+            list-style: none;
+            padding: 0;
+            margin: 12px 0;
+            display: flex;
+            gap: 16px;
+        }
+        .palace-stats li {
+            padding: 8px 12px;
+            border: 1px solid var(--scholar-border);
+            border-radius: 4px;
+            background: white;
+            font-size: 12px;
+            color: var(--scholar-muted);
+        }
+        .palace-stats strong {
+            display: block;
+            font-family: var(--font-serif);
+            font-size: 18px;
+            color: var(--scholar-green);
+            font-weight: 400;
+        }
+
+        /* ─── Dashboard ───────────────────────────────────────────────── */
+        .dashboard {
+            padding: 16px 20px 24px;
+        }
+        .palace-path {
+            margin-left: auto;
+            font-size: 11px;
+            color: var(--scholar-muted);
+            font-family: "SF Mono", Menlo, monospace;
+        }
+        .dashboard-warn {
+            margin: 8px 0;
+            padding: 6px 10px;
+            border-left: 3px solid var(--scholar-warn);
+            background: rgba(163, 80, 62, 0.06);
+            font-size: 12px;
+        }
+        .kpi-strip {
+            display: flex;
+            gap: 10px;
+            margin: 8px 0 16px;
+        }
+        .kpi {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid var(--scholar-border);
+            border-radius: 4px;
+            background: white;
+        }
+        .kpi-label {
+            display: block;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--scholar-muted);
+        }
+        .kpi-value {
+            display: inline-block;
+            font-family: var(--font-serif);
+            font-size: 22px;
+            color: var(--scholar-green);
+            font-weight: 400;
+            margin-top: 2px;
+        }
+        .kpi-value.muted { color: var(--scholar-muted); }
+        .kpi-value.warn { color: var(--scholar-warn); }
+        .kpi-delta {
+            margin-left: 6px;
+            font-size: 11px;
+            color: var(--scholar-muted);
+        }
+        .kpi-delta.up { color: #4a8b54; }
+        .kpi-delta.down { color: var(--scholar-warn); }
+
+        .cron-section, .handovers-section, .questlog-section, .manifest-section {
+            margin-top: 14px;
+        }
+        .cron-section h3, .handovers-section h3, .questlog-section h3, .manifest-section h3 {
+            font-family: var(--font-serif);
+            font-weight: 400;
+            font-size: 14px;
+            color: var(--scholar-green);
+            margin: 0 0 6px 0;
+            border-bottom: 1px solid var(--scholar-border);
+            padding-bottom: 4px;
+        }
+        .cron-table {
+            width: 100%;
+            font-size: 11px;
+            border-collapse: collapse;
+        }
+        .cron-table th {
+            text-align: left;
+            color: var(--scholar-muted);
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            font-size: 9px;
+            padding: 4px 6px;
+            border-bottom: 1px solid var(--scholar-border);
+        }
+        .cron-table td {
+            padding: 4px 6px;
+            vertical-align: top;
+            border-bottom: 1px solid rgba(31, 42, 35, 0.05);
+        }
+        .summary-cell {
+            color: var(--scholar-ink);
+            max-width: 280px;
+            word-wrap: break-word;
+        }
+        .small { font-size: 10px; }
+
+        .badge {
+            display: inline-block;
+            padding: 1px 6px;
+            border-radius: 3px;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            background: rgba(31, 42, 35, 0.06);
+            color: var(--scholar-muted);
+        }
+        .badge-ok { background: rgba(74, 139, 84, 0.14); color: #2f6d3a; }
+        .badge-warn { background: rgba(204, 142, 50, 0.16); color: #8c5a16; }
+        .badge-err { background: rgba(163, 80, 62, 0.16); color: var(--scholar-warn); }
+        .pulse {
+            margin-left: 4px;
+            font-size: 9px;
+            color: var(--scholar-muted);
+            text-transform: uppercase;
+        }
+
+        .handovers-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .handovers-list li {
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 0;
+            font-size: 11px;
+            border-bottom: 1px solid rgba(31, 42, 35, 0.05);
+        }
+        .handovers-list li:last-child { border: 0; }
+        .handover-name { color: var(--scholar-ink); }
+
+        /* Phase 3.6: drill-down interactivity */
+        .row-clickable { cursor: pointer; }
+        .row-clickable:hover { background: rgba(74, 107, 84, 0.07); }
+        .questlog-list { list-style: none; margin: 0; padding: 0; }
+        .questlog-list li {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 4px;
+            font-size: 12px;
+            border-bottom: 1px solid rgba(31, 42, 35, 0.05);
+        }
+        .questlog-list li:last-child { border: 0; }
+        .quest-title { color: var(--scholar-ink); }
+        .detail-pane {
+            position: fixed;
+            top: 0; right: 0; bottom: 0;
+            width: min(440px, 70vw);
+            background: var(--scholar-cream);
+            border-left: 1px solid var(--scholar-border-strong);
+            box-shadow: -8px 0 24px rgba(31, 42, 35, 0.10);
+            padding: 16px 18px;
+            overflow-y: auto;
+            z-index: 20;
+        }
+        .detail-close {
+            background: none;
+            border: 1px solid var(--scholar-border);
+            border-radius: 5px;
+            font-size: 11px;
+            color: var(--scholar-muted);
+            cursor: pointer;
+            padding: 3px 8px;
+            float: right;
+        }
+        .detail-title { font-family: var(--font-serif); font-weight: 400; margin: 0 0 10px 0; }
+        .detail-json {
+            background: rgba(31, 42, 35, 0.04);
+            border: 1px solid var(--scholar-border);
+            border-radius: 6px;
+            padding: 10px;
+            font-size: 11px;
+            line-height: 1.45;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        /* Selected row (single-click preview) */
+        .row-selected { background: rgba(74, 107, 84, 0.13) !important; }
+        /* Done quests settle: recede, stay as trace, no strike-through */
+        .questlog-list li.done { opacity: 0.48; }
+        .questlog-list li.done:hover { opacity: 0.7; }
+        /* Quest detail body + cross-reference chips */
+        .detail-body {
+            font-size: 12px;
+            line-height: 1.55;
+            white-space: pre-wrap;
+            word-break: break-word;
+            color: var(--scholar-ink);
+        }
+        .detail-chips {
+            margin-top: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+        }
+        .detail-chip {
+            background: rgba(74, 107, 84, 0.10);
+            border: 1px solid var(--scholar-border);
+            border-radius: 5px;
+            font-size: 11px;
+            font-family: ui-monospace, "SF Mono", Menlo, monospace;
+            color: var(--scholar-green);
+            cursor: pointer;
+            padding: 2px 7px;
+        }
+        .detail-chip:hover { background: rgba(74, 107, 84, 0.20); }
+        /* Track groups in the questlog */
+        .quest-track { margin-top: 12px; }
+        .quest-track:first-child { margin-top: 2px; }
+        .quest-track-head {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            padding: 2px 0 3px 0;
+            border-bottom: 1px solid var(--scholar-border);
+            margin-bottom: 3px;
+        }
+        .quest-track-name {
+            font-family: var(--font-serif);
+            font-size: 12px;
+            color: var(--scholar-green-dim);
+            letter-spacing: 0.02em;
+        }
+        /* Inline-formatted quest body */
+        .detail-body code {
+            background: rgba(31, 42, 35, 0.06);
+            padding: 0 3px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        }
+        .detail-body strong { color: var(--scholar-ink); font-weight: 600; }
+
+        /* ─── Phase 4a + feature pass: clickable KPIs, CiQ modal, alerts, chat ── */
+        .kpi-clickable { cursor: pointer; transition: border-color 120ms ease, background 120ms ease; }
+        .kpi-clickable:hover { border-color: var(--scholar-green-dim); background: rgba(74, 107, 84, 0.04); }
+        .kpi-info { font-size: 9px; color: var(--scholar-muted); margin-left: 3px; vertical-align: super; }
+
+        /* CiQ explainer modal */
+        .modal-backdrop {
+            position: fixed; inset: 0;
+            background: rgba(31, 42, 35, 0.32);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 40;
+        }
+        .modal-card {
+            background: var(--scholar-cream);
+            border: 1px solid var(--scholar-border-strong);
+            border-radius: 8px;
+            box-shadow: 0 12px 40px rgba(31, 42, 35, 0.22);
+            padding: 18px 20px;
+            width: min(440px, 88vw);
+            max-height: 82vh;
+            overflow-y: auto;
+        }
+        .modal-lede { font-size: 12px; line-height: 1.55; color: var(--scholar-ink); margin: 4px 0 14px; }
+        .ciq-total { margin-bottom: 10px; }
+        .ciq-table { width: 100%; font-size: 11px; border-collapse: collapse; }
+        .ciq-table th {
+            text-align: left; color: var(--scholar-muted); font-weight: 400;
+            text-transform: uppercase; letter-spacing: 0.06em; font-size: 9px;
+            padding: 4px 6px; border-bottom: 1px solid var(--scholar-border);
+        }
+        .ciq-table td { padding: 5px 6px; border-bottom: 1px solid rgba(31, 42, 35, 0.05); vertical-align: middle; }
+        .ciq-bar-wrap { position: relative; background: rgba(31, 42, 35, 0.06); border-radius: 3px; height: 16px; min-width: 90px; }
+        .ciq-bar { background: var(--scholar-green); height: 100%; border-radius: 3px; max-width: 100%; }
+        .ciq-bar-label { position: absolute; right: 5px; top: 0; line-height: 16px; font-size: 9px; color: var(--scholar-ink); }
+        .ciq-history { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+        .ciq-hist-pt {
+            font-size: 10px; font-family: ui-monospace, "SF Mono", Menlo, monospace;
+            background: rgba(74, 107, 84, 0.10); border-radius: 3px; padding: 1px 5px; color: var(--scholar-green);
+        }
+
+        /* Alert list (side detail-pane) */
+        .detail-note { margin: 0 0 10px; line-height: 1.5; }
+        .alert-list { list-style: none; margin: 0; padding: 0; }
+        .alert-row {
+            display: flex; align-items: center; gap: 10px;
+            padding: 7px 4px; border-bottom: 1px solid rgba(31, 42, 35, 0.06);
+        }
+        .alert-row:last-child { border: 0; }
+        .alert-sev { font-size: 15px; line-height: 1; }
+        .alert-meta { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+        .alert-cond { font-size: 10px; color: var(--scholar-muted); }
+
+        /* Chat query box (Phase 4a) */
+        .chat-query { margin: 4px 0 14px; }
+        .chat-row { display: flex; gap: 8px; }
+        .chat-input {
+            flex: 1; font: inherit; font-size: 13px;
+            padding: 8px 12px; border: 1px solid var(--scholar-border-strong);
+            border-radius: 4px; background: white; color: var(--scholar-ink);
+        }
+        .chat-input:focus { outline: none; border-color: var(--scholar-green-dim); }
+        .chat-input:disabled { background: rgba(31, 42, 35, 0.04); color: var(--scholar-muted); }
+        .brain-label {
+            font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em;
+            color: var(--scholar-muted); white-space: nowrap; align-self: center;
+        }
+        .chat-pause {
+            font-size: 11px; padding: 6px 10px; white-space: nowrap;
+            color: var(--scholar-muted); border-color: var(--scholar-border);
+        }
+        .brain-chip {
+            display: inline-flex; align-items: center; align-self: center;
+            font-size: 9px; text-transform: uppercase; letter-spacing: 0.04em;
+            padding: 2px 7px; border-radius: 10px; white-space: nowrap;
+        }
+        .brain-chip::before {
+            content: ""; width: 6px; height: 6px; border-radius: 50%;
+            margin-right: 5px; background: currentColor;
+        }
+        .brain-awake { background: rgba(74, 139, 84, 0.14); color: #2f6d3a; }
+        .brain-asleep { background: rgba(204, 142, 50, 0.16); color: #8c5a16; }
+        .brain-paused { background: rgba(31, 42, 35, 0.08); color: var(--scholar-muted); }
+        .brain-checking { background: rgba(31, 42, 35, 0.05); color: var(--scholar-muted); }
+        .chat-answer {
+            margin-top: 8px; padding: 10px 12px;
+            background: rgba(74, 107, 84, 0.05); border: 1px solid var(--scholar-border);
+            border-radius: 6px; font-size: 12px; line-height: 1.55; white-space: pre-wrap; word-break: break-word;
+        }
+        .chat-error { background: rgba(163, 80, 62, 0.06); border-left: 3px solid var(--scholar-warn); }
+        /* Brain switch + external marker. Amber = you have left the green local garden. */
+        .brain-toggle {
+            font-size: 11px; padding: 6px 10px; white-space: nowrap; align-self: center;
+            color: var(--scholar-muted); border: 1px solid var(--scholar-border);
+            border-radius: 4px; background: white; cursor: pointer;
+        }
+        .brain-toggle-ext {
+            color: #8c5a16; border-color: rgba(204, 142, 50, 0.55);
+            background: rgba(204, 142, 50, 0.12);
+        }
+        .brain-ext-badge {
+            align-self: center; font-size: 9px; text-transform: uppercase; letter-spacing: 0.04em;
+            padding: 2px 8px; border-radius: 10px; white-space: nowrap;
+            background: rgba(204, 142, 50, 0.16); color: #8c5a16;
+        }
+        .chat-input-ext { border-color: rgba(204, 142, 50, 0.55); }
+        .chat-input-ext:focus { border-color: #cc8e32; }
+        .chat-attrib {
+            margin-top: 8px; font-size: 9px; text-transform: uppercase; letter-spacing: 0.06em;
+            color: var(--scholar-muted);
+        }
+        .chat-attrib-ext { color: #8c5a16; font-weight: 600; }
+        /* Engine-room boot: a progress strip + per-box light-up while sections load. */
+        @keyframes boot-pulse { 0%, 100% { opacity: 0.35; } 50% { opacity: 0.9; } }
+        .boot-strip {
+            margin: 4px 0 14px; padding: 10px 12px;
+            background: rgba(74, 107, 84, 0.05);
+            border: 1px solid var(--scholar-border); border-radius: 6px;
+        }
+        .boot-head { display: flex; justify-content: space-between; align-items: center; }
+        .boot-title {
+            font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
+            color: var(--scholar-green-dim);
+        }
+        .boot-count { font-size: 10px; color: var(--scholar-muted); }
+        .boot-bar {
+            margin: 8px 0; height: 4px; border-radius: 2px;
+            background: rgba(31, 42, 35, 0.08); overflow: hidden;
+        }
+        .boot-bar-fill { height: 100%; background: var(--scholar-green-dim); transition: width 0.35s ease; }
+        .boot-systems { display: flex; flex-wrap: wrap; gap: 6px; }
+        .boot-chip {
+            font-size: 9px; text-transform: uppercase; letter-spacing: 0.04em;
+            padding: 2px 8px; border-radius: 10px; white-space: nowrap;
+        }
+        .boot-online { background: rgba(74, 139, 84, 0.14); color: #2f6d3a; }
+        .boot-loading {
+            background: rgba(31, 42, 35, 0.05); color: var(--scholar-muted);
+            animation: boot-pulse 1.2s ease-in-out infinite;
+        }
+        .boot-box {
+            margin: 8px 0; padding: 14px 12px; display: flex; align-items: center; gap: 10px;
+            background: rgba(31, 42, 35, 0.03);
+            border: 1px dashed var(--scholar-border); border-radius: 6px;
+        }
+        .boot-box-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--scholar-green-dim);
+            animation: boot-pulse 1.2s ease-in-out infinite;
+        }
+        .boot-box-label {
+            font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;
+            color: var(--scholar-muted);
+        }
+
+        /* ─── Greeter overlay (first-run anamnetic gate) ──────────────── */
+        @keyframes greeter-emerge {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+        @keyframes greeter-ambient-pulse {
+            0%, 100% { transform: scale(1.0); opacity: 0.18; }
+            50%       { transform: scale(1.14); opacity: 0.40; }
+        }
+        @keyframes greeter-breathe {
+            0%, 100% { transform: scale(1.0); opacity: 0.60; box-shadow: 0 0 40px 10px rgba(200,124,44,0.18); }
+            50%       { transform: scale(1.09); opacity: 1.0;  box-shadow: 0 0 80px 28px rgba(200,124,44,0.40); }
+        }
+        @keyframes greeter-halo-pulse {
+            0%, 100% { opacity: 0.18; transform: scale(1.0);  }
+            50%       { opacity: 0.55; transform: scale(1.10); }
+        }
+        @keyframes greeter-phrase-in {
+            from { opacity: 0; transform: translateY(5px); }
+            to   { opacity: 1; transform: translateY(0);   }
+        }
+        .greeter-overlay {
+            position: fixed; inset: 0; z-index: 100;
+            background: #1a1a16;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 28px;
+            animation: greeter-emerge 0.9s ease-out;
+        }
+        .greeter-orb-wrap {
+            position: relative; width: 160px; height: 160px;
+            display: flex; align-items: center; justify-content: center;
+            /* Purely decorative — WKWebView GPU-composited layers (will-change: transform)
+               use composited layer bounds for hit-testing, not CSS layout bounds. A
+               scale(1.14) ambient pulse extends ~11px below the orb wrap and silently
+               swallows pointer events meant for name-option buttons. Disabling here
+               covers all three child layers in one declaration. */
+            pointer-events: none;
+        }
+        /* Three layers: ambient glow / core orb / halo ring.
+           Periods 28s / 18s / 5.5s share no short common period — they never lock step.
+           Animations gate on .greeter-anim added after first rAF (WKWebView fix). */
+        .greeter-orb-ambient {
+            position: absolute; inset: 0; border-radius: 50%;
+            background: radial-gradient(circle at 50% 50%, rgba(200,124,44,0.22), transparent 70%);
+            will-change: transform, opacity;
+            -webkit-backface-visibility: hidden;
+            pointer-events: none;
+        }
+        .greeter-orb-ambient.greeter-anim {
+            animation: greeter-ambient-pulse 28s cubic-bezier(0.37,0,0.63,1) infinite;
+            animation-delay: -7s;
+        }
+        .greeter-orb {
+            position: relative; z-index: 1;
+            width: 68px; height: 68px; border-radius: 50%;
+            background: radial-gradient(circle at 38% 36%, rgb(230,158,65), rgb(176,96,24));
+            will-change: transform, opacity;
+            -webkit-backface-visibility: hidden;
+            pointer-events: none;
+        }
+        .greeter-orb.greeter-anim {
+            animation: greeter-breathe 18s cubic-bezier(0.37,0,0.63,1) infinite;
+        }
+        .greeter-orb-halo {
+            position: absolute; inset: 0; border-radius: 50%;
+            border: 1px solid rgba(200,124,44,0.30);
+            will-change: transform, opacity;
+            -webkit-backface-visibility: hidden;
+            pointer-events: none;
+        }
+        .greeter-orb-halo.greeter-anim {
+            animation: greeter-halo-pulse 5.5s cubic-bezier(0.37,0,0.63,1) infinite;
+            animation-delay: -1.375s;
+        }
+        .greeter-phrase {
+            font-family: var(--font-serif);
+            font-size: 14px; letter-spacing: 0.07em;
+            color: rgba(200,124,44,0.80);
+            text-align: center; max-width: 220px;
+            height: 22px; display: flex; align-items: center; justify-content: center;
+            transition: opacity 0.35s ease;
+        }
+        .greeter-phrase-fading { opacity: 0; }
+        .greeter-phrase:not(.greeter-phrase-fading) { animation: greeter-phrase-in 0.5s ease-out; }
+        .greeter-skip {
+            position: absolute; top: 14px; right: 18px;
+            font-size: 11px; letter-spacing: 0.06em; text-transform: lowercase;
+            color: rgba(200,124,44,0.40); background: none;
+            border: 1px solid rgba(200,124,44,0.18); border-radius: 4px;
+            padding: 3px 10px; cursor: pointer; transition: color 120ms, border-color 120ms;
+        }
+        .greeter-skip:hover {
+            color: rgba(200,124,44,0.80);
+            border-color: rgba(200,124,44,0.40);
+        }
+        .greeter-notice {
+            position: absolute; bottom: 13px;
+            font-size: 10px; color: rgba(200,124,44,0.22);
+            letter-spacing: 0.04em; text-align: center;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .greeter-orb-ambient { animation: none !important; }
+            .greeter-orb         { animation: none !important; }
+            .greeter-orb-halo    { animation: none !important; }
+            .greeter-overlay     { animation: none !important; }
+        }
+
+        /* ─── Naming Ceremony (Act 1) ─────────────────────────────────
+           Lives inside .greeter-overlay — same dark canvas, same amber.
+           Nyx constraint: the game surface is not the brand surface.
+           Maximalism lives inside the canvas; the brand face stays calm.
+        ──────────────────────────────────────────────────────────────── */
+        @keyframes ceremony-q-in {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes ceremony-wait-pulse {
+            0%, 100% { opacity: 0.28; }
+            50%       { opacity: 0.72; }
+        }
+
+        /* Question block — replaces the phrase line after Arrival */
+        .ceremony-question {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+            width: 100%;
+            max-width: 300px;
+            animation: ceremony-q-in 0.45s ease-out;
+        }
+
+        .ceremony-q {
+            font-family: var(--font-serif);
+            font-size: 16px;
+            letter-spacing: 0.05em;
+            color: rgba(200, 124, 44, 0.90);
+            text-align: center;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        /* Secondary line — Moment3 second sentence */
+        .ceremony-sub {
+            font-family: var(--font-serif);
+            font-size: 13px;
+            color: rgba(200, 124, 44, 0.58);
+            text-align: center;
+            margin: -8px 0 0;
+            font-style: italic;
+            letter-spacing: 0.03em;
+        }
+
+        /* CheckingVagueness / GeneratingNames holding states */
+        .ceremony-waiting {
+            animation: ceremony-wait-pulse 1.6s ease-in-out infinite;
+            font-size: 20px;
+            letter-spacing: 0.25em;
+        }
+
+        /* Bare underline input — sits over the dark canvas */
+        .ceremony-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid rgba(200, 124, 44, 0.32);
+            outline: none;
+            color: rgba(200, 124, 44, 0.92);
+            font-family: var(--font-serif);
+            font-size: 15px;
+            text-align: center;
+            padding: 6px 0;
+            caret-color: rgba(200, 124, 44, 0.80);
+            transition: border-color 180ms ease;
+            letter-spacing: 0.03em;
+        }
+        .ceremony-input::placeholder {
+            color: rgba(200, 124, 44, 0.26);
+            font-style: italic;
+        }
+        .ceremony-input:focus {
+            border-bottom-color: rgba(200, 124, 44, 0.70);
+        }
+
+        /* → button — barely visible until hovered */
+        .ceremony-next {
+            background: none;
+            border: 1px solid rgba(200, 124, 44, 0.20);
+            border-radius: 4px;
+            color: rgba(200, 124, 44, 0.42);
+            font-size: 16px;
+            padding: 4px 14px;
+            cursor: pointer;
+            transition: color 150ms, border-color 150ms;
+        }
+        .ceremony-next:hover {
+            color: rgba(200, 124, 44, 0.85);
+            border-color: rgba(200, 124, 44, 0.52);
+            background: none;
+        }
+
+        /* Naming phase */
+        .ceremony-naming {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            width: 100%;
+            max-width: 320px;
+            animation: ceremony-q-in 0.45s ease-out;
+        }
+
+        .ceremony-name-options {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            width: 100%;
+        }
+
+        .ceremony-name-option {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            background: rgba(200, 124, 44, 0.06);
+            border: 1px solid rgba(200, 124, 44, 0.16);
+            border-radius: 5px;
+            padding: 9px 14px;
+            text-align: left;
+            cursor: pointer;
+            transition: background 140ms ease, border-color 140ms ease;
+        }
+        .ceremony-name-option:hover {
+            background: rgba(200, 124, 44, 0.13);
+            border-color: rgba(200, 124, 44, 0.42);
+        }
+
+        .ceremony-name {
+            font-family: var(--font-serif);
+            font-size: 15px;
+            color: rgba(200, 124, 44, 0.95);
+            letter-spacing: 0.04em;
+            display: block;
+        }
+
+        .ceremony-note {
+            font-size: 11px;
+            color: rgba(200, 124, 44, 0.50);
+            font-style: italic;
+            display: block;
+            letter-spacing: 0.02em;
+        }
+
+        .ceremony-custom-name {
+            width: 100%;
+        }
+
+        /* Confirmed phase — single line, full amber */
+        .ceremony-confirmed {
+            animation: ceremony-q-in 0.5s ease-out;
+        }
+        .ceremony-confirmed .ceremony-q {
+            font-size: 18px;
+            color: rgba(200, 124, 44, 1.0);
+            letter-spacing: 0.06em;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .ceremony-question   { animation: none !important; }
+            .ceremony-naming     { animation: none !important; }
+            .ceremony-confirmed  { animation: none !important; }
+            .ceremony-waiting    { animation: none !important; }
+        }
+
+        /* ─── Settings page ───────────────────────────────────────────── */
+        .settings-body { gap: 0; }
+
+        .settings-section-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--scholar-muted);
+            margin: 0 0 8px;
+        }
+
+        .settings-card {
+            padding: 12px 14px;
+            border: 1px solid var(--scholar-border);
+            border-radius: 6px;
+            background: white;
+            margin-bottom: 8px;
+        }
+
+        .settings-card-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .settings-card-left {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .settings-card-name {
+            font-family: var(--font-serif);
+            font-size: 14px;
+            color: var(--scholar-green);
+        }
+
+        .settings-card-meta {
+            font-size: 10px;
+            color: var(--scholar-muted);
+        }
+
+        .settings-models {
+            margin: 8px 0 0;
+            font-size: 11px;
+            font-family: "SF Mono", Menlo, monospace;
+            color: var(--scholar-muted);
+            line-height: 1.5;
+        }
+
+        .settings-hint {
+            margin: 8px 0 0;
+            font-size: 12px;
+            color: var(--scholar-ink);
+            line-height: 1.5;
+        }
+
+        .settings-actions {
+            margin-top: 14px;
+            display: flex;
+            gap: 8px;
+        }
+
+        /* ─── Model gate (setup_create when no inference available) ───── */
+        .model-gate {
+            padding: 4px 0;
+        }
+
+        .model-gate-lead {
+            font-family: var(--font-serif);
+            font-size: 15px;
+            color: var(--scholar-ink);
+            line-height: 1.5;
+            margin: 0 0 6px;
+        }
+
+        .model-gate-actions {
+            display: flex;
+            gap: 8px;
+            margin: 14px 0 10px;
+            flex-wrap: wrap;
+        }
+
+        /* <A> styled as a primary button */
+        .button.primary {
+            display: inline-block;
+            padding: 8px 16px;
+            background: var(--scholar-green);
+            color: var(--scholar-cream);
+            border-radius: 4px;
+            font-size: 13px;
+            text-decoration: none;
+            border: 1px solid var(--scholar-green);
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .button.primary:hover {
+            background: var(--scholar-green-dim);
+            text-decoration: none;
+        }
+
+        .model-gate-note {
+            font-size: 11px;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        /* ─── Onboarding footer extensions ───────────────────────────── */
+        .onboarding-footer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .onboarding-model-notice {
+            font-size: 10px;
+            color: var(--scholar-warn);
+            letter-spacing: 0.02em;
+        }
+
+        .onboarding-model-notice a {
+            color: var(--scholar-warn);
+            text-decoration: underline;
+        }
+
+        .onboarding-settings-link {
+            font-size: 11px;
+            color: var(--scholar-muted);
+            text-decoration: none;
+            letter-spacing: 0.04em;
+        }
+        .onboarding-settings-link:hover { color: var(--scholar-green); text-decoration: none; }
+    </style>
+</head>
+<div id="crash-fallback" style="display:none;padding:32px 24px;font-family:-apple-system,sans-serif;color:#a3503e;">
+    <p style="font-family:'Iowan Old Style',Georgia,serif;font-size:16px;margin:0 0 8px;">"something in the palace broke"</p>
+    <p id="crash-detail" style="font-size:11px;opacity:0.6;font-family:'SF Mono',Menlo,monospace;margin:0 0 14px;"></p>
+    <button onclick="location.reload()" style="font-size:12px;padding:6px 14px;cursor:pointer;">reload</button>
+</div>
+<script>
+    window.addEventListener('error', function(e) {
+        var fb = document.getElementById('crash-fallback');
+        if (fb) { fb.style.display = 'block'; }
+        var d = document.getElementById('crash-detail');
+        if (d) { d.textContent = (e.message || 'unknown panic') + (e.filename ? ' · ' + e.filename.split('/').pop() : ''); }
+    });
+</script>
+<body></body>
+</html>

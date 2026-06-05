@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>loci wizard</title>
+  <style>
+    /* ── PALETTE ───────────────────────────────────────────────────────────── */
+    :root {
+      --bg:             #0a0a0c;
+      --surface:        rgba(255,255,255,0.04);
+      --surface-hover:  rgba(255,255,255,0.07);
+      --border:         rgba(255,255,255,0.08);
+      --border-strong:  rgba(255,255,255,0.16);
+      --text:           #e8e6e3;
+      --text-sec:       rgba(232,230,227,0.62);
+      --text-muted:     rgba(232,230,227,0.38);
+      --text-faint:     rgba(232,230,227,0.22);
+      --active:         #c87c2c;
+      --active-dim:     rgba(200,124,44,0.14);
+      --warm:           #FFCC33;
+      --mono:           'SF Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace;
+      --radius:         4px;
+    }
+
+    /* ── RESET ─────────────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { background: var(--bg); }
+
+    body {
+      font-family: var(--mono);
+      font-size: 11px;
+      background: var(--bg);
+      color: var(--text);
+      height: 520px;
+      width: 680px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+    }
+
+    /* ── TITLEBAR ──────────────────────────────────────────────────────────── */
+    .titlebar {
+      flex-shrink: 0;
+      height: 36px;
+      background: rgba(255,255,255,0.02);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+      gap: 10px;
+    }
+
+    .title-crystal {
+      width: 12px; height: 16px; flex-shrink: 0;
+      animation: crystal-pulse 3s ease-in-out infinite;
+    }
+    @keyframes crystal-pulse {
+      0%, 100% { opacity: 0.8; }
+      50%       { opacity: 1; filter: drop-shadow(0 0 4px rgba(200,124,44,0.6)); }
+    }
+
+    .title-text {
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: lowercase;
+      color: var(--text-muted);
+    }
+
+    .title-spacer { flex: 1; }
+
+    .title-version {
+      font-size: 9px;
+      color: var(--text-faint);
+      letter-spacing: 0.08em;
+    }
+
+    #titlebarSettingsBtn {
+      all: unset;
+      cursor: pointer;
+      color: var(--text-faint);
+      font-size: 13px;
+      padding: 2px 4px;
+      border-radius: var(--radius);
+      transition: color 0.12s;
+    }
+    #titlebarSettingsBtn:hover { color: var(--text-sec); }
+
+    /* ── SCROLL AREA ───────────────────────────────────────────────────────── */
+    .main {
+      flex: 1;
+      padding: 20px 24px;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+    .main::-webkit-scrollbar { width: 4px; }
+    .main::-webkit-scrollbar-track { background: transparent; }
+    .main::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 2px; }
+
+    /* ── WELCOME VIEW ──────────────────────────────────────────────────────── */
+    #welcome-view {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 40px;
+      gap: 0;
+    }
+
+    .welcome-crystal {
+      width: 32px; height: 42px;
+      margin-bottom: 18px;
+      filter: drop-shadow(0 0 10px rgba(200,124,44,0.25));
+    }
+
+    .welcome-title {
+      font-size: 18px;
+      letter-spacing: 0.22em;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .welcome-sub {
+      font-size: 9.5px;
+      letter-spacing: 0.14em;
+      color: var(--text-faint);
+      margin-bottom: 36px;
+    }
+
+    .welcome-actions {
+      width: 100%;
+      max-width: 300px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .welcome-tagline {
+      margin-top: 28px;
+      font-size: 9px;
+      color: var(--text-faint);
+      letter-spacing: 0.1em;
+      text-align: center;
+      line-height: 1.8;
+    }
+
+    /* ── BUTTONS ───────────────────────────────────────────────────────────── */
+    .btn {
+      padding: 10px 16px;
+      font-family: var(--mono);
+      font-size: 10.5px;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      border-radius: var(--radius);
+      border: 1px solid var(--border-strong);
+      background: var(--surface);
+      color: var(--text-sec);
+      transition: background 0.12s, border-color 0.12s, color 0.12s;
+      text-align: center;
+    }
+    .btn:hover:not(:disabled) {
+      background: var(--surface-hover);
+      border-color: rgba(255,255,255,0.24);
+      color: var(--text);
+    }
+    .btn:active:not(:disabled) { opacity: 0.8; }
+    .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .btn-full { width: 100%; }
+
+    .btn-primary {
+      background: var(--active-dim);
+      border-color: rgba(200,124,44,0.4);
+      color: var(--active);
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: rgba(200,124,44,0.18);
+      border-color: rgba(200,124,44,0.6);
+      color: var(--active);
+    }
+
+    /* ── WIZARD VIEW ───────────────────────────────────────────────────────── */
+    .wizard-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .room-label {
+      font-size: 9px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+    }
+
+    #wizardBackBtn {
+      all: unset;
+      cursor: pointer;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text-faint);
+      letter-spacing: 0.06em;
+      transition: color 0.12s;
+    }
+    #wizardBackBtn:hover { color: var(--text-sec); }
+
+    /* ── CARDS ─────────────────────────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      margin-bottom: 10px;
+    }
+
+    .card-label {
+      font-size: 9px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      margin-bottom: 12px;
+    }
+
+    /* ── FOLDER PICKER ─────────────────────────────────────────────────────── */
+    .folder-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .folder-input {
+      flex: 1;
+      padding: 8px 10px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-sec);
+      font-family: var(--mono);
+      font-size: 10px;
+      outline: none;
+    }
+    .folder-input:focus { border-color: var(--border-strong); color: var(--text); }
+    .folder-input::placeholder { color: var(--text-faint); }
+
+    /* ── RESULT CARD ───────────────────────────────────────────────────────── */
+    .result-card { display: none; }
+    .result-card.show { display: block; }
+
+    .badge-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 2px;
+      border: 1px solid var(--border-strong);
+      color: var(--text-sec);
+      background: var(--surface);
+    }
+    .badge-green {
+      color: var(--active);
+      background: var(--active-dim);
+      border-color: rgba(200,124,44,0.3);
+    }
+    .badge-yellow {
+      color: var(--warm);
+      background: rgba(255,204,51,0.1);
+      border-color: rgba(255,204,51,0.3);
+    }
+
+    .result-text {
+      font-size: 10.5px;
+      color: var(--text-sec);
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    .stats-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .stat-box {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 8px 14px;
+      min-width: 64px;
+    }
+    .stat-num {
+      font-size: 18px;
+      color: var(--active);
+      line-height: 1;
+      margin-bottom: 3px;
+    }
+    .stat-lbl {
+      font-size: 9px;
+      color: var(--text-faint);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .path-display {
+      font-size: 9.5px;
+      color: var(--text-faint);
+      margin-bottom: 12px;
+      word-break: break-all;
+      padding: 5px 8px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    .action-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    /* ── SCHOLAR STATUS BAR ────────────────────────────────────────────────── */
+    .scholar-bar {
+      flex-shrink: 0;
+      height: 24px;
+      background: rgba(255,255,255,0.015);
+      border-top: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      padding: 0 12px;
+      gap: 12px;
+    }
+
+    .ai-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+      cursor: default;
+      position: relative;
+    }
+    .ai-badge.clickable { cursor: pointer; }
+    .ai-badge.clickable:hover { color: var(--text-sec); }
+    .ai-badge.clickable:hover .ai-tooltip { display: block; }
+
+    .ai-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--active);
+      flex-shrink: 0;
+      transition: background 300ms ease, box-shadow 300ms ease;
+    }
+    .ai-dot.online  { box-shadow: 0 0 5px rgba(200,124,44,0.5); }
+    .ai-dot.offline { background: rgba(255,255,255,0.2); box-shadow: none; }
+
+    @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+    .ai-label { animation: fade-in 300ms ease; }
+
+    .ai-tooltip {
+      display: none;
+      position: absolute;
+      bottom: 30px; left: 0;
+      background: #111114;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius);
+      padding: 8px 10px;
+      font-size: 10px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      width: 220px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+      white-space: nowrap;
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    .scholar-bar-center {
+      font-size: 10px;
+      color: var(--text-faint);
+      letter-spacing: 0.04em;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .scholar-bar-right {
+      font-size: 10px;
+      color: var(--text-faint);
+      letter-spacing: 0.04em;
+    }
+
+    /* ── SETTINGS VIEW ─────────────────────────────────────────────────────── */
+    .settings-view {
+      position: absolute;
+      top: 36px;
+      bottom: 24px;
+      left: 0; right: 0;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      z-index: 10;
+    }
+
+    .settings-header {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 11px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .settings-back {
+      all: unset;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      transition: color 120ms ease;
+    }
+    .settings-back:hover { color: var(--text-sec); }
+
+    .settings-header-title {
+      font-size: 10px;
+      color: var(--text-faint);
+      letter-spacing: 0.18em;
+    }
+
+    .settings-main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 24px 28px;
+    }
+    .settings-main::-webkit-scrollbar { width: 4px; }
+    .settings-main::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 2px; }
+
+    .settings-section { margin-bottom: 28px; }
+    .settings-section + .settings-section {
+      padding-top: 4px;
+      border-top: 1px solid var(--border);
+    }
+
+    .section-eyebrow {
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      margin-bottom: 14px;
+    }
+
+    .setting-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .setting-row:last-of-type { border-bottom: 0; }
+    .setting-row.secondary { padding: 8px 0; }
+
+    .setting-label {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .label-text {
+      font-size: 12px;
+      color: var(--text);
+      line-height: 1.3;
+      font-family: -apple-system, system-ui, sans-serif;
+    }
+    .label-sub {
+      font-size: 11px;
+      color: var(--text-sec);
+      line-height: 1.4;
+      font-family: -apple-system, system-ui, sans-serif;
+    }
+    .label-hint {
+      font-size: 9.5px;
+      color: var(--text-muted);
+      letter-spacing: 0.03em;
+    }
+
+    /* Toggle */
+    .sch-toggle {
+      position: relative;
+      width: 36px; height: 20px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .sch-toggle input { position: absolute; opacity: 0; width: 0; height: 0; }
+    .sch-toggle-track {
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid var(--border-strong);
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 200ms ease, border-color 200ms ease;
+    }
+    .sch-toggle-track::after {
+      content: '';
+      position: absolute;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.3);
+      top: 2px; left: 2px;
+      transition: transform 200ms ease, background 200ms ease;
+    }
+    .sch-toggle input:checked + .sch-toggle-track {
+      background: var(--active-dim);
+      border-color: rgba(200,124,44,0.4);
+    }
+    .sch-toggle input:checked + .sch-toggle-track::after {
+      transform: translateX(16px);
+      background: var(--active);
+    }
+
+    /* Inline status dot */
+    .settings-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 0 3px;
+      font-size: 10.5px;
+      color: var(--text-muted);
+      letter-spacing: 0.03em;
+    }
+    .settings-status-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      flex-shrink: 0;
+      transition: background 300ms ease, box-shadow 300ms ease;
+    }
+    .settings-status-dot.online {
+      background: var(--active);
+      box-shadow: 0 0 5px rgba(200,124,44,0.5);
+    }
+
+    /* Model select */
+    .model-select {
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 10.5px;
+      padding: 5px 28px 5px 10px;
+      outline: none;
+      cursor: pointer;
+      min-width: 176px;
+      letter-spacing: 0.02em;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='rgba(232,230,227,0.25)'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      transition: border-color 120ms ease;
+    }
+    .model-select:focus { border-color: rgba(200,124,44,0.4); }
+    .model-select:disabled { opacity: 0.3; cursor: not-allowed; }
+    .model-select option { background: #111114; color: var(--text); }
+
+    .warning-row {
+      font-size: 10px;
+      color: var(--warm);
+      letter-spacing: 0.03em;
+      padding: 4px 0 8px;
+    }
+
+    .mcp-status-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 0 4px;
+    }
+    .mcp-status-label {
+      font-size: 10px;
+      color: var(--text-faint);
+      letter-spacing: 0.03em;
+    }
+    .copy-btn {
+      all: unset;
+      font-size: 9.5px;
+      letter-spacing: 0.06em;
+      color: var(--text-faint);
+      cursor: pointer;
+      padding: 3px 8px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      transition: color 120ms ease, border-color 120ms ease;
+    }
+    .copy-btn:hover { color: var(--text-sec); border-color: var(--border-strong); }
+
+    .ollama-dependent { transition: opacity 200ms ease; }
+    .ollama-dependent.off { opacity: 0.3; pointer-events: none; }
+
+    /* ── ONBOARDING VIEW ───────────────────────────────────────────────────── */
+    #onboarding-view {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 28px 40px 20px;
+    }
+
+    .slide {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      width: 100%;
+      max-width: 340px;
+    }
+    .slide.active { display: flex; }
+
+    .slide-icon {
+      font-size: 28px;
+      margin-bottom: 16px;
+      line-height: 1;
+    }
+
+    .slide-title {
+      font-size: 16px;
+      letter-spacing: 0.18em;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+
+    .slide-body {
+      font-size: 10px;
+      color: var(--text-sec);
+      line-height: 1.85;
+      letter-spacing: 0.04em;
+      margin-bottom: 28px;
+      max-width: 280px;
+    }
+
+    .slide-dots {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+
+    .slide-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--border-strong);
+      transition: background 200ms ease;
+    }
+    .slide-dot.active { background: var(--active); }
+
+    .slide-nav {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+      max-width: 280px;
+    }
+
+    /* ── DASHBOARD VIEW ────────────────────────────────────────────────────── */
+    #dashboard-view {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .db-header {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 20px;
+      border-bottom: 1px solid var(--border);
+      font-size: 9px;
+      color: var(--text-faint);
+      letter-spacing: 0.08em;
+    }
+
+    .db-header-left { display: flex; align-items: center; gap: 10px; }
+
+    .db-status-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .db-status-ok     { background: #5BF0A0; }
+    .db-status-warn   { background: #FFCC33; }
+    .db-status-error  { background: #E73E14; }
+
+    .db-scroll {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 14px 20px 20px;
+    }
+    .db-scroll::-webkit-scrollbar { width: 4px; }
+    .db-scroll::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 2px; }
+
+    .db-section-label {
+      font-size: 8px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      margin-bottom: 8px;
+    }
+
+    /* Cron cards */
+    .cron-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .cron-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--border-strong);
+      border-radius: var(--radius);
+      padding: 8px 10px;
+    }
+    .cron-card.ok    { border-left-color: #5BF0A0; }
+    .cron-card.error { border-left-color: #E73E14; }
+    .cron-card.never { border-left-color: rgba(255,255,255,0.18); }
+
+    .cron-card-name {
+      font-size: 9px;
+      color: var(--text);
+      letter-spacing: 0.04em;
+      margin-bottom: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .cron-card-summary {
+      font-size: 8.5px;
+      color: var(--text-sec);
+      line-height: 1.4;
+      margin-bottom: 4px;
+    }
+
+    .cron-card-meta {
+      font-size: 8px;
+      color: var(--text-faint);
+      letter-spacing: 0.03em;
+    }
+
+    /* Current Focus */
+    .focus-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      margin-bottom: 16px;
+      font-size: 9.5px;
+      color: var(--text-sec);
+      line-height: 1.7;
+      white-space: pre-wrap;
+      max-height: 130px;
+      overflow-y: auto;
+    }
+    .focus-block::-webkit-scrollbar { width: 3px; }
+    .focus-block::-webkit-scrollbar-thumb { background: var(--border-strong); }
+
+    /* Pending tasks */
+    .pending-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .pending-item {
+      font-size: 9.5px;
+      color: var(--text-sec);
+      line-height: 1.4;
+      padding: 3px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .pending-item:last-child { border-bottom: 0; }
+
+    .db-empty {
+      font-size: 9.5px;
+      color: var(--text-faint);
+      font-style: italic;
+      padding: 6px 0;
+    }
+
+    /* ── MAP VIEW ──────────────────────────────────────────────────────────── */
+    #map-view {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .map-header {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 20px;
+      border-bottom: 1px solid var(--border);
+      font-size: 9px;
+      color: var(--text-faint);
+      letter-spacing: 0.06em;
+    }
+
+    #palace-map-svg {
+      flex: 1;
+      width: 100%;
+      overflow: visible;
+    }
+
+    #palace-map-svg text {
+      font-family: var(--mono);
+      fill: var(--text);
+    }
+
+    @keyframes crystal-pulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+    #crystal-glow { animation: crystal-pulse 2.8s ease-in-out infinite; }
+  </style>
+</head>
+<body>
+
+  <!-- Titlebar -->
+  <div class="titlebar">
+    <svg class="title-crystal" viewBox="0 0 32 43" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="16,2  23,11 16,8  9,11"  fill="#ffee99"/>
+      <polygon points="9,11  16,8  16,30 3,21"  fill="#e8861a"/>
+      <polygon points="23,11 16,8  16,30 29,21" fill="#ffcc44"/>
+      <polygon points="3,21  16,30 16,38 8,28"  fill="#c87c2c"/>
+      <polygon points="29,21 16,30 16,38 24,28" fill="#e8861a"/>
+      <polygon points="8,28  16,38 24,28 16,42" fill="#7a3a08"/>
+      <polygon points="14,3  18,9  16,8"        fill="rgba(255,255,255,0.6)"/>
+    </svg>
+    <div class="title-text">loci</div>
+    <div class="title-spacer"></div>
+    <div class="title-version">v0.6.0</div>
+    <button id="titlebarSettingsBtn" title="Settings (⌘,)">⚙</button>
+  </div>
+
+  <!-- Settings view -->
+  <div id="settings-view" class="settings-view" style="display:none;">
+    <div class="settings-header">
+      <button id="settingsBack" class="settings-back">← back</button>
+      <span class="settings-header-title">settings</span>
+    </div>
+    <div class="settings-main">
+
+      <div class="settings-section">
+        <div class="section-eyebrow">local AI</div>
+
+        <div class="setting-row">
+          <div class="setting-label">
+            <span class="label-text">Use local AI (Ollama)</span>
+            <span class="label-sub">Run Loci without sending data to any external server</span>
+            <span class="label-hint">requires Ollama running at localhost:11434</span>
+          </div>
+          <label class="sch-toggle">
+            <input type="checkbox" id="ollamaToggle">
+            <span class="sch-toggle-track"></span>
+          </label>
+        </div>
+
+        <div id="ollamaStatusRow" class="ollama-dependent off">
+          <div class="settings-status">
+            <span class="settings-status-dot" id="settingsDot"></span>
+            <span id="settingsStatusLabel">checking…</span>
+          </div>
+        </div>
+
+        <div class="setting-row ollama-dependent off" id="chatModelRow">
+          <label class="setting-label" for="chatModelSelect">
+            <span class="label-text">Chat model</span>
+          </label>
+          <select id="chatModelSelect" class="model-select" disabled>
+            <option value="">Detecting models…</option>
+          </select>
+        </div>
+
+        <div class="setting-row ollama-dependent off" id="embedModelRow">
+          <label class="setting-label" for="embedModelSelect">
+            <span class="label-text">Embedding model</span>
+            <span class="label-hint">used for semantic search · nomic-embed-text recommended</span>
+          </label>
+          <select id="embedModelSelect" class="model-select" disabled>
+            <option value="">Detecting models…</option>
+          </select>
+        </div>
+
+        <div class="setting-row secondary ollama-dependent off">
+          <label class="setting-label" for="failClosedToggle">
+            <span class="label-text">Fail closed</span>
+            <span class="label-sub">never call external APIs if Ollama is offline</span>
+          </label>
+          <label class="sch-toggle">
+            <input type="checkbox" id="failClosedToggle" checked>
+            <span class="sch-toggle-track"></span>
+          </label>
+        </div>
+
+        <div id="failOpenWarning" class="warning-row" style="display:none;">
+          ⚠ Loci may fall back to external APIs
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="section-eyebrow">MCP server</div>
+
+        <div class="setting-row">
+          <div class="setting-label">
+            <span class="label-text">Enable MCP server</span>
+            <span class="label-sub">Expose Loci knowledge at localhost:3456</span>
+            <span class="label-hint">compatible with Goose, Claude Code, Continue.dev</span>
+          </div>
+          <label class="sch-toggle">
+            <input type="checkbox" id="mcpToggle">
+            <span class="sch-toggle-track"></span>
+          </label>
+        </div>
+
+        <div id="mcpStatusRow" class="mcp-status-row" style="display:none;">
+          <span class="mcp-status-label" id="mcpStatusLabel">—</span>
+          <button id="copyGooseConfig" class="copy-btn">copy goose config</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Onboarding view (first-launch: no palace_path in config) -->
+  <div id="onboarding-view">
+    <!-- Slide 1 — your palace -->
+    <div class="slide active" id="slide-0">
+      <svg class="slide-icon" viewBox="0 0 32 43" xmlns="http://www.w3.org/2000/svg" style="width:28px;height:37px;margin-bottom:16px;filter:drop-shadow(0 0 8px rgba(200,124,44,0.3));">
+        <polygon points="16,2  23,11 16,8  9,11"  fill="#ffee99"/>
+        <polygon points="9,11  16,8  16,30 3,21"  fill="#e8861a"/>
+        <polygon points="23,11 16,8  16,30 29,21" fill="#ffcc44"/>
+        <polygon points="3,21  16,30 16,38 8,28"  fill="#c87c2c"/>
+        <polygon points="29,21 16,30 16,38 24,28" fill="#e8861a"/>
+        <polygon points="8,28  16,38 24,28 16,42" fill="#7a3a08"/>
+        <polygon points="14,3  18,9  16,8"        fill="rgba(255,255,255,0.6)"/>
+      </svg>
+      <div class="slide-title">your palace</div>
+      <div class="slide-body">A palace is a directory on your machine. It holds rooms, crystals — the living memory of your work across sessions. Nothing leaves this machine.</div>
+    </div>
+    <!-- Slide 2 — rooms & crystals -->
+    <div class="slide" id="slide-1">
+      <div class="slide-icon">🏛</div>
+      <div class="slide-title">rooms &amp; crystals</div>
+      <div class="slide-body">Rooms are workspaces: Dev, Design, Cave. Crystals are established facts that persist across sessions. The palace is your context — not a cloud account.</div>
+    </div>
+    <!-- Slide 3 — two paths -->
+    <div class="slide" id="slide-2">
+      <div class="slide-icon">◈</div>
+      <div class="slide-title">two paths</div>
+      <div class="slide-body">Create a new palace from a template, or load one you already have. Your palace lives wherever you put it — your filesystem, your rules.</div>
+    </div>
+    <div class="slide-dots">
+      <span class="slide-dot active" data-slide="0"></span>
+      <span class="slide-dot" data-slide="1"></span>
+      <span class="slide-dot" data-slide="2"></span>
+    </div>
+    <div class="slide-nav">
+      <button id="slidePrev" class="btn" style="visibility:hidden;flex:1;">← back</button>
+      <button id="slideNext" class="btn btn-primary" style="flex:2;">next →</button>
+    </div>
+  </div>
+
+  <!-- Welcome screen -->
+  <div id="welcome-view" style="display:none;">
+    <div style="
+      flex:1; display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
+      padding:32px 40px;
+    ">
+      <svg class="welcome-crystal" viewBox="0 0 32 43" xmlns="http://www.w3.org/2000/svg" style="width:32px;height:42px;margin-bottom:18px;filter:drop-shadow(0 0 12px rgba(200,124,44,0.3));">
+        <polygon points="16,2  23,11 16,8  9,11"  fill="#ffee99"/>
+        <polygon points="9,11  16,8  16,30 3,21"  fill="#e8861a"/>
+        <polygon points="23,11 16,8  16,30 29,21" fill="#ffcc44"/>
+        <polygon points="3,21  16,30 16,38 8,28"  fill="#c87c2c"/>
+        <polygon points="29,21 16,30 16,38 24,28" fill="#e8861a"/>
+        <polygon points="8,28  16,38 24,28 16,42" fill="#7a3a08"/>
+        <polygon points="14,3  18,9  16,8"        fill="rgba(255,255,255,0.6)"/>
+      </svg>
+
+      <div style="font-size:20px;letter-spacing:0.22em;color:var(--text);margin-bottom:6px;">loci</div>
+      <div style="font-size:9.5px;letter-spacing:0.14em;color:var(--text-faint);margin-bottom:36px;">cognitive defence system · v0.6.0</div>
+
+      <div style="width:100%;max-width:300px;display:flex;flex-direction:column;gap:8px;">
+        <button id="diveInBtn" class="btn btn-primary btn-full" style="padding:12px;font-size:11px;letter-spacing:0.1em;">
+          dive in →
+        </button>
+        <button id="migrateBtn" class="btn btn-full" style="padding:10px;font-size:10px;">
+          migrate existing palace
+        </button>
+      </div>
+
+      <div style="margin-top:28px;font-size:9px;color:var(--text-faint);letter-spacing:0.1em;text-align:center;line-height:1.9;">
+        your knowledge stays local · nothing leaves this machine
+      </div>
+    </div>
+  </div>
+
+  <!-- Wizard / migration view -->
+  <div id="main-view" class="main" style="display:none;">
+
+    <div class="wizard-header">
+      <div class="room-label">palace migration</div>
+      <button id="wizardBackBtn">← back</button>
+    </div>
+
+    <div class="card">
+      <div class="card-label">select workspace folder</div>
+      <div class="folder-row">
+        <input id="folderPath" class="folder-input" type="text" placeholder="/Users/you/Dev" readonly>
+        <button id="browseBtn" class="btn">browse</button>
+      </div>
+      <button id="detectBtn" class="btn btn-primary btn-full" disabled>detect palace →</button>
+    </div>
+
+    <div id="resultCard" class="card result-card">
+      <div class="badge-row">
+        <span id="resultBadge" class="badge">none</span>
+        <span id="resultMeta" style="font-size:9px;color:var(--text-faint);">—</span>
+      </div>
+      <p id="resultText" class="result-text"></p>
+
+      <div id="statsSection" class="stats-row" style="display:none;">
+        <div class="stat-box">
+          <div id="roomCount" class="stat-num">—</div>
+          <div class="stat-lbl">rooms</div>
+        </div>
+        <div class="stat-box">
+          <div id="crystalCount" class="stat-num">—</div>
+          <div class="stat-lbl">crystals</div>
+        </div>
+      </div>
+
+      <div id="pathDisplay" class="path-display"></div>
+
+      <div class="action-row">
+        <button id="openFinderBtn" class="btn" style="flex:1;">open in finder</button>
+        <button id="actionBtn" class="btn btn-primary" style="flex:2;" disabled>—</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Setup wizard view (Phase 2) -->
+  <div id="setup-wizard-view" class="main" style="display:none;">
+    <div class="wizard-header">
+      <div class="room-label">palace setup</div>
+      <button id="setupWizardBackBtn">← back</button>
+    </div>
+
+    <!-- Branch picker -->
+    <div id="setup-branch-picker">
+      <div class="card" style="margin-bottom:8px;">
+        <div class="card-label">create new palace</div>
+        <p style="font-size:10px;color:var(--text-sec);line-height:1.6;margin-bottom:12px;">
+          Scaffold a fresh palace from the loci template. Pick a parent folder and we handle the rest.
+        </p>
+        <button id="createPalaceBtn" class="btn btn-primary btn-full">create palace →</button>
+      </div>
+      <div class="card">
+        <div class="card-label">load existing palace</div>
+        <p style="font-size:10px;color:var(--text-sec);line-height:1.6;margin-bottom:12px;">
+          Point to a folder that already has <code style="font-size:9px;color:var(--active);">CLAUDE.md</code> and <code style="font-size:9px;color:var(--active);">_palace/</code>.
+        </p>
+        <button id="loadPalaceBtn" class="btn btn-full">load palace →</button>
+      </div>
+    </div>
+
+    <!-- Branch A: create flow -->
+    <div id="setup-create-flow" style="display:none;">
+      <div class="card">
+        <div class="card-label">choose parent folder</div>
+        <div class="folder-row">
+          <input id="createPalacePath" class="folder-input" type="text" placeholder="~/Documents/loci-palace" readonly>
+          <button id="createBrowseBtn" class="btn">browse</button>
+        </div>
+        <p id="createError" style="font-size:9px;color:#E73E14;display:none;margin-bottom:8px;"></p>
+        <button id="createConfirmBtn" class="btn btn-primary btn-full" disabled>scaffold palace →</button>
+      </div>
+      <button id="createBackBtn" style="all:unset;cursor:pointer;font-family:var(--mono);font-size:10px;color:var(--text-faint);padding:8px 0;letter-spacing:0.06em;" >← back to options</button>
+    </div>
+
+    <!-- Branch B: load flow -->
+    <div id="setup-load-flow" style="display:none;">
+      <div class="card">
+        <div class="card-label">select palace folder</div>
+        <div class="folder-row">
+          <input id="loadPalacePath" class="folder-input" type="text" placeholder="/Users/you/Dev" readonly>
+          <button id="loadBrowseBtn" class="btn">browse</button>
+        </div>
+        <div id="loadResult" style="display:none;margin-bottom:10px;">
+          <div class="badge-row">
+            <span id="loadBadge" class="badge">—</span>
+          </div>
+          <p id="loadResultText" style="font-size:10px;color:var(--text-sec);line-height:1.5;margin-bottom:8px;"></p>
+        </div>
+        <p id="loadError" style="font-size:9px;color:#E73E14;display:none;margin-bottom:8px;"></p>
+        <button id="loadConfirmBtn" class="btn btn-primary btn-full" disabled>load palace →</button>
+      </div>
+      <button id="loadBackBtn" style="all:unset;cursor:pointer;font-family:var(--mono);font-size:10px;color:var(--text-faint);padding:8px 0;letter-spacing:0.06em;">← back to options</button>
+    </div>
+  </div>
+
+  <!-- Dashboard view (Phase 3) -->
+  <div id="dashboard-view" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+    <div class="db-header">
+      <div class="db-header-left">
+        <span id="db-status-dot" class="db-status-dot db-status-ok"></span>
+        <span id="db-meta">loading…</span>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button id="dbChangePalaceBtn" class="btn" style="padding:3px 8px;font-size:9px;">← change</button>
+        <button id="dbMapBtn" class="btn" style="padding:3px 10px;font-size:9px;">map →</button>
+      </div>
+    </div>
+    <div class="db-scroll">
+      <div class="db-section-label">cron jobs</div>
+      <div id="db-cron-grid" class="cron-grid"></div>
+
+      <div class="db-section-label">current focus</div>
+      <div id="db-focus" class="focus-block"></div>
+
+      <div id="db-pending-section">
+        <div class="db-section-label">pending</div>
+        <div id="db-pending" class="pending-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Map view (Phase 4) -->
+  <div id="map-view" style="display:none;">
+    <div class="map-header">
+      <button id="mapBackBtn" style="all:unset;cursor:pointer;font-family:var(--mono);font-size:10px;color:var(--text-faint);letter-spacing:0.06em;transition:color 120ms ease;" onmouseover="this.style.color='rgba(232,230,227,0.62)'" onmouseout="this.style.color='rgba(232,230,227,0.22)'">← dashboard</button>
+      <span id="map-meta" style="letter-spacing:0.08em;">—</span>
+      <span style="opacity:0.4;font-size:8px;letter-spacing:0.1em;">MAP · v0.6</span>
+    </div>
+    <svg id="palace-map-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+
+  <!-- Scholar status bar -->
+  <div class="scholar-bar">
+    <span class="ai-badge" id="ai-badge" style="display:none;">
+      <span class="ai-dot" id="ai-dot"></span>
+      <span class="ai-label" id="ai-label">local AI · online</span>
+      <div class="ai-tooltip">ollama not reachable on :11434<br>open settings → local AI</div>
+    </span>
+    <span class="scholar-bar-center" id="bar-center"></span>
+    <span class="scholar-bar-right">v0.6.0</span>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

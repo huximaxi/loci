@@ -1,0 +1,15 @@
+{
+  "name": "loci",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Local-first AI memory. Searchable, private, yours.",
+  "packageManager": "pnpm@9.0.0",
+  "workspaces": [
+    "packages/*",
+    "desktop"
+  ],
+  "scripts": {
+    "build:all": "pnpm --filter @loci/core build",
+    "typecheck": "pnpm --filter @loci/core typecheck"
+  }
+}

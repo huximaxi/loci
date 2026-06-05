@@ -1,0 +1,14 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "identifier": "default",
+  "description": "Default Loci capabilities",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "core:event:allow-listen",
+    "core:event:allow-unlisten",
+    "dialog:default",
+    "opener:default"
+  ],
+  "_note": "core:event listen is currently unscoped. v0.7.0 should scope to the specific event names emitted (state_changed) once we move past dogfood."
+}
