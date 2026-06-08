@@ -19,8 +19,19 @@ No cloud. No accounts. No vendor dependency.
 
 ## Quick start
 
+loci is plain text first. You do not need to build anything to start.
+
+**Start in plain markdown (no build).** This is the door.
+
 ```bash
 git clone https://github.com/huximaxi/loci
+```
+
+Copy the [`templates/`](templates/) kit into a folder of your own, open [FIRST-SESSION.md](FIRST-SESSION.md), and point any file-aware AI at your palace `CLAUDE.md`. That is the setup. The full walkthrough is in [SETUP-GUIDE.md](SETUP-GUIDE.md); if an agent is doing the setup for you, [AGENT-SETUP.md](AGENT-SETUP.md).
+
+**Run the desktop app (optional).**
+
+```bash
 cd loci/desktop
 ```
 
@@ -37,6 +48,7 @@ Then follow [desktop/QUICKSTART.md](desktop/QUICKSTART.md). For how the pieces f
 
 | Package | Description | Status |
 |---------|-------------|--------|
+| `templates/` | Markdown palace starter kit. The no-build door. | v1.2 |
 | `packages/core/` | Shared TypeScript types | v0.1 |
 | `desktop/` | Tauri v2 desktop app (Rust + WebView) | v0.5.0 |
 

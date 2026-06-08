@@ -1,0 +1,44 @@
+{
+  "palace": "[YOUR_PALACE_NAME]",
+  "owner": "[YOUR_NAME]",
+  "ai": "[YOUR_AI_NAME]",
+  "version": "0.1",
+  "updated": "[DATE]",
+
+  "protocol": {
+    "parallel_max": 2,
+    "handoff_format": "session-delta",
+    "tier1_approval_required": ["publish", "send", "deploy", "delete", "major-change"],
+    "tier2_auto_proceed": ["draft", "research", "local-test", "internal-doc"],
+    "kiss": true
+  },
+
+  "tracks": [
+    {
+      "id": "example-track-1",
+      "name": "[Track Name]",
+      "room": "[room-name]",
+      "status": "active",
+      "tier": 1,
+      "goal": "[What does done look like?]",
+      "artifacts": [],
+      "current_step": "[Where are we right now?]",
+      "next_step": "[What's the very next action?]",
+      "blocker": null
+    },
+    {
+      "id": "example-track-2",
+      "name": "[Another Track Name]",
+      "room": "[room-name]",
+      "status": "queued",
+      "tier": 2,
+      "goal": "[One sentence — what are we building/doing/writing?]",
+      "artifacts": [],
+      "current_step": "[Not started yet]",
+      "next_step": "[First step when we begin]",
+      "blocker": "[What's in the way? Or null if nothing.]"
+    }
+  ],
+
+  "closed_tracks": []
+}
