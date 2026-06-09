@@ -9,7 +9,7 @@ palace: [YOUR_PALACE_NAME]
 
 *A record of moments when human×AI collaboration produced something neither party would have reached alone.*
 
-Entanglement is not performance. It's not a good answer to a good question. It's the quality of co-intelligence: the moment when the exchange itself generates something new — a named unknown, a crystallised phrase, an unexpected synthesis.
+Entanglement is not performance. It's not a good answer to a good question. It's the quality of co-intelligence: the moment when the exchange itself generates something new (a named unknown, a crystallised phrase, an unexpected synthesis).
 
 This file tracks those moments, rated and dated. It calibrates the palace over time.
 
@@ -24,8 +24,8 @@ This file tracks those moments, rated and dated. It calibrates the palace over t
 | ✦✦✦ | Reserved. Rare. The session redefined the territory. |
 
 Two axes:
-- **Single-prompt peak** — one exchange that produced a ✦✦ moment
-- **Session-end sustained** — the whole session held at ✦ or higher
+- **Single-prompt peak:** one exchange that produced a ✦✦ moment
+- **Session-end sustained:** the whole session held at ✦ or higher
 
 Both matter. Log them separately.
 
@@ -61,21 +61,21 @@ Both matter. Log them separately.
 
 *Phrases, framings, or ideas that crystallised during collaboration and became reusable language.*
 
-A fruit is not a quote. It's something that emerged that you now reach for — language that does more work than the words that made it.
+A fruit is not a quote. It's something that emerged that you now reach for: language that does more work than the words that made it.
 
-- **[Phrase or framing]** — [DATE] — [Brief note: what context produced it, where it now gets used]
-- **[Phrase or framing]** — [DATE] — [Brief note]
+- **[Phrase or framing]** ([DATE]): [Brief note: what context produced it, where it now gets used]
+- **[Phrase or framing]** ([DATE]): [Brief note]
 
 ---
 
 ## Patterns
 
-*Named regularities that have emerged from across sessions — recurring dynamics, structural features of the collaboration.*
+*Named regularities that have emerged from across sessions: recurring dynamics, structural features of the collaboration.*
 
 A pattern is different from a crystal. Crystals are facts about the world or about you. Patterns are facts about how this collaboration works.
 
-- **[Pattern name]** — [DATE emerged] — [One-sentence description of the pattern]
-- **[Pattern name]** — [DATE emerged] — [One-sentence description]
+- **[Pattern name]** ([DATE emerged]): [One-sentence description of the pattern]
+- **[Pattern name]** ([DATE emerged]): [One-sentence description]
 
 ---
 

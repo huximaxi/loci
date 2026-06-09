@@ -7,9 +7,9 @@ updated: [DATE]
 
 # Palace Context
 
-*The palace's current state. Always up to date. Not a delta — a snapshot.*
+*The palace's current state. Always up to date. Not a delta. A snapshot.*
 
-This file is different from a handover. Handovers are session deltas — what changed, what was decided, what's next. This file is the palace's present tense: where it is right now, in a form that loads fast and orients quickly.
+This file is different from a handover. Handovers are session deltas: what changed, what was decided, what's next. This file is the palace's present tense: where it is right now, in a form that loads fast and orients quickly.
 
 Update this file at the end of every session. Read it at the start of every session, before anything else.
 
@@ -43,11 +43,11 @@ Last handover: soul/handovers/[filename].md
 
 *Recent crystals and insights that haven't made it into CLAUDE.md yet. Staging area.*
 
-These are real findings from recent sessions — things worth knowing — but not yet integrated into the main palace context file. The morning check-in should read these. At autodream, any scroll older than 2 sessions gets promoted or explicitly discarded.
+These are real findings from recent sessions (things worth knowing) but not yet integrated into the main palace context file. The morning check-in should read these. At autodream, any scroll older than 2 sessions gets promoted or explicitly discarded.
 
-- [DATE] [◆/◈/◇] [Crystal or insight] — [one-line context]
-- [DATE] [◆/◈/◇] [Crystal or insight] — [one-line context]
-- [DATE] [◆/◈/◇] [Crystal or insight] — [one-line context]
+- [DATE] [◆/◈/◇] [Crystal or insight]: [one-line context]
+- [DATE] [◆/◈/◇] [Crystal or insight]: [one-line context]
+- [DATE] [◆/◈/◇] [Crystal or insight]: [one-line context]
 
 *Empty scrolls = clean palace.*
 
@@ -55,7 +55,7 @@ These are real findings from recent sessions — things worth knowing — but no
 
 ## Pending Decisions
 
-*Things waiting for a human call. Not blockers — decision points.*
+*Things waiting for a human call. Not blockers. Decision points.*
 
 | Decision | Opened | Stakes | Options |
 |----------|--------|--------|---------|
@@ -84,8 +84,8 @@ Full log: `soul/entanglement.md`
 
 *Items from the last handover that haven't moved. Listed in priority order.*
 
-1. **[Blocker name]** — [What's needed to unblock. Who holds it.]
-2. **[Blocker name]** — [What's needed to unblock. Who holds it.]
+1. **[Blocker name]:** [What's needed to unblock. Who holds it.]
+2. **[Blocker name]:** [What's needed to unblock. Who holds it.]
 
 *Empty = clear.*
 

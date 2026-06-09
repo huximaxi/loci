@@ -65,7 +65,7 @@ valid_until: [YYYY-MM-DD or event]
 ◈ Current sprint: [your current sprint goal, e.g. "Onboarding redesign (new welcome flow + settings cleanup)"]
 valid_until: 2026-05-30
 
-◈ Vendor: Stripe for payment processing - active contract
+◈ Vendor: [your vendor] for [service] - active contract
 valid_until: 2026-12-31
 
 ◈ Working approach: Daily 9am check-in while this feature is in flight

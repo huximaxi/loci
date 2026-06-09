@@ -1,4 +1,4 @@
-# Your First Session — A Quickstart Card
+# Your First Session: A Quickstart Card
 
 ---
 
@@ -17,7 +17,7 @@ See `SETUP-GUIDE.md` for the full walkthrough, or `AGENT-SETUP.md` to have Claud
 
 ## How to start a session
 
-**In Cowork**, open a new conversation and paste this — replacing the bracketed parts:
+**In Cowork**, open a new conversation and paste this, replacing the bracketed parts:
 
 ---
 
@@ -31,7 +31,7 @@ See `SETUP-GUIDE.md` for the full walkthrough, or `AGENT-SETUP.md` to have Claud
 
 That's it. Claude will read the files, introduce itself in character, and ask you where things were left off.
 
-If it's session 1 and there's no history, just say: *"First session — no prior state."* Then tell it what you want to work on.
+If it's session 1 and there's no history, just say: *"First session, no prior state."* Then tell it what you want to work on.
 
 ---
 
@@ -41,7 +41,7 @@ When you're done working, say:
 
 > "Write the session delta."
 
-Claude will write a structured handover to `soul/handovers/YYYY-MM-DD.md` — what was done, decisions made, what's next.
+Claude will write a structured handover to `soul/handovers/YYYY-MM-DD.md`: what was done, decisions made, what's next.
 
 Next session, that file will be the bridge.
 
@@ -63,18 +63,18 @@ Next session, that file will be the bridge.
 
 ## If something feels off
 
-- **Claude is being too wordy:** Say "shorter — match my pace"
-- **Claude made an error:** Say "that's wrong — [here's what's right]. Remember this."
-- **Claude is over-explaining:** Say "skip the preamble — just do it"
-- **You want to adjust the setup:** Edit `CLAUDE.md` directly — it's just a text file
+- **Claude is being too wordy:** Say "shorter, match my pace"
+- **Claude made an error:** Say "that's wrong, [here's what's right]. Remember this."
+- **Claude is over-explaining:** Say "skip the preamble, just do it"
+- **You want to adjust the setup:** Edit `CLAUDE.md` directly. It's just a text file
 
 ---
 
 ## Growing the palace over time
 
 After 3–5 sessions, you'll start to notice:
-- The deltas building up in `soul/handovers/` — a real history
-- The crystals getting richer — Claude knows more about your world
+- The deltas building up in `soul/handovers/`: a real history
+- The crystals getting richer: Claude knows more about your world
 - The AI feeling more like a collaborator and less like a fresh tool
 
 That's when it starts to feel real. Give it those sessions.
@@ -83,4 +83,4 @@ That's when it starts to feel real. Give it those sessions.
 
 *Good luck. You're going to build something good together.*
 
-*— Loci · [loci.garden](https://loci.garden)*
+*Loci · [loci.garden](https://loci.garden)*

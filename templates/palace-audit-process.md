@@ -1,4 +1,4 @@
-# Palace Audit — Structural Autodream Process
+# Palace Audit: Structural Autodream Process
 
 > Agent-executable process. Trigger: "palace audit" / "structural autodream" / "check our architecture" / "is our file structure healthy"
 
@@ -6,7 +6,7 @@
 
 ## What this does
 
-Scans the full palace setup — CLAUDE.md files, soul files, skills, handover chain — for staleness, duplication, broken references, coverage gaps, and architectural drift. Scores health across 5 dimensions and outputs a report.
+Scans the full palace setup (CLAUDE.md files, soul files, skills, handover chain) for staleness, duplication, broken references, coverage gaps, and architectural drift. Scores health across 5 dimensions and outputs a report.
 
 Run after major sprints, when architecture feels heavy, or when CLAUDE.md files haven't been reviewed in more than 3 weeks.
 
@@ -32,7 +32,7 @@ Score: 0–5 per dimension. Total: /25.
 TRIGGER
    │
    ▼
-Step 1: SCAN (shell — no LLM reads yet)
+Step 1: SCAN (shell, no LLM reads yet)
    ├── List all CLAUDE.md files
    ├── List all soul files
    ├── List all skill files + check against any skills index
@@ -103,7 +103,7 @@ ROOM CLAUDE.MD                 →  room-scoped context only
 
 ## Report format
 
-Reports go to `[palace]/audits/YYYY-MM-DD.md`. They accumulate — the audit history is itself an architectural signal.
+Reports go to `[palace]/audits/YYYY-MM-DD.md`. They accumulate. The audit history is itself an architectural signal.
 
 ```markdown
 ---
@@ -113,7 +113,7 @@ score: XX/25
 verdict: HEALTHY | NEEDS_ATTENTION | DRIFT_DETECTED
 ---
 
-# Palace Audit — YYYY-MM-DD
+# Palace Audit: YYYY-MM-DD
 
 ## Scorecard
 | Dimension | Score | Notes |
@@ -134,7 +134,7 @@ verdict: HEALTHY | NEEDS_ATTENTION | DRIFT_DETECTED
 1. [specific action] → [file path]
 
 ## Verdict
-[HEALTHY / NEEDS_ATTENTION / DRIFT_DETECTED] — [one paragraph]
+[HEALTHY / NEEDS_ATTENTION / DRIFT_DETECTED]: [one paragraph]
 ```
 
 ---

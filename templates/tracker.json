@@ -32,7 +32,7 @@
       "room": "[room-name]",
       "status": "queued",
       "tier": 2,
-      "goal": "[One sentence — what are we building/doing/writing?]",
+      "goal": "[One sentence: what are we building/doing/writing?]",
       "artifacts": [],
       "current_step": "[Not started yet]",
       "next_step": "[First step when we begin]",

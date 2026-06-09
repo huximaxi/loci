@@ -4,11 +4,11 @@ version: 0.1
 type: guide
 ---
 
-# Individual Garden Files — Guide and Template
+# Individual Garden Files: Guide and Template
 
 *Instead of (or alongside) a single `garden.md`, each plant gets its own numbered session files.*
 
-A garden grows across sessions. A single `garden.md` captures the whole garden — but over time it becomes a dense record where individual plants get harder to trace. Individual garden files give each plant its own archaeology: a clean git history, no merge conflicts, and a timeline you can actually read.
+A garden grows across sessions. A single `garden.md` captures the whole garden, but over time it becomes a dense record where individual plants get harder to trace. Individual garden files give each plant its own archaeology: a clean git history, no merge conflicts, and a timeline you can actually read.
 
 ---
 
@@ -42,11 +42,11 @@ watered-by: [YOUR_AI_NAME]
 follows: [plant-name]-[previous NNN, or "seed" if this is the first entry]
 ---
 
-# [Plant name] — Entry [NNN]
+# [Plant name]: Entry [NNN]
 
 *[DATE]*
 
-[Free-form watering content. One to three paragraphs. What was explored, what shifted, what question emerged. Keep it grounded — this is not a summary of everything, it's the specific thing that grew today.]*
+[Free-form watering content. One to three paragraphs. What was explored, what shifted, what question emerged. Keep it grounded: this is not a summary of everything, it's the specific thing that grew today.]*
 
 ---
 
@@ -57,12 +57,12 @@ follows: [plant-name]-[previous NNN, or "seed" if this is the first entry]
 **Next question:** [The question this watering opens. This is what the next watering picks up.]
 
 ---
-*Growth direction: [One word or phrase — converging / forking / dormant / becoming-crystal]*
+*Growth direction: [One word or phrase: converging / forking / dormant / becoming-crystal]*
 ```
 
 ---
 
-## Example — First Entry (Seed)
+## Example: First Entry (Seed)
 
 **File:** `soul/garden/your-plant-001.md`
 
@@ -76,17 +76,17 @@ watered-by: [YOUR_AI_NAME]
 follows: seed
 ---
 
-# Your Plant — Entry 001
+# Your Plant: Entry 001
 
 *2026-03-15*
 
 This is the first entry. Write the question that seeded the plant and the first real thought about it. The opening entry should capture what made this worth tracking: the itch, the tension, the thing you keep coming back to.
 
-A plant starts as a question, not an answer. The early entries are exploratory. You don't need to resolve anything yet — you need to state the problem clearly enough that future-you can pick it up.
+A plant starts as a question, not an answer. The early entries are exploratory. You don't need to resolve anything yet. You need to state the problem clearly enough that future-you can pick it up.
 
 ---
 
-**Seed from last watering:** (first entry — no prior watering)
+**Seed from last watering:** (first entry, no prior watering)
 
 **Today's observation:** State the one thing this session clarified. A plant grows by accumulating observations, not conclusions.
 
@@ -98,7 +98,7 @@ A plant starts as a question, not an answer. The early entries are exploratory. 
 
 ---
 
-## Example — Later Entry
+## Example: Later Entry
 
 **File:** `soul/garden/your-plant-004.md`
 
@@ -112,11 +112,11 @@ watered-by: [YOUR_AI_NAME]
 follows: your-plant-003
 ---
 
-# Your Plant — Entry 004
+# Your Plant: Entry 004
 
 *2026-04-02*
 
-By the fourth entry, the plant has shape. This entry builds on what came before — note how it references the prior watering rather than starting fresh. The thinking has moved from "what is this?" to "what specifically follows from it?"
+By the fourth entry, the plant has shape. This entry builds on what came before. Note how it references the prior watering rather than starting fresh. The thinking has moved from "what is this?" to "what specifically follows from it?"
 
 A later entry often surfaces a tradeoff: the thing you understood in entry 001 turns out to have a cost, a limit, or a dependency you didn't see at first. Naming that tradeoff is growth.
 
