@@ -8,4 +8,4 @@ address = "127.0.0.1"
 open = false
 
 [watch]
-ignore = ["./dist", "../src-tauri/target"]
+ignore = ["./dist"]
