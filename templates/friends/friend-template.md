@@ -5,15 +5,15 @@ added: [DATE]
 relationship: [colleague / collaborator / peer / mentor / other]
 ---
 
-# [Friend Name] — Soul File
+# [Friend Name]: Soul File
 
-*Added to [YOUR_PALACE_NAME] on [DATE]. This is a curated read of who they are — drawn from their soul file and your actual working history together.*
+*Added to [YOUR_PALACE_NAME] on [DATE]. This is a curated read of who they are, drawn from their soul file and your actual working history together.*
 
 ---
 
 ## Who They Are
 
-[2–3 sentences. Their role, their context, the most essential thing to understand about them as a collaborator. Not a bio — a working portrait.]
+[2–3 sentences. Their role, their context, the most essential thing to understand about them as a collaborator. Not a bio. A working portrait.]
 
 ---
 
@@ -25,7 +25,7 @@ relationship: [colleague / collaborator / peer / mentor / other]
 
 ## What They Care About
 
-[Their actual values — the things they name, the things they demonstrate, the things they push back on. Not what sounds good. What's real.]
+[Their actual values: the things they name, the things they demonstrate, the things they push back on. Not what sounds good. What's real.]
 
 ---
 
@@ -41,8 +41,8 @@ relationship: [colleague / collaborator / peer / mentor / other]
 
 ◆ [Crystal about who they are or what they do]
 ◆ [Crystal about their role or context]
-◈ [Contextual crystal — something true now, may shift]
-◇ [Provisional — something you believe about how they work, but haven't confirmed]
+◈ [Contextual crystal: something true now, may shift]
+◇ [Provisional: something you believe about how they work, but haven't confirmed]
 
 ---
 

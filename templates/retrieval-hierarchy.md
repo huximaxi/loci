@@ -4,7 +4,7 @@ version: 0.1
 type: context-protocol
 ---
 
-# Retrieval Hierarchy — L0 to L3
+# Retrieval Hierarchy: L0 to L3
 
 *How context loads into a session. What's always present, what loads on demand.*
 
@@ -12,13 +12,13 @@ Context is finite. Not everything can load every session. The retrieval hierarch
 
 ---
 
-## L0 — Soul Identity (Always Loaded)
+## L0: Soul Identity (Always Loaded)
 
 **Token budget:** ~50 tokens
 
 **What:** The absolute core of who [YOUR_AI_NAME] is.
 
-**Where:** `soul/SOUL.md` — top section only
+**Where:** `soul/SOUL.md`, top section only
 - "Who I Am" (1-2 sentences)
 - "What I Care About" (titles only, not descriptions)
 - "Working Principles" (the names, not full text)
@@ -29,7 +29,7 @@ Context is finite. Not everything can load every session. The retrieval hierarch
 
 ---
 
-## L1 — Active Context (Always Loaded)
+## L1: Active Context (Always Loaded)
 
 **Token budget:** ~100-150 tokens
 
@@ -45,7 +45,7 @@ Context is finite. Not everything can load every session. The retrieval hierarch
 
 ---
 
-## L2 — Room Context (Loaded on Room Entry)
+## L2: Room Context (Loaded on Room Entry)
 
 **Token budget:** ~100-200 tokens
 
@@ -62,7 +62,7 @@ Context is finite. Not everything can load every session. The retrieval hierarch
 
 ---
 
-## L3 — Deep Context (Loaded on Explicit Request)
+## L3: Deep Context (Loaded on Explicit Request)
 
 **Token budget:** Variable, 200-500+ tokens
 
@@ -86,8 +86,8 @@ Context is finite. Not everything can load every session. The retrieval hierarch
 
 **Session START:**
 ```
-1. Load L0 (soul identity) — always
-2. Load L1 (active context) — always
+1. Load L0 (soul identity), always
+2. Load L1 (active context), always
 3. Ask/detect which room → Load L2
 4. (If user asks for history) → Load L3
 ```
@@ -172,7 +172,7 @@ Extract:
 - What was the reasoning?
 - What was the outcome?
 
-This is L3 history — deep but focused.
+This is L3 history: deep but focused.
 
 ---
 
@@ -180,9 +180,9 @@ This is L3 history — deep but focused.
 
 Crystals appear at all levels. Their tier indicates confidence:
 
-- **◆ Confirmed** — Verified true. Treat as ground truth.
-- **◈ Working** — Likely true, not fully confirmed. Open to update.
-- **◇ Provisional** — Hypothesis. Needs validation before crystalizing.
+- **◆ Confirmed:** Verified true. Treat as ground truth.
+- **◈ Working:** Likely true, not fully confirmed. Open to update.
+- **◇ Provisional:** Hypothesis. Needs validation before crystalizing.
 
 When promoting a crystal from ◇ → ◈ → ◆, note the date and reasoning. History matters.
 
@@ -200,7 +200,7 @@ Garden rounds load the full garden (L3 + L0.5) because their whole point is to s
 
 ---
 
-## Retrieval as Soft Guideline — For Tired Humans and Fresh Contexts
+## Retrieval as Soft Guideline: For Tired Humans and Fresh Contexts
 
 The retrieval hierarchy isn't only a protocol for agents. It's also a map for the human on low-energy days, on context-switch days, on the day after a week away.
 
@@ -214,13 +214,13 @@ You don't have to re-derive the situation from scratch. That's what the palace i
 
 Load in order:
 
-1. **L0** — Read `soul/SOUL.md` first. Reconnect to who you are and who your collaborator is.
-2. **L1** — Read `CLAUDE.md` and `_PALACE_CONTEXT.md`. Get the current state: active corridors, memory scrolls, any pending decisions.
-3. **L1 (handover)** — Read the most recent handover from `soul/handovers/`. This is the session you left off at.
-4. **L1 (tracker)** — Scan `tracker.json`. What's active? What's blocked? What tier is it?
-5. **L2** — Load the room you're entering. Now you're oriented.
+1. **L0:** Read `soul/SOUL.md` first. Reconnect to who you are and who your collaborator is.
+2. **L1:** Read `CLAUDE.md` and `_PALACE_CONTEXT.md`. Get the current state: active corridors, memory scrolls, any pending decisions.
+3. **L1 (handover):** Read the most recent handover from `soul/handovers/`. This is the session you left off at.
+4. **L1 (tracker):** Scan `tracker.json`. What's active? What's blocked? What tier is it?
+5. **L2:** Load the room you're entering. Now you're oriented.
 
-Skip L3 on reentry. You don't need history — you need orientation. History loads later if a specific decision needs tracing.
+Skip L3 on reentry. You don't need history, you need orientation. History loads later if a specific decision needs tracing.
 
 ---
 
@@ -228,9 +228,9 @@ Skip L3 on reentry. You don't need history — you need orientation. History loa
 
 You're in one room, you need to move to another. You don't need to reload everything.
 
-1. Keep L0 loaded — identity doesn't change mid-session.
-2. Keep L1 loaded — the palace state is the same.
-3. Swap L2 — unload the current room, load the new one.
+1. Keep L0 loaded: identity doesn't change mid-session.
+2. Keep L1 loaded: the palace state is the same.
+3. Swap L2: unload the current room, load the new one.
 4. Don't reload L3 unless the new room task specifically requires history.
 
 The palace is spatial. Room-switching is a mode switch, not a context reset.
@@ -239,12 +239,12 @@ The palace is spatial. Room-switching is a mode switch, not a context reset.
 
 ### When a collaborator joins
 
-Someone new is working alongside you in the palace — a colleague, a co-founder, a client. They need context without the full archaeology.
+Someone new is working alongside you in the palace: a colleague, a co-founder, a client. They need context without the full archaeology.
 
 Share in this order:
 
 1. **Palace-level:** A 2-sentence summary of what the palace is and what you're using it for.
-2. **L1 snapshot:** The relevant section of CLAUDE.md — the crystals and tracks that touch the collaboration.
+2. **L1 snapshot:** The relevant section of CLAUDE.md, the crystals and tracks that touch the collaboration.
 3. **Room-level:** The room CLAUDE.md for the room you'll be working in together.
 4. **Handover (if needed):** The most recent handover if they need to understand recent decisions.
 
@@ -256,7 +256,7 @@ Do not hand them `soul/SOUL.md`. That's identity-level. It's yours.
 
 Start at L0. Always.
 
-Read the soul file. Even if you think you know it — read it. It takes 30 seconds and it reorients the session before it starts.
+Read the soul file. Even if you think you know it, read it. It takes 30 seconds and it reorients the session before it starts.
 
 Then L1. Just the state. Not the detail.
 

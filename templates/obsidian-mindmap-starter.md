@@ -4,7 +4,7 @@ type: mindmap-starter
 obsidian: true
 ---
 
-# Palace Mindmap — Self-Starter
+# Palace Mindmap: Self-Starter
 
 > **For Obsidian users.** This creates an initial mindmap of your palace structure during onboarding.
 
@@ -97,4 +97,4 @@ Add edge: {"fromNode": "friends", "toNode": "friend-[name]"}
 
 ---
 
-*Obsidian mindmap integration — palace-starter*
+*Obsidian mindmap integration: palace-starter*

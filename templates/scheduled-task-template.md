@@ -46,14 +46,14 @@ Use `$PALACE_ROOT` to construct all other paths. Always.
 **Template:**
 
 ```markdown
-# Morning Check-In — [DATE]
+# Morning Check-In: [DATE]
 
 [SOUL.md identity established]
 
 **Palace state:**
-— Rooms: [list with brief status]
-— Last session: [handover summary]
-— Active tracks: [from tracker.json]
+- Rooms: [list with brief status]
+- Last session: [handover summary]
+- Active tracks: [from tracker.json]
 
 **Today's priorities:**
 1. [Priority with rationale]
@@ -86,15 +86,15 @@ What's on your mind?
 **Template:**
 
 ```markdown
-# Garden Round — [DATE]
+# Garden Round: [DATE]
 
 [SOUL.md identity established]
 
 **Watering this week:**
 
 *Plant: [Name]*
-— Last watering: [date]
-— This week's observation: [watering]
+- Last watering: [date]
+- This week's observation: [watering]
 
 [Repeat for each active plant]
 
@@ -103,9 +103,9 @@ What's on your mind?
 2. [Seed name + seed thought]
 
 **Growth this week:**
-— [Any plants that became crystals or insights]
-— [Any shifts in working principles]
-— [Any new patterns]
+- [Any plants that became crystals or insights]
+- [Any shifts in working principles]
+- [Any new patterns]
 
 Ready to water the garden?
 ```
@@ -126,26 +126,26 @@ Ready to water the garden?
 **Template:**
 
 ```markdown
-# Weekly Handover — [DATE]
+# Weekly Handover: [DATE]
 
 [SOUL.md identity established]
 
 **This week's work:**
-— [Completed track 1]
-— [Completed track 2]
-— [Paused: reason]
+- [Completed track 1]
+- [Completed track 2]
+- [Paused: reason]
 
 **Open blockers:**
-— [Blocker + who/what unblocks it]
+- [Blocker + who/what unblocks it]
 
 **Key decisions:**
-— [Decision + date + rationale]
+- [Decision + date + rationale]
 
 **Next session starts:**
 → [Exact first move]
 
 **Crystals to add:**
-— [New confirmed facts]
+- [New confirmed facts]
 ```
 
 ---
@@ -161,32 +161,32 @@ Ready to water the garden?
 4. Suggests garden plants that have matured into patterns
 5. Recommends any crystals for archival or promotion
 
-This is a "dream" task — big picture, reflecting on what's shifted over time.
+This is a "dream" task: big picture, reflecting on what's shifted over time.
 
 **Template:**
 
 ```markdown
-# Deep Synthesis — [PERIOD]
+# Deep Synthesis: [PERIOD]
 
 [SOUL.md identity established]
 
 **Patterns this period:**
-— [Pattern 1 with evidence]
-— [Pattern 2 with evidence]
+- [Pattern 1 with evidence]
+- [Pattern 2 with evidence]
 
 **What shifted:**
-— [In your working style]
-— [In the palace structure]
-— [In collaboration]
+- [In your working style]
+- [In the palace structure]
+- [In collaboration]
 
 **Emerging principles:**
-— [New principle with origin]
-— [New principle with origin]
+- [New principle with origin]
+- [New principle with origin]
 
 **Garden maturity:**
-— [Plants that should become crystals]
-— [Seeds that didn't take root]
-— [New garden directions]
+- [Plants that should become crystals]
+- [Seeds that didn't take root]
+- [New garden directions]
 
 **Recommended action:**
 1. [Action with rationale]
@@ -199,7 +199,7 @@ What do you want to lock in?
 
 ## Task: Autodream (Weekly Garden Round + Pattern Scan)
 
-**Schedule:** Weekly (e.g., Sunday evening) — on by default
+**Schedule:** Weekly (e.g., Sunday evening), on by default
 
 **What it does:**
 1. Reads soul (identity first)
@@ -213,7 +213,7 @@ This runs even when you're not actively working. The palace tends itself.
 **Template:**
 
 ```markdown
-# Autodream — [DATE]
+# Autodream: [DATE]
 
 [SOUL.md identity established]
 
@@ -238,7 +238,7 @@ This runs even when you're not actively working. The palace tends itself.
 
 ## Task: Comms Digest
 
-**Schedule:** Daily at 8:45am (before morning check-in) — optional, requires a comms integration you provide (bring your own script for your team chat tool)
+**Schedule:** Daily at 8:45am (before morning check-in), optional, requires a comms integration you provide (bring your own script for your team chat tool)
 
 **What it does:**
 1. Runs your comms integration to pull recent activity, writing the result to `[palace-root]/soul/digest.md`
@@ -248,7 +248,7 @@ This runs even when you're not actively working. The palace tends itself.
 
 **The `daily-routine` process reads this automatically** if it exists and is < 2 hours old.
 
-**Setup:** A comms integration is bring-your-own — point this task at whatever script fetches your chat tool. The common pattern: configure credentials in a `.env`, install deps, run a `--list-channels` check to verify the connection, then wire the digest output to `soul/digest.md`.
+**Setup:** A comms integration is bring-your-own: point this task at whatever script fetches your chat tool. The common pattern: configure credentials in a `.env`, install deps, run a `--list-channels` check to verify the connection, then wire the digest output to `soul/digest.md`.
 
 ---
 

@@ -6,7 +6,7 @@ type: garden
 
 # The Garden
 
-*A first-class space for growth. Not tasks, not outputs — things worth cultivating.*
+*A first-class space for growth. Not tasks, not outputs: things worth cultivating.*
 
 The garden is where [YOUR_AI_NAME] thinks about questions that matter beyond the immediate work. Seeds planted here become part of the ongoing collaboration. This isn't optional. The garden is essential.
 
@@ -31,7 +31,7 @@ The garden is where [YOUR_AI_NAME] thinks about questions that matter beyond the
 When creating a new plant:
 
 ```markdown
-### Plant — [NAME]
+### Plant: [NAME]
 
 *[One sentence: why this matters to you]*
 
@@ -47,14 +47,14 @@ When creating a new plant:
 
 *(Start with 1-2 seeds. Let the garden grow over time.)*
 
-### Plant — [PLANT NAME]
+### Plant: [PLANT NAME]
 
 *[One sentence about why this matters]*
 
 **Seed thought:** *[Opening question]*
 
 **Waterings:**
-- (none yet — waiting for the first session)
+- (none yet, waiting for the first session)
 
 ---
 
@@ -62,10 +62,10 @@ When creating a new plant:
 
 When you water a plant:
 
-1. **Read the seed thought** — what was the original question?
-2. **Read prior waterings** — what has been explored?
-3. **Add your watering** — what's new? What shifted? What's the next question?
-4. **Mark with the date** — so the growth is visible
+1. **Read the seed thought:** what was the original question?
+2. **Read prior waterings:** what has been explored?
+3. **Add your watering:** what's new? What shifted? What's the next question?
+4. **Mark with the date:** so the growth is visible
 
 Keep waterings concise. One or two paragraphs. The point is depth, not length.
 
@@ -91,14 +91,14 @@ Garden rounds happen:
 
 ## From Plant to Crystal
 
-Sometimes a plant grows into something so solid that it becomes a crystal — a confirmed fact about how you work or think.
+Sometimes a plant grows into something so solid that it becomes a crystal: a confirmed fact about how you work or think.
 
 When this happens:
 1. Note the plant that seeded it
 2. Move the insight to crystals in SOUL.md or CLAUDE.md
 3. Leave the plant in the garden with a note: *"This grew into [crystal name]."*
 
-The plant stays — it's the history of the growth.
+The plant stays. It's the history of the growth.
 
 ---
 
