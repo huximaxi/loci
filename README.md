@@ -52,6 +52,14 @@ Then follow [desktop/QUICKSTART.md](desktop/QUICKSTART.md). For how the pieces f
 | `packages/core/` | Shared TypeScript types | v0.1 |
 | `desktop/` | Tauri v2 desktop app (Rust + WebView) | v0.5.0 |
 
+## Discoveries
+
+What did your palace become? The [`discoveries/`](discoveries/) folder is where
+loci users share palace portraits: the shape of their setup, what they changed,
+what the framework turned into in their hands.
+
+Submit via pull request or email themapisnory@tuta.io.
+
 ## License
 
 MIT · [loci.garden](https://loci.garden) · 2026

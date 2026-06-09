@@ -63,6 +63,7 @@ Small and shared. The garden does not rank these:
 - A reviewed-and-merged dispatch in the [seed](https://loci.garden/seed/).
 - A bug report with a reproduction.
 - A pull request against this charter itself.
+- A palace portrait in [`discoveries/`](discoveries/): what your loci setup became, what you changed, what you found.
 
 Prose-quality commit messages, please. The garden's git log is part of the garden.
 
