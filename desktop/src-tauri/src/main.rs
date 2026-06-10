@@ -1810,6 +1810,356 @@ fn extract_task_title(body: &str) -> String {
     body.chars().take(80).collect()
 }
 
+// ─── palace-update: the delta checker ─────────────────────────────────────────
+//
+// "What's yours to let in." A read-only, explicit update check: read the local
+// methodology version anchor, fetch the published one (ONE GET, no telemetry,
+// fail-closed), and report the version entries newer than the local version.
+// It never writes, never polls, never auto-applies. The human pulls, sees the
+// delta, decides. This is the app's only call to the public internet, and it
+// runs solely on explicit user action.
+//
+// `main` is the always-latest methodology line; the `stable` field in the doc
+// gates what surfaces by default (candidates are opt-in).
+
+const METHODOLOGY_URL: &str =
+    "https://raw.githubusercontent.com/huximaxi/loci/main/PALACE-METHODOLOGY.md";
+
+/// The `> Key: value` version anchor at the top of PALACE-METHODOLOGY.md.
+#[derive(Debug, Clone, PartialEq)]
+struct MethodologyAnchor {
+    /// The leading version, e.g. "1.3-candidate".
+    version: String,
+    /// The ratified stable version, e.g. "1.2".
+    stable: String,
+}
+
+/// One bullet within a version section: `**Title.** summary.`
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+struct DeltaItem {
+    title: String,
+    summary: String,
+}
+
+/// One `## vX.Y · DATE` section and its bullets.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+struct DeltaEntry {
+    version: String,
+    date: String,
+    is_candidate: bool,
+    items: Vec<DeltaItem>,
+}
+
+/// The report handed to the UI. `status` is a plain string for a frictionless
+/// WASM boundary: "current" | "behind" | "unknown" | "unavailable".
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+struct UpdateReport {
+    /// None when the palace predates the methodology anchor.
+    local_version: Option<String>,
+    /// The version compared against: `stable`, or `version` when candidates are on.
+    latest_version: String,
+    status: String,
+    /// Version sections strictly newer than local, newest first.
+    entries: Vec<DeltaEntry>,
+    include_candidates: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum UpdateStatus {
+    Current,
+    Behind,
+    Unknown,
+    Unavailable,
+}
+
+impl UpdateStatus {
+    fn as_str(self) -> &'static str {
+        match self {
+            UpdateStatus::Current => "current",
+            UpdateStatus::Behind => "behind",
+            UpdateStatus::Unknown => "unknown",
+            UpdateStatus::Unavailable => "unavailable",
+        }
+    }
+}
+
+/// Parse "1.3-candidate" / "1.2" into a `(major, minor)` ordering key. An
+/// unparseable shape sorts to `(0, 0)` so it never masks a real newer version.
+fn version_key(v: &str) -> (u32, u32) {
+    let core = v.split('-').next().unwrap_or(v).trim();
+    let mut parts = core.split('.');
+    let major = parts.next().and_then(|s| s.trim().parse::<u32>().ok()).unwrap_or(0);
+    let minor = parts.next().and_then(|s| s.trim().parse::<u32>().ok()).unwrap_or(0);
+    (major, minor)
+}
+
+/// Read a single `> Field: value` line from methodology markdown text. Mirrors
+/// the logic of `read_palace_field` but operates on an in-memory string.
+fn methodology_field(md: &str, field: &str) -> Option<String> {
+    for line in md.lines() {
+        let line = line.trim();
+        if !line.starts_with('>') {
+            continue;
+        }
+        let rest = line[1..].trim();
+        if let Some(value) = rest.strip_prefix(field) {
+            let v = value.trim();
+            if !v.is_empty() {
+                return Some(v.to_string());
+            }
+        }
+    }
+    None
+}
+
+/// Parse the version anchor from methodology markdown.
+fn parse_anchor(md: &str) -> Option<MethodologyAnchor> {
+    Some(MethodologyAnchor {
+        version: methodology_field(md, "loci-core version:")?,
+        stable: methodology_field(md, "stable:")?,
+    })
+}
+
+/// Parse `## vX.Y · DATE` sections and their `**Title.** summary` bullets.
+fn parse_sections(md: &str) -> Vec<DeltaEntry> {
+    let mut out: Vec<DeltaEntry> = Vec::new();
+    for line in md.lines() {
+        let t = line.trim();
+        if let Some(rest) = t.strip_prefix("## v") {
+            // rest e.g. "1.3-candidate · 2026-06-08"
+            let mut sp = rest.splitn(2, '·');
+            let version = sp.next().unwrap_or("").trim().to_string();
+            let date = sp.next().unwrap_or("").trim().to_string();
+            let is_candidate = version.contains("candidate");
+            out.push(DeltaEntry { version, date, is_candidate, items: Vec::new() });
+        } else if t.starts_with("**") {
+            if let Some(entry) = out.last_mut() {
+                // "**Title.** summary" -> title="Title", summary="summary"
+                let after = &t[2..];
+                if let Some(end) = after.find("**") {
+                    let title = after[..end].trim().trim_end_matches('.').trim().to_string();
+                    let summary = after[end + 2..].trim().to_string();
+                    if !title.is_empty() {
+                        entry.items.push(DeltaItem { title, summary });
+                    }
+                }
+            }
+        }
+    }
+    out
+}
+
+/// Pure: the version sections strictly newer than `local`, gated by channel.
+/// - candidates off: target = `stable`; candidate sections are hidden.
+/// - candidates on:  target = `version` (may be a candidate); candidates show.
+/// A missing local version yields `Unknown` and surfaces everything up to target.
+fn compute_delta(
+    local: Option<&str>,
+    anchor: &MethodologyAnchor,
+    sections: &[DeltaEntry],
+    include_candidates: bool,
+) -> (UpdateStatus, String, Vec<DeltaEntry>) {
+    let target = if include_candidates { &anchor.version } else { &anchor.stable };
+    let target_key = version_key(target);
+
+    let eligible = |s: &&DeltaEntry| -> bool {
+        if !include_candidates && s.is_candidate {
+            return false;
+        }
+        version_key(&s.version) <= target_key
+    };
+
+    let mut newer: Vec<DeltaEntry> = match local {
+        None => sections.iter().filter(eligible).cloned().collect(),
+        Some(l) => {
+            let local_key = version_key(l);
+            sections
+                .iter()
+                .filter(eligible)
+                .filter(|s| version_key(&s.version) > local_key)
+                .cloned()
+                .collect()
+        }
+    };
+    newer.sort_by(|a, b| version_key(&b.version).cmp(&version_key(&a.version)));
+
+    let status = match local {
+        None => UpdateStatus::Unknown,
+        Some(_) if newer.is_empty() => UpdateStatus::Current,
+        Some(_) => UpdateStatus::Behind,
+    };
+    (status, target.clone(), newer)
+}
+
+/// Explicit, read-only update check. Returns `Ok` with a status in every
+/// reachable outcome (so the UI can always show the local version); only an
+/// unbuildable HTTP client yields `Err`. Fail-closed: any reach/parse failure
+/// becomes `unavailable`, never a silent fallback to another source.
+#[tauri::command]
+async fn check_for_updates(
+    palace_path: String,
+    include_candidates: bool,
+) -> Result<UpdateReport, String> {
+    // 1. Local anchor (read-only, on-device). None if the palace predates it.
+    let local_path = Path::new(&palace_path).join("PALACE-METHODOLOGY.md");
+    let local_version = fs::read_to_string(&local_path)
+        .ok()
+        .and_then(|s| parse_anchor(&s))
+        .map(|a| a.version);
+
+    let unavailable = |local: &Option<String>| UpdateReport {
+        local_version: local.clone(),
+        latest_version: String::new(),
+        status: UpdateStatus::Unavailable.as_str().to_string(),
+        entries: Vec::new(),
+        include_candidates,
+    };
+
+    // 2. Fetch the published methodology. ONE GET, no user data, 10s timeout.
+    let client = match reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(10))
+        .user_agent("loci")
+        .build()
+    {
+        Ok(c) => c,
+        Err(_) => return Ok(unavailable(&local_version)),
+    };
+
+    let body = match client.get(METHODOLOGY_URL).send().await {
+        Ok(resp) => match resp.error_for_status() {
+            Ok(r) => match r.text().await {
+                Ok(b) => b,
+                Err(_) => return Ok(unavailable(&local_version)),
+            },
+            Err(_) => return Ok(unavailable(&local_version)),
+        },
+        Err(_) => return Ok(unavailable(&local_version)),
+    };
+
+    let Some(anchor) = parse_anchor(&body) else {
+        return Ok(unavailable(&local_version));
+    };
+    let sections = parse_sections(&body);
+
+    // 3. Compute the delta (pure, on-device).
+    let (status, latest_version, entries) =
+        compute_delta(local_version.as_deref(), &anchor, &sections, include_candidates);
+
+    Ok(UpdateReport {
+        local_version,
+        latest_version,
+        status: status.as_str().to_string(),
+        entries,
+        include_candidates,
+    })
+}
+
+#[cfg(test)]
+mod palace_update_tests {
+    use super::*;
+
+    // Synthetic fixture: no real palace paths, crystals, or product terms.
+    const DOC: &str = "\
+> This document tracks the methodology line.
+
+> loci-core version: 1.3-candidate
+> stable: 1.2
+> status: candidate
+
+## v1.3-candidate · 2026-01-04
+**Alpha seam.** does the alpha thing.
+
+## v1.2 · 2026-01-03
+**Beta overlay.** does the beta thing.
+
+## v1.1 · 2026-01-02
+**Gamma ritual.** does the gamma thing.
+
+## v1.0 · 2026-01-01
+**Delta process.** does the delta thing.
+**Epsilon pin.** a second bullet.
+";
+
+    #[test]
+    fn version_key_orders_numerically_not_lexically() {
+        assert!(version_key("0.9") < version_key("1.0"));
+        assert!(version_key("1.2") < version_key("1.3-candidate"));
+        assert!(version_key("1.2") < version_key("1.10")); // not string order
+        assert_eq!(version_key("garbage"), (0, 0));
+    }
+
+    #[test]
+    fn parse_anchor_reads_version_and_stable() {
+        let a = parse_anchor(DOC).expect("anchor");
+        assert_eq!(a.version, "1.3-candidate");
+        assert_eq!(a.stable, "1.2");
+    }
+
+    #[test]
+    fn parse_sections_splits_title_and_summary() {
+        let s = parse_sections(DOC);
+        assert_eq!(s.len(), 4);
+        assert_eq!(s[0].version, "1.3-candidate");
+        assert!(s[0].is_candidate);
+        assert_eq!(s[0].items[0].title, "Alpha seam");
+        assert_eq!(s[0].items[0].summary, "does the alpha thing.");
+        assert_eq!(s[3].items.len(), 2); // two bullets under v1.0
+    }
+
+    #[test]
+    fn ac1_local_1_2_with_candidates_on_shows_only_v1_3() {
+        let a = parse_anchor(DOC).unwrap();
+        let s = parse_sections(DOC);
+        let (status, target, entries) = compute_delta(Some("1.2"), &a, &s, true);
+        assert_eq!(status, UpdateStatus::Behind);
+        assert_eq!(target, "1.3-candidate");
+        assert_eq!(entries.len(), 1);
+        assert_eq!(entries[0].version, "1.3-candidate");
+    }
+
+    #[test]
+    fn ac2_local_at_stable_default_is_current_and_empty() {
+        let a = parse_anchor(DOC).unwrap();
+        let s = parse_sections(DOC);
+        let (status, _t, entries) = compute_delta(Some("1.2"), &a, &s, false);
+        assert_eq!(status, UpdateStatus::Current);
+        assert!(entries.is_empty());
+    }
+
+    #[test]
+    fn default_channel_hides_candidates() {
+        let a = parse_anchor(DOC).unwrap();
+        let s = parse_sections(DOC);
+        // local 1.1, candidates off → shows 1.2 only, never 1.3-candidate.
+        let (status, target, entries) = compute_delta(Some("1.1"), &a, &s, false);
+        assert_eq!(status, UpdateStatus::Behind);
+        assert_eq!(target, "1.2");
+        assert_eq!(entries.len(), 1);
+        assert_eq!(entries[0].version, "1.2");
+        assert!(entries.iter().all(|e| !e.is_candidate));
+    }
+
+    #[test]
+    fn behind_lists_newest_first() {
+        let a = parse_anchor(DOC).unwrap();
+        let s = parse_sections(DOC);
+        let (_st, _t, entries) = compute_delta(Some("0.9"), &a, &s, false);
+        // 1.0, 1.1, 1.2 (candidate hidden), newest first.
+        assert_eq!(entries.len(), 3);
+        assert_eq!(entries[0].version, "1.2");
+        assert_eq!(entries[2].version, "1.0");
+    }
+
+    #[test]
+    fn ac6_missing_local_version_is_unknown() {
+        let a = parse_anchor(DOC).unwrap();
+        let s = parse_sections(DOC);
+        let (status, _t, entries) = compute_delta(None, &a, &s, false);
+        assert_eq!(status, UpdateStatus::Unknown);
+        assert!(!entries.is_empty()); // surfaces what's available for a full check
+    }
+}
+
 #[cfg(test)]
 mod bridge_tests {
     use super::*;
@@ -2473,6 +2823,8 @@ fn main() {
             generate_greeter_names,
             // Settings: inference readiness gate
             check_inference_available,
+            // palace-update: the delta checker (read-only, explicit, fail-closed)
+            check_for_updates,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

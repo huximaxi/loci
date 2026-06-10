@@ -156,3 +156,32 @@ pub struct QuestlogItem {
     // The `## Heading` track this quest sits under in TASKS.md.
     pub track: String,
 }
+
+// ── palace-update: the delta checker ──────────────────────────────────────────
+// Mirrors UpdateReport / DeltaEntry / DeltaItem in src-tauri/src/main.rs. Field
+// names MUST stay in lockstep (snake_case, no rename: these are command returns).
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct DeltaItem {
+    pub title: String,
+    pub summary: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct DeltaEntry {
+    pub version: String,
+    pub date: String,
+    pub is_candidate: bool,
+    pub items: Vec<DeltaItem>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct UpdateReport {
+    /// None when the palace predates the methodology anchor.
+    pub local_version: Option<String>,
+    pub latest_version: String,
+    /// "current" | "behind" | "unknown" | "unavailable"
+    pub status: String,
+    pub entries: Vec<DeltaEntry>,
+    pub include_candidates: bool,
+}
