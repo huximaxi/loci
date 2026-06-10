@@ -1559,7 +1559,7 @@ fn start_state_watcher(
 struct CronJobSnapshot {
     // Filesystem dir name under _palace/cron. The stable identity key for
     // detail lookups. Distinct from `job`, which is a content-derived display
-    // label (e.g. "palace-sync/run") and is NOT safe as a path component.
+    // label (e.g. "cron-job/run") and is NOT safe as a path component.
     key: String,
     job: String,
     status: Option<String>,

@@ -1010,7 +1010,7 @@ fn lead_date_age_days(title: &str) -> Option<i64> {
 }
 
 /// Pulls cron dir keys out of a quest body by scanning for `cron/<key>` path
-/// fragments (e.g. "_palace/cron/palace-sync/state.json" → "palace-sync").
+/// fragments (e.g. "_palace/cron/sync-job/state.json" → "sync-job").
 /// The key stops at the next path separator, so it matches the filesystem key
 /// read_cron_detail expects. De-duplicated, in first-seen order.
 fn extract_cron_refs(body: &str) -> Vec<String> {
