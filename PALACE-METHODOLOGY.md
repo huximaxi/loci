@@ -11,10 +11,22 @@ Palace methodology version tracker. The structural and intellectual core of loci
 
 > This document tracks the *methodology* line of loci-core: the plain-text firmware, versioned independently of the apps.
 
-> loci-core version: 1.3-candidate
+> loci-core version: 1.4-candidate
 > stable: 1.2
 > status: candidate
-> updated: 2026-06-08
+> updated: 2026-06-11
+
+---
+
+## v1.4-candidate · 2026-06-11
+
+**Co-intelligence eval framework.** A two-phase growth instrument for measuring
+how well a palace and its AI companion operate together over time. Phase 1
+(Foundation Scorecard, 12 axes, 0-5) establishes the working basis. Phase 2
+(Growth Scorecard, G1-G7, 1-10) measures dyad quality and learning velocity with
+no ceiling. A Frontier Section tracks specific orchestration moves to try in the
+next eval window; demonstrated moves graduate to Growth axes. Template:
+`templates/eval-framework.md`.
 
 ---
 
