@@ -1,0 +1,31 @@
+# .lociignore: what the palace audit and structural scans skip.
+#
+# A palace holds MEMORY (soul, handovers, crystals, tracker, CLAUDE.md, garden,
+# rooms) and MATERIAL (vendored code, reference dumps, binaries the work
+# consumes). Scans walk memory, not material. One glob per line.
+# Copy this to your palace root and edit for your palace.
+
+# Dependency / vendored trees
+**/node_modules/**
+**/.venv/**
+**/venv/**
+**/target/**
+**/dist/**
+**/build/**
+
+# Reference dumps and source material the work consumes (rename to your layout)
+material/**
+reference/**
+vendor/**
+**/_sources/**
+
+# Large binaries / non-prose
+**/*.pdf
+**/*.zip
+**/*.gz
+**/*.png
+**/*.jpg
+**/*.mp4
+
+# OS noise
+**/.DS_Store
