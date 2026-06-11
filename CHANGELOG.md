@@ -5,6 +5,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Unreleased]
+
+### Added
+- `templates/eval-framework.md`: two-phase co-intelligence growth instrument:
+  Foundation Scorecard (12 axes, 0-5, lock at ceiling), Growth Scorecard
+  (G1-G7 dyad-quality axes, 1-10, no ceiling), and a Frontier Section for
+  tracking orchestration moves until they recur enough to become axes
+- `PALACE-METHODOLOGY.md` v1.4-candidate: documents the eval framework as a
+  new methodology surface
+
+---
+
 ## [v0.1.0-beta.1] — 2026-06-09
 
 First public beta of the loci CLI and template kit.
