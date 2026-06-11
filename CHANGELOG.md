@@ -7,13 +7,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+Methodology line: `loci-core` 1.4-candidate (supersedes 1.3-candidate).
+
 ### Added
-- `templates/eval-framework.md`: two-phase co-intelligence growth instrument:
-  Foundation Scorecard (12 axes, 0-5, lock at ceiling), Growth Scorecard
-  (G1-G7 dyad-quality axes, 1-10, no ceiling), and a Frontier Section for
-  tracking orchestration moves until they recur enough to become axes
-- `PALACE-METHODOLOGY.md` v1.4-candidate: documents the eval framework as a
-  new methodology surface
+- `templates/eval-framework.md`: two-phase co-intelligence growth instrument: Foundation Scorecard (12 axes, 0-5, lock at ceiling), Growth Scorecard (G1-G7 dyad-quality axes, 1-10, no ceiling), and a Frontier Section for tracking orchestration moves until they recur enough to become axes.
+- `palace-audit` gains a 6th dimension, "Tracker integrity": walks `tracker.json` for broken artifact refs, version staleness (a ref pointing below the highest-numbered artifact on disk), placeholder tracks, and unreferenced drafts. Read-only. Total score moves to /30.
+- `templates/.lociignore`: a memory-vs-material ignore-list that scopes the audit scan so a vendored tree does not swamp it.
+- Two operating rules in `CLAUDE-master.md`: "confirm against disk before asserting state or absence", and "quarantine foreign processes" (the inbound complement to "nothing leaves without approval").
 
 ---
 

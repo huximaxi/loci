@@ -28,6 +28,12 @@ no ceiling. A Frontier Section tracks specific orchestration moves to try in the
 next eval window; demonstrated moves graduate to Growth axes. Template:
 `templates/eval-framework.md`.
 
+**Tracker integrity (palace-audit Dimension 6) + `.lociignore`.** The structural audit gains a sixth dimension that walks `tracker.json`: broken artifact refs, version staleness (the tracker pointing below the highest-numbered artifact on disk), placeholder tracks, and drafts on disk that no track references. The tracker is the one file a human edits while files move underneath it, so it drifts where the other five dimensions never look. Filename comparison normalises to Unicode NFC, since an NFD em-dash or accent on disk otherwise reads as a false "missing". A new `.lociignore` (memory vs material) scopes the scan so a vendored tree does not swamp it. All checks are read-only: drift is reported, never auto-reconciled. The audit total moves to /30.
+
+**"Confirm against disk" operating principle.** A new default rule in the master prompt: the filesystem is ground truth, and pointers, memory, and prior context are hints. The live document is the highest-numbered one on disk. State is checked against disk before it is reported (no more confidently reporting v0.14 as current when v0.18 is live), and absence is confirmed with a second scoped probe before it is asserted (a truncated listing is not a missing file). Three real failure modes, one principle.
+
+**Foreign-process quarantine, numbered.** The cross-provider quarantine instinct becomes a standing rule. Anything that did not originate inside the palace (a script, a check-in, an importer, an update protocol) is foreign and treated as untrusted code: read it as data before executing, sandbox where possible, structure-only access by default, contents only by explicit per-item approval. Cross-provider movement inherits the rule. The inbound complement to "nothing leaves without approval".
+
 ---
 
 ## v1.3-candidate · 2026-06-08
