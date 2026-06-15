@@ -11,10 +11,43 @@ Palace methodology version tracker. The structural and intellectual core of loci
 
 > This document tracks the *methodology* line of loci-core: the plain-text firmware, versioned independently of the apps.
 
-> loci-core version: 1.4-candidate
+> loci-core version: 1.5-candidate
 > stable: 1.2
 > status: candidate
-> updated: 2026-06-11
+> updated: 2026-06-15
+
+---
+
+## v1.5-candidate · 2026-06-15
+
+**The memory lifecycle.** A palace is not a filing cabinet that only fills; it is a
+living store that also decays, and that you can always read. This version names the
+lifecycle the tier system and the garden-health pass already imply, and adds two
+principles to it:
+
+- **Keep what surprised you.** Not everything said in a session is worth a crystal.
+  What earns a slot is what your prior context would not already have predicted: the
+  note that adds signal, not the one that restates what the palace already holds.
+  "Write it all down" is the cheap rule; "write down what's new" is the one that
+  keeps memory legible.
+- **Let the rest decay, on its own clock.** Forgetting is maintenance, not loss.
+  Demotion, expiry (`valid_until`), and composting are first-class healthy steps, not
+  failures. And the three tiers re-validate at different rhythms: ◇ exploratory facts
+  churn fast, ◈ contextual ones turn over more slowly, ◆ confirmed ones almost never.
+  A stale ◇ is normal; a stale ◆ is a signal. Match the review cadence to the tier,
+  not one clock for all.
+- **Keep all of it inspectable, and prunable by you.** Memory you can read and prune
+  is memory you can trust. Every crystal can show its provenance: why it exists, when
+  it landed, which tier it holds. Deletion is gated and reversible (the palace
+  composts, a move with a note, rather than hard-deleting), and it never removes
+  anything without asking. This is the privacy axis: a store you cannot read or prune
+  is not a store you control.
+
+None of this is automatic. The agent surfaces candidates (stale, redundant, overdue
+for review) and you decide. A machine can flag structure; it must not adjudicate
+meaning. See `templates/crystals-guide.md` (tiers, promotion, composting),
+`templates/garden-health-template.md` (the surfacing pass), and
+`templates/memory-lifecycle.md` (the four principles on one page).
 
 ---
 
