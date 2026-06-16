@@ -539,8 +539,8 @@ fn DetailPane(
                 DetailTarget::AlertList { count, .. } => view! {
                     <h4 class="detail-title">{format!("Alerts · {count} surfaced")}</h4>
                     <p class="muted small detail-note">
-                        "Read-only for now. Actioning an alert (mark solved) is a write \
-                         to palace state, sequenced to Phase 4c behind Cipher guardrails."
+                        "Read-only for now. Alert resolution is a write to palace state, \
+                         deferred pending guardrail design."
                     </p>
                     <Suspense fallback=move || view! { <p class="muted">"Loading…"</p> }>
                         {move || cron_detail.get().flatten().map(|res| match res {
@@ -595,7 +595,7 @@ fn render_questlog_detail(item: QuestlogItem, selected: RwSignal<Option<DetailTa
 
 /// Renders the `alerts` array from a publishing job's state.json as a list of
 /// rows. Each alert shows severity, the job it fired on, the condition, and
-/// whether it was posted. Read-only: no solve action (deferred to Phase 4c).
+/// whether it was posted. Read-only: no solve action (deferred).
 fn render_alert_list(detail: &serde_json::Value) -> View {
     let alerts: Vec<AlertItem> = detail
         .get("alerts")

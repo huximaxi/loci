@@ -126,7 +126,7 @@ pub struct HandoverEntry {
 
 /// One alert surfaced by alert-watcher-daily. Parsed from the `alerts` array in
 /// that job's state.json (lazily, via read_cron_detail). Read-only for now: the
-/// "solve/action" affordance is deferred to Phase 4c (write-path) per the roadmap.
+/// "solve/action" affordance is deferred (write-path).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct AlertItem {
     pub job: String,

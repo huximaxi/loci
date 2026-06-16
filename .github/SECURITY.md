@@ -26,7 +26,7 @@ Choose one of the following channels:
 
 ## What is out of scope
 
-- The VPS host operating system and infrastructure operated by 1984 Hosting (Iceland). Report directly to [1984 Hosting](https://1984.hosting/) for host-level issues.
+- The server infrastructure and hosting operating system underlying loci.garden. Contact the hosting provider for host-level issues.
 - Third-party services the project links to (Anthropic, Ollama, Goose, Block, etc).
 - Issues in the methodology or in dispatches as written work, unless they enable a concrete privacy or security harm to a reader.
 - Anything you found while violating the Rainbow Zoku charter (sock-puppet review, misrepresented authorship, etc) is not a vulnerability to report; it is a charter violation to disclose.
