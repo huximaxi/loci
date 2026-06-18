@@ -1,0 +1,118 @@
+# loci feature index
+#
+# The substrate is plain-text firmware: the templates/ kit plus a few named processes,
+# which any file-aware AI can run. The desktop app and the CLI are personal demos built
+# on top of it, not the substrate itself. You do not need either to start.
+#
+# This file maps feature sets <-> shipped templates <-> use-cases <-> tutorials.
+# It is read by the feature-helper process (templates/feature-helper.md).
+
+version: 0.1
+updated: 2026-06-18
+
+feature_sets:
+  - id: memory
+    name: Persistent Memory
+    value: Your AI remembers, on your terms.
+    does: Tiered crystals you can promote, expire, pin, and compost. Memory you can read and prune.
+    templates: [crystals-guide.md, memory-lifecycle.md]
+    tutorial: tutorials/your-first-crystal.md
+
+  - id: context
+    name: Context Architecture
+    value: The right context loads at the right time.
+    does: Rooms, a priority retrieval hierarchy (L0-L3), a local map, and a tracker keep a large palace legible.
+    templates: [room-template.md, retrieval-hierarchy.md, local-map-template.md, _PALACE_CONTEXT.md, tracker.json]
+    tutorial: tutorials/build-a-room.md
+
+  - id: identity
+    name: Identity & Personas
+    value: A companion that is someone, who knows who you are.
+    does: A soul file, a human-authored peer card, and named personas with their own gardens.
+    templates: [SOUL.md, peer-card-template.md, persona-template.md]
+    tutorial: tutorials/name-your-companion.md
+
+  - id: garden
+    name: The Garden
+    value: Ideas cultivated, not just stored.
+    does: One file per idea, a health pass that surfaces stale or ready plants, and seed-to-crystal graduation.
+    templates: [garden-template.md, garden-file-template.md, garden-health-template.md]
+    tutorial: tutorials/grow-the-garden.md
+
+  - id: continuity
+    name: Continuity & Synthesis
+    value: No session starts cold.
+    does: Session deltas (handovers), a synthesis pass that proposes and never auto-applies, and scheduled housekeeping.
+    templates: [handover-template.md, synthesis-automation.md, scheduled-task-template.md]
+    tutorial: tutorials/close-and-reopen.md
+
+  - id: trust
+    name: Trust & Governance
+    value: Nothing leaves or changes without you.
+    does: A named human-review gate, foreign-process quarantine, confirm-against-disk, and a read-only structural audit.
+    templates: [palace-audit-process.md, CLAUDE-master.md, .lociignore]
+    tutorial: tutorials/set-a-gate.md
+
+  - id: interop
+    name: Interop & Evolution
+    value: Works across every tool, federates to no one.
+    does: Reads memory left by other tools by structure only, speaks MCP, exports typed artifacts, and measures its own growth.
+    templates: [eval-framework.md, entanglement-template.md, output-primitive.md, friends/friend-template.md, obsidian-mindmap-starter.md]
+    tutorial: tutorials/go-cross-tool.md
+
+use_cases:
+  - id: researcher
+    name: The Researcher
+    for: Long-running thinking, thesis continuity, an idea garden.
+    primary: [memory, context, garden, continuity]
+    supporting: [identity, trust, interop]
+    start: tutorials/grow-the-garden.md
+
+  - id: builder
+    name: The Builder
+    for: Code context across sessions, MCP and IDE-native, plain text in the repo.
+    primary: [memory, context, interop]
+    supporting: [identity, continuity, trust]
+    start: tutorials/go-cross-tool.md
+
+  - id: companion-keeper
+    name: The Companion-keeper
+    for: Building a named, persistent co-intelligence.
+    primary: [memory, identity, continuity]
+    supporting: [context, garden, interop]
+    start: tutorials/name-your-companion.md
+
+  - id: sovereign
+    name: The Vault-keeper
+    for: Local-only, inspectable, prunable. Nothing leaves the machine.
+    primary: [trust, interop]
+    supporting: [memory, context, continuity]
+    start: tutorials/set-a-gate.md
+
+  - id: team
+    name: The Team
+    for: A shared substrate, shared conventions, onboarding people and their AIs.
+    primary: [context, continuity, trust, interop]
+    supporting: [memory, identity, garden]
+    start: tutorials/build-a-room.md
+
+  - id: migrator
+    name: The Nomad
+    for: Moving across Claude, Cursor, and Codex without lock-in.
+    primary: [interop]
+    supporting: [memory, context, trust]
+    start: tutorials/go-cross-tool.md
+
+# How to run the substrate. These are personal demos, not the substrate itself:
+run_modes:
+  - id: markdown
+    name: Plain markdown
+    how: Copy templates/ into a folder, point any file-aware AI at your CLAUDE.md. No build. This is the door.
+  - id: desktop
+    name: Desktop app
+    how: desktop/ (Tauri). A graphical demo of the substrate.
+  - id: cli
+    name: CLI / MCP
+    how: A terminal-native demo. IDE-friendly, zero GUI.
+
+# One tutorial per feature set ships in tutorials/.
