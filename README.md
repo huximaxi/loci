@@ -73,7 +73,7 @@ Three ways. The substrate is the same underneath all of them.
 |---|---|
 | **Plain markdown** | The door. Clone `templates/`, point any file-aware AI at `CLAUDE.md`. No build. |
 | **Desktop app** | [`desktop/`](desktop/) (Tauri). A graphical demo. See [desktop/QUICKSTART.md](desktop/QUICKSTART.md). |
-| **CLI / MCP** | Terminal-native, IDE-friendly, zero GUI. |
+| **CLI** | [`loci-cli/`](loci-cli/). A small Rust binary that reads your palace from the terminal: `loci status`, `loci crystals`, `loci read`, `loci handover`, `loci init`. Read-only. No network. No inference. See [loci-cli/README.md](loci-cli/README.md). |
 
 The methodology version and full changelog: [PALACE-METHODOLOGY.md](PALACE-METHODOLOGY.md).
 
