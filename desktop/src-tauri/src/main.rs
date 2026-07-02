@@ -1016,7 +1016,7 @@ fn build_companion_grounding(palace_root: &Path) -> String {
          Never use em-dashes."
     );
 
-    let garden = palace_root.join("_palace").join("garden");
+    let garden = palace_scan_root(palace_root).join("garden");
 
     if let Some(origin) = find_greeter_origin_crystal(&garden, &companion) {
         out.push_str("\n\n# Your origin crystal (who you are in this palace)\n");

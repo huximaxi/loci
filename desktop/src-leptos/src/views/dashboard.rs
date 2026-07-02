@@ -138,10 +138,14 @@ pub fn Dashboard() -> impl IntoView {
     );
 
     // rc.3 cockpit: discovered palace-map instruments + the tools gate-ledger.
-    // Same concurrent-boot pattern as the four reads above.
+    // Deliberately keyed on the palace path ONLY, not refetch_tick: the tick
+    // bumps on every cron state.json write, and re-running this read would
+    // recreate the open instrument's iframe (wiping its scroll/filter state)
+    // for a list that only changes when files are added. New instruments
+    // appear on palace reload; live cron data has its own reads.
     let maps_res = create_resource(
-        move || (active.get().path.clone(), refetch_tick.get()),
-        |(path_opt, _tick)| async move {
+        move || active.get().path.clone(),
+        |path_opt| async move {
             match path_opt {
                 Some(path) => invoke::<_, Vec<PalaceMapEntry>>(
                     "list_palace_maps",
@@ -302,13 +306,22 @@ pub fn Dashboard() -> impl IntoView {
             }}
 
             // Each box boots dim, then lights up the instant its own data lands.
-            // KPI strip + cron table share the crons read, so they light together.
+            // The crons read feeds the KPI header. The job table itself is
+            // NOT rendered here when the palace ships instrument tabs (the
+            // automation board owns the list; never render it twice). For a
+            // palace with no instruments, the native table is the only door
+            // to the jobs, so it stays as a fallback.
             {move || match crons_res.get() {
                 None => boot_box("cron systems").into_view(),
-                Some(c) => view! {
-                    <KpiStrip crons=c.clone() selected=selected ciq_open=ciq_open />
-                    <CronSection crons=c selected=selected />
-                }.into_view(),
+                Some(c) => {
+                    let has_instruments = maps_res.get().map(|m| !m.is_empty()).unwrap_or(false);
+                    view! {
+                        <KpiStrip crons=c.clone() selected=selected ciq_open=ciq_open />
+                        {(!has_instruments).then(|| view! {
+                            <CronSection crons=c.clone() selected=selected />
+                        })}
+                    }.into_view()
+                }
             }}
             {move || match tasks_res.get() {
                 None => boot_box("questlog").into_view(),
@@ -333,6 +346,43 @@ pub fn Dashboard() -> impl IntoView {
         </main>
     }
 }
+
+/// Brand-coherence layer, appended to every embedded instrument's HTML.
+/// One stylesheet for now; a proper theming contract is a later RC.
+///
+/// Instruments share a conventional `:root` variable set (bg pair, an anchor
+/// color, four status colors with fills, ink/muted/line). Re-declaring those
+/// variables after the instrument's own styles re-themes the whole document
+/// to the app's scholar palette, because the cascade takes the later
+/// declaration at equal specificity. Two structural overrides handle the
+/// common hardcoded dark header patterns. An instrument that doesn't use the
+/// convention is simply unaffected: coherence is opt-in by convention, never
+/// a rewrite of the instrument's own markup.
+const INSTRUMENT_COHERENCE_CSS: &str = "\n<style id=\"loci-brand-coherence\">\n\
+:root{\n\
+  --bg0:#faf9f6; --bg1:#f1efe9;\n\
+  --gold:#4a6b54; --gold-dim:rgba(74,107,84,.45);\n\
+  --teal:#2e7d64; --teal-fill:#e7f2ec;\n\
+  --amber:#8a6524; --amber-fill:#f5ecdc;\n\
+  --red:#a3503e; --red-fill:#f5e3df;\n\
+  --violet:#6b5fa8; --violet-fill:#eceaf6;\n\
+  --grey:#6f7670; --grey-fill:#ecebe6;\n\
+  --ink:#1f2a23; --muted:#636a64; --line:rgba(31,42,35,.25);\n\
+}\n\
+/* Structural overrides: the conventional hardcoded-dark surfaces the\n\
+   variable remap cannot reach. Harmless no-ops for instruments that\n\
+   do not use these selectors. */\n\
+header, #top, #panel { background: rgba(250,249,246,.92) !important; border-color: rgba(31,42,35,.12) !important; }\n\
+.anchor { background: radial-gradient(circle at 35% 30%, #ffffff, #ece9e1) !important; }\n\
+.skill .bud, .room .tpl { color: #faf9f6 !important; }\n\
+.hot { filter: drop-shadow(0 0 8px rgba(74,107,84,.55)) !important; }\n\
+.sel { filter: drop-shadow(0 0 9px rgba(74,107,84,.85)) !important; }\n\
+.hot.anchor { border-color: #4a6b54 !important; }\n\
+/* JS-set presentation attributes: CSS wins over them, so remap the\n\
+   known bright-on-dark literals to legible-on-light equivalents. */\n\
+[stroke=\"#ffe27a\"] { stroke: #8a6524 !important; }\n\
+[stroke=\"rgba(154,140,255,.25)\"] { stroke: rgba(107,95,168,.5) !important; }\n\
+</style>\n";
 
 /// One embedded palace-map instrument. Self-contained HTML by convention, so
 /// it renders whole inside a srcdoc iframe: no custom protocol, no network,
@@ -362,14 +412,18 @@ fn MapFrame(
             {move || match html_res.get() {
                 None => view! { <p class="muted">"loading " {label.clone()} "…"</p> }.into_view(),
                 Some(Err(e)) => view! { <p class="warn">"could not load instrument: " {e}</p> }.into_view(),
-                Some(Ok(html)) => view! {
-                    // sandbox WITHOUT allow-same-origin: the instrument gets an
-                    // opaque origin, so its scripts run but window.parent, app
-                    // storage, and the Tauri IPC globals are all out of reach.
-                    // Instruments are palace content, but palace content can be
-                    // written by crons and agents; the frame is a wall, not a door.
-                    <iframe class="map-frame" srcdoc=html title=label.clone() sandbox="allow-scripts"></iframe>
-                }.into_view(),
+                Some(Ok(html)) => {
+                    // Appended last so the coherence variables win the cascade.
+                    let themed = format!("{html}{INSTRUMENT_COHERENCE_CSS}");
+                    view! {
+                        // sandbox WITHOUT allow-same-origin: the instrument gets an
+                        // opaque origin, so its scripts run but window.parent, app
+                        // storage, and the Tauri IPC globals are all out of reach.
+                        // Instruments are palace content, but palace content can be
+                        // written by crons and agents; the frame is a wall, not a door.
+                        <iframe class="map-frame" srcdoc=themed title=label.clone() sandbox="allow-scripts"></iframe>
+                    }.into_view()
+                },
             }}
         </section>
     }
@@ -502,6 +556,8 @@ fn KpiStrip(
     }
 }
 
+/// The native cron job table. Rendered only when the palace ships no
+/// instrument tabs: an automation instrument owns this list when present.
 #[component]
 fn CronSection(
     crons: Vec<CronJobSnapshot>,

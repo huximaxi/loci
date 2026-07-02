@@ -104,7 +104,7 @@ your palace after the fact."
 
 ### E. Desktop cockpit: maps rail + tools gate-ledger (shipped in this PR)
 
-The headline candidate named in the QGE-80 delta, landed first. The desktop
+The headline candidate named in the starter-kit delta, landed first. The desktop
 dashboard becomes a cockpit: one Operations view (the existing native
 dashboard) plus one tab per **palace-map instrument** the app discovers in
 the user's palace.
@@ -127,6 +127,16 @@ the user's palace.
   with its quarantine verdict (`admitted` / `admitted-escorted` / `deferred` /
   `held-conditional` / `rejected`) as a state-colored card. The shelf lists;
   it never loads. Palaces without a ledger see no change (fail-soft).
+- **Brand coherence, single stylesheet for now**: instruments are authored on
+  the shared dark palette; the app appends one override stylesheet to each
+  embedded document that remaps the conventional `:root` variables to the
+  app's own palette, plus a short list of structural overrides for the known
+  hardcoded-dark surfaces. Instruments that don't use the convention are
+  unaffected. A proper theming contract (instruments reading a
+  `prefers-...` signal or a palette payload) is a later RC.
+- **One list, one owner**: when instrument tabs exist, the native view keeps
+  only the KPI header and the automation instrument owns the job table; a
+  palace with no instruments keeps the native table as fallback.
 - **Motivation, SWE agents**: this shelf exists because vetting a
   third-party coding-agent harness (a SWE-agent-style tool that reads a
   repo and proposes or runs patches) before trusting it near real

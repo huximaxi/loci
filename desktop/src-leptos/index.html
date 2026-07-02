@@ -1026,13 +1026,13 @@
         }
         .map-view { margin-top: 8px; }
         /* The instrument is a full document; give it the room the ops view has.
-           It styles itself inside the iframe; chrome stays scholar out here. */
+           The brand-coherence layer re-themes it scholar inside the iframe. */
         .map-frame {
             width: 100%;
             height: calc(100vh - 170px);
             border: 1px solid var(--scholar-border-strong);
             border-radius: 6px;
-            background: #060a12; /* instruments are dark; avoids a white flash while they parse */
+            background: var(--scholar-cream);
         }
         .tool-shelf { margin-top: 14px; }
         .tool-shelf h3 {
