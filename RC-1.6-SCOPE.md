@@ -102,7 +102,7 @@ your palace after the fact."
 
 ---
 
-### E. Desktop cockpit: maps rail + tools gate-ledger — SHIPPED IN THIS PR
+### E. Desktop cockpit: maps rail + tools gate-ledger (shipped in this PR)
 
 The headline candidate named in the QGE-80 delta, landed first. The desktop
 dashboard becomes a cockpit: one Operations view (the existing native
@@ -127,7 +127,7 @@ the user's palace.
   with its quarantine verdict (`admitted` / `admitted-escorted` / `deferred` /
   `held-conditional` / `rejected`) as a state-colored card. The shelf lists;
   it never loads. Palaces without a ledger see no change (fail-soft).
-- **Motivation — SWE agents**: this shelf exists because vetting a
+- **Motivation, SWE agents**: this shelf exists because vetting a
   third-party coding-agent harness (a SWE-agent-style tool that reads a
   repo and proposes or runs patches) before trusting it near real
   credentials or a real filesystem is exactly the kind of decision that

@@ -2967,7 +2967,7 @@ struct ToolLedgerEntry {
 /// Read the tools gate-ledger: `tools.items` from the palace's map JSON.
 /// Tries palace-map.json then map.json in each cockpit scan dir. Fail-soft:
 /// a palace without a ledger (or with a malformed one) gets an empty shelf,
-/// never an error — the dashboard must render regardless.
+/// never an error: the dashboard must render regardless.
 #[tauri::command]
 fn read_tools_ledger(palace_path: String) -> Vec<ToolLedgerEntry> {
     let root = PathBuf::from(&palace_path);
