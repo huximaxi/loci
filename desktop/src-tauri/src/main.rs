@@ -872,11 +872,14 @@ plural where the voice is shared. Never use em-dashes.";
 /// Tries the same three directory conventions as the `read_handovers` command.
 /// Returns a char-capped string; empty if no convention matches.
 fn find_latest_handover_delta(palace: &Path, char_cap: usize) -> String {
+    let scan = palace_scan_root(palace);
+    // great-hall mixes handovers with other living docs: prefix-gate it.
     let candidates = [
-        palace.join("_palace").join("handovers"),
-        palace.join("handovers"),
+        (scan.join("handovers"), None),
+        (palace.join("handovers"), None),
+        (scan.join("great-hall"), Some("_HANDOVER")),
     ];
-    let Some(dir) = candidates.iter().find(|p| p.is_dir()) else {
+    let Some((dir, name_prefix)) = candidates.iter().find(|(p, _)| p.is_dir()) else {
         return String::new();
     };
     let Ok(read) = fs::read_dir(dir) else {
@@ -889,6 +892,9 @@ fn find_latest_handover_delta(palace: &Path, char_cap: usize) -> String {
         let path = entry.path();
         let Some(name) = path.file_name().and_then(|n| n.to_str()) else { continue };
         if !name.ends_with(".md") || name.starts_with('.') { continue }
+        if let Some(prefix) = name_prefix {
+            if !name.starts_with(prefix) { continue }
+        }
         let Ok(meta) = fs::metadata(&path) else { continue };
         if !meta.is_file() { continue }
         let mtime = meta.modified().ok()
@@ -1550,6 +1556,18 @@ struct WatcherState {
     watcher: Mutex<Option<notify::RecommendedWatcher>>,
 }
 
+/// Rooms live either inside `_palace/` (the packaged layout) or at the palace
+/// root (organic ports; accepted by load_palace since rc.2). Every read that
+/// addresses palace state must resolve through this, not hardcode `_palace/`.
+fn palace_scan_root(root: &Path) -> PathBuf {
+    let packaged = root.join("_palace");
+    if packaged.is_dir() {
+        packaged
+    } else {
+        root.to_path_buf()
+    }
+}
+
 #[tauri::command]
 fn start_state_watcher(
     palace_path: String,
@@ -1559,8 +1577,8 @@ fn start_state_watcher(
     use notify::{EventKind, RecursiveMode, Watcher};
 
     let palace = PathBuf::from(&palace_path);
-    // Must match read_cron_states: jobs live at <root>/_palace/cron, not <root>/cron.
-    let cron_dir = palace.join("_palace").join("cron");
+    // Must match read_cron_states: jobs live at <scan_root>/cron in both layouts.
+    let cron_dir = palace_scan_root(&palace).join("cron");
     if !cron_dir.is_dir() {
         return Err(format!("cron directory missing: {}", cron_dir.display()));
     }
@@ -1626,7 +1644,7 @@ struct CronJobSnapshot {
 fn read_cron_states(palace_path: String) -> Result<Vec<CronJobSnapshot>, String> {
     let __t = std::time::Instant::now();
     let palace = PathBuf::from(&palace_path);
-    let cron_dir = palace.join("_palace").join("cron");
+    let cron_dir = palace_scan_root(&palace).join("cron");
     if !cron_dir.is_dir() {
         // Either fresh scaffold (no jobs yet) or non-standard layout.
         return Ok(Vec::new());
@@ -1721,11 +1739,17 @@ struct HandoverEntry {
 fn read_handovers(palace_path: String, limit: Option<usize>) -> Result<Vec<HandoverEntry>, String> {
     let __t = std::time::Instant::now();
     let palace = PathBuf::from(&palace_path);
+    let scan = palace_scan_root(&palace);
+    // Dedicated handovers dirs take any .md; the great-hall convention mixes
+    // handovers with other living docs, so only `_HANDOVER*` files count there.
     let candidates = [
-        palace.join("_palace").join("handovers"),
-        palace.join("handovers"),
+        (scan.join("handovers"), None),
+        (palace.join("handovers"), None),
+        (scan.join("great-hall"), Some("_HANDOVER")),
     ];
-    let Some(handovers_dir) = candidates.into_iter().find(|p| p.is_dir()) else {
+    let Some((handovers_dir, name_prefix)) =
+        candidates.into_iter().find(|(p, _)| p.is_dir())
+    else {
         return Ok(Vec::new());
     };
     let mut entries = Vec::new();
@@ -1737,6 +1761,11 @@ fn read_handovers(palace_path: String, limit: Option<usize>) -> Result<Vec<Hando
         };
         if !name.ends_with(".md") || name.starts_with('.') {
             continue;
+        }
+        if let Some(prefix) = name_prefix {
+            if !name.starts_with(prefix) {
+                continue;
+            }
         }
         let Ok(meta) = fs::metadata(&path) else {
             continue;
@@ -1775,8 +1804,7 @@ fn read_cron_detail(palace_path: String, key: String) -> Result<serde_json::Valu
     if key.is_empty() || key.contains('/') || key.contains('\\') || key.contains("..") {
         return Err(format!("invalid cron key: {key}"));
     }
-    let state_file = PathBuf::from(&palace_path)
-        .join("_palace")
+    let state_file = palace_scan_root(&PathBuf::from(&palace_path))
         .join("cron")
         .join(&key)
         .join("state.json");
@@ -1802,11 +1830,19 @@ struct QuestlogItem {
 #[tauri::command]
 fn read_tasks(palace_path: String) -> Result<Vec<QuestlogItem>, String> {
     let __t = std::time::Instant::now();
-    let tasks_file = PathBuf::from(&palace_path).join("_palace").join("TASKS.md");
-    if !tasks_file.is_file() {
+    let scan = palace_scan_root(&PathBuf::from(&palace_path));
+    // Two questlog conventions: the original TASKS.md, and the newer
+    // great-hall/QUEST-LOG.md (same checkbox format, different address).
+    let tasks_file = [
+        scan.join("TASKS.md"),
+        scan.join("great-hall").join("QUEST-LOG.md"),
+    ]
+    .into_iter()
+    .find(|p| p.is_file());
+    let Some(tasks_file) = tasks_file else {
         return Ok(Vec::new());
-    }
-    let text = fs::read_to_string(&tasks_file).map_err(|e| format!("read TASKS.md: {e}"))?;
+    };
+    let text = fs::read_to_string(&tasks_file).map_err(|e| format!("read questlog: {e}"))?;
     let mut items: Vec<QuestlogItem> = Vec::new();
     let mut current_track = String::from("Unfiled");
     for line in text.lines() {
@@ -3026,6 +3062,33 @@ mod cockpit_tests {
         assert_eq!(maps.len(), 1);
         assert_eq!(maps[0].key, "crystal-map");
         assert_eq!(maps[0].badge.as_deref(), Some("3 entries"));
+        let _ = fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn dashboard_reads_resolve_rooms_at_root_layout() {
+        let root = temp_palace("roomsatroot");
+        let root_s = root.to_string_lossy().to_string();
+        fs::create_dir_all(root.join("cron").join("demo-job")).unwrap();
+        fs::write(
+            root.join("cron").join("demo-job").join("state.json"),
+            r#"{"job":"demo","status":"ok"}"#,
+        )
+        .unwrap();
+        fs::create_dir_all(root.join("great-hall")).unwrap();
+        fs::write(
+            root.join("great-hall").join("QUEST-LOG.md"),
+            "## Track\n- [ ] **2026-07-02, Demo item.** body\n",
+        )
+        .unwrap();
+        fs::write(root.join("great-hall").join("_HANDOVER_demo.md"), "## State\nok\n").unwrap();
+        fs::write(root.join("great-hall").join("MORNING-BRIEF.md"), "not a handover\n").unwrap();
+
+        assert_eq!(read_cron_states(root_s.clone()).unwrap().len(), 1);
+        assert_eq!(read_tasks(root_s.clone()).unwrap().len(), 1);
+        let handovers = read_handovers(root_s.clone(), None).unwrap();
+        assert_eq!(handovers.len(), 1, "great-hall must be prefix-gated to _HANDOVER*");
+        assert!(handovers[0].filename.starts_with("_HANDOVER"));
         let _ = fs::remove_dir_all(&root);
     }
 
