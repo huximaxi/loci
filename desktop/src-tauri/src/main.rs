@@ -2809,6 +2809,244 @@ async fn check_inference_available(
     })
 }
 
+// ─── rc.3 cockpit: palace maps rail + tools gate-ledger ──────────────────────
+//
+// The cockpit shape (one Operations view + a tab per self-contained palace-map
+// instrument) re-expressed for any palace. A "palace map" is a standalone
+// *.html the palace generates for itself, self-contained by convention, with
+// its live data embedded as <script id="payload"|"snapshot" type="application/json">.
+// The app discovers them, never hardcodes them, and embeds via iframe srcdoc
+// (no filesystem custom-protocol exposure; the read goes through a validated
+// command). Trust boundary: a palace map is the user's own palace content,
+// same standing as every other file this app reads.
+
+/// Directories a palace may keep instruments in, tried in order. Non-recursive:
+/// instruments live at a palace's surface, not buried in room internals.
+fn cockpit_scan_dirs(root: &Path) -> Vec<PathBuf> {
+    vec![
+        root.to_path_buf(),
+        root.join("_palace"),
+        root.join("cockpit"),
+        root.join("_palace").join("cockpit"),
+    ]
+}
+
+#[derive(Debug, Serialize)]
+struct PalaceMapEntry {
+    /// Stable key = file stem. Also the tab identity.
+    key: String,
+    /// Path relative to the palace root, safe to hand back to read_palace_map_html.
+    file: String,
+    /// Display label derived from the stem ("crystal-map" → "crystal map").
+    label: String,
+    /// Best-effort count peeked from the embedded payload ("41 entries").
+    /// None on any parse trouble; a badge is cosmetic, never an error.
+    badge: Option<String>,
+}
+
+/// Peek an instrument's embedded JSON payload and derive a generic badge:
+/// the length of the largest array found at the top level or one level deep.
+fn peek_map_badge(html: &str) -> Option<String> {
+    let marker_at = ["<script id=\"payload\"", "<script id=\"snapshot\""]
+        .iter()
+        .find_map(|m| html.find(m))?;
+    let body_start = html[marker_at..].find('>')? + marker_at + 1;
+    let body_end = html[body_start..].find("</script>")? + body_start;
+    let value: serde_json::Value = serde_json::from_str(html[body_start..body_end].trim()).ok()?;
+    let largest = match &value {
+        serde_json::Value::Array(a) => a.len(),
+        serde_json::Value::Object(o) => o
+            .values()
+            .filter_map(|v| v.as_array().map(|a| a.len()))
+            .max()
+            .unwrap_or(0),
+        _ => 0,
+    };
+    (largest > 0).then(|| format!("{largest} entries"))
+}
+
+/// Discover self-contained palace-map instruments. dashboard.html is excluded:
+/// that is a palace's generated cockpit page itself; embedding it here would
+/// nest a cockpit inside the cockpit.
+#[tauri::command]
+fn list_palace_maps(palace_path: String) -> Result<Vec<PalaceMapEntry>, String> {
+    let root = PathBuf::from(&palace_path);
+    if !root.is_dir() {
+        return Err("palace path is not a directory".to_string());
+    }
+    let mut maps = Vec::new();
+    for dir in cockpit_scan_dirs(&root) {
+        let Ok(entries) = fs::read_dir(&dir) else { continue };
+        for entry in entries.flatten() {
+            let path = entry.path();
+            let is_html = path.extension().and_then(|e| e.to_str()) == Some("html");
+            if !path.is_file() || !is_html {
+                continue;
+            }
+            let stem = path
+                .file_stem()
+                .map(|s| s.to_string_lossy().to_string())
+                .unwrap_or_default();
+            if stem.is_empty() || stem == "dashboard" {
+                continue;
+            }
+            let Ok(html) = fs::read_to_string(&path) else { continue };
+            let has_payload = html.contains("<script id=\"payload\"")
+                || html.contains("<script id=\"snapshot\"");
+            if !has_payload {
+                continue;
+            }
+            let Ok(rel) = path.strip_prefix(&root) else { continue };
+            // First hit wins per stem: root-level instruments shadow kit-dir copies.
+            if maps.iter().any(|m: &PalaceMapEntry| m.key == stem) {
+                continue;
+            }
+            maps.push(PalaceMapEntry {
+                key: stem.clone(),
+                file: rel.to_string_lossy().to_string(),
+                label: stem.replace(['-', '_'], " "),
+                badge: peek_map_badge(&html),
+            });
+        }
+    }
+    maps.sort_by(|a, b| a.key.cmp(&b.key));
+    Ok(maps)
+}
+
+/// Return a discovered map's HTML for srcdoc embedding. The `file` value must
+/// be a relative .html path that resolves inside the palace root; traversal
+/// and absolute paths are rejected before any read happens.
+#[tauri::command]
+fn read_palace_map_html(palace_path: String, file: String) -> Result<String, String> {
+    let root = PathBuf::from(&palace_path);
+    let rel = Path::new(&file);
+    if rel.is_absolute()
+        || rel
+            .components()
+            .any(|c| !matches!(c, std::path::Component::Normal(_)))
+    {
+        return Err("map path must be a plain relative path".to_string());
+    }
+    if rel.extension().and_then(|e| e.to_str()) != Some("html") {
+        return Err("map path must end in .html".to_string());
+    }
+    let target = root.join(rel);
+    // Belt over the component check: the canonical path must stay under the
+    // canonical root (catches symlinked escapes the component filter cannot).
+    let canon_root = root
+        .canonicalize()
+        .map_err(|e| format!("palace root unreadable: {e}"))?;
+    let canon_target = target
+        .canonicalize()
+        .map_err(|e| format!("map file unreadable: {e}"))?;
+    if !canon_target.starts_with(&canon_root) {
+        return Err("map path escapes the palace root".to_string());
+    }
+    fs::read_to_string(&canon_target).map_err(|e| format!("read map: {e}"))
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct ToolLedgerEntry {
+    id: String,
+    #[serde(default)]
+    label: Option<String>,
+    #[serde(default)]
+    kind: Option<String>,
+    #[serde(default)]
+    room: Option<String>,
+    #[serde(default)]
+    source: Option<String>,
+    #[serde(default)]
+    license: Option<String>,
+    #[serde(default)]
+    quarantine_state: Option<String>,
+    #[serde(default)]
+    gate_read: Option<String>,
+}
+
+/// Read the tools gate-ledger: `tools.items` from the palace's map JSON.
+/// Tries palace-map.json then map.json in each cockpit scan dir. Fail-soft:
+/// a palace without a ledger (or with a malformed one) gets an empty shelf,
+/// never an error — the dashboard must render regardless.
+#[tauri::command]
+fn read_tools_ledger(palace_path: String) -> Vec<ToolLedgerEntry> {
+    let root = PathBuf::from(&palace_path);
+    for dir in cockpit_scan_dirs(&root) {
+        for name in ["palace-map.json", "map.json"] {
+            let candidate = dir.join(name);
+            let Ok(bytes) = fs::read(&candidate) else { continue };
+            let Ok(value) = serde_json::from_slice::<serde_json::Value>(&bytes) else {
+                continue;
+            };
+            let Some(items) = value.get("tools").and_then(|t| t.get("items")) else {
+                continue;
+            };
+            if let Ok(entries) = serde_json::from_value::<Vec<ToolLedgerEntry>>(items.clone()) {
+                return entries;
+            }
+        }
+    }
+    Vec::new()
+}
+
+#[cfg(test)]
+mod cockpit_tests {
+    use super::*;
+
+    fn temp_palace(tag: &str) -> PathBuf {
+        // Unique per test: tests share the process and run on parallel threads,
+        // so a process-id-only path would let one test's cleanup race another's writes.
+        let dir = std::env::temp_dir().join(format!("loci-cockpit-test-{}-{tag}", std::process::id()));
+        let _ = fs::remove_dir_all(&dir);
+        fs::create_dir_all(&dir).unwrap();
+        dir
+    }
+
+    #[test]
+    fn map_read_rejects_traversal_and_absolute() {
+        let root = temp_palace("traversal");
+        let root_s = root.to_string_lossy().to_string();
+        assert!(read_palace_map_html(root_s.clone(), "../evil.html".into()).is_err());
+        assert!(read_palace_map_html(root_s.clone(), "/etc/hosts".into()).is_err());
+        assert!(read_palace_map_html(root_s.clone(), "notes.md".into()).is_err());
+        let _ = fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn discovers_payload_instruments_and_skips_dashboard() {
+        let root = temp_palace("discover");
+        fs::write(
+            root.join("crystal-map.html"),
+            r#"<html><script id="payload" type="application/json">{"crystals":[1,2,3]}</script></html>"#,
+        )
+        .unwrap();
+        fs::write(root.join("dashboard.html"), "<html><script id=\"payload\"></script></html>").unwrap();
+        fs::write(root.join("plain.html"), "<html>no payload</html>").unwrap();
+        let maps = list_palace_maps(root.to_string_lossy().to_string()).unwrap();
+        assert_eq!(maps.len(), 1);
+        assert_eq!(maps[0].key, "crystal-map");
+        assert_eq!(maps[0].badge.as_deref(), Some("3 entries"));
+        let _ = fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn ledger_is_fail_soft() {
+        let root = temp_palace("ledger");
+        // No file at all → empty shelf.
+        assert!(read_tools_ledger(root.to_string_lossy().to_string()).is_empty());
+        // Ledger present → parsed.
+        fs::write(
+            root.join("palace-map.json"),
+            r#"{"tools":{"items":[{"id":"x","quarantine_state":"rejected"}]}}"#,
+        )
+        .unwrap();
+        let tools = read_tools_ledger(root.to_string_lossy().to_string());
+        assert_eq!(tools.len(), 1);
+        assert_eq!(tools[0].quarantine_state.as_deref(), Some("rejected"));
+        let _ = fs::remove_dir_all(&root);
+    }
+}
+
 fn main() {
     let ollama_client = OllamaState {
         client: reqwest::Client::builder()
@@ -2874,6 +3112,10 @@ fn main() {
             check_inference_available,
             // palace-update: the delta checker (read-only, explicit, fail-closed)
             check_for_updates,
+            // rc.3 cockpit: maps rail + tools gate-ledger
+            list_palace_maps,
+            read_palace_map_html,
+            read_tools_ledger,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

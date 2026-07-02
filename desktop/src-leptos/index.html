@@ -991,6 +991,95 @@
             letter-spacing: 0.04em;
         }
         .onboarding-settings-link:hover { color: var(--scholar-green); text-decoration: none; }
+
+        /* ── rc.3 cockpit: tab strip, embedded instruments, tool shelf ── */
+        .cockpit-tabs {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            margin: 10px 0 4px 0;
+            border-bottom: 1px solid var(--scholar-border);
+            padding-bottom: 6px;
+        }
+        .cockpit-tab {
+            font-family: var(--font-serif);
+            font-size: 12px;
+            color: var(--scholar-muted);
+            background: transparent;
+            border: 1px solid var(--scholar-border);
+            border-radius: 4px;
+            padding: 3px 10px;
+            cursor: pointer;
+        }
+        .cockpit-tab:hover { color: var(--scholar-green); border-color: var(--scholar-border-strong); }
+        .cockpit-tab.active {
+            color: var(--scholar-cream);
+            background: var(--scholar-green);
+            border-color: var(--scholar-green);
+        }
+        .tab-badge {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            font-size: 9px;
+            letter-spacing: 0.04em;
+            margin-left: 6px;
+            opacity: 0.75;
+        }
+        .map-view { margin-top: 8px; }
+        /* The instrument is a full document; give it the room the ops view has.
+           It styles itself inside the iframe — chrome stays scholar out here. */
+        .map-frame {
+            width: 100%;
+            height: calc(100vh - 170px);
+            border: 1px solid var(--scholar-border-strong);
+            border-radius: 6px;
+            background: #060a12; /* instruments are dark; avoids a white flash while they parse */
+        }
+        .tool-shelf { margin-top: 14px; }
+        .tool-shelf h3 {
+            font-family: var(--font-serif);
+            font-weight: 400;
+            font-size: 14px;
+            color: var(--scholar-green);
+            margin: 0 0 6px 0;
+            border-bottom: 1px solid var(--scholar-border);
+            padding-bottom: 4px;
+        }
+        .tool-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 8px;
+        }
+        .tool-card {
+            border: 1px solid var(--scholar-border);
+            border-left-width: 3px;
+            border-radius: 5px;
+            padding: 8px 10px;
+            font-size: 11px;
+        }
+        .tool-ok   { border-left-color: var(--scholar-green); }
+        .tool-warn { border-left-color: #a67c2e; }
+        .tool-err  { border-left-color: var(--scholar-warn); }
+        .tool-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+        .tool-name { font-weight: 600; font-size: 12px; }
+        .tool-state {
+            font-size: 9px;
+            letter-spacing: 0.08em;
+            padding: 1px 6px;
+            border-radius: 3px;
+            white-space: nowrap;
+        }
+        .tool-state-ok   { color: var(--scholar-green); background: rgba(74, 107, 84, 0.10); }
+        .tool-state-warn { color: #a67c2e; background: rgba(166, 124, 46, 0.10); }
+        .tool-state-err  { color: var(--scholar-warn); background: rgba(163, 80, 62, 0.10); }
+        .tool-meta { color: var(--scholar-muted); margin-top: 2px; font-size: 10px; }
+        .tool-gate-read { margin: 6px 0 0 0; line-height: 1.45; }
+        .tool-source {
+            margin-top: 6px;
+            font-family: "SF Mono", Menlo, monospace;
+            font-size: 9px;
+            color: var(--scholar-muted);
+            user-select: all;
+        }
     </style>
 </head>
 <div id="crash-fallback" style="display:none;padding:32px 24px;font-family:-apple-system,sans-serif;color:#a3503e;">

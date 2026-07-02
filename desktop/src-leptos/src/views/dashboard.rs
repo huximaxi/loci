@@ -1,5 +1,6 @@
 use crate::models::{
-    ActivePalace, AlertItem, CronJobSnapshot, HandoverEntry, ManifestSummary, QuestlogItem,
+    ActivePalace, AlertItem, CronJobSnapshot, HandoverEntry, ManifestSummary, PalaceMapEntry,
+    QuestlogItem, ToolLedgerEntry,
 };
 use crate::tauri_bindings::{invoke, listen};
 use leptos::*;
@@ -41,6 +42,13 @@ struct ChatQueryArg<'a> {
 struct HealthArg {
     // None → backend defaults to http://localhost:11434.
     base_url: Option<String>,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct MapHtmlArg<'a> {
+    palace_path: &'a str,
+    file: &'a str,
 }
 
 #[component]
@@ -129,6 +137,41 @@ pub fn Dashboard() -> impl IntoView {
         },
     );
 
+    // rc.3 cockpit: discovered palace-map instruments + the tools gate-ledger.
+    // Same concurrent-boot pattern as the four reads above.
+    let maps_res = create_resource(
+        move || (active.get().path.clone(), refetch_tick.get()),
+        |(path_opt, _tick)| async move {
+            match path_opt {
+                Some(path) => invoke::<_, Vec<PalaceMapEntry>>(
+                    "list_palace_maps",
+                    &PathArg { palace_path: &path },
+                )
+                .await
+                .unwrap_or_default(),
+                None => Vec::new(),
+            }
+        },
+    );
+    let tools_res = create_resource(
+        move || (active.get().path.clone(), refetch_tick.get()),
+        |(path_opt, _tick)| async move {
+            match path_opt {
+                Some(path) => invoke::<_, Vec<ToolLedgerEntry>>(
+                    "read_tools_ledger",
+                    &PathArg { palace_path: &path },
+                )
+                .await
+                .unwrap_or_default(),
+                None => Vec::new(),
+            }
+        },
+    );
+    // Which cockpit view is showing: "ops" (native dashboard) or a map key.
+    // Ops content is hidden with display:none rather than unmounted, so its
+    // sections, watcher, and detail pane keep their state across tab flips.
+    let cockpit_view = create_rw_signal::<String>("ops".to_string());
+
     // Watcher wiring effect. Fires once per distinct palace_path value.
     create_effect(move |_| {
         let path_opt = active.get().path;
@@ -179,6 +222,45 @@ pub fn Dashboard() -> impl IntoView {
                 <p class="warn dashboard-warn">{e}</p>
             })}
 
+            // Cockpit tab strip: Operations + one tab per discovered instrument.
+            // No instruments → no strip; the dashboard reads exactly as before.
+            {move || {
+                let maps = maps_res.get().unwrap_or_default();
+                (!maps.is_empty()).then(|| view! {
+                    <nav class="cockpit-tabs">
+                        <button
+                            class=move || if cockpit_view.get() == "ops" { "cockpit-tab active" } else { "cockpit-tab" }
+                            on:click=move |_| cockpit_view.set("ops".to_string())
+                        >"⊞ operations"</button>
+                        {maps.into_iter().map(|m| {
+                            let key = m.key.clone();
+                            let key_cls = m.key.clone();
+                            view! {
+                                <button
+                                    class=move || if cockpit_view.get() == key_cls { "cockpit-tab active" } else { "cockpit-tab" }
+                                    on:click=move |_| cockpit_view.set(key.clone())
+                                >
+                                    {m.label.clone()}
+                                    {m.badge.clone().map(|b| view! { <span class="tab-badge">{b}</span> })}
+                                </button>
+                            }
+                        }).collect_view()}
+                    </nav>
+                })
+            }}
+
+            // A non-ops tab embeds that instrument. Rendered on demand; the file
+            // is re-read on each switch (local read, and instruments regenerate
+            // out-of-band, so fresh beats cached).
+            {move || {
+                let sel = cockpit_view.get();
+                let maps = maps_res.get().unwrap_or_default();
+                maps.into_iter().find(|m| m.key == sel).map(|m| view! {
+                    <MapFrame active=active file=m.file label=m.label />
+                })
+            }}
+
+            <div style=move || if cockpit_view.get() == "ops" { "" } else { "display:none" }>
             <ChatQuery companion=move || {
                 active.get().manifest
                     .and_then(|m| m.companion)
@@ -193,6 +275,8 @@ pub fn Dashboard() -> impl IntoView {
                     ("questlog", tasks_res.get().is_some()),
                     ("schema", manifest_res.get().is_some()),
                     ("handovers", handovers_res.get().is_some()),
+                    ("palace maps", maps_res.get().is_some()),
+                    ("tool shelf", tools_res.get().is_some()),
                 ];
                 let total = sys.len();
                 let online = sys.iter().filter(|(_, ok)| *ok).count();
@@ -238,11 +322,95 @@ pub fn Dashboard() -> impl IntoView {
                 None => boot_box("handovers").into_view(),
                 Some(h) => view! { <HandoversSection handovers=h /> }.into_view(),
             }}
+            {move || match tools_res.get() {
+                None => boot_box("tool shelf").into_view(),
+                Some(t) => view! { <ToolShelfSection tools=t /> }.into_view(),
+            }}
+            </div>
 
             <DetailPane selected=selected active=active />
             <CiqModal ciq_open=ciq_open active=active />
         </main>
     }
+}
+
+/// One embedded palace-map instrument. Self-contained HTML by convention, so
+/// it renders whole inside a srcdoc iframe: no custom protocol, no network,
+/// and the read went through the path-validated command on the Rust side.
+#[component]
+fn MapFrame(
+    active: RwSignal<ActivePalace>,
+    file: String,
+    label: String,
+) -> impl IntoView {
+    let html_res = create_resource(
+        move || (active.get().path.clone(), file.clone()),
+        |(path_opt, file)| async move {
+            match path_opt {
+                Some(path) => invoke::<_, String>(
+                    "read_palace_map_html",
+                    &MapHtmlArg { palace_path: &path, file: &file },
+                )
+                .await
+                .map_err(|e| format!("{e:?}")),
+                None => Err("no palace loaded".to_string()),
+            }
+        },
+    );
+    view! {
+        <section class="map-view">
+            {move || match html_res.get() {
+                None => view! { <p class="muted">"loading " {label.clone()} "…"</p> }.into_view(),
+                Some(Err(e)) => view! { <p class="warn">"could not load instrument: " {e}</p> }.into_view(),
+                Some(Ok(html)) => view! {
+                    // sandbox WITHOUT allow-same-origin: the instrument gets an
+                    // opaque origin, so its scripts run but window.parent, app
+                    // storage, and the Tauri IPC globals are all out of reach.
+                    // Instruments are palace content, but palace content can be
+                    // written by crons and agents; the frame is a wall, not a door.
+                    <iframe class="map-frame" srcdoc=html title=label.clone() sandbox="allow-scripts"></iframe>
+                }.into_view(),
+            }}
+        </section>
+    }
+}
+
+/// The tools gate-ledger: external tools and the quarantine verdict each one
+/// carries. The shelf lists; it never loads. Hidden entirely when the palace
+/// has no ledger, so palaces without one see no change.
+#[component]
+fn ToolShelfSection(tools: Vec<ToolLedgerEntry>) -> impl IntoView {
+    (!tools.is_empty()).then(|| view! {
+        <section class="tool-shelf">
+            <h3>"Tool shelf · gate ledger"</h3>
+            <div class="tool-cards">
+                {tools.into_iter().map(|t| {
+                    let state = t.quarantine_state.clone().unwrap_or_else(|| "unread".to_string());
+                    let tone = match state.as_str() {
+                        "admitted" | "admitted-escorted" => "ok",
+                        "rejected" => "err",
+                        _ => "warn", // deferred, held-conditional, unread
+                    };
+                    let meta = [t.kind.clone(), t.room.clone(), t.license.clone()]
+                        .into_iter()
+                        .flatten()
+                        .collect::<Vec<_>>()
+                        .join(" · ");
+                    view! {
+                        <article class=format!("tool-card tool-{tone}")>
+                            <div class="tool-head">
+                                <span class="tool-name">{t.label.clone().unwrap_or_else(|| t.id.clone())}</span>
+                                <span class=format!("tool-state tool-state-{tone}")>{state.to_uppercase()}</span>
+                            </div>
+                            {(!meta.is_empty()).then(|| view! { <div class="tool-meta">{meta}</div> })}
+                            {t.gate_read.clone().map(|g| view! { <p class="tool-gate-read">{g}</p> })}
+                            {t.source.clone().map(|s| view! { <div class="tool-source">{s}</div> })}
+                        </article>
+                    }
+                }).collect_view()}
+            </div>
+        </section>
+    })
 }
 
 /// A dim placeholder box shown while a section's read is in flight. The instant

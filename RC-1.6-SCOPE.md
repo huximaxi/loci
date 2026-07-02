@@ -102,8 +102,35 @@ your palace after the fact."
 
 ---
 
+### E. Desktop cockpit: maps rail + tools gate-ledger — SHIPPED IN THIS PR
+
+The headline candidate named in the QGE-80 delta, landed first. The desktop
+dashboard becomes a cockpit: one Operations view (the existing native
+dashboard) plus one tab per **palace-map instrument** the app discovers in
+the user's palace.
+
+- **Discovery, not configuration**: any self-contained `*.html` at the
+  palace surface (root, `_palace/`, `cockpit/`) carrying an embedded
+  `<script id="payload"|"snapshot" type="application/json">` payload is an
+  instrument. `dashboard.html` is excluded (a palace's own generated cockpit
+  page; embedding it would nest cockpits). Tab badges are peeked from the
+  payload (largest array count), best-effort, never an error.
+- **Embedding via sandboxed `srcdoc`**: the instrument HTML is read through
+  a path-validated command (relative, `.html`, canonical-under-root;
+  traversal and symlink escapes rejected, unit-tested) and rendered in an
+  iframe with `sandbox="allow-scripts"`: opaque origin, so instrument
+  scripts run but the app's storage, `window.parent`, and the Tauri IPC
+  globals are unreachable. Palace content can be written by crons and
+  agents; the frame is a wall, not a door.
+- **Tools gate-ledger**: if the palace's `palace-map.json` (or `map.json`)
+  carries `tools.items`, the dashboard renders the shelf: each external tool
+  with its quarantine verdict (`admitted` / `admitted-escorted` / `deferred` /
+  `held-conditional` / `rejected`) as a state-colored card. The shelf lists;
+  it never loads. Palaces without a ledger see no change (fail-soft).
+
 ## What ships with rc.3
 
+- Desktop cockpit: maps rail + tools gate-ledger (item E, in this PR)
 - 4 new CLI commands (`-z`, `sync`, `feedback`, `init --guided`)
 - 2 new skills + a skills index
 - 2 new persona templates
