@@ -127,6 +127,13 @@ the user's palace.
   with its quarantine verdict (`admitted` / `admitted-escorted` / `deferred` /
   `held-conditional` / `rejected`) as a state-colored card. The shelf lists;
   it never loads. Palaces without a ledger see no change (fail-soft).
+- **Motivation — SWE agents**: this shelf exists because vetting a
+  third-party coding-agent harness (a SWE-agent-style tool that reads a
+  repo and proposes or runs patches) before trusting it near real
+  credentials or a real filesystem is exactly the kind of decision that
+  otherwise gets buried in a session log and re-litigated the next time
+  someone reaches for the same tool. A durable, visible verdict, once
+  made, should never need re-deriving.
 
 ## What ships with rc.3
 
