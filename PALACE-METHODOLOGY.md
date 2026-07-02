@@ -49,6 +49,26 @@ meaning. See `templates/crystals-guide.md` (tiers, promotion, composting),
 `templates/garden-health-template.md` (the surfacing pass), and
 `templates/memory-lifecycle.md` (the four principles on one page).
 
+**Operational pieces shipped with this line.** Three new templates and one
+detection fix operationalise the 1.5 doctrine without changing it:
+
+- `loci-cli/`: a terminal-native CLI for reading your palace. Five commands
+  (`status`, `crystals`, `read`, `handover`, `init`), all read-only, no
+  network, no inference. The third door alongside the templates kit and the
+  desktop app.
+- `templates/personas/`: a shelf of filled persona examples (`Cipher.md`,
+  `Praxis.md`) showing the engine-room dyad pattern (theoria + praxis). The
+  empty skeleton at `templates/persona-template.md` stays the starting point;
+  the shelf shows working examples you can lift directly.
+- `templates/skills/`: portable disciplines with stated triggers, procedures,
+  and kill conditions. This release ships `quarantine.md`, the long-form
+  procedure behind the v1.4 "Foreign-process quarantine, numbered" doctrine.
+- **Palace detection accepts rooms-at-root.** The desktop's
+  `validate_palace_path` and `load_palace` no longer require a `_palace/`
+  subdir. Palaces ported from older organic layouts (rooms grown at the root
+  directly, never moved into `_palace/`) now load directly. The CLI uses the
+  same dual-layout acceptance.
+
 ---
 
 ## v1.4-candidate · 2026-06-11

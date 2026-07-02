@@ -1,0 +1,18 @@
+[package]
+name = "loci-cli"
+version = "0.1.0"
+edition = "2021"
+description = "Read your local palace from the terminal."
+license = "MIT"
+repository = "https://github.com/huximaxi/loci"
+
+[[bin]]
+name = "loci"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+dirs = "5"
+toml = "0.8"

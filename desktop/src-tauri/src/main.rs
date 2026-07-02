@@ -580,15 +580,50 @@ fn write_loci_config(config: LociRustConfig) -> Result<(), String> {
 
 // ─── Palace commands ─────────────────────────────────────────────────────────
 
-/// Check that `path` is a valid palace root: exists, is a dir,
-/// has CLAUDE.md and a _palace/ subdir.
+/// True if `root` has at least one subdir containing CLAUDE.md (rooms-at-root layout).
+/// Prunes the obvious build artefacts so a workspace clone doesn't false-positive.
+fn has_room_at_root(root: &Path) -> bool {
+    let Ok(entries) = fs::read_dir(root) else {
+        return false;
+    };
+    for entry in entries.filter_map(|e| e.ok()) {
+        let name = entry.file_name();
+        let name_str = name.to_string_lossy();
+        if name_str.starts_with('.')
+            || name_str == "_palace"
+            || name_str == "node_modules"
+            || name_str == "target"
+            || name_str == "cron"
+        {
+            continue;
+        }
+        let p = entry.path();
+        if p.is_dir() && p.join("CLAUDE.md").exists() {
+            return true;
+        }
+    }
+    false
+}
+
+/// Check that `path` is a valid palace root.
+///
+/// Accepts two layouts:
+///   * legacy:        PALACE.md/CLAUDE.md at root + `_palace/` subdir with room dirs inside
+///   * rooms-at-root: PALACE.md/CLAUDE.md at root + at least one sibling dir containing CLAUDE.md
+///
+/// The rooms-at-root shape is what palaces ported from older organic layouts look like
+/// (rooms grew at root, never moved into `_palace/`). Both are valid; detection no longer
+/// presumes one over the other.
 #[tauri::command]
 fn validate_palace_path(path: String) -> bool {
     let p = Path::new(&path);
-    p.exists()
-        && p.is_dir()
-        && (p.join("PALACE.md").exists() || p.join("CLAUDE.md").exists())
-        && p.join("_palace").is_dir()
+    if !p.exists() || !p.is_dir() {
+        return false;
+    }
+    if !(p.join("PALACE.md").exists() || p.join("CLAUDE.md").exists()) {
+        return false;
+    }
+    p.join("_palace").is_dir() || has_room_at_root(p)
 }
 
 /// Open a native directory picker and return the chosen path (or None on cancel).
@@ -1083,19 +1118,33 @@ fn load_palace(path: String) -> Result<PalaceManifest, String> {
     if !has_root_marker {
         return Err("not a palace: neither PALACE.md nor CLAUDE.md found at root".to_string());
     }
+    // Pick the layout: rooms-inside-_palace (legacy) OR rooms-at-root (organic ports).
     let palace_dir = root.join("_palace");
-    if !palace_dir.is_dir() {
-        return Err("not a palace: _palace/ directory not found".to_string());
-    }
+    let scan_root: std::path::PathBuf = if palace_dir.is_dir() {
+        palace_dir.clone()
+    } else if has_room_at_root(root) {
+        root.to_path_buf()
+    } else {
+        return Err(
+            "not a palace: no _palace/ subdir and no rooms-at-root (subdirs with CLAUDE.md)"
+                .to_string(),
+        );
+    };
 
     let mut rooms = Vec::new();
-    if let Ok(entries) = fs::read_dir(&palace_dir) {
+    if let Ok(entries) = fs::read_dir(&scan_root) {
         let mut dirs: Vec<_> = entries
             .filter_map(|e| e.ok())
             .filter(|e| {
                 let n = e.file_name();
                 let name = n.to_string_lossy();
-                e.path().is_dir() && name != "cron" && !name.starts_with('.')
+                // Prune build artefacts + `_palace` (when scanning at root) + cron.
+                e.path().is_dir()
+                    && name != "cron"
+                    && name != "_palace"
+                    && name != "node_modules"
+                    && name != "target"
+                    && !name.starts_with('.')
             })
             .collect();
         dirs.sort_by_key(|e| e.file_name());
@@ -1115,7 +1164,8 @@ fn load_palace(path: String) -> Result<PalaceManifest, String> {
         return Err("not a palace: no rooms found (subdirs with CLAUDE.md)".to_string());
     }
 
-    let cron_job_count = fs::read_dir(palace_dir.join("cron"))
+    // Cron lives where the layout lives.
+    let cron_job_count = fs::read_dir(scan_root.join("cron"))
         .map(|e| e.filter_map(|x| x.ok()).filter(|x| x.path().is_dir()).count())
         .unwrap_or(0);
 
@@ -1123,9 +1173,8 @@ fn load_palace(path: String) -> Result<PalaceManifest, String> {
     config.palace_path = Some(path.clone());
     write_loci_config(config)?;
 
-    // Count crystals inside _palace, NOT from the workspace root: scanning root
-    // walked target/ + node_modules/ + .git/ and was the 30s load beachball.
-    let crystal_count = count_md_files(&palace_dir);
+    // Crystal count scans the layout root (prune-guarded; never walks target/node_modules/.git).
+    let crystal_count = count_md_files(&scan_root);
 
     // Companion name: read from PALACE.md `> Companion:` field for ceremony-created
     // palaces. Legacy palaces (CLAUDE.md only) default to None → dashboard uses the default name.
