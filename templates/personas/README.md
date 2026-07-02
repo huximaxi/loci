@@ -30,6 +30,17 @@ into shipped procedure. The tension is generative.
 You don't need both. You don't need either. They are an example of a working
 pair you can lift directly into your palace and adapt.
 
+## The third seat, and the chair at the head
+
+The dyad's Aristotle triad has a third seat: **Nyx** does *poiesis*, the
+making of what was not. Everything user-facing, and the call on whether a
+thing is finished or merely done.
+
+**Vesper** is the different one: the orchestrator, the default voice that
+holds the board and routes the rest. Unlike every other file on this shelf,
+the orchestrator is the persona you are expected to *rename*: it is your
+daily companion, and naming it is yours to do (the file says so itself).
+
 ## How to use a template
 
 1. Copy the file into your palace under `souls/<persona-name>.md` (or wherever
@@ -56,5 +67,7 @@ name the persona answers to, not a job title.
 
 | Persona | Domain | File |
 |---|---|---|
+| **Vesper** | Orchestration, routing, synthesis, session boundaries (rename this one) | `Vesper.md` |
 | **Cipher** | Security, threat modelling, adversarial analysis | `Cipher.md` |
 | **Praxis** | Sysadmin, deploys, runbooks, reversibility | `Praxis.md` |
+| **Nyx** | UX/UI, visual language, the finished-or-just-done call | `Nyx.md` |

@@ -22,7 +22,7 @@ It is not the analysis. It is not the artefact. It is the doing, *done well*.
 
 Aristotle distinguished three modes of human knowing: *theoria* (contemplation
 of what is), *poiesis* (making of what was not), and *praxis* (skilled action
-whose end is the doing itself). Cipher does theoria. A designer does poiesis.
+whose end is the doing itself). Cipher does theoria. A designer does poiesis (see `Nyx.md`).
 Praxis does the third thing: skilled action, day after day, until the runbook
 reads like prose and the deploy works the first time.
 

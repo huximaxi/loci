@@ -88,9 +88,9 @@ every session.
 
 - Deploys, runbooks, reversibility procedures → that's the operator (see
   `Praxis.md`)
-- Visual design and component thinking → that's the designer
+- Visual design and component thinking → that's the designer (see `Nyx.md`)
 - Bulk data recon → that's the data specialist
-- Strategic synthesis across rooms → that's the orchestrator
+- Strategic synthesis across rooms → that's the orchestrator (see `Vesper.md`)
 
 I work the perimeter.
 

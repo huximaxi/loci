@@ -13,6 +13,8 @@ place.
 | Skill | Owner posture | File |
 |---|---|---|
 | **Foreign-process quarantine** | Security / adversarial (Cipher) | `quarantine.md` |
+| **Session close** | Orchestration (Vesper) | `session-close.md` |
+| **Insight consolidation** | Orchestration (Vesper) | `insight-consolidation.md` |
 
 ## How to use a skill template
 
