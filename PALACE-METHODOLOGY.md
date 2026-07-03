@@ -11,12 +11,41 @@ Palace methodology version tracker. The structural and intellectual core of loci
 
 > This document tracks the *methodology* line of loci-core: the plain-text firmware, versioned independently of the apps.
 
-> loci-core version: 1.5-candidate
+> loci-core version: 1.6-candidate
 > stable: 1.2
 > status: candidate
-> updated: 2026-06-15
+> updated: 2026-07-02
 
 ---
+
+## v1.6-candidate · 2026-07-02
+
+**The cockpit and the release gates.** Two operational shapes earn doctrine lines
+this version:
+
+- **A palace surfaces itself through instruments, and the cockpit discovers
+  them.** An instrument is a self-contained page a palace generates for itself
+  (a map, a watcher, a ledger), carrying its own live data. The cockpit (a
+  dashboard, an app, a generated page) finds instruments by convention rather
+  than configuration, embeds them without rewriting them, and shows one
+  Operations view beside them. **One list, one owner:** when an instrument
+  owns a dataset, no other surface renders that dataset too; duplicated lists
+  drift, and the reader learns to trust neither.
+- **The tool shelf is a gate ledger.** A verdict on foreign tooling (admit,
+  escort, defer, hold, reject) is recorded as durable, visible data where the
+  palace's maps live, not as prose in a session log. A verdict once made
+  should never need re-deriving; re-litigating the same tool each time
+  someone reaches for it is how quarantine discipline erodes.
+- **Releases pass through ordered gates.** The contributor-facing half is now
+  a shipped procedure (`docs/RELEASING.md`): scope, pre-flight, bleed scan,
+  human read, commit gate, adversarial reconstruction, PR, merge, post. The
+  doctrine line it operationalizes is old (nothing leaves without approval,
+  release is re-expression); what is new in 1.6 is that the gates are written
+  down in order, with a rollback path per stage.
+
+Implementation shipped alongside this line: the desktop cockpit (instrument
+tabs + tools gate-ledger) and the release-gates document. This section names
+the shapes so a palace without the app can still apply them.
 
 ## v1.5-candidate · 2026-06-15
 

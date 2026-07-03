@@ -7,7 +7,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-Methodology line: `loci-core` 1.5-candidate (supersedes 1.4-candidate).
+Nothing yet.
+
+---
+
+## [v0.6.0-beta] — 2026-07-02
+
+The 0.6 open beta: the desktop app, the CLI, and the template shelves on one
+version line for the first time. Methodology line: `loci-core` 1.6-candidate
+(supersedes 1.5-candidate; see PALACE-METHODOLOGY.md for the cockpit,
+gate-ledger, and release-gates doctrine).
 
 ### Added
 - `docs/RELEASING.md`: how a change ships to this repository. The ordered gates (scope, pre-flight, bleed scan, human read, commit gate, reconstruction pre-mortem, PR, merge, post), version-anchor semantics for the methodology line, CHANGELOG and README touch triggers, tagging rules, and the rollback table. The contributor-facing half of the release discipline; the maintainer-side check wiring stays outside the repository.

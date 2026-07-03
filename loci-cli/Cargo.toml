@@ -1,6 +1,6 @@
 [package]
 name = "loci-cli"
-version = "0.1.0"
+version = "0.6.0-beta"
 edition = "2021"
 description = "Read your local palace from the terminal."
 license = "MIT"
