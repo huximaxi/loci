@@ -385,8 +385,11 @@ header, #top, #panel { background: rgba(250,249,246,.92) !important; border-colo
 </style>\n";
 
 /// One embedded palace-map instrument. Self-contained HTML by convention, so
-/// it renders whole inside a srcdoc iframe: no custom protocol, no network,
-/// and the read went through the path-validated command on the Rust side.
+/// it renders whole inside a srcdoc iframe: no custom protocol, and no network
+/// by construction. The srcdoc document inherits the webview CSP
+/// (src-tauri/tauri.conf.json), whose connect-src/img-src allow no remote
+/// origins, so fetch/XHR/beacon egress is blocked, not merely unused. The
+/// read went through the path-validated command on the Rust side.
 #[component]
 fn MapFrame(
     active: RwSignal<ActivePalace>,
@@ -421,6 +424,9 @@ fn MapFrame(
                         // storage, and the Tauri IPC globals are all out of reach.
                         // Instruments are palace content, but palace content can be
                         // written by crons and agents; the frame is a wall, not a door.
+                        // Sandbox denies identity and IPC; the inherited CSP denies
+                        // network egress. Both invariants are guarded by
+                        // csp_gate_tests in src-tauri/src/main.rs.
                         <iframe class="map-frame" srcdoc=themed title=label.clone() sandbox="allow-scripts"></iframe>
                     }.into_view()
                 },

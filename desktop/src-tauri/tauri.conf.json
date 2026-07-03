@@ -45,7 +45,18 @@
       }
     ],
     "security": {
-      "csp": null
+      "csp": {
+        "default-src": "'self'",
+        "connect-src": "'self' ipc: http://ipc.localhost",
+        "script-src": "'self' 'unsafe-inline' 'wasm-unsafe-eval' 'unsafe-eval'",
+        "style-src": "'self' 'unsafe-inline'",
+        "img-src": "'self' data:",
+        "font-src": "'self' data:",
+        "object-src": "'none'",
+        "base-uri": "'self'",
+        "form-action": "'self'"
+      },
+      "dangerousDisableAssetCspModification": ["script-src", "style-src"]
     }
   },
   "plugins": {}
