@@ -14,6 +14,9 @@ mod mcp;
 mod inference;
 use inference::{ClaudeBackend, InferenceBackend, OllamaBackend};
 
+// ─── rain + token watcher: 5h-window weather for the garden ──────────────────
+mod token_watcher;
+
 // ─── Loci config (persisted to ~/.loci/config.json) ──────────────────────────
 //
 // LociRustConfig mirrors the TypeScript LociConfig type in packages/core/src/types.ts.
@@ -3179,6 +3182,10 @@ fn main() {
             list_palace_maps,
             read_palace_map_html,
             read_tools_ledger,
+            // rain + token watcher: window weather, garden rain state, hand-off
+            token_watcher::read_token_window,
+            token_watcher::read_rain_status,
+            token_watcher::fire_rain,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

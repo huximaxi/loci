@@ -7,7 +7,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-Nothing yet.
+### Added
+- **Rain: the garden watering round, coupled to a token-window watcher** (0.8 line). Three pieces, one pattern (`templates/skills/rain.md`): (1) `loci tokens`: approximate agent-runtime 5-hour session-window status reconstructed read-only from local transcripts, streamed line-by-line (timing and spend, not quota; honest about being approximate). (2) `loci rain [--fire]`: watering weather on one screen (window signal `fresh`/`open`/`closing`, garden plant count, last rain from the `garden/.rain/` archive) plus the one hand-off in the CLI: `--fire` execs the user's agent runtime from the palace root and exits. (3) Desktop rain gauge card: same weather + garden state with a "make it rain" button behind an explicit click; three new commands (`read_token_window`, `read_rain_status`, `fire_rain`), spawned rounds reaped on exit. Rain never auto-fires: weather is a suggestion, spending is a gate.
 
 ---
 
