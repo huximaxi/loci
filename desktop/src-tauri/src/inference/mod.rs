@@ -189,10 +189,17 @@ impl InferenceBackend for ClaudeBackend {
     async fn chat(&self, system: &str, prompt: &str, model: &str) -> Result<String, String> {
         let mut cmd = tokio::process::Command::new(&self.bin);
         cmd.env("PATH", &self.path_env)
+            // The spawned CLI inherits the user's global Claude config, which can
+            // carry MCP connectors (Jira, Figma, …) that handshake third-party
+            // hosts from a session that needs none of them. --strict-mcp-config
+            // with no --mcp-config loads zero MCP servers; the env var drops the
+            // Statsig/Sentry/auto-update phone-home. Egress stays one host: the API.
+            .env("CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC", "1")
             .arg("-p")
             .arg(prompt)
             .arg("--model")
             .arg(model)
+            .arg("--strict-mcp-config")
             .arg("--output-format")
             .arg("text");
         if !system.trim().is_empty() {
@@ -216,6 +223,7 @@ impl InferenceBackend for ClaudeBackend {
         // Actually run it: a present binary that can't find node is not "awake".
         tokio::process::Command::new(&self.bin)
             .env("PATH", &self.path_env)
+            .env("CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC", "1")
             .arg("--version")
             .output()
             .await
