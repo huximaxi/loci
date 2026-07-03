@@ -1,6 +1,6 @@
 [package]
 name = "loci-leptos"
-version = "0.6.0"
+version = "0.6.0-beta"
 edition = "2021"
 
 [dependencies]

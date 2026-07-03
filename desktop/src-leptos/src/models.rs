@@ -124,6 +124,30 @@ pub struct HandoverEntry {
     pub size: u64,
 }
 
+// ─── rc.3 cockpit ────────────────────────────────────────────────────────────
+
+/// A self-contained palace-map instrument discovered at the palace surface.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct PalaceMapEntry {
+    pub key: String,
+    pub file: String,
+    pub label: String,
+    pub badge: Option<String>,
+}
+
+/// One row of the tools gate-ledger (`tools.items` in the palace map JSON).
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ToolLedgerEntry {
+    pub id: String,
+    pub label: Option<String>,
+    pub kind: Option<String>,
+    pub room: Option<String>,
+    pub source: Option<String>,
+    pub license: Option<String>,
+    pub quarantine_state: Option<String>,
+    pub gate_read: Option<String>,
+}
+
 /// One alert surfaced by alert-watcher-daily. Parsed from the `alerts` array in
 /// that job's state.json (lazily, via read_cron_detail). Read-only for now: the
 /// "solve/action" affordance is deferred (write-path).

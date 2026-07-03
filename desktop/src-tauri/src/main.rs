@@ -872,11 +872,14 @@ plural where the voice is shared. Never use em-dashes.";
 /// Tries the same three directory conventions as the `read_handovers` command.
 /// Returns a char-capped string; empty if no convention matches.
 fn find_latest_handover_delta(palace: &Path, char_cap: usize) -> String {
+    let scan = palace_scan_root(palace);
+    // great-hall mixes handovers with other living docs: prefix-gate it.
     let candidates = [
-        palace.join("_palace").join("handovers"),
-        palace.join("handovers"),
+        (scan.join("handovers"), None),
+        (palace.join("handovers"), None),
+        (scan.join("great-hall"), Some("_HANDOVER")),
     ];
-    let Some(dir) = candidates.iter().find(|p| p.is_dir()) else {
+    let Some((dir, name_prefix)) = candidates.iter().find(|(p, _)| p.is_dir()) else {
         return String::new();
     };
     let Ok(read) = fs::read_dir(dir) else {
@@ -889,6 +892,9 @@ fn find_latest_handover_delta(palace: &Path, char_cap: usize) -> String {
         let path = entry.path();
         let Some(name) = path.file_name().and_then(|n| n.to_str()) else { continue };
         if !name.ends_with(".md") || name.starts_with('.') { continue }
+        if let Some(prefix) = name_prefix {
+            if !name.starts_with(prefix) { continue }
+        }
         let Ok(meta) = fs::metadata(&path) else { continue };
         if !meta.is_file() { continue }
         let mtime = meta.modified().ok()
@@ -1010,7 +1016,7 @@ fn build_companion_grounding(palace_root: &Path) -> String {
          Never use em-dashes."
     );
 
-    let garden = palace_root.join("_palace").join("garden");
+    let garden = palace_scan_root(palace_root).join("garden");
 
     if let Some(origin) = find_greeter_origin_crystal(&garden, &companion) {
         out.push_str("\n\n# Your origin crystal (who you are in this palace)\n");
@@ -1550,6 +1556,18 @@ struct WatcherState {
     watcher: Mutex<Option<notify::RecommendedWatcher>>,
 }
 
+/// Rooms live either inside `_palace/` (the packaged layout) or at the palace
+/// root (organic ports; accepted by load_palace since rc.2). Every read that
+/// addresses palace state must resolve through this, not hardcode `_palace/`.
+fn palace_scan_root(root: &Path) -> PathBuf {
+    let packaged = root.join("_palace");
+    if packaged.is_dir() {
+        packaged
+    } else {
+        root.to_path_buf()
+    }
+}
+
 #[tauri::command]
 fn start_state_watcher(
     palace_path: String,
@@ -1559,8 +1577,8 @@ fn start_state_watcher(
     use notify::{EventKind, RecursiveMode, Watcher};
 
     let palace = PathBuf::from(&palace_path);
-    // Must match read_cron_states: jobs live at <root>/_palace/cron, not <root>/cron.
-    let cron_dir = palace.join("_palace").join("cron");
+    // Must match read_cron_states: jobs live at <scan_root>/cron in both layouts.
+    let cron_dir = palace_scan_root(&palace).join("cron");
     if !cron_dir.is_dir() {
         return Err(format!("cron directory missing: {}", cron_dir.display()));
     }
@@ -1626,7 +1644,7 @@ struct CronJobSnapshot {
 fn read_cron_states(palace_path: String) -> Result<Vec<CronJobSnapshot>, String> {
     let __t = std::time::Instant::now();
     let palace = PathBuf::from(&palace_path);
-    let cron_dir = palace.join("_palace").join("cron");
+    let cron_dir = palace_scan_root(&palace).join("cron");
     if !cron_dir.is_dir() {
         // Either fresh scaffold (no jobs yet) or non-standard layout.
         return Ok(Vec::new());
@@ -1721,11 +1739,17 @@ struct HandoverEntry {
 fn read_handovers(palace_path: String, limit: Option<usize>) -> Result<Vec<HandoverEntry>, String> {
     let __t = std::time::Instant::now();
     let palace = PathBuf::from(&palace_path);
+    let scan = palace_scan_root(&palace);
+    // Dedicated handovers dirs take any .md; the great-hall convention mixes
+    // handovers with other living docs, so only `_HANDOVER*` files count there.
     let candidates = [
-        palace.join("_palace").join("handovers"),
-        palace.join("handovers"),
+        (scan.join("handovers"), None),
+        (palace.join("handovers"), None),
+        (scan.join("great-hall"), Some("_HANDOVER")),
     ];
-    let Some(handovers_dir) = candidates.into_iter().find(|p| p.is_dir()) else {
+    let Some((handovers_dir, name_prefix)) =
+        candidates.into_iter().find(|(p, _)| p.is_dir())
+    else {
         return Ok(Vec::new());
     };
     let mut entries = Vec::new();
@@ -1737,6 +1761,11 @@ fn read_handovers(palace_path: String, limit: Option<usize>) -> Result<Vec<Hando
         };
         if !name.ends_with(".md") || name.starts_with('.') {
             continue;
+        }
+        if let Some(prefix) = name_prefix {
+            if !name.starts_with(prefix) {
+                continue;
+            }
         }
         let Ok(meta) = fs::metadata(&path) else {
             continue;
@@ -1775,8 +1804,7 @@ fn read_cron_detail(palace_path: String, key: String) -> Result<serde_json::Valu
     if key.is_empty() || key.contains('/') || key.contains('\\') || key.contains("..") {
         return Err(format!("invalid cron key: {key}"));
     }
-    let state_file = PathBuf::from(&palace_path)
-        .join("_palace")
+    let state_file = palace_scan_root(&PathBuf::from(&palace_path))
         .join("cron")
         .join(&key)
         .join("state.json");
@@ -1802,11 +1830,19 @@ struct QuestlogItem {
 #[tauri::command]
 fn read_tasks(palace_path: String) -> Result<Vec<QuestlogItem>, String> {
     let __t = std::time::Instant::now();
-    let tasks_file = PathBuf::from(&palace_path).join("_palace").join("TASKS.md");
-    if !tasks_file.is_file() {
+    let scan = palace_scan_root(&PathBuf::from(&palace_path));
+    // Two questlog conventions: the original TASKS.md, and the newer
+    // great-hall/QUEST-LOG.md (same checkbox format, different address).
+    let tasks_file = [
+        scan.join("TASKS.md"),
+        scan.join("great-hall").join("QUEST-LOG.md"),
+    ]
+    .into_iter()
+    .find(|p| p.is_file());
+    let Some(tasks_file) = tasks_file else {
         return Ok(Vec::new());
-    }
-    let text = fs::read_to_string(&tasks_file).map_err(|e| format!("read TASKS.md: {e}"))?;
+    };
+    let text = fs::read_to_string(&tasks_file).map_err(|e| format!("read questlog: {e}"))?;
     let mut items: Vec<QuestlogItem> = Vec::new();
     let mut current_track = String::from("Unfiled");
     for line in text.lines() {
@@ -2809,6 +2845,271 @@ async fn check_inference_available(
     })
 }
 
+// ─── rc.3 cockpit: palace maps rail + tools gate-ledger ──────────────────────
+//
+// The cockpit shape (one Operations view + a tab per self-contained palace-map
+// instrument) re-expressed for any palace. A "palace map" is a standalone
+// *.html the palace generates for itself, self-contained by convention, with
+// its live data embedded as <script id="payload"|"snapshot" type="application/json">.
+// The app discovers them, never hardcodes them, and embeds via iframe srcdoc
+// (no filesystem custom-protocol exposure; the read goes through a validated
+// command). Trust boundary: a palace map is the user's own palace content,
+// same standing as every other file this app reads.
+
+/// Directories a palace may keep instruments in, tried in order. Non-recursive:
+/// instruments live at a palace's surface, not buried in room internals.
+fn cockpit_scan_dirs(root: &Path) -> Vec<PathBuf> {
+    vec![
+        root.to_path_buf(),
+        root.join("_palace"),
+        root.join("cockpit"),
+        root.join("_palace").join("cockpit"),
+    ]
+}
+
+#[derive(Debug, Serialize)]
+struct PalaceMapEntry {
+    /// Stable key = file stem. Also the tab identity.
+    key: String,
+    /// Path relative to the palace root, safe to hand back to read_palace_map_html.
+    file: String,
+    /// Display label derived from the stem ("crystal-map" → "crystal map").
+    label: String,
+    /// Best-effort count peeked from the embedded payload ("41 entries").
+    /// None on any parse trouble; a badge is cosmetic, never an error.
+    badge: Option<String>,
+}
+
+/// Peek an instrument's embedded JSON payload and derive a generic badge:
+/// the length of the largest array found at the top level or one level deep.
+fn peek_map_badge(html: &str) -> Option<String> {
+    let marker_at = ["<script id=\"payload\"", "<script id=\"snapshot\""]
+        .iter()
+        .find_map(|m| html.find(m))?;
+    let body_start = html[marker_at..].find('>')? + marker_at + 1;
+    let body_end = html[body_start..].find("</script>")? + body_start;
+    let value: serde_json::Value = serde_json::from_str(html[body_start..body_end].trim()).ok()?;
+    let largest = match &value {
+        serde_json::Value::Array(a) => a.len(),
+        serde_json::Value::Object(o) => o
+            .values()
+            .filter_map(|v| v.as_array().map(|a| a.len()))
+            .max()
+            .unwrap_or(0),
+        _ => 0,
+    };
+    (largest > 0).then(|| format!("{largest} entries"))
+}
+
+/// Discover self-contained palace-map instruments. dashboard.html is excluded:
+/// that is a palace's generated cockpit page itself; embedding it here would
+/// nest a cockpit inside the cockpit.
+#[tauri::command]
+fn list_palace_maps(palace_path: String) -> Result<Vec<PalaceMapEntry>, String> {
+    let root = PathBuf::from(&palace_path);
+    if !root.is_dir() {
+        return Err("palace path is not a directory".to_string());
+    }
+    let mut maps = Vec::new();
+    for dir in cockpit_scan_dirs(&root) {
+        let Ok(entries) = fs::read_dir(&dir) else { continue };
+        for entry in entries.flatten() {
+            let path = entry.path();
+            let is_html = path.extension().and_then(|e| e.to_str()) == Some("html");
+            if !path.is_file() || !is_html {
+                continue;
+            }
+            let stem = path
+                .file_stem()
+                .map(|s| s.to_string_lossy().to_string())
+                .unwrap_or_default();
+            if stem.is_empty() || stem == "dashboard" {
+                continue;
+            }
+            let Ok(html) = fs::read_to_string(&path) else { continue };
+            let has_payload = html.contains("<script id=\"payload\"")
+                || html.contains("<script id=\"snapshot\"");
+            if !has_payload {
+                continue;
+            }
+            let Ok(rel) = path.strip_prefix(&root) else { continue };
+            // First hit wins per stem: root-level instruments shadow kit-dir copies.
+            if maps.iter().any(|m: &PalaceMapEntry| m.key == stem) {
+                continue;
+            }
+            maps.push(PalaceMapEntry {
+                key: stem.clone(),
+                file: rel.to_string_lossy().to_string(),
+                label: stem.replace(['-', '_'], " "),
+                badge: peek_map_badge(&html),
+            });
+        }
+    }
+    maps.sort_by(|a, b| a.key.cmp(&b.key));
+    Ok(maps)
+}
+
+/// Return a discovered map's HTML for srcdoc embedding. The `file` value must
+/// be a relative .html path that resolves inside the palace root; traversal
+/// and absolute paths are rejected before any read happens.
+#[tauri::command]
+fn read_palace_map_html(palace_path: String, file: String) -> Result<String, String> {
+    let root = PathBuf::from(&palace_path);
+    let rel = Path::new(&file);
+    if rel.is_absolute()
+        || rel
+            .components()
+            .any(|c| !matches!(c, std::path::Component::Normal(_)))
+    {
+        return Err("map path must be a plain relative path".to_string());
+    }
+    if rel.extension().and_then(|e| e.to_str()) != Some("html") {
+        return Err("map path must end in .html".to_string());
+    }
+    let target = root.join(rel);
+    // Belt over the component check: the canonical path must stay under the
+    // canonical root (catches symlinked escapes the component filter cannot).
+    let canon_root = root
+        .canonicalize()
+        .map_err(|e| format!("palace root unreadable: {e}"))?;
+    let canon_target = target
+        .canonicalize()
+        .map_err(|e| format!("map file unreadable: {e}"))?;
+    if !canon_target.starts_with(&canon_root) {
+        return Err("map path escapes the palace root".to_string());
+    }
+    fs::read_to_string(&canon_target).map_err(|e| format!("read map: {e}"))
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct ToolLedgerEntry {
+    id: String,
+    #[serde(default)]
+    label: Option<String>,
+    #[serde(default)]
+    kind: Option<String>,
+    #[serde(default)]
+    room: Option<String>,
+    #[serde(default)]
+    source: Option<String>,
+    #[serde(default)]
+    license: Option<String>,
+    #[serde(default)]
+    quarantine_state: Option<String>,
+    #[serde(default)]
+    gate_read: Option<String>,
+}
+
+/// Read the tools gate-ledger: `tools.items` from the palace's map JSON.
+/// Tries palace-map.json then map.json in each cockpit scan dir. Fail-soft:
+/// a palace without a ledger (or with a malformed one) gets an empty shelf,
+/// never an error: the dashboard must render regardless.
+#[tauri::command]
+fn read_tools_ledger(palace_path: String) -> Vec<ToolLedgerEntry> {
+    let root = PathBuf::from(&palace_path);
+    for dir in cockpit_scan_dirs(&root) {
+        for name in ["palace-map.json", "map.json"] {
+            let candidate = dir.join(name);
+            let Ok(bytes) = fs::read(&candidate) else { continue };
+            let Ok(value) = serde_json::from_slice::<serde_json::Value>(&bytes) else {
+                continue;
+            };
+            let Some(items) = value.get("tools").and_then(|t| t.get("items")) else {
+                continue;
+            };
+            if let Ok(entries) = serde_json::from_value::<Vec<ToolLedgerEntry>>(items.clone()) {
+                return entries;
+            }
+        }
+    }
+    Vec::new()
+}
+
+#[cfg(test)]
+mod cockpit_tests {
+    use super::*;
+
+    fn temp_palace(tag: &str) -> PathBuf {
+        // Unique per test: tests share the process and run on parallel threads,
+        // so a process-id-only path would let one test's cleanup race another's writes.
+        let dir = std::env::temp_dir().join(format!("loci-cockpit-test-{}-{tag}", std::process::id()));
+        let _ = fs::remove_dir_all(&dir);
+        fs::create_dir_all(&dir).unwrap();
+        dir
+    }
+
+    #[test]
+    fn map_read_rejects_traversal_and_absolute() {
+        let root = temp_palace("traversal");
+        let root_s = root.to_string_lossy().to_string();
+        assert!(read_palace_map_html(root_s.clone(), "../evil.html".into()).is_err());
+        assert!(read_palace_map_html(root_s.clone(), "/etc/hosts".into()).is_err());
+        assert!(read_palace_map_html(root_s.clone(), "notes.md".into()).is_err());
+        let _ = fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn discovers_payload_instruments_and_skips_dashboard() {
+        let root = temp_palace("discover");
+        fs::write(
+            root.join("crystal-map.html"),
+            r#"<html><script id="payload" type="application/json">{"crystals":[1,2,3]}</script></html>"#,
+        )
+        .unwrap();
+        fs::write(root.join("dashboard.html"), "<html><script id=\"payload\"></script></html>").unwrap();
+        fs::write(root.join("plain.html"), "<html>no payload</html>").unwrap();
+        let maps = list_palace_maps(root.to_string_lossy().to_string()).unwrap();
+        assert_eq!(maps.len(), 1);
+        assert_eq!(maps[0].key, "crystal-map");
+        assert_eq!(maps[0].badge.as_deref(), Some("3 entries"));
+        let _ = fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn dashboard_reads_resolve_rooms_at_root_layout() {
+        let root = temp_palace("roomsatroot");
+        let root_s = root.to_string_lossy().to_string();
+        fs::create_dir_all(root.join("cron").join("demo-job")).unwrap();
+        fs::write(
+            root.join("cron").join("demo-job").join("state.json"),
+            r#"{"job":"demo","status":"ok"}"#,
+        )
+        .unwrap();
+        fs::create_dir_all(root.join("great-hall")).unwrap();
+        fs::write(
+            root.join("great-hall").join("QUEST-LOG.md"),
+            "## Track\n- [ ] **2026-07-02, Demo item.** body\n",
+        )
+        .unwrap();
+        fs::write(root.join("great-hall").join("_HANDOVER_demo.md"), "## State\nok\n").unwrap();
+        fs::write(root.join("great-hall").join("MORNING-BRIEF.md"), "not a handover\n").unwrap();
+
+        assert_eq!(read_cron_states(root_s.clone()).unwrap().len(), 1);
+        assert_eq!(read_tasks(root_s.clone()).unwrap().len(), 1);
+        let handovers = read_handovers(root_s.clone(), None).unwrap();
+        assert_eq!(handovers.len(), 1, "great-hall must be prefix-gated to _HANDOVER*");
+        assert!(handovers[0].filename.starts_with("_HANDOVER"));
+        let _ = fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn ledger_is_fail_soft() {
+        let root = temp_palace("ledger");
+        // No file at all → empty shelf.
+        assert!(read_tools_ledger(root.to_string_lossy().to_string()).is_empty());
+        // Ledger present → parsed.
+        fs::write(
+            root.join("palace-map.json"),
+            r#"{"tools":{"items":[{"id":"x","quarantine_state":"rejected"}]}}"#,
+        )
+        .unwrap();
+        let tools = read_tools_ledger(root.to_string_lossy().to_string());
+        assert_eq!(tools.len(), 1);
+        assert_eq!(tools[0].quarantine_state.as_deref(), Some("rejected"));
+        let _ = fs::remove_dir_all(&root);
+    }
+}
+
 fn main() {
     let ollama_client = OllamaState {
         client: reqwest::Client::builder()
@@ -2874,6 +3175,10 @@ fn main() {
             check_inference_available,
             // palace-update: the delta checker (read-only, explicit, fail-closed)
             check_for_updates,
+            // rc.3 cockpit: maps rail + tools gate-ledger
+            list_palace_maps,
+            read_palace_map_html,
+            read_tools_ledger,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
