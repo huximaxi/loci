@@ -1,0 +1,77 @@
+# Build CI: compiles and tests the Rust surfaces on every PR and main push.
+# Advisory for now (not a required check); promote once it has proven quiet.
+# First-party actions only (checkout, cache): this repo treats third-party
+# CI actions as foreign tooling, and the gate ledger has no entry for them.
+name: build
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "loci-cli/**"
+      - "desktop/**"
+      - ".github/workflows/build.yml"
+  pull_request:
+    paths:
+      - "loci-cli/**"
+      - "desktop/**"
+      - ".github/workflows/build.yml"
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  cli:
+    name: loci-cli (build + test)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            loci-cli/target
+          key: cli-${{ runner.os }}-${{ hashFiles('loci-cli/Cargo.lock') }}
+      - run: cargo build --locked
+        working-directory: loci-cli
+      - run: cargo test --locked
+        working-directory: loci-cli
+
+  desktop-backend:
+    name: tauri backend (test)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: system deps (webkit2gtk for tauri)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev librsvg2-dev
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            desktop/target
+          key: tauri-${{ runner.os }}-${{ hashFiles('desktop/Cargo.lock') }}
+      # tauri-build validates frontendDist at compile time; the leptos dist/
+      # is gitignored, so give it an empty stand-in (backend tests only).
+      - run: mkdir -p desktop/src-leptos/dist
+      - run: cargo test --locked
+        working-directory: desktop/src-tauri
+
+  leptos:
+    name: leptos frontend (check, wasm)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup target add wasm32-unknown-unknown
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            desktop/target
+          key: leptos-${{ runner.os }}-${{ hashFiles('desktop/Cargo.lock') }}
+      - run: cargo check --locked --target wasm32-unknown-unknown
+        working-directory: desktop/src-leptos
