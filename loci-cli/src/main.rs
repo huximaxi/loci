@@ -1,7 +1,9 @@
 //! loci: read your local palace from the terminal.
 //!
-//! Five read-shaped commands. No network. No inference. No daemons.
+//! Read-shaped commands. No network. No inference. No daemons.
 //! Honest about what it is: a CLI that knows the palace layout and prints what's there.
+//! The one hand-off: `rain --fire` execs your agent runtime and exits; the CLI
+//! itself still does no inference.
 
 use clap::{Parser, Subcommand};
 use serde::Serialize;
@@ -10,6 +12,7 @@ use std::path::PathBuf;
 use std::process::ExitCode;
 
 mod palace;
+mod tokens;
 
 #[derive(Parser)]
 #[command(
@@ -55,6 +58,14 @@ enum Cmd {
     },
     /// Print the most recent handover (by mtime).
     Handover,
+    /// Approximate agent-runtime session-window status (5h rolling) from local transcripts.
+    Tokens,
+    /// Garden watering weather: window headroom + garden state + how to fire a rain round.
+    Rain {
+        /// Hand off to the agent runtime now (`claude -p "rain"` from the palace root).
+        #[arg(long)]
+        fire: bool,
+    },
     /// Interactive setup wizard. Writes `~/.config/loci/config.toml`.
     Init,
 }
@@ -80,6 +91,8 @@ fn run(cli: Cli) -> Result<(), Error> {
         Cmd::Crystals { room } => cmd_crystals(cli.palace, room, cli.json),
         Cmd::Read { slug, room } => cmd_read(cli.palace, &slug, room.as_deref(), cli.json),
         Cmd::Handover => cmd_handover(cli.palace, cli.json),
+        Cmd::Tokens => cmd_tokens(cli.json),
+        Cmd::Rain { fire } => cmd_rain(cli.palace, fire, cli.json),
         Cmd::Init => cmd_init(),
     }
 }
@@ -280,6 +293,179 @@ fn cmd_handover(palace_arg: Option<PathBuf>, json: bool) -> Result<(), Error> {
         println!("{}", serde_json::to_string_pretty(&out)?);
     } else {
         print!("{content}");
+    }
+    Ok(())
+}
+
+// ── tokens + rain ────────────────────────────────────────────────────────
+
+fn fmt_tok(n: u64) -> String {
+    if n >= 1_000_000 {
+        format!("{:.1}M", n as f64 / 1e6)
+    } else if n >= 1_000 {
+        format!("{:.0}k", n as f64 / 1e3)
+    } else {
+        n.to_string()
+    }
+}
+
+fn signal_glyph(signal: &str) -> &'static str {
+    match signal {
+        "fresh" => "☔",
+        "open" => "🌦",
+        "closing" => "⏳",
+        _ => "🌫",
+    }
+}
+
+fn cmd_tokens(json: bool) -> Result<(), Error> {
+    let w = tokens::window_status();
+    if json {
+        println!("{}", serde_json::to_string_pretty(&w)?);
+        return Ok(());
+    }
+    println!("window  : {} {}", signal_glyph(&w.signal), w.state);
+    match (&w.window_start_utc, &w.window_reset_utc, w.minutes_remaining) {
+        (Some(start), Some(reset), Some(min)) => {
+            println!("started : {start}");
+            println!("resets  : {reset} ({min}m left)");
+        }
+        _ => {}
+    }
+    println!(
+        "spent   : {} total (in {} · out {} · cache-w {} · cache-r {}) over {} messages",
+        fmt_tok(w.tokens.total),
+        fmt_tok(w.tokens.input),
+        fmt_tok(w.tokens.output),
+        fmt_tok(w.tokens.cache_creation),
+        fmt_tok(w.tokens.cache_read),
+        w.messages
+    );
+    println!("note    : {}", w.note);
+    Ok(())
+}
+
+#[derive(Serialize)]
+struct RainGardenOut {
+    plants: usize,
+    last_rain: Option<String>,
+    last_rain_waterings: Option<usize>,
+}
+
+#[derive(Serialize)]
+struct RainOut {
+    garden: RainGardenOut,
+    window: tokens::WindowStatus,
+    invocation: String,
+}
+
+fn rain_garden(p: &palace::Palace) -> RainGardenOut {
+    let garden = p.scan_root.join("garden");
+    let plants = std::fs::read_dir(garden.join("plants"))
+        .map(|rd| {
+            rd.filter_map(|e| e.ok())
+                .filter(|e| e.path().extension().and_then(|x| x.to_str()) == Some("md"))
+                .count()
+        })
+        .unwrap_or(0);
+    // Latest archived round: garden/.rain/waterings-<date>.json
+    let mut last: Option<(String, PathBuf)> = None;
+    if let Ok(rd) = std::fs::read_dir(garden.join(".rain")) {
+        for e in rd.filter_map(|e| e.ok()) {
+            let name = e.file_name().to_string_lossy().to_string();
+            if let Some(date) = name
+                .strip_prefix("waterings-")
+                .and_then(|s| s.strip_suffix(".json"))
+            {
+                if last.as_ref().map(|(d, _)| date > d.as_str()).unwrap_or(true) {
+                    last = Some((date.to_string(), e.path()));
+                }
+            }
+        }
+    }
+    let (last_rain, last_rain_waterings) = match last {
+        Some((date, path)) => {
+            let n = std::fs::read_to_string(&path)
+                .ok()
+                .and_then(|s| serde_json::from_str::<serde_json::Value>(&s).ok())
+                .and_then(|v| v.as_array().map(|a| a.len()));
+            (Some(date), n)
+        }
+        None => (None, None),
+    };
+    RainGardenOut {
+        plants,
+        last_rain,
+        last_rain_waterings,
+    }
+}
+
+fn cmd_rain(palace_arg: Option<PathBuf>, fire: bool, json: bool) -> Result<(), Error> {
+    let p = require_palace(palace_arg)?;
+    let garden = rain_garden(&p);
+    let window = tokens::window_status();
+    let invocation = "claude -p \"rain\"".to_string();
+
+    if fire {
+        println!(
+            "firing rain from {} ({} {})…",
+            p.root.display(),
+            signal_glyph(&window.signal),
+            window.signal
+        );
+        let status = std::process::Command::new("claude")
+            .args(["-p", "rain"])
+            .current_dir(&p.root)
+            .status()
+            .map_err(|e| {
+                Error::io(format!(
+                    "could not launch agent runtime `claude`: {e}. Is it on PATH?"
+                ))
+            })?;
+        if !status.success() {
+            return Err(Error::io(format!("rain round exited with {status}")));
+        }
+        return Ok(());
+    }
+
+    if json {
+        let out = RainOut {
+            garden,
+            window,
+            invocation,
+        };
+        println!("{}", serde_json::to_string_pretty(&out)?);
+        return Ok(());
+    }
+
+    println!("rain · garden watering round");
+    let weather = match (&window.window_reset_utc, window.minutes_remaining) {
+        (Some(reset), Some(min)) => format!(
+            "{} {} · {}m left (resets {reset}) · {} spent",
+            signal_glyph(&window.signal),
+            window.signal,
+            min,
+            fmt_tok(window.tokens.total)
+        ),
+        _ => format!(
+            "{} {} · {}",
+            signal_glyph(&window.signal),
+            window.signal,
+            window.note
+        ),
+    };
+    println!("weather : {weather}");
+    let last = match (&garden.last_rain, garden.last_rain_waterings) {
+        (Some(d), Some(n)) => format!("last rain {d} ({n} waterings)"),
+        (Some(d), None) => format!("last rain {d}"),
+        _ => "no rain on record".to_string(),
+    };
+    println!("garden  : {} plants · {last}", garden.plants);
+    println!("fire    : loci rain --fire   (or in-session: Workflow({{ name: \"rain\" }}))");
+    if window.signal == "fresh" {
+        println!("          window is fresh: full headroom. Good weather for rain.");
+    } else if window.signal == "closing" {
+        println!("          window closes soon: spare capacity expires with it.");
     }
     Ok(())
 }
