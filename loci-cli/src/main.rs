@@ -6,7 +6,9 @@
 use clap::{Parser, Subcommand};
 use serde::Serialize;
 use std::io::{IsTerminal, Read, Write};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
+
+use loci_wal::{ChainError, EgressClass, Frame, ProofBundle, Wal};
 use std::process::ExitCode;
 
 mod palace;
@@ -57,6 +59,32 @@ enum Cmd {
     Handover,
     /// Interactive setup wizard. Writes `~/.config/loci/config.toml`.
     Init,
+    /// Egress receipt: what left the device, grouped by class, with chain integrity.
+    Audit {
+        /// WAL path (default: ~/.loci/wal/egress.jsonl).
+        #[arg(long)]
+        wal: Option<PathBuf>,
+        /// Only count frames at/after this ISO-8601 UTC timestamp (lexicographic).
+        #[arg(long)]
+        since: Option<String>,
+    },
+    /// Proof-bundle tools (verify an exported egress receipt).
+    Wal {
+        #[command(subcommand)]
+        cmd: WalCmd,
+    },
+}
+
+#[derive(Subcommand)]
+enum WalCmd {
+    /// Verify an exported proof bundle offline (pure, no network).
+    Verify {
+        /// Path to the bundle JSON.
+        bundle: PathBuf,
+        /// Require the signer key to equal this hex pubkey (provenance check).
+        #[arg(long)]
+        expect_key: Option<String>,
+    },
 }
 
 fn main() -> ExitCode {
@@ -81,6 +109,12 @@ fn run(cli: Cli) -> Result<(), Error> {
         Cmd::Read { slug, room } => cmd_read(cli.palace, &slug, room.as_deref(), cli.json),
         Cmd::Handover => cmd_handover(cli.palace, cli.json),
         Cmd::Init => cmd_init(),
+        Cmd::Audit { wal, since } => cmd_audit(wal, since, cli.json),
+        Cmd::Wal { cmd } => match cmd {
+            WalCmd::Verify { bundle, expect_key } => {
+                cmd_wal_verify(&bundle, expect_key.as_deref(), cli.json)
+            }
+        },
     }
 }
 
@@ -282,6 +316,180 @@ fn cmd_handover(palace_arg: Option<PathBuf>, json: bool) -> Result<(), Error> {
         print!("{content}");
     }
     Ok(())
+}
+
+// ── audit / proof bundle ──────────────────────────────────────────────────
+
+#[derive(Serialize)]
+struct AuditClassOut {
+    egress_class: &'static str,
+    events: usize,
+    bytes: u64,
+    hosts: Vec<String>,
+}
+
+#[derive(Serialize)]
+struct AuditOut {
+    wal: String,
+    frames: usize,
+    chain_ok: bool,
+    chain_break_seq: Option<u64>,
+    since: Option<String>,
+    classes: Vec<AuditClassOut>,
+}
+
+fn class_label(c: EgressClass) -> &'static str {
+    match c {
+        EgressClass::Local => "local",
+        EgressClass::ExternalCloud => "external_cloud",
+        EgressClass::ChannelEgress => "channel_egress",
+        EgressClass::ProfileWrite => "profile_write",
+    }
+}
+
+fn chain_break_seq(e: &ChainError) -> Option<u64> {
+    match e {
+        ChainError::Empty => None,
+        ChainError::BrokenLink(s) | ChainError::NonContiguous(s) => Some(*s),
+    }
+}
+
+fn default_wal_path() -> Result<PathBuf, Error> {
+    let home = dirs::home_dir().ok_or_else(|| Error::io("could not resolve home dir".to_string()))?;
+    Ok(home.join(".loci").join("wal").join("egress.jsonl"))
+}
+
+fn cmd_audit(wal_arg: Option<PathBuf>, since: Option<String>, json: bool) -> Result<(), Error> {
+    let path = match wal_arg {
+        Some(p) => p,
+        None => default_wal_path()?,
+    };
+    let all = Wal::open(&path).read()?;
+    let (chain_ok, break_seq) = match Wal::verify_full(&all) {
+        Ok(()) => (true, None),
+        Err(e) => (false, chain_break_seq(&e)),
+    };
+
+    let selected: Vec<&Frame> = all
+        .iter()
+        .filter(|f| since.as_deref().map_or(true, |s| f.ts.as_str() >= s))
+        .collect();
+
+    use std::collections::{BTreeMap, BTreeSet};
+    let mut groups: BTreeMap<&'static str, (usize, u64, BTreeSet<String>)> = BTreeMap::new();
+    for f in &selected {
+        let e = groups.entry(class_label(f.egress_class)).or_default();
+        e.0 += 1;
+        e.1 += f.byte_count.unwrap_or(0);
+        e.2.insert(f.dest_host.clone());
+    }
+    let classes: Vec<AuditClassOut> = groups
+        .into_iter()
+        .map(|(egress_class, (events, bytes, hosts))| AuditClassOut {
+            egress_class,
+            events,
+            bytes,
+            hosts: hosts.into_iter().collect(),
+        })
+        .collect();
+
+    if json {
+        let out = AuditOut {
+            wal: path.display().to_string(),
+            frames: selected.len(),
+            chain_ok,
+            chain_break_seq: break_seq,
+            since,
+            classes,
+        };
+        println!("{}", serde_json::to_string_pretty(&out)?);
+        return Ok(());
+    }
+
+    println!("egress receipt : {}", path.display());
+    if all.is_empty() {
+        println!("frames         : 0 (no egress recorded)");
+        return Ok(());
+    }
+    let chain = if chain_ok {
+        "ok".to_string()
+    } else {
+        format!(
+            "BROKEN at seq {}",
+            break_seq.map(|s| s.to_string()).unwrap_or_else(|| "?".to_string())
+        )
+    };
+    println!("frames         : {} (chain: {chain})", selected.len());
+    if let Some(ref s) = since {
+        println!("since          : {s}");
+    }
+    println!();
+    for c in &classes {
+        println!(
+            "  {:<16} {:>5} events   {:>10} bytes",
+            c.egress_class, c.events, c.bytes
+        );
+        for h in &c.hosts {
+            println!("       {h}");
+        }
+    }
+    Ok(())
+}
+
+#[derive(Serialize)]
+struct VerifyOut {
+    bundle: String,
+    result: &'static str,
+    signer_pubkey: String,
+    range: [u64; 2],
+    frames: usize,
+    detail: Option<String>,
+}
+
+fn cmd_wal_verify(path: &Path, expect_key: Option<&str>, json: bool) -> Result<(), Error> {
+    let text = std::fs::read_to_string(path)?;
+    let bundle: ProofBundle = serde_json::from_str(&text)?;
+    let outcome = match expect_key {
+        Some(k) => bundle.verify_against(k),
+        None => bundle.verify(),
+    };
+    let (ok, detail) = match &outcome {
+        Ok(()) => (true, None),
+        Err(e) => (false, Some(format!("{e:?}"))),
+    };
+
+    if json {
+        let out = VerifyOut {
+            bundle: path.display().to_string(),
+            result: if ok { "pass" } else { "fail" },
+            signer_pubkey: bundle.signer_pubkey.clone(),
+            range: bundle.range,
+            frames: bundle.frames.len(),
+            detail,
+        };
+        println!("{}", serde_json::to_string_pretty(&out)?);
+    } else if ok {
+        println!(
+            "PASS  {} frames, seq {}..{}",
+            bundle.frames.len(),
+            bundle.range[0],
+            bundle.range[1]
+        );
+        println!("      signer {}", bundle.signer_pubkey);
+        if expect_key.is_some() {
+            println!("      signer matches the pinned key");
+        } else {
+            println!("      (signature valid for the embedded key; pass --expect-key for provenance)");
+        }
+    } else {
+        println!("FAIL  {}", detail.unwrap_or_default());
+    }
+
+    if ok {
+        Ok(())
+    } else {
+        Err(Error::bad_input("proof bundle verification failed".to_string()))
+    }
 }
 
 // ── init ─────────────────────────────────────────────────────────────────
