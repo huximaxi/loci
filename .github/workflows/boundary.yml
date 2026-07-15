@@ -1,0 +1,36 @@
+name: boundary
+
+# Open-core boundary as a chokepoint, not a convention: fail the build if a
+# private breadcrumb leaks into public source. The denylist itself is held in a
+# repo secret (BLEED_DENYLIST), NOT in this file — a public workflow that spelled
+# out the forbidden terms would publish the very list it guards. Set it with:
+#   gh secret set BLEED_DENYLIST --repo huximaxi/loci   (value: an ERE alternation)
+# Public product vocabulary (e.g. "palace", the plain-text methodology name) is
+# intentionally NOT in the list; only private repo paths, crate idents, infra
+# hosts, and local paths are.
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  no-private-terms:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: forbid private breadcrumbs in public source
+        env:
+          DENYLIST: ${{ secrets.BLEED_DENYLIST }}
+        run: |
+          if [ -z "${DENYLIST:-}" ]; then
+            echo "::warning::BLEED_DENYLIST secret unset — boundary gate is a no-op until it is set"
+            exit 0
+          fi
+          if grep -rniE "$DENYLIST" \
+               --include='*.rs' --include='*.toml' --include='*.md' \
+               --include='*.ts' --include='*.js' --include='*.html' \
+               --exclude-dir=.github --exclude-dir=target --exclude-dir=node_modules . ; then
+            echo "::error::a private breadcrumb leaked into public source (matches above)"
+            exit 1
+          fi
+          echo "boundary clean"
