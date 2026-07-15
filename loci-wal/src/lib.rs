@@ -24,7 +24,7 @@ pub mod wal;
 
 pub use frame::{ChainError, Chained, EgressClass, Frame, GENESIS};
 pub use proof::{ProofBundle, ProofFrame, VerifyError, BUNDLE_VERSION, SIG_ALGORITHM};
-pub use wal::Wal;
+pub use wal::{record_egress, Wal};
 
 #[cfg(test)]
 mod tests {
@@ -119,6 +119,21 @@ mod tests {
         let mut t = ProofBundle::mint(&frames, &SigningKey::from_bytes(&[5u8; 32]));
         t.frames.remove(1); // gap -> range/contiguity/signature all reject
         assert!(t.verify().is_err());
+        let _ = std::fs::remove_file(&path);
+    }
+
+    #[test]
+    fn record_egress_writes_a_classed_frame() {
+        let path = tmp("rec");
+        let _ = std::fs::remove_file(&path);
+        record_egress(&path, "2026-07-14T00:00:00Z".into(), "chat", EgressClass::ExternalCloud, "api.anthropic.com", b"the prompt", None).unwrap();
+        record_egress(&path, "2026-07-14T00:01:00Z".into(), "local_inference", EgressClass::Local, "localhost", b"", None).unwrap();
+        let frames = Wal::open(&path).read().unwrap();
+        assert_eq!(frames.len(), 2);
+        assert_eq!(frames[0].egress_class, EgressClass::ExternalCloud);
+        assert_eq!(frames[1].egress_class, EgressClass::Local);
+        assert!(frames[0].payload_hash.is_some());
+        assert!(Wal::verify_full(&frames).is_ok());
         let _ = std::fs::remove_file(&path);
     }
 }
