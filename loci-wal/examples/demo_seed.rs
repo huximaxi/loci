@@ -9,8 +9,15 @@ use loci_wal::{EgressClass, Frame, ProofBundle, Wal};
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    let wal_path = args.get(1).cloned().unwrap_or_else(|| "/tmp/loci-demo-wal.jsonl".to_string());
-    let bundle_path = args.get(2).cloned().unwrap_or_else(|| "/tmp/loci-demo-bundle.json".to_string());
+    // Paths are required, no defaults: a predictable /tmp default is a symlink-
+    // follow overwrite footgun (CWE-377/61), and this ships in a public repo.
+    let (wal_path, bundle_path) = match (args.get(1), args.get(2)) {
+        (Some(w), Some(b)) => (w.clone(), b.clone()),
+        _ => {
+            eprintln!("usage: demo_seed <wal_path> <bundle_path>");
+            std::process::exit(2);
+        }
+    };
     let _ = std::fs::remove_file(&wal_path);
 
     let wal = Wal::open(&wal_path);

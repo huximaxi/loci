@@ -163,7 +163,13 @@ impl ProofBundle {
     /// Verify AND require the signer key equals `expected_pubkey_hex`. This is the
     /// provenance check a third party runs against your published/pinned key.
     pub fn verify_against(&self, expected_pubkey_hex: &str) -> Result<(), VerifyError> {
-        if self.signer_pubkey != expected_pubkey_hex {
+        // Hex is case-insensitive; tolerate surrounding whitespace so a genuine
+        // match is never false-rejected. The cryptographic check is in verify().
+        if !self
+            .signer_pubkey
+            .trim()
+            .eq_ignore_ascii_case(expected_pubkey_hex.trim())
+        {
             return Err(VerifyError::KeyMismatch);
         }
         self.verify()

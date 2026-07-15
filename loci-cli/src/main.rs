@@ -59,7 +59,8 @@ enum Cmd {
     Handover,
     /// Interactive setup wizard. Writes `~/.config/loci/config.toml`.
     Init,
-    /// Egress receipt: what left the device, grouped by class, with chain integrity.
+    /// Egress receipt: what left the device, grouped by class, over the live WAL,
+    /// with a hash-chain sanity check. For cryptographic proof, export a bundle and `wal verify` it.
     Audit {
         /// WAL path (default: ~/.loci/wal/egress.jsonl).
         #[arg(long)]
@@ -320,6 +321,11 @@ fn cmd_handover(palace_arg: Option<PathBuf>, json: bool) -> Result<(), Error> {
 
 // ── audit / proof bundle ──────────────────────────────────────────────────
 
+/// Refuse to read files larger than these caps: `audit` + `wal verify` run on
+/// potentially attacker-supplied files, so bound the allocation up front.
+const MAX_WAL_BYTES: u64 = 256 * 1024 * 1024;
+const MAX_BUNDLE_BYTES: u64 = 64 * 1024 * 1024;
+
 #[derive(Serialize)]
 struct AuditClassOut {
     egress_class: &'static str,
@@ -364,6 +370,14 @@ fn cmd_audit(wal_arg: Option<PathBuf>, since: Option<String>, json: bool) -> Res
         Some(p) => p,
         None => default_wal_path()?,
     };
+    if path.exists() {
+        let len = std::fs::metadata(&path)?.len();
+        if len > MAX_WAL_BYTES {
+            return Err(Error::bad_input(format!(
+                "WAL too large: {len} bytes (cap {MAX_WAL_BYTES})"
+            )));
+        }
+    }
     let all = Wal::open(&path).read()?;
     let (chain_ok, break_seq) = match Wal::verify_full(&all) {
         Ok(()) => (true, None),
@@ -447,6 +461,12 @@ struct VerifyOut {
 }
 
 fn cmd_wal_verify(path: &Path, expect_key: Option<&str>, json: bool) -> Result<(), Error> {
+    let len = std::fs::metadata(path)?.len();
+    if len > MAX_BUNDLE_BYTES {
+        return Err(Error::bad_input(format!(
+            "bundle too large: {len} bytes (cap {MAX_BUNDLE_BYTES})"
+        )));
+    }
     let text = std::fs::read_to_string(path)?;
     let bundle: ProofBundle = serde_json::from_str(&text)?;
     let outcome = match expect_key {
