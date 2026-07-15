@@ -341,12 +341,14 @@ struct AuditOut {
     chain_ok: bool,
     chain_break_seq: Option<u64>,
     since: Option<String>,
+    degraded: usize,
     classes: Vec<AuditClassOut>,
 }
 
 fn class_label(c: EgressClass) -> &'static str {
     match c {
         EgressClass::Local => "local",
+        EgressClass::LocalNetwork => "local_network",
         EgressClass::ExternalCloud => "external_cloud",
         EgressClass::ChannelEgress => "channel_egress",
         EgressClass::ProfileWrite => "profile_write",
@@ -378,6 +380,11 @@ fn cmd_audit(wal_arg: Option<PathBuf>, since: Option<String>, json: bool) -> Res
             )));
         }
     }
+    // A degraded marker means the writer failed to record ≥1 egress: the log may
+    // be INCOMPLETE (a dropped write leaves no chain gap, so it is otherwise invisible).
+    let degraded = std::fs::read_to_string(path.with_file_name("egress.degraded"))
+        .map(|s| s.lines().filter(|l| !l.trim().is_empty()).count())
+        .unwrap_or(0);
     let all = Wal::open(&path).read()?;
     let (chain_ok, break_seq) = match Wal::verify_full(&all) {
         Ok(()) => (true, None),
@@ -414,6 +421,7 @@ fn cmd_audit(wal_arg: Option<PathBuf>, since: Option<String>, json: bool) -> Res
             chain_ok,
             chain_break_seq: break_seq,
             since,
+            degraded,
             classes,
         };
         println!("{}", serde_json::to_string_pretty(&out)?);
@@ -421,6 +429,11 @@ fn cmd_audit(wal_arg: Option<PathBuf>, since: Option<String>, json: bool) -> Res
     }
 
     println!("egress receipt : {}", path.display());
+    if degraded > 0 {
+        println!(
+            "⚠ WARNING      : {degraded} egress record(s) failed to write — this receipt may be INCOMPLETE"
+        );
+    }
     if all.is_empty() {
         println!("frames         : 0 (no egress recorded)");
         return Ok(());

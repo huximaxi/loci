@@ -12,7 +12,7 @@ mod mcp;
 
 // ─── Phase 4a: pluggable inference (trait, not vendor) ────────────────────────
 mod inference;
-use inference::{ClaudeBackend, EgressLogged, InferenceBackend, OllamaBackend};
+use inference::InferenceBackend;
 
 // ─── Loci config (persisted to ~/.loci/config.json) ──────────────────────────
 //
@@ -330,15 +330,6 @@ async fn embed_text(
 // the InferenceBackend trait — the command never names a vendor beyond picking
 // which trait impl to construct.
 
-/// Where the egress receipt WAL lives, shared with `loci audit`: ~/.loci/wal/egress.jsonl.
-fn egress_wal_path() -> PathBuf {
-    dirs::home_dir()
-        .unwrap_or_else(|| PathBuf::from("."))
-        .join(".loci")
-        .join("wal")
-        .join("egress.jsonl")
-}
-
 #[tauri::command]
 async fn chat_query(
     state: tauri::State<'_, OllamaState>,
@@ -369,7 +360,7 @@ async fn chat_query(
             let (bin, path_env) = resolve_claude().ok_or(
                 "external brain unavailable — Claude Code CLI not found on this machine",
             )?;
-            let backend = EgressLogged::new(ClaudeBackend { bin, path_env }, egress_wal_path());
+            let backend = inference::claude(bin, path_env);
             if !backend.health().await {
                 return Err(
                     "Claude CLI is present but won't run (node missing from PATH, or not logged in?)".into(),
@@ -384,13 +375,7 @@ async fn chat_query(
         _ => {
             // SSRF gate: reject any base_url that isn't localhost / [::1] / Tailscale.
             let base = validate_ollama_url(&cfg.base_url)?;
-            let backend = EgressLogged::new(
-                OllamaBackend {
-                    client: state.client.clone(),
-                    base,
-                },
-                egress_wal_path(),
-            );
+            let backend = inference::ollama(state.client.clone(), base);
             // Probe first so an unreachable daemon reads as an honest message,
             // not a 120s hang. The trait's health() never errors.
             if !backend.health().await {
@@ -2710,7 +2695,7 @@ async fn check_ceremony_vagueness(
         .connect_timeout(std::time::Duration::from_millis(500))
         .build()
         .unwrap_or_else(|_| state.client.clone());
-    let backend = OllamaBackend { client: ceremony_client, base };
+    let backend = inference::ollama(ceremony_client, base);
     let system = "Answer only with one word: concrete or vague.";
     let prompt = format!(
         "Does this answer name something specific — a project, task, goal, or named thing? Answer: '{answer}'"
@@ -2764,7 +2749,7 @@ async fn generate_greeter_names(
         .connect_timeout(std::time::Duration::from_millis(500))
         .build()
         .unwrap_or_else(|_| state.client.clone());
-    let backend = OllamaBackend { client: name_client, base };
+    let backend = inference::ollama(name_client, base);
     let system = "You are naming an AI companion for a memory palace. \
         Output exactly 4 options, one per line. \
         Format: Name · one-line character note (under 10 words). \
@@ -2842,7 +2827,7 @@ async fn check_inference_available(
         async {
             match resolve_claude() {
                 None => false,
-                Some((bin, path_env)) => ClaudeBackend { bin, path_env }.health().await,
+                Some((bin, path_env)) => inference::claude(bin, path_env).health().await,
             }
         },
     )

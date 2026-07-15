@@ -23,7 +23,11 @@ jobs:
           DENYLIST: ${{ secrets.BLEED_DENYLIST }}
         run: |
           if [ -z "${DENYLIST:-}" ]; then
-            echo "::warning::BLEED_DENYLIST secret unset — boundary gate is a no-op until it is set"
+            if [ "${{ github.event_name }}" = "push" ]; then
+              echo "::error::BLEED_DENYLIST unset — boundary gate cannot scan; failing closed on push"
+              exit 1
+            fi
+            echo "::warning::BLEED_DENYLIST unset — skipping on ${{ github.event_name }} (fork PRs cannot read secrets)"
             exit 0
           fi
           if grep -rniE "$DENYLIST" \

@@ -20,8 +20,11 @@ use sha2::{Digest, Sha256};
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum EgressClass {
-    /// Never leaves the device (e.g. a local Ollama call).
+    /// Never leaves the device — loopback only (127.0.0.1 / ::1 / localhost).
     Local,
+    /// Left the device to a private, trusted host that is NOT loopback — e.g. an
+    /// Ollama on a Tailscale peer. Private, but it did leave this machine.
+    LocalNetwork,
     /// A cloud LLM / external API call.
     ExternalCloud,
     /// An outbound message to a channel.

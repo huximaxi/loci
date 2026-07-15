@@ -11,6 +11,10 @@
 
 use loci_wal::EgressClass;
 use serde::{Deserialize, Serialize};
+use std::ffi::OsString;
+use std::fs::{create_dir_all, OpenOptions};
+use std::io::Write;
+use std::path::PathBuf;
 
 /// A local-first inference provider. One-shot completion plus a cheap probe.
 pub trait InferenceBackend {
@@ -91,8 +95,8 @@ struct ChoiceMsg {
 /// Ollama-backed inference. Holds a clone of the app-wide reqwest client
 /// (cheap: reqwest::Client is Arc internally) and a pre-validated base URL.
 pub struct OllamaBackend {
-    pub client: reqwest::Client,
-    pub base: url::Url,
+    client: reqwest::Client,
+    base: url::Url,
 }
 
 impl InferenceBackend for OllamaBackend {
@@ -179,7 +183,14 @@ impl InferenceBackend for OllamaBackend {
     }
 
     fn egress_class(&self) -> EgressClass {
-        EgressClass::Local
+        // Local means loopback ONLY. A permitted non-loopback host (a Tailscale
+        // peer) physically leaves this machine, so it is LocalNetwork, not Local.
+        match self.base.host_str() {
+            Some("localhost") | Some("127.0.0.1") | Some("::1") | Some("[::1]") => {
+                EgressClass::Local
+            }
+            _ => EgressClass::LocalNetwork,
+        }
     }
 
     fn dest_host(&self) -> String {
@@ -195,11 +206,11 @@ impl InferenceBackend for OllamaBackend {
 // constructed on an explicit, UI-marked opt-in, never as a silent fallback.
 pub struct ClaudeBackend {
     /// Absolute path to the `claude` binary (a GUI app can't see shell aliases).
-    pub bin: std::path::PathBuf,
+    bin: std::path::PathBuf,
     /// PATH for the spawned process, augmented with the node dir. The CLI is a
     /// node script whose shebang needs `node`, which lives in nvm/homebrew and is
     /// invisible to a bundled app's minimal PATH.
-    pub path_env: std::ffi::OsString,
+    path_env: std::ffi::OsString,
 }
 
 impl InferenceBackend for ClaudeBackend {
@@ -281,25 +292,37 @@ struct TagModel {
 // The frame is written BEFORE the inner call — over-reporting an attempt is the
 // safe direction for a privacy receipt; never under-report what may have left.
 
+/// The egress receipt WAL path, shared with `loci audit`: ~/.loci/wal/egress.jsonl.
+pub fn egress_wal_path() -> PathBuf {
+    dirs::home_dir()
+        .unwrap_or_else(|| PathBuf::from("."))
+        .join(".loci")
+        .join("wal")
+        .join("egress.jsonl")
+}
+
 /// Decorator that records an egress frame on every `chat`, then delegates.
+/// Not built directly by call sites — obtain a backend via `ollama()` / `claude()`,
+/// the ONLY constructors, so no site can egress content without this chokepoint.
 pub struct EgressLogged<B: InferenceBackend> {
     inner: B,
-    wal_path: std::path::PathBuf,
+    wal_path: PathBuf,
 }
 
 impl<B: InferenceBackend> EgressLogged<B> {
-    pub fn new(inner: B, wal_path: std::path::PathBuf) -> Self {
+    pub fn new(inner: B, wal_path: PathBuf) -> Self {
         Self { inner, wal_path }
     }
-}
 
-impl<B: InferenceBackend> InferenceBackend for EgressLogged<B> {
-    async fn chat(&self, system: &str, prompt: &str, model: &str) -> Result<String, String> {
-        if let Some(parent) = self.wal_path.parent() {
-            let _ = std::fs::create_dir_all(parent);
+    fn record(&self, prompt: &str) {
+        // Kill switch: LOCI_WAL_DISABLED turns the writer off without a rebuild.
+        if std::env::var_os("LOCI_WAL_DISABLED").is_some() {
+            return;
         }
-        // Best-effort: a WAL write failure must not block the user's inference.
-        let _ = loci_wal::record_egress(
+        if let Some(parent) = self.wal_path.parent() {
+            let _ = create_dir_all(parent);
+        }
+        if let Err(e) = loci_wal::record_egress(
             &self.wal_path,
             chrono::Utc::now().to_rfc3339(),
             "chat",
@@ -307,7 +330,23 @@ impl<B: InferenceBackend> InferenceBackend for EgressLogged<B> {
             &self.inner.dest_host(),
             prompt.as_bytes(),
             None,
-        );
+        ) {
+            // A dropped write leaves NO gap in the chain, so it is invisible to
+            // `loci audit`. Surface it: a degraded marker the audit reads + warns on.
+            let marker = self.wal_path.with_file_name("egress.degraded");
+            let _ = OpenOptions::new()
+                .create(true)
+                .append(true)
+                .open(&marker)
+                .and_then(|mut f| writeln!(f, "{} {}", chrono::Utc::now().to_rfc3339(), e));
+        }
+    }
+}
+
+impl<B: InferenceBackend> InferenceBackend for EgressLogged<B> {
+    async fn chat(&self, system: &str, prompt: &str, model: &str) -> Result<String, String> {
+        // Record BEFORE the call: over-report an attempt, never under-report an egress.
+        self.record(prompt);
         self.inner.chat(system, prompt, model).await
     }
 
@@ -326,6 +365,17 @@ impl<B: InferenceBackend> InferenceBackend for EgressLogged<B> {
     fn dest_host(&self) -> String {
         self.inner.dest_host()
     }
+}
+
+/// The ONLY constructors for a callable backend. Because the backend struct
+/// fields are private to this module, a call site cannot build a raw (unlogged)
+/// backend — it comes through here, wrapped in the egress chokepoint.
+pub fn ollama(client: reqwest::Client, base: url::Url) -> EgressLogged<OllamaBackend> {
+    EgressLogged::new(OllamaBackend { client, base }, egress_wal_path())
+}
+
+pub fn claude(bin: PathBuf, path_env: OsString) -> EgressLogged<ClaudeBackend> {
+    EgressLogged::new(ClaudeBackend { bin, path_env }, egress_wal_path())
 }
 
 #[cfg(test)]
@@ -380,5 +430,21 @@ mod tests {
         assert!(!raw.contains("the secret prompt"), "payload must not be stored");
 
         let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn ollama_tailscale_is_local_network_not_local() {
+        let c = reqwest::Client::new();
+        let loopback = OllamaBackend {
+            client: c.clone(),
+            base: url::Url::parse("http://127.0.0.1:11434").unwrap(),
+        };
+        assert_eq!(loopback.egress_class(), EgressClass::Local);
+        // A Tailscale peer physically leaves this machine — must not read as Local.
+        let tailnet = OllamaBackend {
+            client: c,
+            base: url::Url::parse("http://100.64.1.5:11434").unwrap(),
+        };
+        assert_eq!(tailnet.egress_class(), EgressClass::LocalNetwork);
     }
 }
