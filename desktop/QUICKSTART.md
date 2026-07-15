@@ -88,7 +88,7 @@ npm run tauri:build
 
 ## Next
 
-- Test with your `~/Dev/_palace/` setup
+- Test with your own palace folder
 - Verify migration creates `~/.loci/loci.json`
 - Check room/crystal counts are accurate
 - Open migrated palace in Finder to confirm files copied
