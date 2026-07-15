@@ -9,6 +9,7 @@
 // silent external fallback. URL validation (localhost / Tailscale only) stays in
 // main.rs::validate_ollama_url; this module receives an already-validated base.
 
+use loci_wal::EgressClass;
 use serde::{Deserialize, Serialize};
 
 /// A local-first inference provider. One-shot completion plus a cheap probe.
@@ -44,6 +45,14 @@ pub trait InferenceBackend {
         }
         Ok(models[0].clone())
     }
+
+    /// This backend's egress class — the single classifier the WAL + gate read.
+    /// No default: a new backend must declare whether its calls leave the device
+    /// (so a provider can't be added without being classified).
+    fn egress_class(&self) -> EgressClass;
+
+    /// The effective destination host recorded in the egress receipt.
+    fn dest_host(&self) -> String;
 }
 
 // ─── Ollama (first implementation) ────────────────────────────────────────────
@@ -168,6 +177,14 @@ impl InferenceBackend for OllamaBackend {
             .map(|t| t.models.into_iter().map(|m| m.name).collect())
             .unwrap_or_default()
     }
+
+    fn egress_class(&self) -> EgressClass {
+        EgressClass::Local
+    }
+
+    fn dest_host(&self) -> String {
+        self.base.host_str().unwrap_or("localhost").to_string()
+    }
 }
 
 // ─── Claude (external brain — the "online garden" tier) ─────────────────────────
@@ -235,6 +252,15 @@ impl InferenceBackend for ClaudeBackend {
         // The CLI resolves aliases server-side; we offer the stable aliases.
         vec!["sonnet".to_string(), "opus".to_string(), "haiku".to_string()]
     }
+
+    fn egress_class(&self) -> EgressClass {
+        EgressClass::ExternalCloud
+    }
+
+    fn dest_host(&self) -> String {
+        // Effective destination: the CLI authenticates to Anthropic's API.
+        "api.anthropic.com".to_string()
+    }
 }
 
 #[derive(Deserialize)]
@@ -245,4 +271,114 @@ struct TagsResponse {
 #[derive(Deserialize)]
 struct TagModel {
     name: String,
+}
+
+// ─── Egress chokepoint ──────────────────────────────────────────────────────
+//
+// Wraps any backend so a WAL frame is written at the single point content
+// leaves via `chat`. This is the chokepoint the egress-receipt feature rests on:
+// content egress is recorded here, not as a convention each call site remembers.
+// The frame is written BEFORE the inner call — over-reporting an attempt is the
+// safe direction for a privacy receipt; never under-report what may have left.
+
+/// Decorator that records an egress frame on every `chat`, then delegates.
+pub struct EgressLogged<B: InferenceBackend> {
+    inner: B,
+    wal_path: std::path::PathBuf,
+}
+
+impl<B: InferenceBackend> EgressLogged<B> {
+    pub fn new(inner: B, wal_path: std::path::PathBuf) -> Self {
+        Self { inner, wal_path }
+    }
+}
+
+impl<B: InferenceBackend> InferenceBackend for EgressLogged<B> {
+    async fn chat(&self, system: &str, prompt: &str, model: &str) -> Result<String, String> {
+        if let Some(parent) = self.wal_path.parent() {
+            let _ = std::fs::create_dir_all(parent);
+        }
+        // Best-effort: a WAL write failure must not block the user's inference.
+        let _ = loci_wal::record_egress(
+            &self.wal_path,
+            chrono::Utc::now().to_rfc3339(),
+            "chat",
+            self.inner.egress_class(),
+            &self.inner.dest_host(),
+            prompt.as_bytes(),
+            None,
+        );
+        self.inner.chat(system, prompt, model).await
+    }
+
+    async fn health(&self) -> bool {
+        self.inner.health().await
+    }
+
+    async fn available_models(&self) -> Vec<String> {
+        self.inner.available_models().await
+    }
+
+    fn egress_class(&self) -> EgressClass {
+        self.inner.egress_class()
+    }
+
+    fn dest_host(&self) -> String {
+        self.inner.dest_host()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    struct FakeBackend {
+        class: EgressClass,
+        host: String,
+    }
+
+    impl InferenceBackend for FakeBackend {
+        async fn chat(&self, _s: &str, _p: &str, _m: &str) -> Result<String, String> {
+            Ok("ok".to_string())
+        }
+        async fn health(&self) -> bool {
+            true
+        }
+        async fn available_models(&self) -> Vec<String> {
+            vec!["m".to_string()]
+        }
+        fn egress_class(&self) -> EgressClass {
+            self.class
+        }
+        fn dest_host(&self) -> String {
+            self.host.clone()
+        }
+    }
+
+    #[tokio::test]
+    async fn egress_logged_records_a_classed_payload_free_frame() {
+        let dir = std::env::temp_dir().join(format!("loci_egress_test_{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        let wal_path = dir.join("egress.jsonl");
+        let backend = EgressLogged::new(
+            FakeBackend {
+                class: EgressClass::ExternalCloud,
+                host: "api.anthropic.com".to_string(),
+            },
+            wal_path.clone(),
+        );
+
+        let out = backend.chat("sys", "the secret prompt", "sonnet").await.unwrap();
+        assert_eq!(out, "ok");
+
+        let frames = loci_wal::Wal::open(&wal_path).read().unwrap();
+        assert_eq!(frames.len(), 1);
+        assert_eq!(frames[0].egress_class, EgressClass::ExternalCloud);
+        assert_eq!(frames[0].dest_host, "api.anthropic.com");
+        // The prompt bytes must NOT be on disk — only a hash.
+        let raw = std::fs::read_to_string(&wal_path).unwrap();
+        assert!(!raw.contains("the secret prompt"), "payload must not be stored");
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
 }
