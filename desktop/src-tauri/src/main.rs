@@ -12,7 +12,7 @@ mod mcp;
 
 // ─── Phase 4a: pluggable inference (trait, not vendor) ────────────────────────
 mod inference;
-use inference::{ClaudeBackend, InferenceBackend, OllamaBackend};
+use inference::{ClaudeBackend, EgressLogged, InferenceBackend, OllamaBackend};
 
 // ─── Loci config (persisted to ~/.loci/config.json) ──────────────────────────
 //
@@ -330,6 +330,15 @@ async fn embed_text(
 // the InferenceBackend trait — the command never names a vendor beyond picking
 // which trait impl to construct.
 
+/// Where the egress receipt WAL lives, shared with `loci audit`: ~/.loci/wal/egress.jsonl.
+fn egress_wal_path() -> PathBuf {
+    dirs::home_dir()
+        .unwrap_or_else(|| PathBuf::from("."))
+        .join(".loci")
+        .join("wal")
+        .join("egress.jsonl")
+}
+
 #[tauri::command]
 async fn chat_query(
     state: tauri::State<'_, OllamaState>,
@@ -360,7 +369,7 @@ async fn chat_query(
             let (bin, path_env) = resolve_claude().ok_or(
                 "external brain unavailable — Claude Code CLI not found on this machine",
             )?;
-            let backend = ClaudeBackend { bin, path_env };
+            let backend = EgressLogged::new(ClaudeBackend { bin, path_env }, egress_wal_path());
             if !backend.health().await {
                 return Err(
                     "Claude CLI is present but won't run (node missing from PATH, or not logged in?)".into(),
@@ -375,10 +384,13 @@ async fn chat_query(
         _ => {
             // SSRF gate: reject any base_url that isn't localhost / [::1] / Tailscale.
             let base = validate_ollama_url(&cfg.base_url)?;
-            let backend = OllamaBackend {
-                client: state.client.clone(),
-                base,
-            };
+            let backend = EgressLogged::new(
+                OllamaBackend {
+                    client: state.client.clone(),
+                    base,
+                },
+                egress_wal_path(),
+            );
             // Probe first so an unreachable daemon reads as an honest message,
             // not a 120s hang. The trait's health() never errors.
             if !backend.health().await {
