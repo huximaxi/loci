@@ -5,7 +5,7 @@
 //! agents; without the lock two calls would fork the chain). Single-writer per
 //! append is enforced by the lock; readers need no lock.
 
-use crate::frame::{verify_links, ChainError, Chained, Frame, GENESIS};
+use crate::frame::{verify_links, ChainError, Chained, EgressClass, Frame, GENESIS};
 use fs2::FileExt;
 use std::fs::{File, OpenOptions};
 use std::io::{BufRead, BufReader, Read, Seek, SeekFrom, Write};
@@ -108,4 +108,30 @@ impl Wal {
         }
         verify_links(frames)
     }
+}
+
+/// Record one egress event: hash the payload for the local-audit anchor (the
+/// payload bytes are discarded), stamp the caller-supplied `ts`, and append
+/// (chained + lock-serialized). The single call an egress chokepoint makes.
+#[allow(clippy::too_many_arguments)]
+pub fn record_egress(
+    path: impl AsRef<Path>,
+    ts: String,
+    event_type: &str,
+    egress_class: EgressClass,
+    dest_host: &str,
+    payload: &[u8],
+    consent_ref: Option<String>,
+) -> std::io::Result<Frame> {
+    Wal::open(path).append(Frame {
+        seq: 0,
+        ts,
+        event_type: event_type.to_string(),
+        egress_class,
+        dest_host: dest_host.to_string(),
+        prev_frame_hash: String::new(),
+        payload_hash: Some(Frame::hash_payload(payload)),
+        byte_count: Some(payload.len() as u64),
+        consent_ref,
+    })
 }
