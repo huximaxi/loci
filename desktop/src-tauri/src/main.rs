@@ -3110,6 +3110,123 @@ mod cockpit_tests {
     }
 }
 
+#[cfg(test)]
+mod csp_gate_tests {
+    // Tripwire for the instrument-egress invariant (rc.4, Cipher advisory on
+    // PR #79): palace-authored srcdoc instruments inherit the webview CSP, so
+    // the config below IS the wall. These tests parse the shipped config; if
+    // one fails, an egress channel reopened or instruments went blank.
+
+    const CONF: &str = include_str!("../tauri.conf.json");
+    const DASHBOARD_SRC: &str = include_str!("../../src-leptos/src/views/dashboard.rs");
+
+    fn csp() -> serde_json::Value {
+        let conf: serde_json::Value = serde_json::from_str(CONF).unwrap();
+        conf["app"]["security"]["csp"].clone()
+    }
+
+    /// Directive value → source list, accepting both CSP config shapes
+    /// (space-separated string or array of strings).
+    fn sources(directive: &serde_json::Value) -> Vec<String> {
+        match directive {
+            serde_json::Value::String(s) => s.split_whitespace().map(String::from).collect(),
+            serde_json::Value::Array(items) => items
+                .iter()
+                .filter_map(|v| v.as_str().map(String::from))
+                .collect(),
+            _ => Vec::new(),
+        }
+    }
+
+    #[test]
+    fn csp_is_configured_and_default_deny() {
+        let csp = csp();
+        assert!(csp.is_object(), "csp must not regress to null: srcdoc instruments would get unrestricted network egress");
+        assert_eq!(sources(&csp["default-src"]), ["'self'"]);
+    }
+
+    #[test]
+    fn connect_src_allows_only_app_origin_and_tauri_ipc() {
+        // 'self' is required: Trunk's init glue fetches the wasm binary, and
+        // fetch is governed by connect-src. It resolves to the app origin
+        // only, so instrument egress to remote hosts stays closed.
+        for src in sources(&csp()["connect-src"]) {
+            assert!(
+                src == "'self'" || src == "ipc:" || src == "http://ipc.localhost",
+                "connect-src source {src:?} is neither the app origin nor a Tauri IPC endpoint: fetch/XHR/beacon egress reopened"
+            );
+        }
+    }
+
+    #[test]
+    fn no_remote_origins_in_any_directive() {
+        let csp = csp();
+        for (name, directive) in csp.as_object().unwrap() {
+            for src in sources(directive) {
+                assert!(
+                    !(src.starts_with("http://") || src.starts_with("https://"))
+                        || src == "http://ipc.localhost",
+                    "{name} allows remote origin {src:?}"
+                );
+            }
+        }
+        let img: Vec<String> = sources(&csp["img-src"]);
+        for src in &img {
+            assert!(
+                src == "'self'" || src == "data:",
+                "img-src source {src:?} would allow image-beacon egress"
+            );
+        }
+    }
+
+    #[test]
+    fn inline_instrument_scripts_stay_runnable() {
+        // Instruments are runtime srcdoc data: their inline scripts/styles are
+        // never hashed by Tauri, so these directives must carry 'unsafe-inline'
+        // and stay free of nonce/hash sources (CSP3 ignores 'unsafe-inline'
+        // once any nonce or hash is present).
+        let csp = csp();
+        for key in ["script-src", "style-src"] {
+            let srcs = sources(&csp[key]);
+            assert!(srcs.contains(&"'unsafe-inline'".to_string()), "{key} lost 'unsafe-inline': instruments go inert");
+            for src in &srcs {
+                assert!(
+                    !(src.starts_with("'nonce-") || src.starts_with("'sha")),
+                    "{key} carries {src:?}, which voids 'unsafe-inline'"
+                );
+            }
+        }
+        // Without this, Tauri injects hashes/nonces into bundled-asset CSP at
+        // build time and release builds ship blank instruments anyway.
+        let conf: serde_json::Value = serde_json::from_str(CONF).unwrap();
+        let disabled = &conf["app"]["security"]["dangerousDisableAssetCspModification"];
+        for key in ["script-src", "style-src"] {
+            assert!(
+                disabled.as_array().is_some_and(|a| a.iter().any(|v| v == key)),
+                "dangerousDisableAssetCspModification must list {key}"
+            );
+        }
+    }
+
+    #[test]
+    fn map_frame_sandbox_has_no_same_origin() {
+        // Inspect the actual sandbox attribute values, not the whole source:
+        // comments legitimately mention allow-same-origin by name.
+        let mut attrs = Vec::new();
+        for (i, _) in DASHBOARD_SRC.match_indices(r#"sandbox=""#) {
+            let rest = &DASHBOARD_SRC[i + r#"sandbox=""#.len()..];
+            attrs.push(rest.split('"').next().unwrap_or_default());
+        }
+        assert!(!attrs.is_empty(), "MapFrame iframe lost its sandbox attribute");
+        for attr in attrs {
+            assert_eq!(
+                attr, "allow-scripts",
+                "sandbox {attr:?} regressed: allow-same-origin would give instruments the app origin (IPC globals, storage)"
+            );
+        }
+    }
+}
+
 fn main() {
     let ollama_client = OllamaState {
         client: reqwest::Client::builder()
