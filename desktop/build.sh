@@ -17,7 +17,7 @@
 # ─────────────────────────────────────────────────────────────────────────────
 set -e
 
-VERSION="0.2.0"
+VERSION="0.6.0-beta"
 APP="loci wizard"
 
 echo ""
@@ -40,7 +40,7 @@ case "${1:-}" in
     echo "  ╔══════════════════════════════════════════╗"
     echo "  ║  Windows target must run on Windows or   ║"
     echo "  ║  a GitHub Actions windows-latest runner. ║"
-    echo "  ║  See: .github/workflows/release.yml      ║"
+    echo "  ║  Run this script on a Windows runner.    ║"
     echo "  ╚══════════════════════════════════════════╝"
     npm run tauri:build -- --target x86_64-pc-windows-msvc
     echo ""
@@ -63,8 +63,8 @@ case "${1:-}" in
     find src-tauri/target -name "*.dmg" 2>/dev/null | head -3
     echo ""
     echo "  ─────────────────────────────────────────"
-    echo "  Gatekeeper note: notarization required"
-    echo "  for public distribution. See:"
+    echo "  This build is UNSIGNED. Notarization is required"
+    echo "  before public distribution. See:"
     echo "  https://tauri.app/distribute/sign/apple/"
     echo "  ─────────────────────────────────────────"
     ;;
