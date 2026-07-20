@@ -14,7 +14,7 @@ use serde::{Deserialize, Serialize};
 use std::ffi::OsString;
 use std::fs::{create_dir_all, OpenOptions};
 use std::io::Write;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 /// A local-first inference provider. One-shot completion plus a cheap probe.
 pub trait InferenceBackend {
@@ -183,14 +183,7 @@ impl InferenceBackend for OllamaBackend {
     }
 
     fn egress_class(&self) -> EgressClass {
-        // Local means loopback ONLY. A permitted non-loopback host (a Tailscale
-        // peer) physically leaves this machine, so it is LocalNetwork, not Local.
-        match self.base.host_str() {
-            Some("localhost") | Some("127.0.0.1") | Some("::1") | Some("[::1]") => {
-                EgressClass::Local
-            }
-            _ => EgressClass::LocalNetwork,
-        }
+        egress_class_for_host(self.base.host_str())
     }
 
     fn dest_host(&self) -> String {
@@ -301,6 +294,46 @@ pub fn egress_wal_path() -> PathBuf {
         .join("egress.jsonl")
 }
 
+/// Classify a host for egress: loopback = Local; any permitted non-loopback host
+/// (e.g. a Tailscale peer) leaves the machine, so it is LocalNetwork.
+pub fn egress_class_for_host(host: Option<&str>) -> EgressClass {
+    match host {
+        Some("localhost") | Some("127.0.0.1") | Some("::1") | Some("[::1]") => EgressClass::Local,
+        _ => EgressClass::LocalNetwork,
+    }
+}
+
+/// The single recording path for EVERY egress site (the decorator + any raw
+/// command). Honors the LOCI_WAL_DISABLED kill switch (stamps egress.disabled)
+/// and, on write failure, stamps egress.degraded — so a gap is never invisible.
+pub fn note_egress(wal_path: &Path, event_type: &str, egress_class: EgressClass, dest_host: &str, payload: &[u8]) {
+    if let Some(parent) = wal_path.parent() {
+        let _ = create_dir_all(parent);
+    }
+    if std::env::var_os("LOCI_WAL_DISABLED").is_some() {
+        let _ = std::fs::write(
+            wal_path.with_file_name("egress.disabled"),
+            chrono::Utc::now().to_rfc3339(),
+        );
+        return;
+    }
+    if let Err(e) = loci_wal::record_egress(
+        wal_path,
+        chrono::Utc::now().to_rfc3339(),
+        event_type,
+        egress_class,
+        dest_host,
+        payload,
+        None,
+    ) {
+        let _ = OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(wal_path.with_file_name("egress.degraded"))
+            .and_then(|mut f| writeln!(f, "{} {}", chrono::Utc::now().to_rfc3339(), e));
+    }
+}
+
 /// Decorator that records an egress frame on every `chat`, then delegates.
 /// Not built directly by call sites — obtain a backend via `ollama()` / `claude()`,
 /// the ONLY constructors, so no site can egress content without this chokepoint.
@@ -310,40 +343,18 @@ pub struct EgressLogged<B: InferenceBackend> {
 }
 
 impl<B: InferenceBackend> EgressLogged<B> {
-    pub fn new(inner: B, wal_path: PathBuf) -> Self {
+    pub(crate) fn new(inner: B, wal_path: PathBuf) -> Self {
         Self { inner, wal_path }
     }
 
     fn record(&self, prompt: &str) {
-        if let Some(parent) = self.wal_path.parent() {
-            let _ = create_dir_all(parent);
-        }
-        // Kill switch: LOCI_WAL_DISABLED turns the writer off without a rebuild —
-        // but it must NOT let the receipt read clean while logging is off. Stamp a
-        // marker `loci audit` warns on, so a disabled window is never invisible.
-        if std::env::var_os("LOCI_WAL_DISABLED").is_some() {
-            let marker = self.wal_path.with_file_name("egress.disabled");
-            let _ = std::fs::write(&marker, chrono::Utc::now().to_rfc3339());
-            return;
-        }
-        if let Err(e) = loci_wal::record_egress(
+        note_egress(
             &self.wal_path,
-            chrono::Utc::now().to_rfc3339(),
             "chat",
             self.inner.egress_class(),
             &self.inner.dest_host(),
             prompt.as_bytes(),
-            None,
-        ) {
-            // A dropped write leaves NO gap in the chain, so it is invisible to
-            // `loci audit`. Surface it: a degraded marker the audit reads + warns on.
-            let marker = self.wal_path.with_file_name("egress.degraded");
-            let _ = OpenOptions::new()
-                .create(true)
-                .append(true)
-                .open(&marker)
-                .and_then(|mut f| writeln!(f, "{} {}", chrono::Utc::now().to_rfc3339(), e));
-        }
+        );
     }
 }
 

@@ -256,6 +256,15 @@ async fn call_ollama(
     let base = validate_ollama_url(raw)?;
     let url = base.join("/v1/chat/completions").map_err(|e| e.to_string())?;
 
+    // Record the egress even on this raw path so it is never invisible to `loci audit`.
+    inference::note_egress(
+        &inference::egress_wal_path(),
+        "chat",
+        inference::egress_class_for_host(base.host_str()),
+        base.host_str().unwrap_or("localhost"),
+        prompt.as_bytes(),
+    );
+
     let body = OllamaChatRequest {
         model,
         messages: vec![OllamaChatMessage {
@@ -300,6 +309,15 @@ async fn embed_text(
     let raw = base_url.as_deref().unwrap_or("http://localhost:11434");
     let base = validate_ollama_url(raw)?;
     let url = base.join("/api/embeddings").map_err(|e| e.to_string())?;
+
+    // Embeddings leave the machine too — record the egress on this raw path.
+    inference::note_egress(
+        &inference::egress_wal_path(),
+        "embed",
+        inference::egress_class_for_host(base.host_str()),
+        base.host_str().unwrap_or("localhost"),
+        text.as_bytes(),
+    );
 
     let body = OllamaEmbedRequest {
         model: model.unwrap_or_else(|| "nomic-embed-text".to_string()),
