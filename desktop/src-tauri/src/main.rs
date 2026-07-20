@@ -178,10 +178,11 @@ fn validate_ollama_url(raw: &str) -> Result<url::Url, String> {
 
     let is_localhost = host == "localhost" || host == "127.0.0.1" || host == "[::1]" || host == "::1";
     let is_tailscale = host.starts_with("100.") && {
-        // Validate it's a real Tailscale CGNAT address (100.64.0.0/10)
+        // Validate it's a real Tailscale CGNAT address (100.64.0.0/10).
+        // The second octet is bounded 64..=127; 128+ is public IP space, not CGNAT.
         let parts: Vec<&str> = host.splitn(4, '.').collect();
         if parts.len() >= 2 {
-            parts[1].parse::<u8>().map(|n| n >= 64).unwrap_or(false)
+            parts[1].parse::<u8>().map(|n| (64..=127).contains(&n)).unwrap_or(false)
         } else {
             false
         }
@@ -3242,6 +3243,57 @@ mod csp_gate_tests {
                 "sandbox {attr:?} regressed: allow-same-origin would give instruments the app origin (IPC globals, storage)"
             );
         }
+    }
+}
+
+#[cfg(test)]
+mod url_validation_tests {
+    use super::*;
+
+    fn host_of(raw: &str) -> Option<String> {
+        validate_ollama_url(raw)
+            .ok()
+            .map(|u| u.host_str().unwrap_or("").to_string())
+    }
+
+    #[test]
+    fn accepts_loopback_and_cgnat_bounds() {
+        // Loopback forms.
+        assert!(validate_ollama_url("http://localhost:11434").is_ok());
+        assert!(validate_ollama_url("http://127.0.0.1:11434").is_ok());
+        assert!(validate_ollama_url("http://[::1]:11434").is_ok());
+        // Tailscale CGNAT (100.64.0.0/10) — both ends of the real range.
+        assert!(validate_ollama_url("http://100.64.0.1:11434").is_ok());
+        assert!(validate_ollama_url("http://100.127.255.255:11434").is_ok());
+        // HTTPS is accepted for permitted hosts (e.g. Tailscale HTTPS).
+        assert!(validate_ollama_url("https://100.64.0.1:11434").is_ok());
+    }
+
+    #[test]
+    fn rejects_public_space_above_cgnat() {
+        // 100.128.0.0–100.255.255.255 is public IP space, NOT CGNAT — must reject.
+        // This is the SSRF regression the bounded second-octet check closes.
+        assert!(validate_ollama_url("http://100.128.0.1:11434").is_err());
+        assert!(validate_ollama_url("http://100.200.5.5:11434").is_err());
+        assert!(validate_ollama_url("http://100.255.255.255:11434").is_err());
+        // Below the range too (100.0–100.63 is also public).
+        assert!(validate_ollama_url("http://100.0.0.1:11434").is_err());
+        assert!(validate_ollama_url("http://100.63.255.255:11434").is_err());
+    }
+
+    #[test]
+    fn rejects_arbitrary_and_bad_schemes() {
+        assert!(validate_ollama_url("http://example.com:11434").is_err());
+        assert!(validate_ollama_url("http://10.0.0.1:11434").is_err());
+        assert!(validate_ollama_url("http://192.168.1.10:11434").is_err());
+        assert!(validate_ollama_url("ftp://100.64.0.1:11434").is_err());
+        assert!(validate_ollama_url("file:///etc/hosts").is_err());
+    }
+
+    #[test]
+    fn permitted_cgnat_host_survives_round_trip() {
+        assert_eq!(host_of("http://100.64.0.1:11434").as_deref(), Some("100.64.0.1"));
+        assert_eq!(host_of("http://100.128.0.1:11434"), None);
     }
 }
 
