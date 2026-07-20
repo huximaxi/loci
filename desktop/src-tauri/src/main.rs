@@ -175,10 +175,11 @@ fn validate_ollama_url(raw: &str) -> Result<url::Url, String> {
 
     let is_localhost = host == "localhost" || host == "127.0.0.1" || host == "[::1]" || host == "::1";
     let is_tailscale = host.starts_with("100.") && {
-        // Validate it's a real Tailscale CGNAT address (100.64.0.0/10)
+        // Validate it's a real Tailscale CGNAT address (100.64.0.0/10).
+        // The second octet is bounded 64..=127; 128+ is public IP space, not CGNAT.
         let parts: Vec<&str> = host.splitn(4, '.').collect();
         if parts.len() >= 2 {
-            parts[1].parse::<u8>().map(|n| n >= 64).unwrap_or(false)
+            parts[1].parse::<u8>().map(|n| (64..=127).contains(&n)).unwrap_or(false)
         } else {
             false
         }
@@ -256,6 +257,15 @@ async fn call_ollama(
     let base = validate_ollama_url(raw)?;
     let url = base.join("/v1/chat/completions").map_err(|e| e.to_string())?;
 
+    // Record the egress even on this raw path so it is never invisible to `loci audit`.
+    inference::note_egress(
+        &inference::egress_wal_path(),
+        "chat",
+        inference::egress_class_for_host(base.host_str()),
+        base.host_str().unwrap_or("localhost"),
+        prompt.as_bytes(),
+    );
+
     let body = OllamaChatRequest {
         model,
         messages: vec![OllamaChatMessage {
@@ -300,6 +310,15 @@ async fn embed_text(
     let raw = base_url.as_deref().unwrap_or("http://localhost:11434");
     let base = validate_ollama_url(raw)?;
     let url = base.join("/api/embeddings").map_err(|e| e.to_string())?;
+
+    // Embeddings leave the machine too — record the egress on this raw path.
+    inference::note_egress(
+        &inference::egress_wal_path(),
+        "embed",
+        inference::egress_class_for_host(base.host_str()),
+        base.host_str().unwrap_or("localhost"),
+        text.as_bytes(),
+    );
 
     let body = OllamaEmbedRequest {
         model: model.unwrap_or_else(|| "nomic-embed-text".to_string()),
@@ -3104,6 +3123,57 @@ mod cockpit_tests {
         assert_eq!(tools.len(), 1);
         assert_eq!(tools[0].quarantine_state.as_deref(), Some("rejected"));
         let _ = fs::remove_dir_all(&root);
+    }
+}
+
+#[cfg(test)]
+mod url_validation_tests {
+    use super::*;
+
+    fn host_of(raw: &str) -> Option<String> {
+        validate_ollama_url(raw)
+            .ok()
+            .map(|u| u.host_str().unwrap_or("").to_string())
+    }
+
+    #[test]
+    fn accepts_loopback_and_cgnat_bounds() {
+        // Loopback forms.
+        assert!(validate_ollama_url("http://localhost:11434").is_ok());
+        assert!(validate_ollama_url("http://127.0.0.1:11434").is_ok());
+        assert!(validate_ollama_url("http://[::1]:11434").is_ok());
+        // Tailscale CGNAT (100.64.0.0/10) — both ends of the real range.
+        assert!(validate_ollama_url("http://100.64.0.1:11434").is_ok());
+        assert!(validate_ollama_url("http://100.127.255.255:11434").is_ok());
+        // HTTPS is accepted for permitted hosts (e.g. Tailscale HTTPS).
+        assert!(validate_ollama_url("https://100.64.0.1:11434").is_ok());
+    }
+
+    #[test]
+    fn rejects_public_space_above_cgnat() {
+        // 100.128.0.0–100.255.255.255 is public IP space, NOT CGNAT — must reject.
+        // This is the SSRF regression the bounded second-octet check closes.
+        assert!(validate_ollama_url("http://100.128.0.1:11434").is_err());
+        assert!(validate_ollama_url("http://100.200.5.5:11434").is_err());
+        assert!(validate_ollama_url("http://100.255.255.255:11434").is_err());
+        // Below the range too (100.0–100.63 is also public).
+        assert!(validate_ollama_url("http://100.0.0.1:11434").is_err());
+        assert!(validate_ollama_url("http://100.63.255.255:11434").is_err());
+    }
+
+    #[test]
+    fn rejects_arbitrary_and_bad_schemes() {
+        assert!(validate_ollama_url("http://example.com:11434").is_err());
+        assert!(validate_ollama_url("http://10.0.0.1:11434").is_err());
+        assert!(validate_ollama_url("http://192.168.1.10:11434").is_err());
+        assert!(validate_ollama_url("ftp://100.64.0.1:11434").is_err());
+        assert!(validate_ollama_url("file:///etc/hosts").is_err());
+    }
+
+    #[test]
+    fn permitted_cgnat_host_survives_round_trip() {
+        assert_eq!(host_of("http://100.64.0.1:11434").as_deref(), Some("100.64.0.1"));
+        assert_eq!(host_of("http://100.128.0.1:11434"), None);
     }
 }
 
