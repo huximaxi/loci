@@ -315,12 +315,16 @@ impl<B: InferenceBackend> EgressLogged<B> {
     }
 
     fn record(&self, prompt: &str) {
-        // Kill switch: LOCI_WAL_DISABLED turns the writer off without a rebuild.
-        if std::env::var_os("LOCI_WAL_DISABLED").is_some() {
-            return;
-        }
         if let Some(parent) = self.wal_path.parent() {
             let _ = create_dir_all(parent);
+        }
+        // Kill switch: LOCI_WAL_DISABLED turns the writer off without a rebuild —
+        // but it must NOT let the receipt read clean while logging is off. Stamp a
+        // marker `loci audit` warns on, so a disabled window is never invisible.
+        if std::env::var_os("LOCI_WAL_DISABLED").is_some() {
+            let marker = self.wal_path.with_file_name("egress.disabled");
+            let _ = std::fs::write(&marker, chrono::Utc::now().to_rfc3339());
+            return;
         }
         if let Err(e) = loci_wal::record_egress(
             &self.wal_path,

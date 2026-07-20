@@ -342,6 +342,8 @@ struct AuditOut {
     chain_break_seq: Option<u64>,
     since: Option<String>,
     degraded: usize,
+    degraded_latest: Option<String>,
+    disabled_at: Option<String>,
     classes: Vec<AuditClassOut>,
 }
 
@@ -380,11 +382,28 @@ fn cmd_audit(wal_arg: Option<PathBuf>, since: Option<String>, json: bool) -> Res
             )));
         }
     }
-    // A degraded marker means the writer failed to record ≥1 egress: the log may
-    // be INCOMPLETE (a dropped write leaves no chain gap, so it is otherwise invisible).
-    let degraded = std::fs::read_to_string(path.with_file_name("egress.degraded"))
-        .map(|s| s.lines().filter(|l| !l.trim().is_empty()).count())
-        .unwrap_or(0);
+    // Incompleteness signals, scoped by --since (both markers carry RFC3339 stamps):
+    //   egress.degraded — one line per failed write (a dropped write leaves no chain gap)
+    //   egress.disabled — last time LOCI_WAL_DISABLED suppressed the writer entirely
+    let degraded_content =
+        std::fs::read_to_string(path.with_file_name("egress.degraded")).unwrap_or_default();
+    let degraded_lines: Vec<&str> = degraded_content
+        .lines()
+        .filter(|l| !l.trim().is_empty())
+        .filter(|l| {
+            let ts = l.split_whitespace().next().unwrap_or("");
+            since.as_deref().map_or(true, |s| ts >= s)
+        })
+        .collect();
+    let degraded = degraded_lines.len();
+    let degraded_latest = degraded_lines
+        .last()
+        .and_then(|l| l.split_whitespace().next())
+        .map(|s| s.to_string());
+    let disabled_at = std::fs::read_to_string(path.with_file_name("egress.disabled"))
+        .ok()
+        .map(|s| s.trim().to_string())
+        .filter(|t| !t.is_empty() && since.as_deref().map_or(true, |s| t.as_str() >= s));
     let all = Wal::open(&path).read()?;
     let (chain_ok, break_seq) = match Wal::verify_full(&all) {
         Ok(()) => (true, None),
@@ -422,6 +441,8 @@ fn cmd_audit(wal_arg: Option<PathBuf>, since: Option<String>, json: bool) -> Res
             chain_break_seq: break_seq,
             since,
             degraded,
+            degraded_latest,
+            disabled_at,
             classes,
         };
         println!("{}", serde_json::to_string_pretty(&out)?);
@@ -429,9 +450,15 @@ fn cmd_audit(wal_arg: Option<PathBuf>, since: Option<String>, json: bool) -> Res
     }
 
     println!("egress receipt : {}", path.display());
+    if let Some(ref t) = disabled_at {
+        println!(
+            "⚠ WARNING      : egress logging was DISABLED (LOCI_WAL_DISABLED) as of {t} — receipt is INCOMPLETE"
+        );
+    }
     if degraded > 0 {
         println!(
-            "⚠ WARNING      : {degraded} egress record(s) failed to write — this receipt may be INCOMPLETE"
+            "⚠ WARNING      : {degraded} egress record(s) failed to write (latest {}) — receipt may be INCOMPLETE",
+            degraded_latest.as_deref().unwrap_or("?")
         );
     }
     if all.is_empty() {
