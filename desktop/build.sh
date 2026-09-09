@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 # loci wizard — build script
-# v0.2.0
 # ─────────────────────────────────────────────────────────────────────────────
 # Usage:
 #   ./build.sh              — macOS universal .dmg (arm64 + x86_64)
@@ -9,11 +8,11 @@
 #
 # Output (macOS):
 #   src-tauri/target/universal-apple-darwin/release/bundle/dmg/
-#     loci wizard_0.2.0_universal.dmg
+#     loci wizard_${VERSION}_universal.dmg
 #
 # Output (Windows, run on Windows or CI):
 #   src-tauri/target/release/bundle/nsis/
-#     loci wizard_0.2.0_x64-setup.exe
+#     loci wizard_${VERSION}_x64-setup.exe
 # ─────────────────────────────────────────────────────────────────────────────
 set -e
 
@@ -46,6 +45,12 @@ case "${1:-}" in
     echo ""
     echo "  ✦ Windows installer:"
     find src-tauri/target -name "*.exe" -path "*/nsis/*" 2>/dev/null || echo "  (run on Windows to generate)"
+    echo ""
+    echo "  ─────────────────────────────────────────"
+    echo "  This build is UNSIGNED. Authenticode signing is"
+    echo "  required before public distribution. See:"
+    echo "  https://tauri.app/distribute/sign/windows/"
+    echo "  ─────────────────────────────────────────"
     ;;
 
   *)
