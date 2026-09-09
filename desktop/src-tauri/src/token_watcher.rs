@@ -216,6 +216,54 @@ fn data_dirs() -> Vec<PathBuf> {
     v
 }
 
+/// Above this, a single line is drained and discarded rather than buffered:
+/// an adversarial file with one very long "line" (or none at all) must not
+/// force an unbounded allocation before the `"usage"` filter below runs.
+const MAX_LINE_BYTES: usize = 8 * 1024 * 1024;
+
+/// Scan a file line-by-line, invoking `on_line` for each line up to
+/// `MAX_LINE_BYTES`. Bounds memory at the line level, not just the file
+/// level: `BufRead::lines()` still buffers one arbitrarily long line in
+/// full before yielding it, which `read_to_string` avoids for the whole
+/// file but not for one hostile unterminated line within it.
+fn for_each_bounded_line(f: impl std::io::Read, mut on_line: impl FnMut(&str)) {
+    let mut reader = std::io::BufReader::new(f);
+    let mut buf: Vec<u8> = Vec::new();
+    let mut overflowed = false;
+    loop {
+        let chunk = match reader.fill_buf() {
+            Ok(c) => c,
+            Err(_) => break,
+        };
+        if chunk.is_empty() {
+            if !buf.is_empty() && !overflowed {
+                on_line(&String::from_utf8_lossy(&buf));
+            }
+            break;
+        }
+        match chunk.iter().position(|&b| b == b'\n') {
+            Some(pos) => {
+                if !overflowed && buf.len() + pos <= MAX_LINE_BYTES {
+                    buf.extend_from_slice(&chunk[..pos]);
+                    on_line(&String::from_utf8_lossy(&buf));
+                }
+                reader.consume(pos + 1);
+                buf.clear();
+                overflowed = false;
+            }
+            None => {
+                if !overflowed && buf.len() + chunk.len() <= MAX_LINE_BYTES {
+                    buf.extend_from_slice(chunk);
+                } else {
+                    overflowed = true;
+                }
+                let n = chunk.len();
+                reader.consume(n);
+            }
+        }
+    }
+}
+
 fn scan_entries(now: u64) -> Vec<(u64, WindowTokens)> {
     let horizon = now.saturating_sub(SCAN_HORIZON_SECS);
     let mut entries = Vec::new();
@@ -226,8 +274,15 @@ fn scan_entries(now: u64) -> Vec<(u64, WindowTokens)> {
         while let Some(dir) = stack.pop() {
             let Ok(rd) = std::fs::read_dir(&dir) else { continue };
             for e in rd.filter_map(|e| e.ok()) {
+                let Ok(ft) = e.file_type() else { continue };
+                if ft.is_symlink() {
+                    // Never traverse through a symlink: an attacker who can write
+                    // into the scanned tree could otherwise point one anywhere on
+                    // disk and have it read here as if it were a transcript.
+                    continue;
+                }
                 let p = e.path();
-                if p.is_dir() {
+                if ft.is_dir() {
                     stack.push(p);
                     continue;
                 }
@@ -244,29 +299,26 @@ fn scan_entries(now: u64) -> Vec<(u64, WindowTokens)> {
                 if !fresh_enough {
                     continue;
                 }
-                // Stream line-by-line: transcripts can run to hundreds of MB,
-                // and read_to_string would hold a whole file in memory per scan.
                 let Ok(f) = std::fs::File::open(&p) else { continue };
-                for line in std::io::BufReader::new(f).lines() {
-                    let Ok(line) = line else { break };
+                for_each_bounded_line(f, |line| {
                     if !line.contains("\"usage\"") {
-                        continue;
+                        return;
                     }
-                    let Ok(v) = serde_json::from_str::<serde_json::Value>(&line) else { continue };
-                    let Some(ts) = v.get("timestamp").and_then(|t| t.as_str()) else { continue };
-                    let Ok(dt) = chrono::DateTime::parse_from_rfc3339(ts) else { continue };
+                    let Ok(v) = serde_json::from_str::<serde_json::Value>(line) else { return };
+                    let Some(ts) = v.get("timestamp").and_then(|t| t.as_str()) else { return };
+                    let Ok(dt) = chrono::DateTime::parse_from_rfc3339(ts) else { return };
                     let t = dt.timestamp().max(0) as u64;
                     if t < horizon {
-                        continue;
+                        return;
                     }
-                    let Some(usage) = v.pointer("/message/usage") else { continue };
+                    let Some(usage) = v.pointer("/message/usage") else { return };
                     let key = format!(
                         "{}:{}",
                         v.pointer("/message/id").and_then(|x| x.as_str()).unwrap_or(""),
                         v.get("requestId").and_then(|x| x.as_str()).unwrap_or("")
                     );
                     if key != ":" && !seen.insert(key) {
-                        continue;
+                        return;
                     }
                     let g = |k: &str| usage.get(k).and_then(|x| x.as_u64()).unwrap_or(0);
                     entries.push((
@@ -282,9 +334,49 @@ fn scan_entries(now: u64) -> Vec<(u64, WindowTokens)> {
                                 + g("cache_read_input_tokens"),
                         },
                     ));
-                }
+                });
             }
         }
     }
     entries
+}
+
+#[cfg(test)]
+mod bounded_line_tests {
+    use super::*;
+
+    fn scan(content: &[u8]) -> Vec<String> {
+        let mut out = Vec::new();
+        for_each_bounded_line(std::io::Cursor::new(content.to_vec()), |l| out.push(l.to_string()));
+        out
+    }
+
+    #[test]
+    fn normal_lines_pass_through() {
+        assert_eq!(scan(b"a\nbb\nccc\n"), vec!["a", "bb", "ccc"]);
+    }
+
+    #[test]
+    fn trailing_line_without_newline_is_yielded() {
+        assert_eq!(scan(b"a\nb"), vec!["a", "b"]);
+    }
+
+    #[test]
+    fn empty_file_yields_nothing() {
+        assert!(scan(b"").is_empty());
+    }
+
+    #[test]
+    fn oversized_line_is_dropped_not_buffered() {
+        let mut content = vec![b'x'; MAX_LINE_BYTES + 1024];
+        content.push(b'\n');
+        content.extend_from_slice(b"next\n");
+        assert_eq!(scan(&content), vec!["next"]);
+    }
+
+    #[test]
+    fn oversized_line_at_eof_is_dropped() {
+        let content = vec![b'x'; MAX_LINE_BYTES + 1024];
+        assert!(scan(&content).is_empty());
+    }
 }
