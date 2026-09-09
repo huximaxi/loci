@@ -269,7 +269,7 @@ mod tests {
     fn palace_subdir_layout() {
         let root = scratch("subdir");
         fs::write(root.join("PALACE.md"), "# palace\n").unwrap();
-        room(&root.join("_palace"), "great-hall");
+        room(&root.join("_palace"), "ideas-room");
         let p = validate(&root).expect("palace detected");
         assert!(matches!(p.layout, Layout::PalaceSubdir));
         assert_eq!(p.scan_root, root.join("_palace"));
@@ -300,8 +300,8 @@ mod tests {
     fn rooms_at_root_layout() {
         let root = scratch("atroot");
         fs::write(root.join("CLAUDE.md"), "# master\n").unwrap();
-        room(&root, "engine-room");
-        room(&root, "observatory");
+        room(&root, "creative-room");
+        room(&root, "research-room");
         let p = validate(&root).expect("palace detected");
         assert!(matches!(p.layout, Layout::RoomsAtRoot));
         assert_eq!(p.scan_root, root);
