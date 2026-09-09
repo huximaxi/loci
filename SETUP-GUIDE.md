@@ -52,7 +52,7 @@ templates/
 
 Start with `CLAUDE-master.md`. It's the most important file and takes 10–15 minutes.
 
-**What to ignore on day one.** The `templates/` folder holds more than these five: guides for crystals, the garden, retrieval, scheduled tasks, and two optional shelves, `personas/` (filled example personas) and `skills/` (portable disciplines). None of it is required. Start with the five above; the rest is there when you want it.
+**What to ignore on day one.** The `templates/` folder holds more than these five, including guides for crystals, the garden, retrieval, and scheduled tasks, plus two optional shelves, `personas/` (filled example personas) and `skills/` (portable disciplines), and more besides. None of it is required. Start with the five above; the rest is there when you want it.
 
 ---
 
