@@ -278,7 +278,10 @@ Once the interview is done, create the following structure. Ask the user where t
     [etc.]
   souls/                 ← additional personas (if created)
   friends/               ← soul files from friends (via add-friend process)
+  _templates/            ← a copy of this repo's templates/ folder
 ```
+
+Also copy `templates/` into the palace as `_templates/`. The master `CLAUDE.md` points at `_templates/persona-template.md`, `_templates/retrieval-hierarchy.md`, and `_templates/scheduled-task-template.md`; without the copy those pointers do not resolve. This matches the structure in `SETUP-GUIDE.md`.
 
 **Fill in every placeholder** using interview answers. No `[PLACEHOLDER]` should remain in output files.
 
@@ -373,9 +376,13 @@ You are [AI_NAME]. [Character note.]
 
 [2–3 highest-priority persistent crystals from the interview]
 
+Palace: [absolute path to this palace]
+
 Palace context is loaded separately from the workspace CLAUDE.md.
 → Read that file for current focus, rooms, and active projects.
 ```
+
+The `Palace:` line is the one place the palace's location is written down. Tools and shared rituals may read it to find the palace, so keep it an absolute path and update it if the folder moves. For shells and the `loci` CLI, the equivalent is the `LOCI_PALACE` environment variable (the CLI checks `--palace`, then `LOCI_PALACE`, then walks up from the current directory).
 
 Note in their palace `CLAUDE.md` under crystals: `◆ Global identity: ~/.claude/CLAUDE.md, identity layer loaded separately in Claude Code sessions.`
 

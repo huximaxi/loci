@@ -31,6 +31,8 @@ See `SETUP-GUIDE.md` for the full walkthrough, or `AGENT-SETUP.md` to have Claud
 
 That's it. Claude will read the files, introduce itself in character, and ask you where things were left off.
 
+**In Claude Code**, open a terminal in your palace folder and run `claude`. Your `CLAUDE.md` is read automatically, so there is nothing to paste. Say the wake-up line: *"Wake up [YOUR_AI_NAME]. We're in [ROOM NAME] today."*
+
 If it's session 1 and there's no history, just say: *"First session, no prior state."* Then tell it what you want to work on.
 
 ---

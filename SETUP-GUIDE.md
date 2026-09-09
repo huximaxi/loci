@@ -52,6 +52,8 @@ templates/
 
 Start with `CLAUDE-master.md`. It's the most important file and takes 10–15 minutes.
 
+**What to ignore on day one.** The `templates/` folder holds more than these five: guides for crystals, the garden, retrieval, scheduled tasks, and two optional shelves, `personas/` (filled example personas) and `skills/` (portable disciplines). None of it is required. Start with the five above; the rest is there when you want it.
+
 ---
 
 ## Step 2: Fill in CLAUDE-master.md
@@ -112,7 +114,7 @@ At the end of a session, ask Claude to write a handover:
 
 > "Write the session delta."
 
-Claude will save a `handover/YYYY-MM-DD.md` with what was done, decisions made, and the exact first move for next time.
+Claude will save a `soul/handovers/YYYY-MM-DD.md` with what was done, decisions made, and the exact first move for next time.
 
 ---
 
@@ -160,7 +162,7 @@ That's it. You're running.
 
 If you set up automated runs (morning check-ins, autodreams, etc.), two things matter:
 
-**Dynamic paths.** Session IDs change on every run, so hardcoded paths break immediately. Your scheduled task prompts should locate palace files dynamically using something like `find /sessions -maxdepth 4 -name "CLAUDE.md" -path "*/my-palace/*"` rather than embedding a specific session path.
+**Dynamic paths.** Session IDs change on every run, so hardcoded paths break immediately. Your scheduled task prompts should locate palace files relative to the palace root rather than embedding a specific session or machine path: for example `find "$PALACE_ROOT" -maxdepth 3 -name "CLAUDE.md"`, where the root is the one place you name once (the `Palace:` line in your identity block, or the `LOCI_PALACE` environment variable if you use the CLI).
 
 **SOUL.md first.** Your AI's SOUL.md must be included in every scheduled task prompt: it is what makes the output feel like your collaborator rather than a generic assistant. Read it before any state files.
 
@@ -185,6 +187,8 @@ my-palace/
       CLAUDE.md                ← ideas room context
   _templates/                  ← the templates folder (keep for reference)
 ```
+
+**If your agent set you up** (via `AGENT-SETUP.md`), you also have `soul/garden.md` (the garden, seeded from the interview), and possibly `souls/` (extra personas), `friends/` (soul files from friends), and `palace-map.canvas` (an Obsidian mindmap). Same palace, a few more shelves; nothing above changes.
 
 ---
 

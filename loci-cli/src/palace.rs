@@ -1,8 +1,13 @@
 //! Palace detection + read primitives for the CLI.
 //!
-//! Mirrors the desktop's dual-layout acceptance:
+//! Accepts three layouts:
 //!   * legacy:        PALACE.md/CLAUDE.md at root + `_palace/` subdir holding rooms.
+//!   * rooms-dir:     PALACE.md/CLAUDE.md at root + `rooms/` subdir holding rooms
+//!                    (the shape the templates kit and the setup guides build).
 //!   * rooms-at-root: PALACE.md/CLAUDE.md at root + sibling dirs each holding CLAUDE.md.
+//!
+//! The first two mirror the desktop's dual-layout acceptance; `rooms/` is checked
+//! before rooms-at-root because an explicit rooms directory is the stronger signal.
 //!
 //! Re-expressed for the CLI in stdlib + std::fs. No shared crate with the desktop:
 //! the public CLI is a separate door into the same shape.
@@ -14,6 +19,7 @@ const SKIP_DIRS: &[&str] = &["_palace", "node_modules", "target", "cron"];
 
 pub enum Layout {
     PalaceSubdir,
+    RoomsDir,
     RoomsAtRoot,
 }
 
@@ -65,7 +71,15 @@ pub fn validate(root: &Path) -> Option<Palace> {
             layout: Layout::PalaceSubdir,
         });
     }
-    if has_room_at_root(root) {
+    let rooms_dir = root.join("rooms");
+    if rooms_dir.is_dir() && has_room_in(&rooms_dir) {
+        return Some(Palace {
+            root: root.to_path_buf(),
+            scan_root: rooms_dir,
+            layout: Layout::RoomsDir,
+        });
+    }
+    if has_room_in(root) {
         return Some(Palace {
             root: root.to_path_buf(),
             scan_root: root.to_path_buf(),
@@ -75,8 +89,9 @@ pub fn validate(root: &Path) -> Option<Palace> {
     None
 }
 
-fn has_room_at_root(root: &Path) -> bool {
-    let Ok(entries) = fs::read_dir(root) else {
+/// True when `dir` holds at least one non-skipped subdirectory with a CLAUDE.md.
+fn has_room_in(dir: &Path) -> bool {
+    let Ok(entries) = fs::read_dir(dir) else {
         return false;
     };
     for entry in entries.filter_map(|e| e.ok()) {
@@ -229,4 +244,85 @@ pub fn latest_handover(p: &Palace) -> Option<PathBuf> {
         }
     }
     best.map(|(_, p)| p)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Fresh scratch dir per test, keyed by name + pid so parallel tests never collide.
+    fn scratch(name: &str) -> PathBuf {
+        let p = std::env::temp_dir().join(format!("loci_cli_palace_{}_{}", name, std::process::id()));
+        let _ = fs::remove_dir_all(&p);
+        fs::create_dir_all(&p).unwrap();
+        p
+    }
+
+    fn room(dir: &Path, name: &str) {
+        let r = dir.join(name);
+        fs::create_dir_all(&r).unwrap();
+        fs::write(r.join("CLAUDE.md"), "# room\n").unwrap();
+        fs::write(r.join("note.md"), "crystal\n").unwrap();
+    }
+
+    #[test]
+    fn palace_subdir_layout() {
+        let root = scratch("subdir");
+        fs::write(root.join("PALACE.md"), "# palace\n").unwrap();
+        room(&root.join("_palace"), "great-hall");
+        let p = validate(&root).expect("palace detected");
+        assert!(matches!(p.layout, Layout::PalaceSubdir));
+        assert_eq!(p.scan_root, root.join("_palace"));
+        assert_eq!(list_rooms(&p).len(), 1);
+        let _ = fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn rooms_dir_layout_as_built_by_the_kit() {
+        let root = scratch("roomsdir");
+        fs::write(root.join("CLAUDE.md"), "# master\n").unwrap();
+        fs::create_dir_all(root.join("soul")).unwrap();
+        fs::write(root.join("soul").join("SOUL.md"), "# soul\n").unwrap();
+        fs::create_dir_all(root.join("_templates")).unwrap();
+        fs::write(root.join("_templates").join("CLAUDE-master.md"), "# tpl\n").unwrap();
+        room(&root.join("rooms"), "work-room");
+        room(&root.join("rooms"), "writing-room");
+        let p = validate(&root).expect("kit palace detected");
+        assert!(matches!(p.layout, Layout::RoomsDir));
+        assert_eq!(p.scan_root, root.join("rooms"));
+        let names: Vec<String> = list_rooms(&p).into_iter().map(|r| r.name).collect();
+        assert_eq!(names, vec!["work-room", "writing-room"]);
+        assert_eq!(find_crystal(&p, "note", Some("work-room")).len(), 1);
+        let _ = fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn rooms_at_root_layout() {
+        let root = scratch("atroot");
+        fs::write(root.join("CLAUDE.md"), "# master\n").unwrap();
+        room(&root, "engine-room");
+        room(&root, "observatory");
+        let p = validate(&root).expect("palace detected");
+        assert!(matches!(p.layout, Layout::RoomsAtRoot));
+        assert_eq!(p.scan_root, root);
+        assert_eq!(list_rooms(&p).len(), 2);
+        let _ = fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn empty_rooms_dir_is_not_a_palace() {
+        let root = scratch("emptyrooms");
+        fs::write(root.join("CLAUDE.md"), "# master\n").unwrap();
+        fs::create_dir_all(root.join("rooms")).unwrap();
+        assert!(validate(&root).is_none());
+        let _ = fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn no_marker_file_is_not_a_palace() {
+        let root = scratch("nomarker");
+        room(&root.join("rooms"), "work-room");
+        assert!(validate(&root).is_none());
+        let _ = fs::remove_dir_all(&root);
+    }
 }
