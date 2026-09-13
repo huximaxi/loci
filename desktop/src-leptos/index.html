@@ -251,10 +251,10 @@
         .kpi-delta.up { color: #4a8b54; }
         .kpi-delta.down { color: var(--scholar-warn); }
 
-        .cron-section, .handovers-section, .questlog-section, .manifest-section {
+        .cron-section, .handovers-section, .questlog-section, .manifest-section, .rain-card {
             margin-top: 14px;
         }
-        .cron-section h3, .handovers-section h3, .questlog-section h3, .manifest-section h3 {
+        .cron-section h3, .handovers-section h3, .questlog-section h3, .manifest-section h3, .rain-card h3 {
             font-family: var(--font-serif);
             font-weight: 400;
             font-size: 14px;
@@ -263,6 +263,22 @@
             border-bottom: 1px solid var(--scholar-border);
             padding-bottom: 4px;
         }
+        .rain-card .rain-line { margin: 4px 0; font-size: 12px; }
+        .rain-card .rain-label {
+            font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em;
+            color: var(--scholar-muted); margin-right: 6px;
+        }
+        .rain-card .rain-hint { margin: 4px 0; font-size: 12px; color: var(--scholar-green); }
+        .rain-actions { display: flex; gap: 8px; margin: 8px 0 2px 0; }
+        .rain-fire, .rain-refresh {
+            font-size: 11px; padding: 4px 12px; border-radius: 5px; cursor: pointer;
+            border: 1px solid var(--scholar-border-strong);
+            background: rgba(31, 42, 35, 0.03); color: var(--scholar-ink);
+        }
+        .rain-fire { border-color: var(--scholar-green); color: var(--scholar-green); }
+        .rain-fire:disabled { opacity: 0.5; cursor: default; }
+        .rain-fired { margin: 4px 0; font-size: 12px; color: var(--scholar-green); }
+        .rain-note { font-size: 11px; margin: 4px 0 0 0; }
         .cron-table {
             width: 100%;
             font-size: 11px;

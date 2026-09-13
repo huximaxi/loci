@@ -51,6 +51,44 @@ struct MapHtmlArg<'a> {
     file: &'a str,
 }
 
+#[derive(Serialize)]
+struct EmptyArg {}
+
+// Rain gauge mirrors of src-tauri/src/token_watcher.rs (snake_case, no rename).
+#[derive(Serialize, Deserialize, Clone, Default)]
+struct RainWindowTokens {
+    #[allow(dead_code)]
+    input: u64,
+    #[allow(dead_code)]
+    output: u64,
+    #[allow(dead_code)]
+    cache_creation: u64,
+    #[allow(dead_code)]
+    cache_read: u64,
+    total: u64,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+struct RainWindowStatus {
+    state: String,
+    signal: String,
+    #[allow(dead_code)]
+    window_start_utc: Option<String>,
+    window_reset_utc: Option<String>,
+    minutes_remaining: Option<u64>,
+    tokens: RainWindowTokens,
+    #[allow(dead_code)]
+    messages: usize,
+    note: String,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+struct RainGardenStatus {
+    plants: usize,
+    last_rain: Option<String>,
+    last_rain_waterings: Option<usize>,
+}
+
 #[component]
 pub fn Dashboard() -> impl IntoView {
     let active = expect_context::<RwSignal<ActivePalace>>();
@@ -171,6 +209,28 @@ pub fn Dashboard() -> impl IntoView {
             }
         },
     );
+    // Rain gauge: token-window weather + garden rain state. Its own tick so
+    // "refresh" can refetch without disturbing the other reads.
+    let rain_tick = create_rw_signal(0u32);
+    let rain_res = create_resource(
+        move || (active.get().path.clone(), rain_tick.get()),
+        |(path_opt, _tick)| async move {
+            let window = invoke::<_, RainWindowStatus>("read_token_window", &EmptyArg {})
+                .await
+                .ok();
+            let garden = match path_opt {
+                Some(path) => invoke::<_, RainGardenStatus>(
+                    "read_rain_status",
+                    &PathArg { palace_path: &path },
+                )
+                .await
+                .ok(),
+                None => None,
+            };
+            (window, garden)
+        },
+    );
+
     // Which cockpit view is showing: "ops" (native dashboard) or a map key.
     // Ops content is hidden with display:none rather than unmounted, so its
     // sections, watcher, and detail pane keep their state across tab flips.
@@ -339,11 +399,124 @@ pub fn Dashboard() -> impl IntoView {
                 None => boot_box("tool shelf").into_view(),
                 Some(t) => view! { <ToolShelfSection tools=t /> }.into_view(),
             }}
+            {move || match rain_res.get() {
+                None => boot_box("rain gauge").into_view(),
+                Some((w, g)) => view! {
+                    <RainCard window=w garden=g active=active rain_tick=rain_tick />
+                }.into_view(),
+            }}
             </div>
 
             <DetailPane selected=selected active=active />
             <CiqModal ciq_open=ciq_open active=active />
         </main>
+    }
+}
+
+fn fmt_tok(n: u64) -> String {
+    if n >= 1_000_000 {
+        format!("{:.1}M", n as f64 / 1e6)
+    } else if n >= 1_000 {
+        format!("{:.0}k", n as f64 / 1e3)
+    } else {
+        n.to_string()
+    }
+}
+
+/// Rain gauge: 5h token-window weather + garden rain state + the hand-off
+/// button. The button is the human nod; rain never auto-fires.
+#[component]
+fn RainCard(
+    window: Option<RainWindowStatus>,
+    garden: Option<RainGardenStatus>,
+    active: RwSignal<ActivePalace>,
+    rain_tick: RwSignal<u32>,
+) -> impl IntoView {
+    let fired = create_rw_signal::<Option<String>>(None);
+    let firing = create_rw_signal(false);
+
+    let signal = window
+        .as_ref()
+        .map(|w| w.signal.clone())
+        .unwrap_or_else(|| "unknown".to_string());
+    let glyph = match signal.as_str() {
+        "fresh" => "☔",
+        "open" => "🌦",
+        "closing" => "⏳",
+        _ => "🌫",
+    };
+    let weather = match &window {
+        Some(w) => match (&w.window_reset_utc, w.minutes_remaining) {
+            (Some(reset), Some(min)) => format!(
+                "{} · {}m left (resets {}) · {} spent",
+                w.state,
+                min,
+                reset,
+                fmt_tok(w.tokens.total)
+            ),
+            _ => format!("{} · {}", w.state, w.note),
+        },
+        None => "window watcher unavailable".to_string(),
+    };
+    let garden_line = match &garden {
+        Some(g) => {
+            let last = match (&g.last_rain, g.last_rain_waterings) {
+                (Some(d), Some(n)) => format!("last rain {d} ({n} waterings)"),
+                (Some(d), None) => format!("last rain {d}"),
+                _ => "no rain on record".to_string(),
+            };
+            format!("{} plants · {last}", g.plants)
+        }
+        None => "no garden found in this palace".to_string(),
+    };
+    let hint = match signal.as_str() {
+        "fresh" => Some("window is fresh: full headroom. Good weather for rain."),
+        "closing" => Some("window closes soon: spare capacity expires with it."),
+        _ => None,
+    };
+    let note = window.as_ref().map(|w| w.note.clone());
+    let can_fire = garden.is_some();
+
+    let on_fire = move |_| {
+        if firing.get() {
+            return;
+        }
+        firing.set(true);
+        fired.set(None);
+        let path = active.get().path;
+        spawn_local(async move {
+            let msg = match path {
+                Some(p) => invoke::<_, String>("fire_rain", &PathArg { palace_path: &p })
+                    .await
+                    .unwrap_or_else(|e| format!("could not fire: {e}")),
+                None => "no palace loaded".to_string(),
+            };
+            fired.set(Some(msg));
+            firing.set(false);
+        });
+    };
+
+    view! {
+        <section class="rain-card">
+            <h3>{glyph}" rain · garden watering"</h3>
+            <p class="rain-line"><span class="rain-label">"weather "</span>{weather}</p>
+            <p class="rain-line"><span class="rain-label">"garden "</span>{garden_line}</p>
+            {hint.map(|h| view! { <p class="rain-hint">{h}</p> })}
+            <div class="rain-actions">
+                <button
+                    class="rain-fire"
+                    disabled=move || firing.get() || !can_fire
+                    on:click=on_fire
+                >
+                    {move || if firing.get() { "firing…" } else { "make it rain" }}
+                </button>
+                <button class="rain-refresh" on:click=move |_| rain_tick.update(|n| *n += 1)>
+                    "refresh"
+                </button>
+            </div>
+            {move || fired.get().map(|m| view! { <p class="rain-fired">{m}</p> })}
+            {note.map(|n| view! { <p class="muted rain-note">{n}</p> })}
+        </section>
     }
 }
 
