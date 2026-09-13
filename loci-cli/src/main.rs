@@ -5,7 +5,7 @@
 //! The one hand-off: `rain --fire` execs your agent runtime and exits; the CLI
 //! itself still does no inference.
 
-use clap::{Parser, Subcommand};
+use clap::{CommandFactory, Parser, Subcommand};
 use serde::Serialize;
 use std::io::{IsTerminal, Read, Write};
 use std::path::{Path, PathBuf};
@@ -85,6 +85,9 @@ enum Cmd {
         #[command(subcommand)]
         cmd: WalCmd,
     },
+    /// Overview of every command, grouped, with examples and the three doors.
+    #[command(alias = "commands")]
+    Overview,
 }
 
 #[derive(Subcommand)]
@@ -129,7 +132,190 @@ fn run(cli: Cli) -> Result<(), Error> {
                 cmd_wal_verify(&bundle, expect_key.as_deref(), cli.json)
             }
         },
+        Cmd::Overview => cmd_overview(cli.palace, cli.json),
     }
+}
+
+// ── overview ─────────────────────────────────────────────────────────────
+
+/// Curated grouping of the commands. Descriptions are deliberately NOT stored
+/// here: they are read live from clap's `about` (the doc comment on each `Cmd`
+/// variant), so this table only decides ordering, sectioning, and one example
+/// per command. A unit test asserts every clap subcommand appears here exactly
+/// once, so a new command cannot silently drop out of the overview.
+const OVERVIEW_GROUPS: &[(&str, &[(&str, &str)])] = &[
+    (
+        "Read the palace",
+        &[
+            ("status", "loci status"),
+            ("crystals", "loci crystals --room soul"),
+            ("read", "loci read <slug>"),
+            ("handover", "loci handover"),
+        ],
+    ),
+    (
+        "Garden & session",
+        &[
+            ("tokens", "loci tokens"),
+            ("rain", "loci rain            (add --fire to hand off a round)"),
+        ],
+    ),
+    (
+        "Egress & proof",
+        &[
+            ("audit", "loci audit --since 2026-01-01"),
+            ("wal", "loci wal verify <bundle.json>"),
+        ],
+    ),
+    ("Setup", &[("init", "loci init")]),
+    ("Meta", &[("overview", "loci overview")]),
+];
+
+/// The three ways into a palace. Named in the CLI's own `long_about`; restated
+/// here so the overview places this terminal door among its siblings.
+const DOORS: &[(&str, &str)] = &[
+    (
+        "CLI (this door)",
+        "terminal-native: walk the palace and print what's there",
+    ),
+    (
+        "Companion app",
+        "the desktop app: the palace with a GUI and the instrument cockpit",
+    ),
+    (
+        "Templates kit",
+        "scaffold a new palace to fork: personas, skills, structure",
+    ),
+];
+
+#[derive(Serialize)]
+struct OverviewOut {
+    tool: &'static str,
+    version: &'static str,
+    palace: Option<String>,
+    groups: Vec<OverviewGroupOut>,
+    doors: Vec<DoorOut>,
+}
+
+#[derive(Serialize)]
+struct OverviewGroupOut {
+    name: String,
+    commands: Vec<OverviewCmdOut>,
+}
+
+#[derive(Serialize)]
+struct OverviewCmdOut {
+    name: String,
+    about: String,
+    usage: String,
+}
+
+#[derive(Serialize)]
+struct DoorOut {
+    name: String,
+    role: String,
+}
+
+/// Read each command's one-line description straight from clap (`about`), so the
+/// overview can never disagree with `--help`. Keyed by command name; clap's
+/// built-in `help` subcommand is excluded.
+fn command_abouts() -> std::collections::BTreeMap<String, String> {
+    Cli::command()
+        .get_subcommands()
+        .filter(|c| c.get_name() != "help")
+        .map(|c| {
+            let about = c.get_about().map(|s| s.to_string()).unwrap_or_default();
+            // Keep the compact catalogue to one line; full text is in `--help`.
+            let first = about.lines().next().unwrap_or("").to_string();
+            (c.get_name().to_string(), first)
+        })
+        .collect()
+}
+
+/// Trim a description to a brief, word-boundary-clean line for the text view.
+/// The full text stays available in `--json` and via `<cmd> --help`.
+fn brief(s: &str, max: usize) -> String {
+    if s.chars().count() <= max {
+        return s.to_string();
+    }
+    let mut out = String::new();
+    for word in s.split_whitespace() {
+        if out.chars().count() + word.chars().count() + 1 > max {
+            break;
+        }
+        if !out.is_empty() {
+            out.push(' ');
+        }
+        out.push_str(word);
+    }
+    out.push('…');
+    out
+}
+
+fn cmd_overview(palace_arg: Option<PathBuf>, json: bool) -> Result<(), Error> {
+    let abouts = command_abouts();
+    // Soft detection: overview must work with no palace (unlike require_palace).
+    let palace = palace::detect(palace_arg).map(|p| p.root.display().to_string());
+
+    if json {
+        let groups = OVERVIEW_GROUPS
+            .iter()
+            .map(|(gname, cmds)| OverviewGroupOut {
+                name: (*gname).to_string(),
+                commands: cmds
+                    .iter()
+                    .map(|(n, usage)| OverviewCmdOut {
+                        name: (*n).to_string(),
+                        about: abouts.get(*n).cloned().unwrap_or_default(),
+                        usage: (*usage).to_string(),
+                    })
+                    .collect(),
+            })
+            .collect();
+        let doors = DOORS
+            .iter()
+            .map(|(n, r)| DoorOut {
+                name: (*n).to_string(),
+                role: (*r).to_string(),
+            })
+            .collect();
+        let out = OverviewOut {
+            tool: "loci",
+            version: env!("CARGO_PKG_VERSION"),
+            palace,
+            groups,
+            doors,
+        };
+        println!("{}", serde_json::to_string_pretty(&out)?);
+        return Ok(());
+    }
+
+    println!(
+        "loci {} · read your local palace from the terminal",
+        env!("CARGO_PKG_VERSION")
+    );
+    println!("Read-only. No network, no inference, no daemons.");
+    match &palace {
+        Some(p) => println!("palace : {p}"),
+        None => println!("palace : (none detected — pass --palace <path> or run inside one)"),
+    }
+    println!();
+    for (gname, cmds) in OVERVIEW_GROUPS {
+        println!("{gname}");
+        for (n, usage) in *cmds {
+            let about = brief(abouts.get(*n).map(|s| s.as_str()).unwrap_or(""), 64);
+            println!("  {n:<10} {about}");
+            println!("  {:<10}   e.g. {usage}", "");
+        }
+        println!();
+    }
+    println!("The three doors");
+    for (n, r) in DOORS {
+        println!("  {n:<16} {r}");
+    }
+    println!();
+    println!("Run `loci <command> --help` for the full options of any command.");
+    Ok(())
 }
 
 // ── Commands ───────────────────────────────────────────────────────────────
@@ -858,3 +1044,55 @@ impl From<serde_json::Error> for Error {
 // Keep Read in scope to silence the unused-import lint when no command uses it.
 #[allow(dead_code)]
 fn _read_used(_r: &dyn Read) {}
+
+#[cfg(test)]
+mod overview_tests {
+    use super::*;
+    use std::collections::BTreeSet;
+
+    /// The chokepoint: every clap subcommand must be grouped in the overview
+    /// exactly once. Add a command without grouping it and this fails, instead
+    /// of the command silently missing from `loci overview`.
+    #[test]
+    fn every_command_is_grouped_exactly_once() {
+        let app = Cli::command();
+        let clap_names: BTreeSet<String> = app
+            .get_subcommands()
+            .map(|c| c.get_name().to_string())
+            .filter(|n| n != "help")
+            .collect();
+
+        let mut grouped: Vec<String> = Vec::new();
+        for (_, cmds) in OVERVIEW_GROUPS {
+            for (n, _) in *cmds {
+                grouped.push((*n).to_string());
+            }
+        }
+        let grouped_set: BTreeSet<String> = grouped.iter().cloned().collect();
+
+        assert_eq!(
+            grouped.len(),
+            grouped_set.len(),
+            "a command is listed in more than one overview group"
+        );
+        assert_eq!(
+            clap_names, grouped_set,
+            "overview groups must cover every command exactly once (clap vs OVERVIEW_GROUPS)"
+        );
+    }
+
+    /// Every command listed in the overview must carry a non-empty description
+    /// sourced from clap, proving the descriptions really come from `about`.
+    #[test]
+    fn every_grouped_command_has_a_clap_about() {
+        let abouts = command_abouts();
+        for (_, cmds) in OVERVIEW_GROUPS {
+            for (n, _) in *cmds {
+                assert!(
+                    abouts.get(*n).is_some_and(|s| !s.is_empty()),
+                    "command `{n}` has no clap `about` (add a doc comment on its Cmd variant)"
+                );
+            }
+        }
+    }
+}
