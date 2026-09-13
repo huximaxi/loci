@@ -106,3 +106,4 @@ URL validation: `localhost` and Tailscale CGNAT (`100.64.x.x–100.127.x.x`) onl
 - SSRF: Ollama `base_url` validated before every HTTP call
 - Path traversal: all Locus IDs validated (alphanumeric + hyphens only)
 - Port: MCP server refuses to bind below 1024
+- Instrument egress: palace map instruments render in a sandboxed srcdoc iframe (opaque origin, no IPC globals) and inherit the webview CSP (`src-tauri/tauri.conf.json`), which allows no remote origins. Fetch/XHR/beacon/img egress from palace-authored HTML is blocked; only the app origin and Tauri IPC are reachable. Guarded by `csp_gate_tests` in `src-tauri/src/main.rs`.
