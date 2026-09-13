@@ -154,6 +154,7 @@ fn cmd_status(palace_arg: Option<PathBuf>, json: bool) -> Result<(), Error> {
     let crystal_total = palace::count_md_files(&p.scan_root);
     let layout = match p.layout {
         palace::Layout::PalaceSubdir => "palace-subdir",
+        palace::Layout::RoomsDir => "rooms-dir",
         palace::Layout::RoomsAtRoot => "rooms-at-root",
     };
 

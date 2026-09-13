@@ -8,7 +8,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- `loci-wal/`: the egress-receipt trust primitive (#84, 2026-07-15). An append-only, payload-free, hash-chained write-ahead log of what left the device, plus an Ed25519-signed proof bundle a third party verifies offline. The chain orders frames and breaks on piecemeal edits; the signed bundle is the cryptographic tamper-evidence, and it carries no payload hash or byte count. Public half only: key custody and the disclosure policy stay outside this repository.
+- `loci-cli`: two commands on the receipt (#84). `loci audit [--wal PATH] [--since ISO]` reads the live WAL and prints what left the device grouped by egress class, with hash-chain integrity and per-class destination hosts (`--json` supported). `loci wal verify <bundle> [--expect-key HEX]` verifies an exported bundle offline; `--expect-key` pins the signer for provenance. Both cap the file size before reading.
 - **Rain: the garden watering round, coupled to a token-window watcher** (0.8 line). Three pieces, one pattern (`templates/skills/rain.md`): (1) `loci tokens`: approximate agent-runtime 5-hour session-window status reconstructed read-only from local transcripts, streamed line-by-line (timing and spend, not quota; honest about being approximate). (2) `loci rain [--fire]`: watering weather on one screen (window signal `fresh`/`open`/`closing`, garden plant count, last rain from the `garden/.rain/` archive) plus the one hand-off in the CLI: `--fire` execs the user's agent runtime from the palace root and exits. (3) Desktop rain gauge card: same weather + garden state with a "make it rain" button behind an explicit click; three new commands (`read_token_window`, `read_rain_status`, `fire_rain`), spawned rounds reaped on exit. Rain never auto-fires: weather is a suggestion, spending is a gate.
+
+### Fixed
+- `loci-cli` palace detection accepts the layout the templates kit builds (`rooms/<room>/CLAUDE.md`). `loci status --palace <kit palace>` no longer returns "no palace found". Reported as `rooms-dir`; the `_palace/` and rooms-at-root layouts are unchanged. Unit tests cover all three.
+- Setup docs reconciled: handover path (`soul/handovers/`), template pointers (`_templates/`), a path-agnostic scheduled-task example, a Rust prerequisite before `cargo install`, a Claude Code variant of the first-session card, a `Palace:` line in the global identity block, and one paragraph in each setup door naming what the other door creates.
 
 ---
 

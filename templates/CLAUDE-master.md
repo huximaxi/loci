@@ -47,7 +47,7 @@ Load the relevant room CLAUDE.md immediately after the room is named.
 *(Optional. Only fill this in if you have defined named sub-agent personas with their own soul files. Leave blank and delete this section if working solo: [YOUR_AI_NAME] handles everything by default.)*
 
 **How to add a persona:**
-1. Create a soul file at `souls/[persona-name].md` (use `templates/persona-template.md`)
+1. Create a soul file at `souls/[persona-name].md` (use `_templates/persona-template.md`)
 2. Add a row to the roster below
 3. Define its domain and the trigger conditions that suit your actual work
 
@@ -222,7 +222,7 @@ Four triggers. Apply every session.
 
 ## RETRIEVAL HIERARCHY (L0–L3)
 
-Context loads in priority order. See `templates/retrieval-hierarchy.md` for full protocol.
+Context loads in priority order. See `_templates/retrieval-hierarchy.md` for full protocol.
 
 - **L0:** Soul identity (~50 tokens), always loaded first
 - **L1:** Active context (~100-150 tokens): CLAUDE.md, handover, tracker
@@ -243,7 +243,7 @@ Load what you need. Don't overload unnecessarily.
 5. Surface anything high priority
 
 ### For scheduled tasks (morning check-ins, garden rounds, etc.)
-Do NOT hardcode session paths in scheduled task prompts. See `templates/scheduled-task-template.md` for dynamic path finding.
+Do NOT hardcode session paths in scheduled task prompts. See `_templates/scheduled-task-template.md` for dynamic path finding.
 
 SOUL.md must be read first in every scheduled task run: it is what makes the output feel like your collaborator rather than a generic assistant.
 

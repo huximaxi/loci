@@ -23,6 +23,10 @@ thinking; the CLI just shows the firmware.
 
 ## Install
 
+Prerequisite: a stable Rust toolchain via [rustup](https://rustup.rs) (one
+command: `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`).
+Then, from the repository root:
+
 ```bash
 cargo install --path loci-cli
 ```
@@ -31,13 +35,15 @@ A pre-built binary will follow once release tagging stabilises.
 
 ## Layouts it accepts
 
-Two shapes, matched by the desktop app:
+Three shapes:
 
 - **rooms-inside-`_palace`/**: the original loci layout
+- **rooms-inside-`rooms/`**: the shape the templates kit and the setup guides
+  build (`rooms/<room>/CLAUDE.md`)
 - **rooms-at-root**: palaces ported from older organic structures (rooms grew
   at root, never moved into `_palace/`)
 
-Either works.
+Any of the three works. The root must hold a `PALACE.md` or `CLAUDE.md`.
 
 ## Palace resolution
 
@@ -58,8 +64,25 @@ Each command resolves the palace in this order:
 | `loci read <slug> --room <name>` | Disambiguate when the same slug lives in two rooms |
 | `loci handover` | Print the most recent handover by mtime |
 | `loci init` | Interactive wizard. Writes `~/.config/loci/config.toml` |
+| `loci audit` | Egress receipt: what left the device, grouped by class, with a hash-chain check. `--wal <path>` and `--since <ISO-8601>` narrow it |
+| `loci wal verify <bundle>` | Verify an exported proof bundle offline. `--expect-key <hex>` pins the signer for provenance |
 
 Add `--json` to any read command for machine-readable output.
+
+## The egress receipt
+
+`~/.loci/wal/egress.jsonl` is an append-only write-ahead log of what left the
+device: one frame per outbound call, recording that a call went out, to which
+host, and under which egress class (`local`, `external_cloud`,
+`channel_egress`, `profile_write`). It is payload-free by construction: the
+prompt bytes are never kept, and the optional content hash and byte count stay
+in the local log and never travel in an exported bundle. Frames are
+hash-chained, so an interior edit, a reorder, or a dropped frame breaks the
+chain; `loci audit` reports the break by sequence number. The chain alone is
+not keyed tamper-evidence (a tail edit or a wholesale re-chain is not caught
+without a key); for cryptographic proof, export a signed bundle and check it
+with `loci wal verify`. The primitive lives in the `loci-wal` crate; see its
+crate docs for the exact guarantees.
 
 ## Exit codes
 
