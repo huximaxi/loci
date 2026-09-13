@@ -14,6 +14,7 @@ use loci_wal::{ChainError, EgressClass, Frame, ProofBundle, Wal};
 use std::process::ExitCode;
 
 mod palace;
+mod scaffold;
 mod tokens;
 
 #[derive(Parser)]
@@ -67,6 +68,14 @@ enum Cmd {
         /// Hand off to the agent runtime now (`claude -p "rain"` from the palace root).
         #[arg(long)]
         fire: bool,
+    },
+    /// Scaffold a new palace at PATH: a starter palace + the lifecycle skills.
+    New {
+        /// Where to create the palace (e.g. ~/my-palace).
+        path: PathBuf,
+        /// Scaffold into a non-empty or existing-palace directory instead of refusing.
+        #[arg(long)]
+        force: bool,
     },
     /// Interactive setup wizard. Writes `~/.config/loci/config.toml`.
     Init,
@@ -125,7 +134,8 @@ fn run(cli: Cli) -> Result<(), Error> {
         Cmd::Handover => cmd_handover(cli.palace, cli.json),
         Cmd::Tokens => cmd_tokens(cli.json),
         Cmd::Rain { fire } => cmd_rain(cli.palace, fire, cli.json),
-        Cmd::Init => cmd_init(),
+        Cmd::New { path, force } => cmd_new(&path, force, cli.json),
+        Cmd::Init => cmd_init(None),
         Cmd::Audit { wal, since } => cmd_audit(wal, since, cli.json),
         Cmd::Wal { cmd } => match cmd {
             WalCmd::Verify { bundle, expect_key } => {
@@ -167,7 +177,13 @@ const OVERVIEW_GROUPS: &[(&str, &[(&str, &str)])] = &[
             ("wal", "loci wal verify <bundle.json>"),
         ],
     ),
-    ("Setup", &[("init", "loci init")]),
+    (
+        "Setup",
+        &[
+            ("new", "loci new ~/my-palace"),
+            ("init", "loci init"),
+        ],
+    ),
     ("Meta", &[("overview", "loci overview")]),
 ];
 
@@ -901,7 +917,81 @@ struct Backend {
     model: String,
 }
 
-fn cmd_init() -> Result<(), Error> {
+// ── new (scaffold a palace) ─────────────────────────────────────────────────
+
+#[derive(Serialize)]
+struct NewOut {
+    palace: String,
+    created: Vec<String>,
+}
+
+fn cmd_new(path: &Path, force: bool, json: bool) -> Result<(), Error> {
+    // Overwrite policy: refuse an existing palace or a non-empty directory
+    // unless --force, so `new` never silently writes over someone's work.
+    if !force {
+        if palace::validate(path).is_some() {
+            return Err(Error::bad_input(format!(
+                "{} already looks like a palace. Pass --force to scaffold into it anyway.",
+                path.display()
+            )));
+        }
+        if path.is_dir()
+            && path
+                .read_dir()
+                .map(|mut d| d.next().is_some())
+                .unwrap_or(false)
+        {
+            return Err(Error::bad_input(format!(
+                "{} is not empty. Pass --force to scaffold into it anyway.",
+                path.display()
+            )));
+        }
+    }
+
+    std::fs::create_dir_all(path)?;
+    let written = scaffold::write_files(path)?;
+
+    if json {
+        let out = NewOut {
+            palace: path.display().to_string(),
+            created: written.iter().map(|p| p.display().to_string()).collect(),
+        };
+        println!("{}", serde_json::to_string_pretty(&out)?);
+        return Ok(());
+    }
+
+    println!("Created a starter palace at {}", path.display());
+    for p in &written {
+        // Compact tree: show paths relative to the palace root.
+        let shown = p.strip_prefix(path).unwrap_or(p);
+        println!("  {}", shown.display());
+    }
+    println!();
+    println!("Next:");
+    println!("  1. Edit CLAUDE.md and soul/SOUL.md — name your collaborator, say who you are.");
+    println!(
+        "  2. Run `loci status --palace {}` to confirm it reads.",
+        path.display()
+    );
+    println!("  3. The full templates kit (personas, more skills) is at loci.garden.");
+
+    // Hand off to the config step, defaulting the palace path to the new palace.
+    if std::io::stdin().is_terminal() {
+        print!("\nConfigure loci to use this palace now? [Y/n]: ");
+        std::io::stdout().flush()?;
+        let mut buf = String::new();
+        std::io::stdin().read_line(&mut buf)?;
+        let ans = buf.trim().to_lowercase();
+        if ans.is_empty() || ans == "y" || ans == "yes" {
+            println!();
+            return cmd_init(Some(path.display().to_string()));
+        }
+    }
+    println!("\nWhen ready: loci init   (configure the backend)");
+    Ok(())
+}
+
+fn cmd_init(default_palace: Option<String>) -> Result<(), Error> {
     if !std::io::stdin().is_terminal() {
         return Err(Error::bad_input(
             "init is interactive; run from a terminal".to_string(),
@@ -912,13 +1002,9 @@ fn cmd_init() -> Result<(), Error> {
     println!("---------");
     println!("Interactive setup. Press Ctrl-C to abort.\n");
 
-    let palace_path = prompt(
-        "Palace path",
-        std::env::current_dir()
-            .ok()
-            .map(|p| p.display().to_string())
-            .as_deref(),
-    )?;
+    let default =
+        default_palace.or_else(|| std::env::current_dir().ok().map(|p| p.display().to_string()));
+    let palace_path = prompt("Palace path", default.as_deref())?;
     let trimmed = palace_path.trim();
     if !trimmed.is_empty() && palace::validate(std::path::Path::new(trimmed)).is_none() {
         eprintln!(
