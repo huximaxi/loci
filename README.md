@@ -74,7 +74,7 @@ Three ways. The substrate is the same underneath all of them.
 |---|---|
 | **Plain markdown** | The door. Clone `templates/`, point any file-aware AI at `CLAUDE.md`. No build. |
 | **Desktop app** | [`desktop/`](desktop/) (Tauri, v0.6.0-beta). The cockpit: native dashboard plus a tab per instrument your palace generates for itself. See [desktop/QUICKSTART.md](desktop/QUICKSTART.md). |
-| **CLI** | [`loci-cli/`](loci-cli/) (v0.6.0-beta). A small Rust binary that reads your palace from the terminal: `loci status`, `loci crystals`, `loci read`, `loci handover`, `loci init`. Read-only. No network. No inference. See [loci-cli/README.md](loci-cli/README.md). |
+| **CLI** | [`loci-cli/`](loci-cli/) (v0.6.0-beta). A small Rust binary that reads your palace from the terminal: `loci status`, `loci crystals`, `loci read`, `loci handover`, `loci tokens`, `loci rain`, `loci init`. Read-only, with one hand-off: `loci rain --fire` execs your agent runtime. No network. No inference. See [loci-cli/README.md](loci-cli/README.md). |
 
 The methodology version and full changelog: [PALACE-METHODOLOGY.md](PALACE-METHODOLOGY.md).
 
