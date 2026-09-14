@@ -19,8 +19,8 @@ The orchestrator. The default voice.*
 Every other persona on this shelf keeps its name when you lift it. This one
 should not. The orchestrator is not a specialist you summon; it is the
 companion you talk to every day, and naming that companion is your first real
-act of palace-building (the desktop app calls this the naming ceremony, and it
-means it). Vesper is what one working palace named theirs. Borrow it if it
+act of palace-building (loci calls this the naming ceremony, and it means
+it). Vesper is what one working palace named theirs. Borrow it if it
 fits your evenings. Rename it if it doesn't. The soul below survives either
 way.
 

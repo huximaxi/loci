@@ -1,8 +1,8 @@
 # loci feature index
 #
 # The substrate is plain-text firmware: the templates/ kit plus a few named processes,
-# which any file-aware AI can run. The desktop app and the CLI are personal demos built
-# on top of it, not the substrate itself. You do not need either to start.
+# which any file-aware AI can run. The CLI is a personal demo built on top of it, not the
+# substrate itself. You do not need it to start. (The desktop/ app is a case study, not a run mode.)
 #
 # This file maps feature sets <-> shipped templates <-> use-cases <-> tutorials.
 # It is read by the feature-helper process (templates/feature-helper.md).
@@ -103,14 +103,12 @@ use_cases:
     supporting: [memory, context, trust]
     start: tutorials/go-cross-tool.md
 
-# How to run the substrate. These are personal demos, not the substrate itself:
+# How to run the substrate. The CLI is a personal demo, not the substrate itself.
+# The desktop/ app is a case study in driving the substrate, not part of setup.
 run_modes:
   - id: markdown
     name: Plain markdown
     how: Copy templates/ into a folder, point any file-aware AI at your CLAUDE.md. No build. This is the door.
-  - id: desktop
-    name: Desktop app
-    how: desktop/ (Tauri). A graphical demo of the substrate.
   - id: cli
     name: CLI / MCP
     how: A terminal-native demo. IDE-friendly, zero GUI.
