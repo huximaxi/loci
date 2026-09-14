@@ -3,6 +3,11 @@
 > **You are an AI agent.** A human has pointed you at this repo to set up their memory palace.
 > Your job: read the structure, run a short interview, write all the setup files. The user answers questions. You do everything else.
 
+> **First run?** The gentler entry is the naming ceremony in `templates/first-session-protocol.md`:
+> the user pastes one block and answers one question at a time, and the palace is born with a name.
+> Use the interview below when a palace already exists and its holder wants the deeper, structured
+> pass this file describes.
+
 ---
 
 ## Before you start
