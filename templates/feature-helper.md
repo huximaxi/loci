@@ -14,8 +14,8 @@ proposes; the human chooses. One step at a time, always skippable.
 ## The substrate, in one line
 
 loci is an intelligence substrate: plain-text firmware (the `templates/` kit plus a few
-named processes) that any file-aware AI can run. The desktop app and the CLI are personal
-demos built on top of it. You do not need either to start.
+named processes) that any file-aware AI can run. The CLI is a personal demo built on top
+of it. You do not need it to start.
 
 ## Protocol
 
