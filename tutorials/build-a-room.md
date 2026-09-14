@@ -12,7 +12,7 @@ Uses: `templates/room-template.md`, `templates/retrieval-hierarchy.md`,
    `rooms/<name>/CLAUDE.md` for each.
 2. In each room file, set a `session_strategy`: `always-load`, `on-demand`, or
    `per-session`. This is what tells your AI when to pull the room in.
-3. Add the room to the room table in your main `CLAUDE.md` so your AI can state the room
+3. Add the room to the room table in your `PALACE.md` so your AI can state the room
    at session open.
 4. Keep room files room-scoped only (the two-layer rule): behavioural constants live in the
    global layer, living state in the project layer, room specifics here.
