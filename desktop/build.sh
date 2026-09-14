@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 # loci wizard — build script
-# v0.2.0
 # ─────────────────────────────────────────────────────────────────────────────
 # Usage:
 #   ./build.sh              — macOS universal .dmg (arm64 + x86_64)
@@ -9,15 +8,15 @@
 #
 # Output (macOS):
 #   src-tauri/target/universal-apple-darwin/release/bundle/dmg/
-#     loci wizard_0.2.0_universal.dmg
+#     loci wizard_${VERSION}_universal.dmg
 #
 # Output (Windows, run on Windows or CI):
 #   src-tauri/target/release/bundle/nsis/
-#     loci wizard_0.2.0_x64-setup.exe
+#     loci wizard_${VERSION}_x64-setup.exe
 # ─────────────────────────────────────────────────────────────────────────────
 set -e
 
-VERSION="0.2.0"
+VERSION="0.6.0-beta"
 APP="loci wizard"
 
 echo ""
@@ -40,12 +39,18 @@ case "${1:-}" in
     echo "  ╔══════════════════════════════════════════╗"
     echo "  ║  Windows target must run on Windows or   ║"
     echo "  ║  a GitHub Actions windows-latest runner. ║"
-    echo "  ║  See: .github/workflows/release.yml      ║"
+    echo "  ║  Run this script on a Windows runner.    ║"
     echo "  ╚══════════════════════════════════════════╝"
     npm run tauri:build -- --target x86_64-pc-windows-msvc
     echo ""
     echo "  ✦ Windows installer:"
     find src-tauri/target -name "*.exe" -path "*/nsis/*" 2>/dev/null || echo "  (run on Windows to generate)"
+    echo ""
+    echo "  ─────────────────────────────────────────"
+    echo "  This build is UNSIGNED. Authenticode signing is"
+    echo "  required before public distribution. See:"
+    echo "  https://tauri.app/distribute/sign/windows/"
+    echo "  ─────────────────────────────────────────"
     ;;
 
   *)
@@ -63,8 +68,8 @@ case "${1:-}" in
     find src-tauri/target -name "*.dmg" 2>/dev/null | head -3
     echo ""
     echo "  ─────────────────────────────────────────"
-    echo "  Gatekeeper note: notarization required"
-    echo "  for public distribution. See:"
+    echo "  This build is UNSIGNED. Notarization is required"
+    echo "  before public distribution. See:"
     echo "  https://tauri.app/distribute/sign/apple/"
     echo "  ─────────────────────────────────────────"
     ;;
