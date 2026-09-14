@@ -1,8 +1,12 @@
-# [YOUR_AI_NAME]: Master Prompt
+# [YOUR_AI_NAME]: PALACE.md (master)
 **[YOUR_NAME] × [YOUR_AI_NAME] · [your-palace-name] · v0.1**
 
-> This file is read by Claude at the start of every session.
-> Fill in every [PLACEHOLDER]. Be specific: the more real this is, the better Claude works.
+> This is your palace's primary file. Fill it in and save it as `PALACE.md` at your palace root.
+> It is read at the start of every session, by any file-aware AI, which is why it is not named for
+> one tool. Beside it, create a two-line `CLAUDE.md` pointer so Claude Code finds it: "Read PALACE.md
+> first. Then soul/SOUL.md if it exists. Then the newest file in soul/handovers/. Then the room we
+> are in."
+> Fill in every [PLACEHOLDER]. Be specific: the more real this is, the better your AI works.
 
 ---
 

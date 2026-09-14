@@ -7,7 +7,7 @@
 **If you ran agent setup** (i.e. you told Claude to read this repo and run the setup): your files are already written. Skip straight to "How to start a session" below.
 
 **If you're setting up manually**: make sure you've filled in at minimum:
-- ✅ `templates/CLAUDE-master.md` → renamed and saved as `CLAUDE.md` in your palace folder
+- ✅ `templates/CLAUDE-master.md` → filled in and saved as `PALACE.md` (the primary file), with a two-line `CLAUDE.md` pointer beside it
 - ✅ `templates/SOUL.md` → saved as `soul/SOUL.md`
 - ✅ At least one room file → `rooms/[room-name]/CLAUDE.md`
 
@@ -21,7 +21,7 @@ See `SETUP-GUIDE.md` for the full walkthrough, or `AGENT-SETUP.md` to have Claud
 
 ---
 
-> Read `CLAUDE.md` to understand who you are and how we work.
+> Read `PALACE.md` to understand who you are and how we work.
 > Then read `soul/SOUL.md` for your character and any prior history.
 > Then read `rooms/[ROOM NAME]/CLAUDE.md` for this session's context.
 >
@@ -31,7 +31,7 @@ See `SETUP-GUIDE.md` for the full walkthrough, or `AGENT-SETUP.md` to have Claud
 
 That's it. Claude will read the files, introduce itself in character, and ask you where things were left off.
 
-**In Claude Code**, open a terminal in your palace folder and run `claude`. Your `CLAUDE.md` is read automatically, so there is nothing to paste. Say the wake-up line: *"Wake up [YOUR_AI_NAME]. We're in [ROOM NAME] today."*
+**In Claude Code**, open a terminal in your palace folder and run `claude`. Your `CLAUDE.md` pointer is read automatically and sends me to `PALACE.md`, so there is nothing to paste. Say the wake-up line: *"Wake up [YOUR_AI_NAME]. We're in [ROOM NAME] today."*
 
 If it's session 1 and there's no history, just say: *"First session, no prior state."* Then tell it what you want to work on.
 
@@ -68,7 +68,7 @@ Next session, that file will be the bridge.
 - **Claude is being too wordy:** Say "shorter, match my pace"
 - **Claude made an error:** Say "that's wrong, [here's what's right]. Remember this."
 - **Claude is over-explaining:** Say "skip the preamble, just do it"
-- **You want to adjust the setup:** Edit `CLAUDE.md` directly. It's just a text file
+- **You want to adjust the setup:** Edit `PALACE.md` directly. It's just a text file
 
 ---
 
