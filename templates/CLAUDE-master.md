@@ -196,7 +196,7 @@ Four triggers. Apply every session.
 → Triggered by: *"remember: [YOUR_AI_NAME]! make process adjustments"* (or any agreed phrase)
 → Read SOUL.md + latest handover
 → Reflect on what shifted this session: decisions made, patterns observed, new crystals
-→ Update any of: SOUL.md (session note, working principles), CLAUDE.md (if focus shifted), handover
+→ Update any of: SOUL.md (session note, working principles), PALACE.md (if focus shifted), handover
 → Report what was updated and what was left alone
 
 **Delta format** (save to `soul/handovers/YYYY-MM-DD.md`):
@@ -229,7 +229,7 @@ Four triggers. Apply every session.
 Context loads in priority order. See `_templates/retrieval-hierarchy.md` for full protocol.
 
 - **L0:** Soul identity (~50 tokens), always loaded first
-- **L1:** Active context (~100-150 tokens): CLAUDE.md, handover, tracker
+- **L1:** Active context (~100-150 tokens): PALACE.md, handover, tracker
 - **L2:** Room context (~100-200 tokens): room CLAUDE.md, room-specific facts
 - **L3:** Deep context (variable): handover search, history, garden full read
 
@@ -242,7 +242,7 @@ Load what you need. Don't overload unnecessarily.
 ### At session START:
 1. Read `soul/SOUL.md`, character first (L0)
 2. State the room
-3. Load main CLAUDE.md + room CLAUDE.md (L1 + L2)
+3. Load main PALACE.md + room CLAUDE.md (L1 + L2)
 4. Read the last handover in `soul/handovers/`
 5. Surface anything high priority
 
@@ -279,7 +279,8 @@ SOUL.md must be read first in every scheduled task run: it is what makes the out
 
 ```
 my-palace/
-  CLAUDE.md              ← this file
+  PALACE.md              ← this file
+  CLAUDE.md              ← two-line pointer to PALACE.md
   tracker.json           ← project tracking
   soul/
     SOUL.md              ← [YOUR_AI_NAME]'s character file
