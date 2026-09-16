@@ -2,9 +2,10 @@
 
 ---
 
-> **Never set up a palace before?** Start with the naming ceremony in
-> `templates/first-session-protocol.md`: paste one block, answer one question at a time, and the agent
-> builds the palace and takes its name. This card is the everyday opener for the sessions after that.
+> **Never set up a palace before?** Run the first session one of two ways, both the same naming
+> ceremony: paste the self-contained block in `templates/first-session-protocol.md` (nothing else
+> needs to be in front of the agent), or point an agent that can read this repo at `AGENT-SETUP.md`.
+> This card is the everyday opener for the sessions after that.
 
 ---
 

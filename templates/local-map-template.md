@@ -25,7 +25,7 @@
 ┌─────────────────────────────────────────────────▼───────────────────────────────────┐
 │  LAYER 1 · PROJECT STATE LAYER  (living · updated by Process Adjustment Trigger)    │
 │                                                                                     │
-│  [project-root]/CLAUDE.md          ← primary state source of truth                 │
+│  [project-root]/PALACE.md          ← primary state source of truth                 │
 │  ├── Current focus + active themes                                                  │
 │  ├── Context crystals                                                               │
 │  ├── Room index                                                                     │
@@ -50,7 +50,7 @@
 │  LAYER 3 · KNOWLEDGE CORE  ([palace-name]/)                                         │
 │                                                                                     │
 │  [palace-name]/                                                                     │
-│  ├── CLAUDE.md              Master palace prompt                                    │
+│  ├── PALACE.md              Master palace prompt                                    │
 │  ├── LOCAL_MAP.md           ← THIS FILE                                             │
 │  │                                                                                  │
 │  ├── souls/                 Persona soul files                                      │
@@ -87,7 +87,7 @@
 │  HANDOVER CHAIN · reading order for session start                                   │
 │                                                                                     │
 │  1. Global CLAUDE.md (behavioral layer)                                             │
-│  2. [project]/CLAUDE.md (project state)                                             │
+│  2. [project]/PALACE.md (project state)                                             │
 │  3. [palace]/handovers/ → latest *.md                                              │
 │  4. Room CLAUDE.md (if entering a specific room)                                    │
 │  5. Soul file (if invoking a persona)                                               │
@@ -98,7 +98,7 @@
 │                                                                                     │
 │  Last audit:      YYYY-MM-DD                                                        │
 │  Active rooms:    N                                                                 │
-│  Open blockers:   N (see [project]/CLAUDE.md → Pending)                            │
+│  Open blockers:   N (see [project]/PALACE.md → Pending)                            │
 │  Next eval:       YYYY-MM-DD (~2 weeks)                                             │
 └─────────────────────────────────────────────────────────────────────────────────────┘
 ```
