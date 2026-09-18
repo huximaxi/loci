@@ -40,50 +40,54 @@ pub fn write_files(root: &Path) -> std::io::Result<Vec<PathBuf>> {
     Ok(written)
 }
 
-const PALACE_MD: &str = r#"# Palace
+const PALACE_MD: &str = r#"# [Your name]'s Palace
+> Palace holder: [your name]
+> Companion: (to be named)
+> Gate: [name your gate], the review checkpoint for anything that ships, sends, or deletes outside this folder.
 
-Your memory palace: the files, context, and history your AI collaborator reads
-at the start of every session, and writes to at the end. This file marks the
-palace root.
+This is the palace root and the primary operating file: whose palace this is, how
+it works, and where to look first. It belongs to no particular tool, so it is not
+named for one. Change your AI and the palace stays; the `CLAUDE.md` beside it is
+just a thin pointer for one specific agent.
 
-- `CLAUDE.md` — who your AI is, who you are, how you work together.
-- `soul/SOUL.md` — your AI's character, grown slowly over sessions.
-- `soul/handovers/` — session memory: what happened, what's next.
-- `rooms/<room>/CLAUDE.md` — context for one area of work.
-- `skills/` — repeatable rituals (session open/close, maintenance, eval).
-- `tracker.json` — what's active, what's blocked.
+## Read order (every session)
+At the start of a session, read this file, then `soul/SOUL.md` if it exists, then
+the newest file in `soul/handovers/`, then the room you are working in. Identity
+always, current state always, the room when you enter it, deep history only when
+asked.
 
-Read the palace at session start; write to it at session close.
-"#;
+## The gate
+Nothing that ships, sends, publishes, or deletes outside this folder happens
+without your yes. That is the whole trust rule: about to leave the folder, stop
+and ask first. Give it a name on the `Gate:` line above, so you have one word for
+it.
 
-const CLAUDE_MD: &str = r#"# CLAUDE.md — master prompt
-
-> Read this first, every session. It says who you are, who I am, and how we work.
-
-## Who you are
-You are my named AI collaborator, not a generic assistant. You live in this
-palace: you read it at the start of each session and write to it at the end, so
-you carry context forward instead of starting cold. Pick a name (or let me name
-you) and record it in `soul/SOUL.md`.
-
-## Who I am
-[Your name, role, and what you're working on. Fill this in — one paragraph.]
+## What is here
+- `soul/SOUL.md`: your AI's character, grown slowly over sessions.
+- `soul/handovers/`: session memory, what happened and what is next.
+- `rooms/<room>/CLAUDE.md`: context for one area of work.
+- `skills/`: repeatable rituals (session open/close, maintenance, eval).
+- `tracker.json`: what is active, what is blocked.
+- `CLAUDE.md`: a thin pointer that sends Claude here first.
 
 ## How we work
-- Read `soul/SOUL.md` and the latest `soul/handovers/` file at session start.
+- Read the palace first; act from context, not from scratch.
 - Be direct and concrete: say the tradeoff, then the recommendation.
-- Keep the palace current: prune what's stale, name what recurred.
+- Keep the palace current: prune what is stale, name what recurred.
 - At session close, run the `session-close` skill.
-
-## The skills (in `skills/`)
-- `session-open` — orient at the start of a session.
-- `session-close` — end on purpose: reflect, persist, record.
-- `palace-maintenance` — keep memory, rooms, and the tracker healthy.
-- `skill-eval` — check how well we're working together and where to grow.
 
 ## More
 This is a starter palace. The full templates kit (personas, more skills) is the
 richer door: loci.garden.
+"#;
+
+const CLAUDE_MD: &str = r#"# CLAUDE.md: pointer to PALACE.md
+
+> A thin pointer for Claude. The operating instructions live in `PALACE.md`, the
+> primary file, so a person who switches tools carries the palace, not this.
+
+Read PALACE.md first. Then soul/SOUL.md if it exists. Then the newest file in
+soul/handovers/. Then the room we are in.
 "#;
 
 const SOUL_MD: &str = r#"# SOUL.md — [your AI's name]
@@ -242,5 +246,52 @@ mod tests {
     fn tracker_json_is_valid_json() {
         let v: serde_json::Value = serde_json::from_str(TRACKER_JSON).unwrap();
         assert!(v.get("tracks").is_some());
+    }
+
+    /// F2: `PALACE.md` is the primary, AI-agnostic operating file. It carries the
+    /// operating instructions (holder, companion, read-order, gate line) that used
+    /// to live in `CLAUDE.md`.
+    #[test]
+    fn palace_md_holds_the_operating_instructions() {
+        assert!(PALACE_MD.contains("Palace holder:"), "PALACE.md needs a holder line");
+        assert!(PALACE_MD.contains("Companion:"), "PALACE.md needs a companion line");
+        assert!(PALACE_MD.contains("Gate:"), "PALACE.md needs a gate line");
+        assert!(
+            PALACE_MD.contains("read this file") && PALACE_MD.contains("soul/handovers/"),
+            "PALACE.md needs the session read-order"
+        );
+    }
+
+    /// F2: `CLAUDE.md` is a thin pointer, not the master prompt. It sends the reader
+    /// to `PALACE.md` first and no longer carries the "who you are / who I am"
+    /// substance.
+    #[test]
+    fn claude_md_is_a_thin_pointer_to_palace() {
+        assert!(
+            CLAUDE_MD.contains("Read PALACE.md first"),
+            "CLAUDE.md must point at PALACE.md first"
+        );
+        assert!(
+            !CLAUDE_MD.contains("master prompt"),
+            "CLAUDE.md is no longer the master prompt"
+        );
+        assert!(
+            !CLAUDE_MD.contains("## Who I am"),
+            "the operating substance belongs in PALACE.md, not CLAUDE.md"
+        );
+        // A pointer, not a document: keep it short.
+        assert!(
+            CLAUDE_MD.lines().count() < 12,
+            "CLAUDE.md should stay a thin pointer"
+        );
+    }
+
+    /// Voice law: no em-dashes in the two operating templates (use a colon, a comma,
+    /// or a new sentence). Guards the F2 fix to the old `CLAUDE.md — master prompt`
+    /// header against regression.
+    #[test]
+    fn operating_templates_have_no_em_dash() {
+        assert!(!PALACE_MD.contains('\u{2014}'), "PALACE.md has an em-dash");
+        assert!(!CLAUDE_MD.contains('\u{2014}'), "CLAUDE.md has an em-dash");
     }
 }

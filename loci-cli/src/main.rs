@@ -1008,7 +1008,7 @@ fn cmd_new(path: &Path, force: bool, json: bool) -> Result<(), Error> {
     }
     println!();
     println!("Next:");
-    println!("  1. Edit CLAUDE.md and soul/SOUL.md — name your collaborator, say who you are.");
+    println!("  1. Edit PALACE.md and soul/SOUL.md: say who you are, name your collaborator.");
     println!(
         "  2. Run `loci status --palace {}` to confirm it reads.",
         path.display()
