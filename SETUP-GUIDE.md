@@ -29,7 +29,8 @@ The palace lives in a folder on your computer. Claude reads it at the start of e
 
 | File | What it is | How often you touch it |
 |---|---|---|
-| `CLAUDE.md` | The master prompt: tells Claude who it is, who you are, and how to work with you | Set up once, update occasionally |
+| `PALACE.md` | The master prompt, and the primary file: who your AI is, who you are, how you work. AI-agnostic, so it carries across tools | Set up once, update occasionally |
+| `CLAUDE.md` | A two-line pointer to `PALACE.md`, for Claude specifically | Set up once |
 | `soul/SOUL.md` | Your AI's character file, grows over sessions | Claude updates it; you read it |
 | `soul/handovers/YYYY-MM-DD.md` | Session memory: what happened, decisions made, what's next | Claude writes these at the end of sessions |
 | `rooms/[room]/CLAUDE.md` | Room-specific context: what Claude should know for this area of work | Set up once per room |
@@ -43,22 +44,24 @@ In the `templates/` folder you'll find ready-to-fill versions of all these files
 
 ```
 templates/
-  CLAUDE-master.md       ← fill this in first
+  CLAUDE-master.md       ← fill this in first, then save it as PALACE.md
   SOUL.md                ← fill in the basics; Claude grows this over time
   room-template.md       ← copy once per room you want
   tracker.json           ← copy and edit for your projects
   handover-template.md   ← Claude uses this automatically
 ```
 
-Start with `CLAUDE-master.md`. It's the most important file and takes 10–15 minutes.
+Start with `CLAUDE-master.md`. It's the most important file and takes 10–15 minutes. You fill it in
+and save it as your `PALACE.md` (the primary file); the short `CLAUDE.md` pointer comes in Step 5.
 
 **What to ignore on day one.** The `templates/` folder holds more than these five, including guides for crystals, the garden, retrieval, and scheduled tasks, plus two optional shelves, `personas/` (filled example personas) and `skills/` (portable disciplines), and more besides. None of it is required. Start with the five above; the rest is there when you want it.
 
 ---
 
-## Step 2: Fill in CLAUDE-master.md
+## Step 2: Fill in the master, save it as PALACE.md
 
-This is the document Claude reads at the start of every session. It answers:
+This becomes `PALACE.md`, your palace's primary file, read at the start of every session by any
+file-aware AI. It answers:
 
 - Who is this AI? (you'll name it)
 - Who are you? (a few key facts about you and your work)
@@ -81,7 +84,7 @@ The name can be:
 - Something practical (Remy, Scout, Wren...)
 - Something personal to you
 
-Once you name it, put the name in `CLAUDE-master.md` and `SOUL.md`. Claude will use that name and build on it.
+Once you name it, put the name in `PALACE.md` and `SOUL.md`. Claude will use that name and build on it.
 
 ---
 
@@ -101,7 +104,15 @@ You don't need more than 2–3 to start. Copy `room-template.md` into `rooms/[ro
 
 ## Step 5: Start your first session
 
-When you open Claude in Cowork (or Claude Code), paste the contents of `CLAUDE.md` or point Claude to it. Then say:
+First, create the pointer: a `CLAUDE.md` beside your `PALACE.md`, two lines, so Claude Code loads
+it automatically and is sent to the primary file:
+
+```
+Read PALACE.md first. Then soul/SOUL.md if it exists. Then the newest file in soul/handovers/.
+Then the room we are in.
+```
+
+When you open Claude in Cowork (or Claude Code), point it at `PALACE.md` (or paste its contents). Then say:
 
 > "Wake up [your AI's name]. We're in [Room Name] today."
 
@@ -133,7 +144,7 @@ Claude will save a `soul/handovers/YYYY-MM-DD.md` with what was done, decisions 
 ## What to do on day one (realistic)
 
 1. Read this guide fully (you're doing it now, good)
-2. Fill in `CLAUDE-master.md` (takes 15 minutes)
+2. Fill in the master and save it as `PALACE.md`, then add the two-line `CLAUDE.md` pointer (takes 15 minutes)
 3. Fill in `SOUL.md` basics (takes 5 minutes)
 4. Set up 1–2 rooms (takes 10 minutes each)
 5. Have one session and ask Claude to write the first delta at the end
@@ -172,7 +183,8 @@ If you set up automated runs (morning check-ins, autodreams, etc.), two things m
 
 ```
 my-palace/
-  CLAUDE.md                    ← master prompt (start here)
+  PALACE.md                    ← master prompt, primary, AI-agnostic (start here)
+  CLAUDE.md                    ← two-line pointer to PALACE.md (for Claude Code)
   tracker.json                 ← project tracking
   soul/
     SOUL.md                    ← your AI's character

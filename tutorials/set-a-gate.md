@@ -10,7 +10,7 @@ Uses: `templates/CLAUDE-master.md` (rules 4, 7, 8), `templates/palace-audit-proc
 
 1. Pick a gate name. The convention is `[YOURNAME]GATE`. Add it as a crystal:
    `◆ [name]GATE: human review checkpoint for anything that ships, sends, or deletes.`
-2. Confirm the three standing guardrails are in your `CLAUDE.md` (they ship in the master
+2. Confirm the three standing guardrails are in your `PALACE.md` (they ship in the master
    template):
    - Anything going to the outside world needs your approval.
    - Foreign processes are quarantined: anything that did not originate in your palace is

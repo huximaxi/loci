@@ -2,8 +2,8 @@
 
 > This is the agent-executable first session. You do three small things by hand, then paste one
 > block and answer one question at a time while the agent builds your palace and earns its name.
-> It replaces the nine-block interview in `AGENT-SETUP.md` for the first run; that file is still
-> there for the deeper, later passes it describes.
+> Everything the agent needs travels in the paste block, so nothing else has to be in front of it.
+> If your agent can already read this repo, `AGENT-SETUP.md` runs the same ceremony from the files.
 
 ## You do this (about two minutes)
 

@@ -6,7 +6,7 @@ Uses: `templates/crystals-guide.md`, `templates/memory-lifecycle.md`
 
 ## Steps
 
-1. Open your palace `CLAUDE.md` and find the `## CONTEXT CRYSTALS` block (it ships in
+1. Open your palace `PALACE.md` and find the `## CONTEXT CRYSTALS` block (it ships in
    `templates/CLAUDE-master.md`).
 2. Write one fact your AI should never have to re-derive. Keep it to a line.
    Example: `◈ I prefer bullet points over prose.`
