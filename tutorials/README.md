@@ -18,6 +18,12 @@ let it point you.
 
 One flow per feature set. Start anywhere; each one ends with something working in your palace.
 
+Plus one cross-cutting flow:
+
+| Flow | Spans | You end with |
+|---|---|---|
+| [keep-your-memory-yours](keep-your-memory-yours.md) | Trust & Memory | the vendor holding no copy of you the substrate already holds better |
+
 ---
 
 *loci · [loci.garden](https://loci.garden)*
