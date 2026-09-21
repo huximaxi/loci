@@ -173,7 +173,7 @@ That's it. You're running.
 
 If you set up automated runs (morning check-ins, autodreams, etc.), two things matter:
 
-**Dynamic paths.** Session IDs change on every run, so hardcoded paths break immediately. Your scheduled task prompts should locate palace files relative to the palace root rather than embedding a specific session or machine path: for example `find "$PALACE_ROOT" -maxdepth 3 -name "CLAUDE.md"`, where the root is the one place you name once (the `Palace:` line in your identity block, or the `LOCI_PALACE` environment variable if you use the CLI).
+**Dynamic paths.** Session IDs change on every run, so hardcoded paths break immediately. Your scheduled task prompts should locate palace files relative to the palace root rather than embedding a specific session or machine path: for example `find "$PALACE_ROOT" -maxdepth 3 -name "PALACE.md"`, where the root is the one place you name once (the `Palace:` line in your identity block, or the `LOCI_PALACE` environment variable if you use the CLI).
 
 **SOUL.md first.** Your AI's SOUL.md must be included in every scheduled task prompt: it is what makes the output feel like your collaborator rather than a generic assistant. Read it before any state files.
 
