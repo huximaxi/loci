@@ -30,7 +30,8 @@ git clone https://github.com/huximaxi/loci
 
 Copy the [`templates/`](templates/) kit into a folder of your own, open
 [FIRST-SESSION.md](FIRST-SESSION.md), and point any file-aware AI at your palace
-`CLAUDE.md`. That is the setup. Not sure where to begin? Run the
+`PALACE.md`. That is the setup. (Claude Code users also get a two-line `CLAUDE.md`
+beside it, which just says to read `PALACE.md` first.) Not sure where to begin? Run the
 [feature helper](templates/feature-helper.md) and it points you. The full walkthrough is in
 [SETUP-GUIDE.md](SETUP-GUIDE.md); if an agent is doing the setup for you, see
 [AGENT-SETUP.md](AGENT-SETUP.md).
@@ -71,7 +72,7 @@ Two ways, and the door is the first. The substrate is the same underneath both.
 
 | Run mode | What it is |
 |---|---|
-| **Plain markdown** | The door. Clone `templates/`, point any file-aware AI at `CLAUDE.md`. No build. |
+| **Plain markdown** | The door. Clone `templates/`, point any file-aware AI at `PALACE.md`. No build. |
 | **CLI** | [`loci-cli/`](loci-cli/) (v0.6.0-beta, optional). A small Rust binary that reads your palace from the terminal: `loci status`, `loci crystals`, `loci read`, `loci handover`, `loci tokens`, `loci rain`, `loci init`. Read-only, with one hand-off: `loci rain --fire` execs your agent runtime. No network. No inference. See [loci-cli/README.md](loci-cli/README.md). |
 
 The [`desktop/`](desktop/) app is a case study in driving the same substrate from a native
