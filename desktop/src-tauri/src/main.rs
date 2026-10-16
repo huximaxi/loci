@@ -82,7 +82,7 @@ fn loci_config_path() -> Result<std::path::PathBuf, String> {
 
 // ─── 1A: Ollama local inference ───────────────────────────────────────────────
 //
-// Cipher gate (non-negotiable):
+// Privacy gate (non-negotiable):
 //   1. base_url is validated before any HTTP call — localhost / 127.0.0.1 / Tailscale (100.x) only.
 //      Arbitrary URLs are rejected to prevent SSRF.
 //   2. offline_mode=true → commands return Err("ollama_offline") immediately.
@@ -155,7 +155,7 @@ struct InferenceStatus {
     local_models: Vec<String>,
 }
 
-// ─── URL validation (Cipher gate) ────────────────────────────────────────────
+// ─── URL validation (Privacy gate) ───────────────────────────────────────────
 //
 // Accepts:
 //   - http://localhost:*      (local loop, IPv4 name)
@@ -465,7 +465,7 @@ fn resolve_claude() -> Option<(PathBuf, std::ffi::OsString)> {
 // When None, no server is running. Wrapped in Mutex for interior mutability
 // inside Tauri's managed state.
 //
-// Cipher gate: port range validated (1024–65535) before bind.
+// Privacy gate: port range validated (1024–65535) before bind.
 // The server itself always binds to 127.0.0.1 — see mcp/server.rs.
 
 struct McpServerHandle {
@@ -483,7 +483,7 @@ async fn start_mcp_server(
     port: Option<u16>,
     loci_dir: Option<String>,
 ) -> Result<u16, String> {
-    // --- Cipher gate: port validation ---
+    // --- Privacy gate: port validation ---
     let requested_port = port.unwrap_or(3456);
     if requested_port < 1024 {
         return Err(format!(
@@ -831,7 +831,7 @@ fn extract_md_section_prefix(path: &std::path::PathBuf, header_prefix: &str) -> 
 /// precious and first-load latency is the main UX risk.
 ///
 /// NOT included (intentional):
-///   - The full ~2845-line VESPER.md (far too large, voice nuance not worth it at 7B)
+///   - The full voice file (far too large, voice nuance not worth it at 7B)
 ///   - Room/persona switching (deferred)
 /// Branching: PALACE.md without CLAUDE.md → build_companion_grounding (ceremony palaces).
 ///            CLAUDE.md present → identity grounding (legacy palaces).
@@ -1286,7 +1286,7 @@ fn detect_palace(search_path: String) -> DetectionResult {
             path: Some(mila_dir.to_string_lossy().to_string()),
             rooms: Some(detect_rooms(&mila_dir)),
             crystal_count: Some(count_crystals(&mila_dir)),
-            suggestion: "Found Mila's memory palace. Ready to migrate to loci format.".to_string(),
+            suggestion: "Found a MemPalace-style palace. Ready to migrate to loci format.".to_string(),
         };
     }
 
@@ -1314,8 +1314,8 @@ fn detect_palace(search_path: String) -> DetectionResult {
     // separate, Quarantined step (foreign text is never trusted-by-construction).
     //
     // Each signature matches if ALL its markers exist (file or dir) at `path`.
-    // Extend with Hermes and bourdon's L0–L6 once their on-disk signatures are
-    // confirmed under recon — do NOT guess a recogniser for a shape we haven't seen.
+    // Extend with other known palace layouts once their on-disk signatures are
+    // confirmed. Do NOT guess a recogniser for a shape we haven't seen.
     let signatures: &[(&str, &str, &[&str])] = &[
         ("claude-code", "Found a Claude Code store (CLAUDE.md). Loci can read across to it.", &["CLAUDE.md"]),
         ("agents-md", "Found an AGENTS.md store (Codex / kilo convention). Loci can read across to it.", &["AGENTS.md"]),
@@ -1616,7 +1616,7 @@ fn start_state_watcher(
             if path.file_name().and_then(|n| n.to_str()) != Some("state.json") {
                 continue;
             }
-            // Cipher: strip prefix so absolute palace path never reaches JS.
+            // Privacy: strip prefix so absolute palace path never reaches JS.
             // If strip fails the path is outside the palace; drop silently.
             if let Ok(rel) = path.strip_prefix(&palace_for_thread) {
                 eprintln!("[TIMING] watcher emit state_changed: {}", rel.display());
@@ -2366,10 +2366,10 @@ mod bridge_tests {
             "expected several cron jobs, got {}",
             snapshots.len()
         );
-        // At least one job must publish a CIQ score (coworking-eval-daily).
+        // At least one job must publish a score metric.
         assert!(
             snapshots.iter().any(|s| s.ciq.is_some()),
-            "expected at least one CIQ-publishing job"
+            "expected at least one job publishing a score metric"
         );
         // Most snapshots should expose at least one of {status, summary, last_run}.
         // A handful of palace-cron jobs publish metric-only state.json files that
