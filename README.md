@@ -46,7 +46,7 @@ Seven feature sets, all shipped as plain-text firmware.
 - **The Garden.** Ideas cultivated, not just stored. One file per idea, a health pass, seed-to-crystal graduation.
 - **Continuity & Synthesis.** No session starts cold. Handovers, a synthesis pass that proposes, scheduled housekeeping.
 - **Trust & Governance.** Nothing leaves or changes without you. A named review gate, foreign-process quarantine, confirm-against-disk, and a read-only structural audit.
-- **Interop & Evolution.** Works across every tool, federates to no one. Reads memory left by other tools by structure, speaks MCP, exports typed artifacts.
+- **Interop & Evolution.** Works across every tool, federates to no one. Reads memory left by other tools as data behind a gate, exports typed artifacts.
 
 The full map, with the templates behind each set, lives in
 [`features/features.yaml`](features/features.yaml).
@@ -74,9 +74,6 @@ Two ways, and the door is the first. The substrate is the same underneath both.
 |---|---|
 | **Plain markdown** | The door. Clone `templates/`, point any file-aware AI at `PALACE.md`. No build. |
 | **CLI** | [`loci-cli/`](loci-cli/) (v0.6.0-beta, optional). A small Rust binary that reads your palace from the terminal: `loci status`, `loci crystals`, `loci read`, `loci handover`, `loci tokens`, `loci rain`, `loci init`. Read-only, with one hand-off: `loci rain --fire` execs your agent runtime. No network. No inference. See [loci-cli/README.md](loci-cli/README.md). |
-
-The [`desktop/`](desktop/) app is a case study in driving the same substrate from a native
-cockpit, not part of setup. Read [desktop/README.md](desktop/README.md) if you want to see how it works.
 
 The methodology version and full changelog: [PALACE-METHODOLOGY.md](PALACE-METHODOLOGY.md).
 

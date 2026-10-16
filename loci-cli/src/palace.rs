@@ -6,11 +6,10 @@
 //!                    (the shape the templates kit and the setup guides build).
 //!   * rooms-at-root: PALACE.md/CLAUDE.md at root + sibling dirs each holding CLAUDE.md.
 //!
-//! The first two mirror the desktop's dual-layout acceptance; `rooms/` is checked
-//! before rooms-at-root because an explicit rooms directory is the stronger signal.
+//! `rooms/` is checked before rooms-at-root because an explicit rooms directory
+//! is the stronger signal.
 //!
-//! Re-expressed for the CLI in stdlib + std::fs. No shared crate with the desktop:
-//! the public CLI is a separate door into the same shape.
+//! Plain stdlib + std::fs, no shared crate.
 
 use std::fs;
 use std::path::{Path, PathBuf};

@@ -9,10 +9,10 @@ Uses: `templates/output-primitive.md`, `templates/friends/friend-template.md`,
 
 ## Steps
 
-1. Move freely. loci recognises memory laid down by other tools by structure alone:
-   `CLAUDE.md` (Claude Code), `AGENTS.md` (Codex), `.cursor/rules`, `.windsurfrules`.
-   Foreign content is read as data first, never trusted by construction (see `set-a-gate.md`).
-2. Speak MCP: point an MCP-aware client at your palace to read and create entries locally.
+1. Move freely. Other tools leave memory in known places: `CLAUDE.md` (Claude Code),
+   `AGENTS.md` (Codex), `.cursor/rules`, `.windsurfrules`. Point your AI at them and the
+   palace reads them as data first, never trusted by construction (see `set-a-gate.md`).
+2. Switch clients without moving anything: any file-aware AI reads the same palace folder.
    Nothing leaves the machine.
 3. Export a session as a typed artifact (`output-primitive.md`): for example a
    git-log-incident, a session arc rendered as an annotated commit log you can archive.

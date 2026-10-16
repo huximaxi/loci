@@ -106,8 +106,8 @@ releases:
 - Full diagnostic feedback flow
 
 The CLI's job at this tier is to be the door into your palace from the
-terminal, not to host the conversation. The companion app is one door; the
-templates kit is another; this is the third.
+terminal, not to host the conversation. The templates kit is one door;
+this is the other.
 
 ## License
 

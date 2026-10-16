@@ -2,7 +2,7 @@
 #
 # The substrate is plain-text firmware: the templates/ kit plus a few named processes,
 # which any file-aware AI can run. The CLI is a personal demo built on top of it, not the
-# substrate itself. You do not need it to start. (The desktop/ app is a case study, not a run mode.)
+# substrate itself. You do not need it to start.
 #
 # This file maps feature sets <-> shipped templates <-> use-cases <-> tutorials.
 # It is read by the feature-helper process (templates/feature-helper.md).
@@ -56,7 +56,7 @@ feature_sets:
   - id: interop
     name: Interop & Evolution
     value: Works across every tool, federates to no one.
-    does: Reads memory left by other tools by structure only, speaks MCP, exports typed artifacts, and measures its own growth.
+    does: Reads memory left by other tools as data behind a gate, exports typed artifacts, and measures its own growth.
     templates: [eval-framework.md, entanglement-template.md, output-primitive.md, friends/friend-template.md, obsidian-mindmap-starter.md]
     tutorial: tutorials/go-cross-tool.md
 
@@ -70,7 +70,7 @@ use_cases:
 
   - id: builder
     name: The Builder
-    for: Code context across sessions, MCP and IDE-native, plain text in the repo.
+    for: Code context across sessions, IDE-native, plain text in the repo.
     primary: [memory, context, interop]
     supporting: [identity, continuity, trust]
     start: tutorials/go-cross-tool.md
@@ -104,13 +104,12 @@ use_cases:
     start: tutorials/go-cross-tool.md
 
 # How to run the substrate. The CLI is a personal demo, not the substrate itself.
-# The desktop/ app is a case study in driving the substrate, not part of setup.
 run_modes:
   - id: markdown
     name: Plain markdown
     how: Copy templates/ into a folder, point any file-aware AI at your CLAUDE.md. No build. This is the door.
   - id: cli
-    name: CLI / MCP
+    name: CLI
     how: A terminal-native demo. IDE-friendly, zero GUI.
 
 # One tutorial per feature set ships in tutorials/.

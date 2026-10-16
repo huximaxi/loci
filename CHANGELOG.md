@@ -16,6 +16,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `loci-cli` palace detection accepts the layout the templates kit builds (`rooms/<room>/CLAUDE.md`). `loci status --palace <kit palace>` no longer returns "no palace found". Reported as `rooms-dir`; the `_palace/` and rooms-at-root layouts are unchanged. Unit tests cover all three.
 - Setup docs reconciled: handover path (`soul/handovers/`), template pointers (`_templates/`), a path-agnostic scheduled-task example, a Rust prerequisite before `cargo install`, a Claude Code variant of the first-session card, a `Palace:` line in the global identity block, and one paragraph in each setup door naming what the other door creates.
 
+### Removed
+- The Tauri desktop app (`desktop/`), including its embedded MCP server. Loci runs as plain markdown plus the optional CLI; the app was a case study, not a run mode. The code is archived at the `archive/desktop-app` tag for later work. CI drops the desktop and frontend jobs, the npm workspace drops `desktop`, and the CLI's overview now names two doors (CLI, templates kit).
+
 ---
 
 ## [v0.6.0-beta] — 2026-07-02

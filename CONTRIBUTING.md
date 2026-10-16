@@ -4,7 +4,7 @@ This is the canonical charter of the **Rainbow Zoku**: the maintainer chapter of
 
 ## What this is
 
-Loci is a methodology, a desktop app, and a public garden. It is not a company and it does not have an owner in the proprietary sense. The work belongs to whoever tends it.
+Loci is a methodology, a CLI, and a public garden. It is not a company and it does not have an owner in the proprietary sense. The work belongs to whoever tends it.
 
 A *zoku*, in the borrowed sense, is a voluntary affiliation built around shared values rather than birth, employment, or contract. The word comes from Hannu Rajaniemi's *Quantum Thief* trilogy. The Rainbow Zoku in that lore was the network's quiet circulatory system: keys, identities, routes, the architecture nobody sees until it stops working. We borrow the name for the same reason. Our Rainbow Zoku is the chapter that tends the infrastructure of Loci, welcomes new contributors, and holds the line on what we are committed to.
 

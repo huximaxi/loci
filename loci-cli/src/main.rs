@@ -25,8 +25,8 @@ mod tokens;
     long_about = "Read your local palace from the terminal.\n\n\
                   loci is the plain-text firmware for a persistent, private cognitive system.\n\
                   This CLI walks the palace structure and prints what's there. Read-only.\n\
-                  No network, no inference, no daemons. The companion app and the templates\n\
-                  kit are the other two doors; the CLI is the terminal-native one."
+                  No network, no inference, no daemons. The templates kit is the other\n\
+                  door; the CLI is the terminal-native one."
 )]
 struct Cli {
     /// Palace path. Overrides $LOCI_PALACE and cwd auto-detect.
@@ -94,7 +94,7 @@ enum Cmd {
         #[command(subcommand)]
         cmd: WalCmd,
     },
-    /// Overview of every command, grouped, with examples and the three doors.
+    /// Overview of every command, grouped, with examples and the two doors.
     #[command(alias = "commands")]
     Overview,
 }
@@ -187,16 +187,12 @@ const OVERVIEW_GROUPS: &[(&str, &[(&str, &str)])] = &[
     ("Meta", &[("overview", "loci overview")]),
 ];
 
-/// The three ways into a palace. Named in the CLI's own `long_about`; restated
+/// The two ways into a palace. Named in the CLI's own `long_about`; restated
 /// here so the overview places this terminal door among its siblings.
 const DOORS: &[(&str, &str)] = &[
     (
         "CLI (this door)",
         "terminal-native: walk the palace and print what's there",
-    ),
-    (
-        "Companion app",
-        "the desktop app: the palace with a GUI and the instrument cockpit",
     ),
     (
         "Templates kit",
@@ -325,7 +321,7 @@ fn cmd_overview(palace_arg: Option<PathBuf>, json: bool) -> Result<(), Error> {
         }
         println!();
     }
-    println!("The three doors");
+    println!("The two doors");
     for (n, r) in DOORS {
         println!("  {n:<16} {r}");
     }
