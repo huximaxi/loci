@@ -88,6 +88,8 @@ fn loci_config_path() -> Result<std::path::PathBuf, String> {
 //   2. offline_mode=true → commands return Err("ollama_offline") immediately.
 //      No silent external fallback. Ever.
 //   3. A single shared reqwest::Client is held in Tauri managed state for connection reuse.
+//   4. Every Ollama client starts from inference::ollama_client_builder(), which never
+//      follows redirects: the gate checks only the first hop, so a 307/308 fails closed.
 //
 // TODO(v2): extract to src/ollama.rs when this module grows.
 
@@ -2712,7 +2714,7 @@ async fn check_ceremony_vagueness(
     // cancels reliably even when Ollama is running but slow. tokio::time::timeout
     // alone is unreliable because reqwest may not drop an in-flight request fast
     // enough on future cancellation — the reqwest-level timeout fires first.
-    let ceremony_client = reqwest::Client::builder()
+    let ceremony_client = inference::ollama_client_builder()
         .timeout(std::time::Duration::from_secs(3))
         .connect_timeout(std::time::Duration::from_millis(500))
         .build()
@@ -2766,7 +2768,7 @@ async fn generate_greeter_names(
     // Short-timeout client: same rationale as check_ceremony_vagueness.
     // Naming names should feel fast or fall back gracefully — 30s waits here
     // kill the ceremony's momentum. 2s HTTP timeout + 3s outer guard.
-    let name_client = reqwest::Client::builder()
+    let name_client = inference::ollama_client_builder()
         .timeout(std::time::Duration::from_secs(2))
         .connect_timeout(std::time::Duration::from_millis(500))
         .build()
@@ -3299,7 +3301,7 @@ mod url_validation_tests {
 
 fn main() {
     let ollama_client = OllamaState {
-        client: reqwest::Client::builder()
+        client: inference::ollama_client_builder()
             .timeout(std::time::Duration::from_secs(120)) // generous for local inference
             .build()
             .expect("failed to build reqwest client"),

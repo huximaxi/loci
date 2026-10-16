@@ -92,8 +92,19 @@ struct ChoiceMsg {
     content: String,
 }
 
+/// The starting point for EVERY reqwest client that talks to Ollama. Redirects
+/// are never followed: the URL gate (main.rs::validate_ollama_url) checks only
+/// the first hop, and a 307/308 keeps the POST body, so following one would let
+/// an accepted endpoint forward a prompt or embedding text to a host the gate
+/// never saw (while the egress receipt still names the first host). A redirect
+/// therefore surfaces as a non-success status and fails closed.
+pub fn ollama_client_builder() -> reqwest::ClientBuilder {
+    reqwest::Client::builder().redirect(reqwest::redirect::Policy::none())
+}
+
 /// Ollama-backed inference. Holds a clone of the app-wide reqwest client
 /// (cheap: reqwest::Client is Arc internally) and a pre-validated base URL.
+/// That client must come from `ollama_client_builder()`.
 pub struct OllamaBackend {
     client: reqwest::Client,
     base: url::Url,
@@ -461,5 +472,98 @@ mod tests {
             base: url::Url::parse("http://100.64.1.5:11434").unwrap(),
         };
         assert_eq!(tailnet.egress_class(), EgressClass::LocalNetwork);
+    }
+
+    use tokio::io::{AsyncReadExt, AsyncWriteExt};
+    use tokio::net::{TcpListener, TcpStream};
+    use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver};
+
+    /// Read one HTTP/1.1 request (headers plus Content-Length body), so the
+    /// socket is drained before the reply goes out.
+    async fn read_request(stream: &mut TcpStream) -> String {
+        let mut buf = Vec::new();
+        let mut chunk = [0u8; 1024];
+        loop {
+            let n = stream.read(&mut chunk).await.unwrap_or(0);
+            if n == 0 {
+                break;
+            }
+            buf.extend_from_slice(&chunk[..n]);
+            if let Some(end) = buf.windows(4).position(|w| w == b"\r\n\r\n") {
+                let head = String::from_utf8_lossy(&buf[..end]).to_lowercase();
+                let len = head
+                    .lines()
+                    .find_map(|l| l.strip_prefix("content-length:"))
+                    .and_then(|v| v.trim().parse::<usize>().ok())
+                    .unwrap_or(0);
+                if buf.len() >= end + 4 + len {
+                    break;
+                }
+            }
+        }
+        String::from_utf8_lossy(&buf).into_owned()
+    }
+
+    /// Answer every connection on `listener` with `reply`. Each request is sent
+    /// down the returned channel BEFORE the reply, so once a client call returns,
+    /// anything it delivered here is already observable.
+    fn serve(listener: TcpListener, reply: String) -> UnboundedReceiver<String> {
+        let (tx, rx) = unbounded_channel();
+        tokio::spawn(async move {
+            while let Ok((mut stream, _)) = listener.accept().await {
+                let _ = tx.send(read_request(&mut stream).await);
+                let _ = stream.write_all(reply.as_bytes()).await;
+                let _ = stream.shutdown().await;
+            }
+        });
+        rx
+    }
+
+    /// `redirector` stands in for an Ollama URL the gate accepted; it answers
+    /// every request with `status` pointing at `trap`, a host the gate never
+    /// checked. Returns the redirector's base URL and the trap's request log.
+    async fn redirect_rig(status: &str) -> (url::Url, UnboundedReceiver<String>) {
+        let trap = TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let trap_addr = trap.local_addr().unwrap();
+        let ok = r#"{"choices":[{"message":{"content":"forwarded"}}]}"#;
+        let trap_log = serve(
+            trap,
+            format!(
+                "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{ok}",
+                ok.len()
+            ),
+        );
+
+        let redirector = TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let base = url::Url::parse(&format!("http://{}", redirector.local_addr().unwrap())).unwrap();
+        let _ = serve(
+            redirector,
+            format!(
+                "HTTP/1.1 {status}\r\nLocation: http://{trap_addr}/v1/chat/completions\r\nContent-Length: 0\r\nConnection: close\r\n\r\n"
+            ),
+        );
+        (base, trap_log)
+    }
+
+    #[tokio::test]
+    async fn ollama_client_does_not_follow_redirects() {
+        // Control: reqwest's default policy follows the 307 and replays the POST
+        // body to the trap. That is the leak, and it proves the rig can see one.
+        let (base, mut trap_log) = redirect_rig("307 Temporary Redirect").await;
+        let leaky = OllamaBackend { client: reqwest::Client::new(), base };
+        assert_eq!(leaky.chat("", "the secret prompt", "m").await.unwrap(), "forwarded");
+        assert!(trap_log.try_recv().unwrap().contains("the secret prompt"));
+
+        // The Ollama client: both body-preserving redirects surface as a
+        // non-success status and fail closed; nothing reaches the trap.
+        for status in ["307 Temporary Redirect", "308 Permanent Redirect"] {
+            let (base, mut trap_log) = redirect_rig(status).await;
+            let backend = OllamaBackend { client: ollama_client_builder().build().unwrap(), base };
+            let err = backend.chat("", "the secret prompt", "m").await.unwrap_err();
+            assert!(err.starts_with(&format!("ollama {}", &status[..3])), "{status}: {err}");
+            assert!(!backend.health().await, "{status}: a redirect must not read as healthy");
+            assert!(backend.available_models().await.is_empty());
+            assert!(trap_log.try_recv().is_err(), "{status}: redirect followed to an unchecked host");
+        }
     }
 }
