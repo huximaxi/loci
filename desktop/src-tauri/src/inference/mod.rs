@@ -5,7 +5,7 @@
 // answer; nothing knows whether Ollama, LM Studio, or llama.cpp replied. Adding
 // a provider means implementing this one trait — the chat UI never changes.
 //
-// Privacy contract (Cipher gate): every backend is fail-closed. `Err` is never a
+// Privacy gate: every backend is fail-closed. `Err` is never a
 // silent external fallback. URL validation (localhost / Tailscale only) stays in
 // main.rs::validate_ollama_url; this module receives an already-validated base.
 
