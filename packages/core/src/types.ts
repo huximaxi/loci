@@ -66,7 +66,8 @@ export interface Room {
 // ─── Ollama local inference config (1A) ──────────────────────────────────────
 //
 // OllamaConfig is the source-of-truth type for the Ollama integration.
-// Stored in LociConfig and read by the Tauri backend on every command invocation.
+// Stored in LociConfig. Its Rust reader shipped with the desktop app, now archived
+// at the `archive/desktop-app` tag.
 //
 // Cipher gate:
 //   - base_url is validated in Rust before any HTTP call (localhost / Tailscale only)
@@ -121,7 +122,8 @@ export interface LociConfig {
 // ─── MCP server config (1B) ──────────────────────────────────────────────────
 //
 // McpConfig governs the embedded MCP server (localhost:3456).
-// Served by the Tauri backend via axum. Goose, Continue.dev, Claude Code compatible.
+// The server shipped with the desktop app, now archived at the `archive/desktop-app`
+// tag. No MCP server ships from this repository today.
 //
 // Cipher gate:
 //   - port must be in range 1024–65535 (validated in Rust before bind)

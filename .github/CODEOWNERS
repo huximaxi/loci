@@ -12,10 +12,6 @@
 /.github/SECURITY.md                    @huximaxi
 /.github/CODEOWNERS                     @huximaxi
 
-# Desktop application
-/desktop/                               @huximaxi
-/desktop/src-tauri/                     @huximaxi
-
 # CI and governance
 /.github/workflows/                     @huximaxi
 

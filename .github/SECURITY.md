@@ -4,7 +4,7 @@ The Loci project takes security seriously. This file is the GitHub-side mirror o
 
 ## Reporting a vulnerability
 
-If you have found a vulnerability in the Loci desktop application, the loci.garden site, the MCP server, or any other component of this project, please **do not** open a public issue.
+If you have found a vulnerability in the Loci CLI, the loci.garden site, or any other component of this project, please **do not** open a public issue.
 
 Choose one of the following channels:
 
@@ -19,7 +19,7 @@ Choose one of the following channels:
 
 ## What is in scope
 
-- The Loci desktop application (Tauri v2, Rust + WebView frontend) and its local MCP server.
+- The Loci CLI (`loci-cli/`) and the palace templates in this repository.
 - The loci.garden static site and any subdomains under `loci.garden`.
 - The CONTRIBUTING.md charter (the Rainbow Zoku charter) and any review/merge workflow it documents.
 - Build and release artefacts published via GitHub Releases on this repository.
