@@ -34,6 +34,7 @@ Create a new file for each watering, using the format below.
 
 ```markdown
 ---
+type: Garden Entry
 plant: [Plant name]
 entry: [NNN]
 date: [YYYY-MM-DD]
@@ -68,6 +69,7 @@ follows: [plant-name]-[previous NNN, or "seed" if this is the first entry]
 
 ```markdown
 ---
+type: Garden Entry
 plant: Your Plant
 entry: 001
 date: 2026-03-15
@@ -104,6 +106,7 @@ A plant starts as a question, not an answer. The early entries are exploratory. 
 
 ```markdown
 ---
+type: Garden Entry
 plant: Your Plant
 entry: 004
 date: 2026-04-02

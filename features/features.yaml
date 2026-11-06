@@ -57,7 +57,7 @@ feature_sets:
     name: Interop & Evolution
     value: Works across every tool, federates to no one.
     does: Reads memory left by other tools as data behind a gate, exports typed artifacts, and measures its own growth.
-    templates: [eval-framework.md, entanglement-template.md, output-primitive.md, friends/friend-template.md, obsidian-mindmap-starter.md]
+    templates: [eval-framework.md, entanglement-template.md, output-primitive.md, friends/friend-template.md, obsidian-mindmap-starter.md, okf-interop.md]
     tutorial: tutorials/go-cross-tool.md
 
 use_cases:
