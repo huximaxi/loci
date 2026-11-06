@@ -41,8 +41,12 @@ Step 1: SCAN (shell, no LLM reads yet)
    ├── Check file refs exist (bash test -f on each path cited)
    ├── Walk tracker.json: test every path in each track's `artifacts` (test -f),
    │   normalising filenames to Unicode NFC before comparing
-   └── For versioned artifacts (name carries vN or rev-N), find the highest-numbered
-       match on disk and flag any tracker ref that points below it
+   ├── For versioned artifacts (name carries vN or rev-N), find the highest-numbered
+   │   match on disk and flag any tracker ref that points below it
+   └── Interop (advisory, not scored): run the check in okf-interop.md, then drop
+       instruction files (CLAUDE.md, PALACE.md, skills) and .lociignore material
+       from its output before counting: they never go into a bundle. What is left
+       is the number of memory files missing a frontmatter `type`
    (all scans honour .lociignore: skip "material", walk "memory")
    │
    ▼
@@ -155,6 +159,8 @@ verdict: HEALTHY | NEEDS_ATTENTION | DRIFT_DETECTED
 | Architectural drift | X/5 | |
 | Tracker integrity | X/5 | |
 | **Total** | **XX/30** | |
+
+Interop (advisory, not scored): N memory files missing a frontmatter `type` (OKF conformance, see okf-interop.md)
 
 ## Findings
 | File | Issue | Severity |
