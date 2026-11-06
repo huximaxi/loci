@@ -43,9 +43,10 @@ Step 1: SCAN (shell, no LLM reads yet)
    │   normalising filenames to Unicode NFC before comparing
    ├── For versioned artifacts (name carries vN or rev-N), find the highest-numbered
    │   match on disk and flag any tracker ref that points below it
-   └── Interop (advisory, not scored): list memory .md files whose frontmatter lacks
-       a `type`, using the check in okf-interop.md. Instruction files (CLAUDE.md,
-       PALACE.md, skills) are exempt: they never go into a bundle
+   └── Interop (advisory, not scored): run the check in okf-interop.md, then drop
+       instruction files (CLAUDE.md, PALACE.md, skills) and .lociignore material
+       from its output before counting: they never go into a bundle. What is left
+       is the number of memory files missing a frontmatter `type`
    (all scans honour .lociignore: skip "material", walk "memory")
    │
    ▼
