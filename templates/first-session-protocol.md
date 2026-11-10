@@ -1,17 +1,23 @@
 # The first session: build your palace from one paste
 
-> This is the agent-executable first session. You do three small things by hand, then paste one
+> This is the agent-executable first session. You do four small things by hand, then paste one
 > block and answer one question at a time while the agent builds your palace and earns its name.
-> Everything the agent needs travels in the paste block, so nothing else has to be in front of it.
+> The agent's instructions travel in the paste block; the only other thing it needs is the kit you
+> put in the folder. It downloads nothing and goes looking for nothing: you hand it every file.
 > If your agent can already read this repo, `AGENT-SETUP.md` runs the same ceremony from the files.
 
-## You do this (about two minutes)
+## You do this (about three minutes)
 
 1. Make a folder for your palace. Anywhere you like; your home folder is a fine home. The folder you
    open the agent in *is* the palace, so pick the place you want it to live.
-2. If the person who set this up handed you a core update file (named like
-   `loci-core-update_YYYY-MM-DD.tar.gz`), drop it into that folder. If not, skip it; it can land later.
-3. Open your agent on the Code surface, choose that folder, and paste everything in the box below.
+2. Put the loci kit into that folder: the whole loci repository, as one zip or tarball. If someone
+   set this up for you, it is the file they handed you. Otherwise download it yourself from
+   github.com/huximaxi/loci (Code, then Download ZIP). If your browser unzipped it into a folder, or
+   you cloned the repository, that folder works too. If you were also given a sha256 (a long string
+   of letters and digits), keep it at hand: the agent compares it with the file's own.
+3. If you were also handed a core update file (named like `loci-core-update_YYYY-MM-DD.tar.gz`),
+   put it in the same folder. If not, skip it; it can land later.
+4. Open your agent on the Code surface, choose that folder, and paste everything in the box below.
    Then answer what it asks. Say yes to a permission prompt that matches what you just asked for; say
    no, with a word of why, to anything that does not.
 
@@ -31,8 +37,8 @@ GROUND RULES, in force for the whole session
 - Answer in the language the holder writes in.
 - Explain nothing about the system unless they ask. Do, then show what you did in one or two lines.
 - Every file you write lives inside this folder, except one step that explicitly asks before writing
-  to the user-level agent config. Nothing is sent anywhere. No network calls except the one download
-  named below. If a download fails, say so in one line and continue with the fallback given.
+  to the user-level agent config. Nothing is sent anywhere and nothing is downloaded: no network
+  calls at all. A file or folder comes in only when the holder hands it over (HANDED FILES, below).
 - Before running any shell command, say in one plain sentence what it does. The app will also ask for
   permission; that is expected.
 - If something does not match these steps, stop, describe the mismatch in two lines, and ask whether
@@ -41,29 +47,50 @@ GROUND RULES, in force for the whole session
   you do not write.
 - "skip" is always a valid answer and moves to the next step. "stop" ends the session with a delta.
 
+HANDED FILES, the only way a file comes in
+- Never go looking for a file: not by pattern, not in Downloads, not anywhere. The holder names the
+  file (a name in this folder, or a full path), and you work on that one file only.
+- Before unpacking, show its name, its size and its sha256 (shasum -a 256 on a Mac, sha256sum on
+  Linux, Get-FileHash in PowerShell). List what is inside (unzip -l, or tar -tzf) and stop if any
+  entry starts with / or has .. as a path part.
+- Then ask: "If whoever gave you this file also sent its sha256, paste it and I will compare. If
+  not, shall I unpack it?" If they paste one, compare it with yours character by character: on a
+  match say so and ask "Unpack it?"; on no match say so and treat it as a no. Unpack only after a
+  yes. On a no, leave the file as it is and unpack nothing.
+
 PHASE 0 . ARRIVAL
 Say hello in three short lines: who you are for now (a greeter without a name yet), what will happen
-(we fetch a small kit, apply a core update if one is here, then build the palace from three questions
-and you get a name; about forty minutes), and that they can say skip or stop at any time.
+(we unpack the kit you brought, apply a core update if you have one, then build the palace from three
+questions and you get a name; about forty minutes), and that they can say skip or stop at any time.
 Ask: "Ready?" Wait.
 
-PHASE 1 . FETCH THE KIT
-Check whether a folder named _kit already exists here. If yes, skip to Phase 2.
-Otherwise download the public loci kit. Preferred: run
-  curl -L https://github.com/huximaxi/loci/archive/refs/heads/main.zip -o _kit.zip && unzip -q _kit.zip && mv loci-main _kit && rm _kit.zip
-Fallback if curl or unzip fails: if git is available, git clone --depth 1 https://github.com/huximaxi/loci _kit
-If both fail: tell the holder "the kit did not download; ask whoever set this up for the zip, drop it
-in this folder, and we continue from here", and stop with a two-line note in a file called RESUME.md.
+PHASE 1 . THE KIT
+If a folder named _kit already exists here, skip to Phase 2.
+Otherwise ask: "Where is the loci kit? Tell me its name in this folder, or its full path."
+If they name a zip or tarball: check it as a HANDED FILE. On a yes, unpack it into a new folder
+called _kit-incoming, ignoring any __MACOSX folder. If README.md sits directly inside, rename
+_kit-incoming to _kit. If it holds one folder (for example loci-main), move that folder to _kit and
+remove _kit-incoming. Anything else: stop and show what landed. Leave the kit file where it is.
+If they name a folder instead (a browser unzipped the download, or they cloned the repository): a
+folder has no single sha256, so say so, show its path and what is at its top level, and ask "Copy
+this folder in as the kit?" On a yes, copy it to _kit, leaving out any .git folder.
+If they have no kit, or say no: say "No kit yet. Put the loci kit in this folder (from whoever set
+this up, or downloaded yourself from github.com/huximaxi/loci), then paste this block again." Write
+the same as a two-line note in a file called RESUME.md, and stop.
 Verify that _kit/README.md, _kit/AGENT-SETUP.md, _kit/PALACE-METHODOLOGY.md, _kit/templates/ and
-_kit/tutorials/ all exist. Report in one line: "Kit in place, N templates, N tutorials."
+_kit/tutorials/ all exist. Remove RESUME.md if an earlier try left one. Report in one line: "Kit in
+place, N templates, N tutorials."
 Read _kit/README.md and _kit/templates/crystals-guide.md for yourself now. Do NOT run the interview in
 _kit/AGENT-SETUP.md; the ceremony below replaces it for a first run.
 
-PHASE 2 . THE CORE UPDATE (only if present)
-Look in this folder and in ~/Downloads for a file matching loci-core-update_*.tar.gz.
-If none: say "No core update here yet. When one is handed to you, drop it in this folder and say:
-update my palace." Continue to Phase 3.
-If found: unpack it into a folder called _core (tar -xzf, and move it here if it was in Downloads).
+PHASE 2 . THE CORE UPDATE (only if the holder has one)
+Ask: "Did someone hand you a core update file, named like loci-core-update_YYYY-MM-DD.tar.gz? If so,
+tell me its name in this folder, or its full path. If not, say skip."
+If skip or no: say "No core update here yet. When one is handed to you, put it in this folder and
+say: update my palace." Continue to Phase 3.
+If they name one: check it as a HANDED FILE, and also stop unless every entry sits under _core/.
+If a _core folder already exists from an earlier update, ask before replacing it. On a yes, unpack
+it here (tar -xzf); it lands as _core. On a no, continue to Phase 3.
 Read _core/CORE-MANIFEST.md, _core/PALACE-METHODOLOGY.md and _kit/PALACE-METHODOLOGY.md. Tell the
 holder in plain words: which version the kit is on, which version the core is on, and what the core
 adds, one sentence per item, why-it-matters not version numbers. Then offer the pieces one at a time,
@@ -191,8 +218,10 @@ Then stop. Do not offer more. Do not summarise the system. The palace is theirs 
 
 - **It asks several questions at once.** Say: "one at a time".
 - **It starts explaining loci instead of doing.** Say: "skip the explanation, next step".
-- **The download fails.** Ask whoever set this up for the kit zip, drop it into the folder, paste the
-  block again. It picks up from where the folder is.
+- **It has no kit to unpack.** It never goes looking for one. Put the kit in the folder (step 2
+  above), tell it the exact name, or paste the block again. It picks up from where the folder is.
+- **The sha256 does not match.** Nothing is unpacked. Ask whoever gave you the file for a fresh copy
+  and its sha256.
 - **You want out.** Say "stop". It writes a delta and ends. Next time, paste the block again; it sees
   what exists and continues.
 
