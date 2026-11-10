@@ -51,12 +51,16 @@ HANDED FILES, the only way a file comes in
 - Never go looking for a file: not by pattern, not in Downloads, not anywhere. The holder names the
   file (a name in this folder, or a full path), and you work on that one file only.
 - Before unpacking, show its name, its size and its sha256 (shasum -a 256 on a Mac, sha256sum on
-  Linux, Get-FileHash in PowerShell). List what is inside (unzip -l, or tar -tzf) and stop if any
-  entry starts with / or has .. as a path part.
+  Linux, Get-FileHash in PowerShell). List what is inside with each entry's type (zipinfo for a
+  zip, tar -tvzf for a tarball). Stop if any entry starts with / or has .. as a path part, or is
+  anything but a regular file or a folder: each entry line's first character must be - or d (a
+  link shows as l or h).
 - Then ask: "If whoever gave you this file also sent its sha256, paste it and I will compare. If
   not, shall I unpack it?" If they paste one, compare it with yours character by character: on a
   match say so and ask "Unpack it?"; on no match say so and treat it as a no. Unpack only after a
   yes. On a no, leave the file as it is and unpack nothing.
+- If the unpack command exits with an error, stop and show its output. Read or copy nothing from
+  what landed.
 
 PHASE 0 . ARRIVAL
 Say hello in three short lines: who you are for now (a greeter without a name yet), what will happen
@@ -65,21 +69,32 @@ questions and you get a name; about forty minutes), and that they can say skip o
 Ask: "Ready?" Wait.
 
 PHASE 1 . THE KIT
-If a folder named _kit already exists here, skip to Phase 2.
-Otherwise ask: "Where is the loci kit? Tell me its name in this folder, or its full path."
-If they name a zip or tarball: check it as a HANDED FILE. On a yes, unpack it into a new folder
-called _kit-incoming, ignoring any __MACOSX folder. If README.md sits directly inside, rename
-_kit-incoming to _kit. If it holds one folder (for example loci-main), move that folder to _kit and
-remove _kit-incoming. Anything else: stop and show what landed. Leave the kit file where it is.
+The kit is complete when _kit/README.md, _kit/AGENT-SETUP.md, _kit/PALACE-METHODOLOGY.md,
+_kit/templates/ and _kit/tutorials/ all exist. If it is complete already, skip to Phase 2. If a
+_kit folder is here but incomplete, say what is missing and ask "Move it aside as _kit-rejected?"
+On a yes, rename it (add a number if that name is taken); on a no, stop.
+Ask: "Where is the loci kit? Tell me its name in this folder, or its full path."
+If they name a zip or tarball: check it as a HANDED FILE. On a yes, first: if a _kit-incoming
+folder is left from an earlier try, ask before removing it, and on a no, stop. Then unpack it into
+a new folder called _kit-incoming, ignoring any __MACOSX folder. If README.md sits directly inside,
+rename _kit-incoming to _kit. If it holds one folder (for example loci-main), move that folder to
+_kit and remove _kit-incoming. Anything else: stop and show what landed. Leave the kit file where
+it is.
 If they name a folder instead (a browser unzipped the download, or they cloned the repository): a
-folder has no single sha256, so say so, show its path and what is at its top level, and ask "Copy
-this folder in as the kit?" On a yes, copy it to _kit, leaving out any .git folder.
-If they have no kit, or say no: say "No kit yet. Put the loci kit in this folder (from whoever set
-this up, or downloaded yourself from github.com/huximaxi/loci), then paste this block again." Write
-the same as a two-line note in a file called RESUME.md, and stop.
-Verify that _kit/README.md, _kit/AGENT-SETUP.md, _kit/PALACE-METHODOLOGY.md, _kit/templates/ and
-_kit/tutorials/ all exist. Remove RESUME.md if an earlier try left one. Report in one line: "Kit in
-place, N templates, N tutorials."
+folder has no single sha256, so say so, and show its path and what is at its top level. Stop if,
+leaving .git aside, it holds anything but regular files and folders. Ask "Copy this folder in as
+the kit?" On a yes, copy it to _kit, leaving out any .git folder.
+If the sha256 did not match: say "The kit file does not match its sha256. Nothing was unpacked. Ask
+whoever gave it to you for a fresh copy and its sha256, then paste this block again." Write the
+same as a two-line note in a file called RESUME.md, and stop.
+If they have no kit, or say no for any other reason: say "No kit yet. Put the loci kit in this
+folder (from whoever set this up, or downloaded yourself from github.com/huximaxi/loci), then paste
+this block again." Write the same as a two-line note in RESUME.md, and stop.
+Check that the kit is now complete. If it is not, say what is missing and ask "Move it aside as
+_kit-rejected?" On a yes, rename it (add a number if that name is taken). Either way, write the
+"No kit yet" note to RESUME.md and stop.
+Remove RESUME.md if an earlier try left one. Report in one line: "Kit in place, N templates, N
+tutorials."
 Read _kit/README.md and _kit/templates/crystals-guide.md for yourself now. Do NOT run the interview in
 _kit/AGENT-SETUP.md; the ceremony below replaces it for a first run.
 
@@ -88,9 +103,17 @@ Ask: "Did someone hand you a core update file, named like loci-core-update_YYYY-
 tell me its name in this folder, or its full path. If not, say skip."
 If skip or no: say "No core update here yet. When one is handed to you, put it in this folder and
 say: update my palace." Continue to Phase 3.
-If they name one: check it as a HANDED FILE, and also stop unless every entry sits under _core/.
-If a _core folder already exists from an earlier update, ask before replacing it. On a yes, unpack
-it here (tar -xzf); it lands as _core. On a no, continue to Phase 3.
+If they name one: check it as a HANDED FILE. A core update holds one top-level folder, _core: its
+entries read _core/... or ./_core/..., and any entry outside it means stop. On a no, continue to
+Phase 3. On a yes:
+- If a _core-incoming folder is left from an earlier try, ask before removing it; on a no,
+  continue to Phase 3.
+- Unpack it into a new folder called _core-incoming (tar -xzf with -C _core-incoming). It lands
+  as _core-incoming/_core.
+- If a _core folder is already here from an earlier update, ask "Set the old core aside as
+  _core-previous-[date]?" On a yes, rename it (add a number if that name is taken). On a no, remove
+  _core-incoming and continue to Phase 3.
+- Move _core-incoming/_core to _core, then remove _core-incoming.
 Read _core/CORE-MANIFEST.md, _core/PALACE-METHODOLOGY.md and _kit/PALACE-METHODOLOGY.md. Tell the
 holder in plain words: which version the kit is on, which version the core is on, and what the core
 adds, one sentence per item, why-it-matters not version numbers. Then offer the pieces one at a time,
