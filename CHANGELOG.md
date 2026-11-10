@@ -7,15 +7,30 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+---
+
+## [v0.7.0-beta] - 2026-11-10
+
+CLI 0.7.0-beta. The desktop app leaves the repository; loci runs as plain markdown plus
+the optional CLI. Methodology line unchanged: `loci-core` 1.6-candidate.
+
 ### Added
 - `templates/okf-interop.md`: the palace speaks the Open Knowledge Format (OKF v0.2), a vendor-neutral spec for markdown with YAML frontmatter. Maps file types, tiers, lifecycle (dated `valid_until` to `stale_after`, composting to `deprecated`) and provenance onto OKF fields while keeping the stability axis (◆ ◈ ◇) and OKF's who-confirmed axis apart; an agent-executable export that stages outside the palace and leaves nothing until the person says so; reading foreign bundles as data behind the gate; a read-only check for the required `type`. Garden entries now carry `type: Garden Entry`, and the palace audit gains an advisory, unscored interop line.
-- `loci-wal/`: the egress-receipt trust primitive (#84, 2026-07-15). An append-only, payload-free, hash-chained write-ahead log of what left the device, plus an Ed25519-signed proof bundle a third party verifies offline. The chain orders frames and breaks on piecemeal edits; the signed bundle is the cryptographic tamper-evidence, and it carries no payload hash or byte count. Public half only: key custody and the disclosure policy stay outside this repository.
+- `loci-wal/`: the egress-receipt trust primitive (#84, 2026-07-15). An append-only, payload-free, hash-chained write-ahead log of what left the device, plus an Ed25519-signed proof bundle a third party verifies offline. The chain orders frames and breaks on piecemeal edits; the signed bundle is the cryptographic tamper-evidence, and it carries no payload hash or byte count. Public half only: key custody and the disclosure policy stay outside this repository. The writer that recorded frames lived in the desktop app and left with it (see Removed): in this release nothing in the repository appends to the log, and a runtime that wants receipts calls `record_egress`.
 - `loci-cli`: two commands on the receipt (#84). `loci audit [--wal PATH] [--since ISO]` reads the live WAL and prints what left the device grouped by egress class, with hash-chain integrity and per-class destination hosts (`--json` supported). `loci wal verify <bundle> [--expect-key HEX]` verifies an exported bundle offline; `--expect-key` pins the signer for provenance. Both cap the file size before reading.
-- **Rain: the garden watering round, coupled to a token-window watcher** (0.8 line). Three pieces, one pattern (`templates/skills/rain.md`): (1) `loci tokens`: approximate agent-runtime 5-hour session-window status reconstructed read-only from local transcripts, streamed line-by-line (timing and spend, not quota; honest about being approximate). (2) `loci rain [--fire]`: watering weather on one screen (window signal `fresh`/`open`/`closing`, garden plant count, last rain from the `garden/.rain/` archive) plus the one hand-off in the CLI: `--fire` execs the user's agent runtime from the palace root and exits. (3) Desktop rain gauge card: same weather + garden state with a "make it rain" button behind an explicit click; three new commands (`read_token_window`, `read_rain_status`, `fire_rain`), spawned rounds reaped on exit. Rain never auto-fires: weather is a suggestion, spending is a gate.
+- **Rain: the garden watering round, coupled to a token-window watcher.** Two pieces, one pattern (`templates/skills/rain.md`): (1) `loci tokens`: approximate agent-runtime 5-hour session-window status reconstructed read-only from local transcripts, streamed line-by-line (timing and spend, not quota; honest about being approximate). (2) `loci rain [--fire]`: watering weather on one screen (window signal `fresh`/`open`/`closing`, garden plant count, last rain from the `garden/.rain/` archive) plus the one hand-off in the CLI: `--fire` execs the user's agent runtime from the palace root and exits. Rain never auto-fires: weather is a suggestion, spending is a gate.
+- `loci new <path>` scaffolds a starter palace (`PALACE.md`, a `CLAUDE.md` pointer, a soul file, a starter room, `tracker.json`, the lifecycle skills) and hands off to `loci init` (#89, #93).
+- `loci overview` (alias `commands`): every command grouped, each with a one-line description read live from `--help` and one example (#88).
+- `templates/first-session-protocol.md`: an agent-executable first session. A newcomer pastes one block into a fresh agent, answers one question at a time, and the palace is named in a short ceremony (#91).
+- `tutorials/keep-your-memory-yours.md`: keep the palace the only memory of record when the tool you point at it can build its own server-side memory of you (#94).
+
+### Changed
+- `PALACE.md` is the primary, AI-agnostic file in every setup door (`AGENT-SETUP.md`, `SETUP-GUIDE.md`, `loci new`, the README); `CLAUDE.md` is a two-line pointer for Claude Code (#92, #93, #95).
 
 ### Fixed
 - `loci-cli` palace detection accepts the layout the templates kit builds (`rooms/<room>/CLAUDE.md`). `loci status --palace <kit palace>` no longer returns "no palace found". Reported as `rooms-dir`; the `_palace/` and rooms-at-root layouts are unchanged. Unit tests cover all three.
 - Setup docs reconciled: handover path (`soul/handovers/`), template pointers (`_templates/`), a path-agnostic scheduled-task example, a Rust prerequisite before `cargo install`, a Claude Code variant of the first-session card, a `Palace:` line in the global identity block, and one paragraph in each setup door naming what the other door creates.
+- The scheduled-task locator in `SETUP-GUIDE.md` looks for `PALACE.md`, not `CLAUDE.md` (#96).
 - `templates/first-session-protocol.md` no longer downloads anything or goes looking for files. Phase 1 used to fetch the moving `main` branch (falling back to a shallow clone) and act on it with no pin, hash or signature; Phase 2 used to unpack any `loci-core-update_*.tar.gz` it found in the palace folder or in `~/Downloads`. Now the holder names the kit and any core update file. For an archive, the agent shows its name, size and sha256, compares a sha256 the holder pastes, lists its contents (stopping on absolute or `..` paths, and on core-update entries outside `_core/`), and unpacks only after a yes; a kit the browser already unzipped, or a clone, is copied in as a named folder after a yes. The first session makes no network calls; `FIRST-SESSION.md` says the kit now sits beside the paste block.
 - First-session unpacking, hardened: the listing now shows entry types (`zipinfo`, `tar -tvzf`) and stops on anything but regular files and folders, so a symlink entry such as `_core/skills -> ~/.claude` no longer passes; a copied kit folder gets the same check. An unpack that exits with an error stops before anything is read or copied. A `_kit` folder counts only when its five required paths exist; an incomplete one is set aside as `_kit-rejected` after a yes, and a leftover `_kit-incoming` is cleared only after a yes. A core update unpacks into `_core-incoming` and swaps in, with an earlier `_core` renamed to `_core-previous-<date>` instead of overlaid; `./_core/` entries pass. A sha256 mismatch writes its own RESUME.md note.
 
@@ -25,7 +40,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-## [v0.6.0-beta] — 2026-07-02
+## [v0.6.0-beta] - 2026-07-02
 
 The 0.6 open beta: the desktop app, the CLI, and the template shelves on one
 version line for the first time. Methodology line: `loci-core` 1.6-candidate
@@ -53,7 +68,7 @@ gate-ledger, and release-gates doctrine).
 
 ---
 
-## [v0.1.0-beta.1] — 2026-06-09
+## [v0.1.0-beta.1] - 2026-06-09
 
 First public beta of the loci CLI and template kit.
 
@@ -64,7 +79,7 @@ First public beta of the loci CLI and template kit.
 - `ARCHITECTURE.md` system overview and design rationale
 - `PALACE-METHODOLOGY.md` protocol reference (check-for-updates anchor)
 - `PALACE-UPDATE.md` update protocol documentation
-- `packages/core` — core loci Node.js package
+- `packages/core`: core loci Node.js package
 - `discoveries/` community findings folder
 - `CONTRIBUTING.md` contribution guide
 

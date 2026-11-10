@@ -18,7 +18,7 @@ and processes that decide how memory, context, and trust work, regardless of whi
 them or how. One blueprint, many expressions. Local-first. No cloud, no accounts, no lock-in.
 
 The CLI in this repo is an optional expression built on top of the substrate
-(v0.6 beta). It is not the substrate, and you do not need it to start.
+(v0.7 beta). It is not the substrate, and you do not need it to start.
 
 ## Start in plain markdown (the door)
 
@@ -73,7 +73,7 @@ Two ways, and the door is the first. The substrate is the same underneath both.
 | Run mode | What it is |
 |---|---|
 | **Plain markdown** | The door. Clone `templates/`, point any file-aware AI at `PALACE.md`. No build. |
-| **CLI** | [`loci-cli/`](loci-cli/) (v0.6.0-beta, optional). A small Rust binary that reads your palace from the terminal: `loci status`, `loci crystals`, `loci read`, `loci handover`, `loci tokens`, `loci rain`, `loci init`. Read-only, with one hand-off: `loci rain --fire` execs your agent runtime. No network. No inference. See [loci-cli/README.md](loci-cli/README.md). |
+| **CLI** | [`loci-cli/`](loci-cli/) (v0.7.0-beta, optional). A small Rust binary that reads your palace from the terminal: `loci status`, `loci crystals`, `loci read`, `loci handover`, `loci tokens`, `loci rain`, `loci init`. Read-only, with one hand-off: `loci rain --fire` execs your agent runtime. No network. No inference. See [loci-cli/README.md](loci-cli/README.md). |
 
 The methodology version and full changelog: [PALACE-METHODOLOGY.md](PALACE-METHODOLOGY.md).
 
