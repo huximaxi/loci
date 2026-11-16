@@ -2,8 +2,8 @@
 
 ---
 
-> **Never set up a palace before?** Run the first session one of two ways, both the same naming
-> ceremony: paste the block in `templates/first-session-protocol.md` into a palace folder that holds
+> **Never set up a workfolder before?** Run the first session one of two ways, both the same naming
+> ceremony: paste the block in `templates/first-session-protocol.md` into a workfolder that holds
 > the loci kit (handed to you, or downloaded yourself; the agent downloads nothing), or point
 > an agent that can read this repo at `AGENT-SETUP.md`. This card is the everyday opener for the
 > sessions after that.
@@ -80,7 +80,7 @@ Next session, that file will be the bridge.
 
 ---
 
-## Growing the palace over time
+## Growing the workfolder over time
 
 After 3–5 sessions, you'll start to notice:
 - The deltas building up in `soul/handovers/`: a real history

@@ -11,11 +11,12 @@ Walks a person from "here is what I want to do" to the smallest set of loci feat
 does it, and points them at a tutorial. It reads `features/features.yaml` as its map. It
 proposes; the human chooses. One step at a time, always skippable.
 
-## The substrate, in one line
+## loci, in one line
 
-loci is an intelligence substrate: plain-text firmware (the `templates/` kit plus a few
-named processes) that any file-aware AI can run. The CLI is a personal demo built on top
-of it. You do not need it to start.
+loci is a local AI topology: one nested workfolder on your machine, with fixed places your
+AI reads and writes like a small local database. It ships as the `templates/` kit plus a
+few named processes, which any file-aware AI can run. The CLI is optional. You do not need
+it to start.
 
 ## Protocol
 

@@ -11,14 +11,15 @@
 ◇  ◈  ◆  ◈  ◇  ◈  ◆  ◈  ◇  ◈  ◆  ◈  ◇
 ```
 
-**An intelligence substrate for working with AI.**
+**A local AI topology, in one folder you own.**
 
-loci is the plain-text firmware for a persistent, private cognitive system: the templates
-and processes that decide how memory, context, and trust work, regardless of which AI runs
-them or how. One blueprint, many expressions. Local-first. No cloud, no accounts, no lock-in.
+loci is a local AI topology: one nested workfolder on your machine, with fixed places your
+AI reads and writes like a small local database. It ships as a kit of plain-text templates
+any file-aware AI can run. What you settle once stays settled, in files you can read, move
+or delete. Local-first. No cloud, no accounts, no lock-in.
 
-The CLI in this repo is an optional expression built on top of the substrate
-(v0.7 beta). It is not the substrate, and you do not need it to start.
+The CLI in this repo (v0.7 beta) is an optional door into the workfolder. You do not need it
+to start.
 
 ## Start in plain markdown (the door)
 
@@ -29,7 +30,7 @@ git clone https://github.com/huximaxi/loci
 ```
 
 Copy the [`templates/`](templates/) kit into a folder of your own, open
-[FIRST-SESSION.md](FIRST-SESSION.md), and point any file-aware AI at your palace
+[FIRST-SESSION.md](FIRST-SESSION.md), and point any file-aware AI at your workfolder's
 `PALACE.md`. That is the setup. (Claude Code users also get a two-line `CLAUDE.md`
 beside it, which just says to read `PALACE.md` first.) Not sure where to begin? Run the
 [feature helper](templates/feature-helper.md) and it points you. The full walkthrough is in
@@ -38,7 +39,7 @@ beside it, which just says to read `PALACE.md` first.) Not sure where to begin? 
 
 ## What it gives you
 
-Seven feature sets, all shipped as plain-text firmware.
+Seven feature sets, all shipped as plain-text templates.
 
 - **Persistent Memory.** Your AI remembers, on your terms. Tiered crystals (◇ ◈ ◆) you can promote, expire, pin, and compost.
 - **Context Architecture.** The right context loads at the right time. Rooms, an L0-L3 retrieval hierarchy, a local map.
@@ -53,7 +54,7 @@ The full map, with the templates behind each set, lives in
 
 ## Who it's for
 
-One substrate, six shapes. Each use-case lights up a different subset, and none of it is wasted.
+One cognitive substrate, six shapes. Each use-case lights up a different subset, and none of it is wasted.
 
 | | Memory | Context | Identity | Garden | Continuity | Trust | Interop |
 |---|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
@@ -68,21 +69,21 @@ One substrate, six shapes. Each use-case lights up a different subset, and none 
 
 ## How to run it
 
-Two ways, and the door is the first. The substrate is the same underneath both.
+Two ways, and the door is the first. The workfolder is the same underneath both.
 
 | Run mode | What it is |
 |---|---|
 | **Plain markdown** | The door. Clone `templates/`, point any file-aware AI at `PALACE.md`. No build. |
-| **CLI** | [`loci-cli/`](loci-cli/) (v0.7.0-beta, optional). A small Rust binary that reads your palace from the terminal: `loci status`, `loci crystals`, `loci read`, `loci handover`, `loci tokens`, `loci rain`, `loci init`. Read-only, with one hand-off: `loci rain --fire` execs your agent runtime. No network. No inference. See [loci-cli/README.md](loci-cli/README.md). |
+| **CLI** | [`loci-cli/`](loci-cli/) (v0.7.0-beta, optional). A small Rust binary that reads your workfolder from the terminal: `loci status`, `loci crystals`, `loci read`, `loci handover`, `loci tokens`, `loci rain`, `loci init`. Read-only, with one hand-off: `loci rain --fire` execs your agent runtime. No network. No inference. See [loci-cli/README.md](loci-cli/README.md). |
 
 The methodology version and full changelog: [PALACE-METHODOLOGY.md](PALACE-METHODOLOGY.md).
 
 ## Discoveries
 
-What did your palace become? The [`discoveries/`](discoveries/) folder is where loci users
-share palace portraits: the shape of their setup, what they changed, what the framework
+What did your workfolder become? The [`discoveries/`](discoveries/) folder is where loci users
+share workfolder portraits: the shape of their setup, what they changed, what the framework
 turned into in their hands. Submit via pull request or email themapisnory@tuta.io. To
-contribute to the substrate itself, see [CONTRIBUTING.md](CONTRIBUTING.md).
+contribute to the cognitive substrate itself, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 

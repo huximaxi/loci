@@ -1,6 +1,6 @@
 # loci-cli
 
-A small terminal-native door into your local palace.
+A small terminal-native door into your local workfolder.
 
 ```
 $ loci status
@@ -16,10 +16,10 @@ total  : 142 crystals
 
 ## What it is
 
-`loci` is the read-shaped CLI for a loci palace: a small Rust binary that walks
+`loci` is the read-shaped CLI for a loci workfolder: a small Rust binary that walks
 the palace structure (PALACE.md / CLAUDE.md / rooms / crystals) and prints what
 it finds. Read-only. No network, no inference, no daemons. Your AI does the
-thinking; the CLI just shows the firmware.
+thinking; the CLI just shows the files.
 
 ## Install
 
@@ -40,18 +40,18 @@ Three shapes:
 - **rooms-inside-`_palace`/**: the original loci layout
 - **rooms-inside-`rooms/`**: the shape the templates kit and the setup guides
   build (`rooms/<room>/CLAUDE.md`)
-- **rooms-at-root**: palaces ported from older organic structures (rooms grew
+- **rooms-at-root**: workfolders ported from older organic structures (rooms grew
   at root, never moved into `_palace/`)
 
 Any of the three works. The root must hold a `PALACE.md` or `CLAUDE.md`.
 
-## Palace resolution
+## Workfolder resolution
 
-Each command resolves the palace in this order:
+Each command resolves the workfolder in this order:
 
 1. `--palace <path>` (explicit override)
 2. `$LOCI_PALACE` (environment variable)
-3. Walk up from the current directory until a palace marker is found
+3. Walk up from the current directory until a workfolder marker is found
 
 ## Commands
 
@@ -105,7 +105,7 @@ releases:
 - Sync / reindex (`loci sync`)
 - Full diagnostic feedback flow
 
-The CLI's job at this tier is to be the door into your palace from the
+The CLI's job at this tier is to be the door into your workfolder from the
 terminal, not to host the conversation. The templates kit is one door;
 this is the other.
 

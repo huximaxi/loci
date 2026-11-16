@@ -19,7 +19,7 @@ Choose one of the following channels:
 
 ## What is in scope
 
-- The Loci CLI (`loci-cli/`) and the palace templates in this repository.
+- The Loci CLI (`loci-cli/`) and the workfolder templates in this repository.
 - The loci.garden static site and any subdomains under `loci.garden`.
 - The CONTRIBUTING.md charter (the Rainbow Zoku charter) and any review/merge workflow it documents.
 - Build and release artefacts published via GitHub Releases on this repository.

@@ -1,7 +1,7 @@
 # Your AI Collaborator: Setup Guide
 **A blueprint for building a lasting working relationship with Claude**
 
-*Loci · agent-first memory palace kit · [loci.garden](https://loci.garden)*
+*Loci · a local AI topology · [loci.garden](https://loci.garden)*
 
 ---
 
@@ -13,15 +13,15 @@ It takes about 30–60 minutes to set up. After that, every session you have wil
 
 ---
 
-## The big idea: The Palace
+## The big idea: The Workfolder
 
 Think of your working relationship with Claude like a building.
 
-- **The Palace** is your whole setup: your files, your context, your history
+- **The Workfolder** is your whole setup: your files, your context, your history
 - **Rooms** are different areas of work (e.g. "Writing Room", "Work Room", "Ideas Room")
-- **Your AI** is a named collaborator who lives inside the palace, not a generic assistant, but someone with a character, opinions, and memory of your work
+- **Your AI** is a named collaborator who lives inside the workfolder, not a generic assistant, but someone with a character, opinions, and memory of your work
 
-The palace lives in a folder on your computer. Claude reads it at the start of each session and picks up right where you left off.
+The workfolder lives on your computer. Claude reads it at the start of each session and picks up right where you left off. The templates and file names still call it the palace.
 
 ---
 
@@ -200,13 +200,13 @@ my-palace/
   _templates/                  ← the templates folder (keep for reference)
 ```
 
-**If your agent set you up** (via `AGENT-SETUP.md`), you also have `soul/garden.md` (the garden, seeded from the interview), and possibly `souls/` (extra personas), `friends/` (soul files from friends), and `palace-map.canvas` (an Obsidian mindmap). Same palace, a few more shelves; nothing above changes.
+**If your agent set you up** (via `AGENT-SETUP.md`), you also have `soul/garden.md` (the garden, seeded from the interview), and possibly `souls/` (extra personas), `friends/` (soul files from friends), and `palace-map.canvas` (an Obsidian mindmap). Same workfolder, a few more shelves; nothing above changes.
 
 ---
 
 ## One last thing
 
-The palace grows with you. It starts simple and gets richer over time. Don't try to build the perfect system before you start. Start working and let the system emerge from what you actually need.
+The workfolder grows with you. It starts simple and gets richer over time. Don't try to build the perfect system before you start. Start working and let the system emerge from what you actually need.
 
 The best version of your AI is the one that's been through a few dozen sessions with you and knows how you think.
 
@@ -214,5 +214,5 @@ Start there.
 
 ---
 
-*Loci · agent-first memory palace kit · [loci.garden](https://loci.garden)*
+*Loci · a local AI topology · [loci.garden](https://loci.garden)*
 *"A collaborator, not a tool."*

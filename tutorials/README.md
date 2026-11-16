@@ -1,7 +1,7 @@
 # loci tutorials
 
 Short, do-it-now walkthroughs. Each one uses templates that already ship in `templates/`.
-No build required: copy the template into your palace and point any file-aware AI at it.
+No build required: copy the template into your workfolder and point any file-aware AI at it.
 
 Pick by what you want to do, or run the feature helper (`templates/feature-helper.md`) and
 let it point you.
@@ -16,13 +16,13 @@ let it point you.
 | [set-a-gate](set-a-gate.md) | Trust & Governance | a review gate and a quarantine rule |
 | [go-cross-tool](go-cross-tool.md) | Interop & Evolution | memory that travels across tools |
 
-One flow per feature set. Start anywhere; each one ends with something working in your palace.
+One flow per feature set. Start anywhere; each one ends with something working in your workfolder.
 
 Plus one cross-cutting flow:
 
 | Flow | Spans | You end with |
 |---|---|---|
-| [keep-your-memory-yours](keep-your-memory-yours.md) | Trust & Memory | the vendor holding no copy of you the substrate already holds better |
+| [keep-your-memory-yours](keep-your-memory-yours.md) | Trust & Memory | the vendor holding no copy of you the workfolder already holds better |
 
 ---
 
