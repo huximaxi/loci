@@ -26,7 +26,8 @@ mod tokens;
                   loci is a local AI topology: one workfolder your AI reads and writes.\n\
                   This CLI walks the workfolder and prints what's there. Read-only.\n\
                   No network, no inference, no daemons. The templates kit is the other\n\
-                  door; the CLI is the terminal-native one."
+                  door; the CLI is the terminal-native one. Files, flags and output\n\
+                  still say palace: --palace and $LOCI_PALACE point at the workfolder."
 )]
 struct Cli {
     /// Palace path. Overrides $LOCI_PALACE and cwd auto-detect.

@@ -6,7 +6,7 @@
 > ceremony: paste the block in `templates/first-session-protocol.md` into a workfolder that holds
 > the loci kit (handed to you, or downloaded yourself; the agent downloads nothing), or point
 > an agent that can read this repo at `AGENT-SETUP.md`. This card is the everyday opener for the
-> sessions after that.
+> sessions after that. The templates and file names still call the workfolder the palace.
 
 ---
 

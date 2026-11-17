@@ -110,6 +110,6 @@ run_modes:
     how: Copy templates/ into a folder, point any file-aware AI at your CLAUDE.md. No build. This is the door.
   - id: cli
     name: CLI
-    how: A terminal-native demo. IDE-friendly, zero GUI.
+    how: An optional terminal door into the workfolder. IDE-friendly, zero GUI.
 
 # One tutorial per feature set ships in tutorials/.
