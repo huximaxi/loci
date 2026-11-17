@@ -1,6 +1,6 @@
 # Build a room
 
-A room is a domain of work. Rooms keep a large palace legible: when you enter one, exactly
+A room is a domain of work. Rooms keep a large workfolder legible: when you enter one, exactly
 its context loads, and nothing else.
 
 Uses: `templates/room-template.md`, `templates/retrieval-hierarchy.md`,
@@ -21,7 +21,7 @@ Uses: `templates/room-template.md`, `templates/retrieval-hierarchy.md`,
 
 ## You are done when
 
-You open a session, name a room, and only that room's context loads (L0-L3). The palace
+You open a session, name a room, and only that room's context loads (L0-L3). The workfolder
 stops dumping everything at once.
 
 ## Next

@@ -8,7 +8,7 @@ Uses: `templates/garden-template.md`, `templates/garden-file-template.md`,
 
 ## Steps
 
-1. Create a `garden/` folder in your palace. Copy `garden-file-template.md` for your first
+1. Create a `garden/` folder in your workfolder. Copy `garden-file-template.md` for your first
    plant: one file per idea, so nothing collides and nothing merge-conflicts.
 2. Name the plant as a question or a hunch, not a conclusion. Give it a stage:
    seed, sapling, plant, crystal-ready.

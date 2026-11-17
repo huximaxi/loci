@@ -7,6 +7,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+- loci is now defined as a local AI topology: one nested workfolder with fixed places your AI
+  reads and writes. README, setup guide, tutorials, the feature helper and `loci --help` say
+  "workfolder"; file names, flags, CLI output and `templates/` still say palace.
+
 ---
 
 ## [v0.7.0-beta] - 2026-11-10

@@ -1,4 +1,4 @@
-//! loci: read your local palace from the terminal.
+//! loci: read your local workfolder from the terminal.
 //!
 //! Read-shaped commands. No network. No inference. No daemons.
 //! Honest about what it is: a CLI that knows the palace layout and prints what's there.
@@ -21,12 +21,13 @@ mod tokens;
 #[command(
     name = "loci",
     version,
-    about = "Read your local palace from the terminal.",
-    long_about = "Read your local palace from the terminal.\n\n\
-                  loci is the plain-text firmware for a persistent, private cognitive system.\n\
-                  This CLI walks the palace structure and prints what's there. Read-only.\n\
+    about = "Read your local workfolder from the terminal.",
+    long_about = "Read your local workfolder from the terminal.\n\n\
+                  loci is a local AI topology: one workfolder your AI reads and writes.\n\
+                  This CLI walks the workfolder and prints what's there. Read-only.\n\
                   No network, no inference, no daemons. The templates kit is the other\n\
-                  door; the CLI is the terminal-native one."
+                  door; the CLI is the terminal-native one. Files, flags and output\n\
+                  still say palace: --palace and $LOCI_PALACE point at the workfolder."
 )]
 struct Cli {
     /// Palace path. Overrides $LOCI_PALACE and cwd auto-detect.
@@ -303,7 +304,7 @@ fn cmd_overview(palace_arg: Option<PathBuf>, json: bool) -> Result<(), Error> {
     }
 
     println!(
-        "loci {} · read your local palace from the terminal",
+        "loci {} · read your local workfolder from the terminal",
         env!("CARGO_PKG_VERSION")
     );
     println!("Read-only. No network, no inference, no daemons.");

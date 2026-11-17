@@ -7,9 +7,9 @@
 
 Palace methodology version tracker. The structural and intellectual core of loci, independent of the CLI and site versions.
 
-`loci-core` is the **firmware** of the palace: the templates, processes, and concepts that define how a palace works. The methodology is plain text and engine-agnostic. Any LLM with file access can run it. When you check for updates, this is the version you are comparing.
+`loci-core` is the **cognitive substrate** of the palace: the templates, processes, and concepts that define how a palace works. The methodology is plain text and engine-agnostic. Any LLM with file access can run it. When you check for updates, this is the version you are comparing.
 
-> This document tracks the *methodology* line of loci-core: the plain-text firmware, versioned independently of the apps.
+> This document tracks the *methodology* line of loci-core: the plain-text templates, versioned independently of the apps.
 
 > loci-core version: 1.6-candidate
 > stable: 1.2

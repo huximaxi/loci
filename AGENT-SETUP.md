@@ -340,7 +340,7 @@ loci/
   FIRST-SESSION.md       ← quickstart card (for after setup)
   SETUP-GUIDE.md         ← manual setup reference
   PALACE-METHODOLOGY.md  ← the methodology version and full changelog
-  templates/             ← the firmware: soul, rooms, crystals, garden, handovers, personas, skills
+  templates/             ← the kit: soul, rooms, crystals, garden, handovers, personas, skills
   tutorials/             ← short flows, one per feature set
   features/features.yaml ← the feature map (read by the feature helper)
 ```
