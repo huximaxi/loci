@@ -7,6 +7,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+- `templates/quarantine-fixtures.md`: six agent-run regression cases for the quarantine gate,
+  each built from a way memory systems fail: a secret's body surviving a clean-up that reports
+  success, foreign text that pretends its quote has ended, a token seen in passing reaching the
+  close note, a remote destination nobody configured, two hunches consolidated into one fact,
+  and foreign content asking the agent to rewrite its own gate. Run on a scratch copy, one fresh
+  session per case; inputs are generated at run time with a random canary, and every pass
+  condition is checked on disk or in the session's tool log, never on the agent's word.
+
 ### Changed
 - loci is now defined as a local AI topology: one nested workfolder with fixed places your AI
   reads and writes. README, setup guide, tutorials, the feature helper and `loci --help` say
