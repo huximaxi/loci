@@ -56,6 +56,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   An `egress.degraded` or `egress.disabled` marker that exists but cannot be read is an error,
   not zero failures.
 
+### Removed
+- `loci init` no longer asks for an Ollama endpoint and model. Nothing in the CLI read them,
+  and the CLI runs no inference. `config.toml` now records only the palace path.
+
 ---
 
 ## [v0.7.0-beta] - 2026-11-10
