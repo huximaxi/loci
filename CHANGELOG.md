@@ -55,6 +55,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   warns about them (`unreadable_lines` in `--json`), and a lost interior frame fails the chain.
   An `egress.degraded` or `egress.disabled` marker that exists but cannot be read is an error,
   not zero failures.
+- The first session appends the identity block to `~/.claude/CLAUDE.md` instead of writing the
+  file. The instruction said "write", which an agent could read as replacing a file that other
+  projects use. It now reads the file first, appends, and only edits a block with the same heading.
 
 ### Removed
 - `loci init` no longer asks for an Ollama endpoint and model. Nothing in the CLI read them,
