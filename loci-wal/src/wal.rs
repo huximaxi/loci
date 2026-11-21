@@ -22,15 +22,29 @@ impl Wal {
         }
     }
 
-    /// Read all frames in order. A trailing unparseable line (crash mid-write) is
-    /// tolerated: parsing stops at the first bad line rather than erroring, so a
-    /// partial tail cannot brick future appends.
+    /// Read all frames in order, skipping unparseable lines. See `read_counted`.
     pub fn read(&self) -> std::io::Result<Vec<Frame>> {
+        self.read_counted().map(|(frames, _)| frames)
+    }
+
+    /// Read all frames in order and count the lines that did not parse.
+    ///
+    /// An unparseable line (typically a crash mid-write) is skipped, not treated
+    /// as the end of the log: `append` starts on a fresh line after a fragment and
+    /// chains to the last *parseable* frame, so frames written after it are still
+    /// part of the chain and must still be read. Stopping at the first bad line
+    /// would hide every later frame while the chain check still passed. The count
+    /// lets a reader say the log is not clean instead of reporting it as complete.
+    /// A torn fragment was never acknowledged to its caller, so skipping it leaves
+    /// the chain intact; a damaged line that held an acknowledged frame shows up as
+    /// a broken link in `verify_full`.
+    pub fn read_counted(&self) -> std::io::Result<(Vec<Frame>, usize)> {
         if !self.path.exists() {
-            return Ok(Vec::new());
+            return Ok((Vec::new(), 0));
         }
         let f = File::open(&self.path)?;
         let mut frames = Vec::new();
+        let mut unreadable = 0;
         for line in BufReader::new(f).lines() {
             let line = line?;
             if line.trim().is_empty() {
@@ -38,10 +52,10 @@ impl Wal {
             }
             match serde_json::from_str::<Frame>(&line) {
                 Ok(fr) => frames.push(fr),
-                Err(_) => break,
+                Err(_) => unreadable += 1,
             }
         }
-        Ok(frames)
+        Ok((frames, unreadable))
     }
 
     /// Read only the last complete frame (the tip) without parsing the whole file.
@@ -77,10 +91,23 @@ impl Wal {
     pub fn append(&self, mut frame: Frame) -> std::io::Result<Frame> {
         let f = OpenOptions::new()
             .create(true)
+            .read(true)
             .append(true)
             .open(&self.path)?;
         f.lock_exclusive()?;
         let result = (|| {
+            // A crash can leave the file ending mid-line. Start on a fresh line, or
+            // this frame is glued to the fragment and neither can be parsed.
+            let len = f.metadata()?.len();
+            if len > 0 {
+                let mut last = [0u8; 1];
+                let mut r = &f;
+                r.seek(SeekFrom::Start(len - 1))?;
+                r.read_exact(&mut last)?;
+                if last[0] != b'\n' {
+                    (&f).write_all(b"\n")?;
+                }
+            }
             let (seq, prev) = match Self::read_tip(&self.path)? {
                 Some(tip) => (tip.seq + 1, tip.chain_hash()),
                 None => (0, GENESIS.to_string()),

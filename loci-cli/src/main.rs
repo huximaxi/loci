@@ -279,7 +279,16 @@ fn brief(s: &str, max: usize) -> String {
 fn cmd_overview(palace_arg: Option<PathBuf>, json: bool) -> Result<(), Error> {
     let abouts = command_abouts();
     // Soft detection: overview must work with no palace (unlike require_palace).
-    let palace = palace::detect(palace_arg).map(|p| p.root.display().to_string());
+    let palace = match palace::detect(palace_arg) {
+        Ok(found) => found.map(|p| p.root.display().to_string()),
+        Err(palace::BadEnv(p)) => {
+            eprintln!(
+                "loci: warning: LOCI_PALACE is set to {} but no palace is there",
+                p.display()
+            );
+            None
+        }
+    };
 
     if json {
         let groups = OVERVIEW_GROUPS
@@ -568,6 +577,7 @@ struct AuditOut {
     degraded: usize,
     degraded_latest: Option<String>,
     disabled_at: Option<String>,
+    unreadable_lines: usize,
     classes: Vec<AuditClassOut>,
 }
 
@@ -609,8 +619,9 @@ fn cmd_audit(wal_arg: Option<PathBuf>, since: Option<String>, json: bool) -> Res
     // Incompleteness signals, scoped by --since (both markers carry RFC3339 stamps):
     //   egress.degraded — one line per failed write (a dropped write leaves no chain gap)
     //   egress.disabled — last time LOCI_WAL_DISABLED suppressed the writer entirely
-    let degraded_content =
-        std::fs::read_to_string(path.with_file_name("egress.degraded")).unwrap_or_default();
+    // A missing marker means "nothing to report"; an unreadable one means the
+    // receipt's completeness is unknown, so audit stops instead of reading it as zero.
+    let degraded_content = read_marker(&path.with_file_name("egress.degraded"))?.unwrap_or_default();
     let degraded_lines: Vec<&str> = degraded_content
         .lines()
         .filter(|l| !l.trim().is_empty())
@@ -624,11 +635,10 @@ fn cmd_audit(wal_arg: Option<PathBuf>, since: Option<String>, json: bool) -> Res
         .last()
         .and_then(|l| l.split_whitespace().next())
         .map(|s| s.to_string());
-    let disabled_at = std::fs::read_to_string(path.with_file_name("egress.disabled"))
-        .ok()
+    let disabled_at = read_marker(&path.with_file_name("egress.disabled"))?
         .map(|s| s.trim().to_string())
         .filter(|t| !t.is_empty() && since.as_deref().map_or(true, |s| t.as_str() >= s));
-    let all = Wal::open(&path).read()?;
+    let (all, unreadable_lines) = Wal::open(&path).read_counted()?;
     let (chain_ok, break_seq) = match Wal::verify_full(&all) {
         Ok(()) => (true, None),
         Err(e) => (false, chain_break_seq(&e)),
@@ -667,6 +677,7 @@ fn cmd_audit(wal_arg: Option<PathBuf>, since: Option<String>, json: bool) -> Res
             degraded,
             degraded_latest,
             disabled_at,
+            unreadable_lines,
             classes,
         };
         println!("{}", serde_json::to_string_pretty(&out)?);
@@ -683,6 +694,11 @@ fn cmd_audit(wal_arg: Option<PathBuf>, since: Option<String>, json: bool) -> Res
         println!(
             "⚠ WARNING      : {degraded} egress record(s) failed to write (latest {}) — receipt may be INCOMPLETE",
             degraded_latest.as_deref().unwrap_or("?")
+        );
+    }
+    if unreadable_lines > 0 {
+        println!(
+            "⚠ WARNING      : {unreadable_lines} unreadable line(s) in the log were skipped; receipt may be INCOMPLETE"
         );
     }
     if all.is_empty() {
@@ -1157,13 +1173,32 @@ fn prompt(label: &str, default: Option<&str>) -> Result<String, Error> {
 
 // ── helpers ─────────────────────────────────────────────────────────────
 
+/// Read an audit marker file. Missing is `None`; any other read failure is an
+/// error, never an empty marker.
+fn read_marker(path: &Path) -> Result<Option<String>, Error> {
+    match std::fs::read_to_string(path) {
+        Ok(s) => Ok(Some(s)),
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(None),
+        Err(e) => Err(Error::io(format!(
+            "cannot read {}: {e}. The receipt's completeness is unknown.",
+            path.display()
+        ))),
+    }
+}
+
 fn require_palace(arg: Option<PathBuf>) -> Result<palace::Palace, Error> {
-    palace::detect(arg).ok_or_else(|| {
-        Error::not_found(
+    match palace::detect(arg) {
+        Ok(Some(p)) => Ok(p),
+        Ok(None) => Err(Error::not_found(
             "no palace found. Pass --palace <path>, set LOCI_PALACE, or run from inside a palace."
                 .to_string(),
-        )
-    })
+        )),
+        Err(palace::BadEnv(p)) => Err(Error::not_found(format!(
+            "LOCI_PALACE is set to {} but no palace is there. Fix or unset it; \
+             loci does not fall back to the current directory.",
+            p.display()
+        ))),
+    }
 }
 
 // ── Error ────────────────────────────────────────────────────────────────
@@ -1276,5 +1311,25 @@ mod overview_tests {
                 );
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod audit_tests {
+    use super::*;
+
+    #[test]
+    fn missing_marker_is_none_unreadable_marker_is_an_error() {
+        let dir = std::env::temp_dir().join(format!("loci_cli_marker_{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        assert!(matches!(read_marker(&dir.join("egress.degraded")), Ok(None)));
+        // A directory where the marker should be cannot be read as text.
+        let blocked = dir.join("egress.disabled");
+        std::fs::create_dir_all(&blocked).unwrap();
+        assert!(read_marker(&blocked).is_err(), "an unreadable marker must not read as empty");
+        std::fs::write(dir.join("egress.degraded"), "2026-07-14T00:00:00Z write failed\n").unwrap();
+        assert!(matches!(read_marker(&dir.join("egress.degraded")), Ok(Some(_))));
+        let _ = std::fs::remove_dir_all(&dir);
     }
 }
