@@ -58,7 +58,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Removed
 - `loci init` no longer asks for an Ollama endpoint and model. Nothing in the CLI read them,
-  and the CLI runs no inference. `config.toml` now records only the palace path.
+  and the CLI runs no inference. `config.toml` now records only the palace path. No command reads
+  it yet: they resolve the palace from `--palace`, `$LOCI_PALACE` or the current directory.
 
 ---
 

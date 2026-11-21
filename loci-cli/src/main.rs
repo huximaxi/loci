@@ -1081,7 +1081,7 @@ fn cmd_new(path: &Path, force: bool, json: bool) -> Result<(), Error> {
 
     // Hand off to the config step, defaulting the palace path to the new palace.
     if std::io::stdin().is_terminal() {
-        print!("\nRecord this palace in ~/.config/loci/config.toml now? [Y/n]: ");
+        print!("\nRecord this palace in ~/.config/loci/config.toml now? (no command reads it yet) [Y/n]: ");
         std::io::stdout().flush()?;
         let mut buf = String::new();
         std::io::stdin().read_line(&mut buf)?;
@@ -1091,7 +1091,7 @@ fn cmd_new(path: &Path, force: bool, json: bool) -> Result<(), Error> {
             return cmd_init(Some(path.display().to_string()));
         }
     }
-    println!("\nWhen ready: loci init   (records the palace path)");
+    println!("\nWhen ready: loci init   (records the palace path; no command reads it yet)");
     Ok(())
 }
 
