@@ -13,7 +13,8 @@ Uses: `templates/output-primitive.md`, `templates/friends/friend-template.md`,
    `AGENTS.md` (Codex), `.cursor/rules`, `.windsurfrules`. Point your AI at them and the
    workfolder reads them as data first, never trusted by construction (see `set-a-gate.md`).
 2. Switch clients without moving anything: any file-aware AI reads the same workfolder.
-   Nothing leaves the machine.
+   The workfolder stays on your machine. Each AI sends what it reads to its own provider,
+   unless it runs locally.
 3. Export a session as a typed artifact (`output-primitive.md`): for example a
    git-log-incident, a session arc rendered as an annotated commit log you can archive.
 4. Add a friend (`friends/friend-template.md`): a colleague door for another workfolder or
