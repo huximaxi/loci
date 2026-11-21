@@ -24,7 +24,8 @@ Uses: `templates/CLAUDE-master.md` (rules 4, 7, 8), `templates/palace-audit-proc
 ## You are done when
 
 Your AI pauses at the gate before irreversible moves, and an audit can flag problems
-without changing a thing. Nothing leaves or changes without you.
+without changing a thing. The gate is a rule your AI reads, not a lock: it holds as well as
+your AI follows instructions, which is why the audit exists.
 
 ## Next
 

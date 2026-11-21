@@ -1,6 +1,7 @@
 //! loci: read your local workfolder from the terminal.
 //!
-//! Read-shaped commands. No network. No inference. No daemons.
+//! Mostly read-shaped commands. No network. No inference. No daemons.
+//! Three commands write or hand off: `new` (scaffold), `init` (config file), `rain --fire`.
 //! Honest about what it is: a CLI that knows the palace layout and prints what's there.
 //! The one hand-off: `rain --fire` execs your agent runtime and exits; the CLI
 //! itself still does no inference.
@@ -24,7 +25,8 @@ mod tokens;
     about = "Read your local workfolder from the terminal.",
     long_about = "Read your local workfolder from the terminal.\n\n\
                   loci is a local AI topology: one workfolder your AI reads and writes.\n\
-                  This CLI walks the workfolder and prints what's there. Read-only.\n\
+                  This CLI walks the workfolder and prints what's there. Most commands\n\
+                  only read; `new`, `init` and `rain --fire` write or hand off.\n\
                   No network, no inference, no daemons. The templates kit is the other\n\
                   door; the CLI is the terminal-native one. Files, flags and output\n\
                   still say palace: --palace and $LOCI_PALACE point at the workfolder."
@@ -307,7 +309,7 @@ fn cmd_overview(palace_arg: Option<PathBuf>, json: bool) -> Result<(), Error> {
         "loci {} · read your local workfolder from the terminal",
         env!("CARGO_PKG_VERSION")
     );
-    println!("Read-only. No network, no inference, no daemons.");
+    println!("Mostly reads (new, init and rain --fire write or hand off). No network, no inference, no daemons.");
     match &palace {
         Some(p) => println!("palace : {p}"),
         None => println!("palace : (none detected — pass --palace <path> or run inside one)"),

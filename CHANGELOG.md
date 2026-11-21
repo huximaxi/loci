@@ -8,6 +8,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Changed
+- Claims now match the code. The README no longer says "nothing leaves": loci sends nothing
+  itself, but the AI you run sees what it reads, and the gate is a rule your AI follows, not a
+  lock. The CLI no longer calls itself read-only: `new`, `init` and `rain --fire` write or hand
+  off (it still makes no network calls and runs no inference).
 - loci is now defined as a local AI topology: one nested workfolder with fixed places your AI
   reads and writes. README, setup guide, tutorials, the feature helper and `loci --help` say
   "workfolder"; file names, flags, CLI output and `templates/` still say palace.
