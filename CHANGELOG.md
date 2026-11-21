@@ -8,6 +8,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- `loci reads [--days N]`: does the agent read the palace at all? Counts, from local Claude Code
+  transcripts, the turns a person typed that were followed by at least one read of a palace
+  file before the next one. Harness entries (task notifications, reminders, interrupt markers,
+  slash and bash-mode echoes) are not turns: `origin.kind` decides where a transcript records
+  it, known harness shapes where it does not. Two rates, because a shell command cannot say
+  whether it read or wrote: the read rate (tool reads only, the floor) and the touch rate
+  (reads or shell commands naming the palace, a wider count that still misses commands that
+  spell the palace relative, with `~` or `$HOME`, or with escaped spaces). A turn copied into
+  a new transcript on resume or fork counts once, and files are read in a fixed order. Also
+  palace reads, writes and shell touches, sessions that read the palace, and subagent reads
+  and writes kept outside the rate. Prints the measured palace root, so a run from a parent
+  folder cannot silently measure the wrong one. Read-only and offline, counts only: no
+  transcript text, transcript path or command is printed or kept. Same line bounds and
+  symlink rule as `loci tokens`, which now scans a transcript folder once even when
+  `CLAUDE_CONFIG_DIR` names the default; `--json` supported.
 - `templates/quarantine-fixtures.md` (draft, not yet run end to end against an agent): six
   agent-run regression cases for the quarantine gate, each built from a way memory systems
   fail: a secret's body surviving a clean-up that reports success, foreign text that pretends
@@ -21,6 +36,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   on the agent's word, and a teardown removes the copy.
 
 ### Changed
+- loci is held by themapisnory OÜ: the LICENSE copyright line and the README name it. The licence
+  stays MIT.
+- Claims now match the code. The README no longer says "nothing leaves": loci sends nothing
+  itself, but the AI you run sees what it reads, and the gate is a rule your AI follows, not a
+  lock. The CLI no longer calls itself read-only: `new`, `init` and `rain --fire` write or hand
+  off (it still makes no network calls and runs no inference).
 - loci is now defined as a local AI topology: one nested workfolder with fixed places your AI
   reads and writes. README, setup guide, tutorials, the feature helper and `loci --help` say
   "workfolder"; file names, flags, CLI output and `templates/` still say palace.

@@ -48,7 +48,7 @@ feature_sets:
 
   - id: trust
     name: Trust & Governance
-    value: Nothing leaves or changes without you.
+    value: You decide what changes and what goes out.
     does: A named human-review gate, foreign-process quarantine, confirm-against-disk, and a read-only structural audit.
     templates: [palace-audit-process.md, CLAUDE-master.md, .lociignore, quarantine-fixtures.md]
     tutorial: tutorials/set-a-gate.md
@@ -84,7 +84,7 @@ use_cases:
 
   - id: sovereign
     name: The Vault-keeper
-    for: Local-only, inspectable, prunable. Nothing leaves the machine.
+    for: Local files, inspectable, prunable. loci sends nothing itself; run a local model when nothing may leave.
     primary: [trust, interop]
     supporting: [memory, context, continuity]
     start: tutorials/set-a-gate.md

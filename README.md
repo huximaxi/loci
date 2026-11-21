@@ -46,7 +46,7 @@ Seven feature sets, all shipped as plain-text templates.
 - **Identity & Personas.** A companion that is someone, who knows who you are. A soul file, a peer card, named personas.
 - **The Garden.** Ideas cultivated, not just stored. One file per idea, a health pass, seed-to-crystal graduation.
 - **Continuity & Synthesis.** No session starts cold. Handovers, a synthesis pass that proposes, scheduled housekeeping.
-- **Trust & Governance.** Nothing leaves or changes without you. A named review gate, foreign-process quarantine, confirm-against-disk, and a read-only structural audit.
+- **Trust & Governance.** You decide what changes and what goes out. A named review gate, foreign-process quarantine, confirm-against-disk, and a read-only structural audit. The gate is a rule your AI reads, not a lock. loci itself sends nothing anywhere; the AI you run sees what it reads, so pick a local model when nothing may leave.
 - **Interop & Evolution.** Works across every tool, federates to no one. Reads memory left by other tools as data behind a gate, exports typed artifacts.
 
 The full map, with the templates behind each set, lives in
@@ -87,7 +87,7 @@ contribute to the cognitive substrate itself, see [CONTRIBUTING.md](CONTRIBUTING
 
 ## License
 
-MIT · [loci.garden](https://loci.garden) · 2026
+MIT · © 2026 themapisnory OÜ · [loci.garden](https://loci.garden)
 
 ---
 

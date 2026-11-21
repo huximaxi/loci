@@ -18,8 +18,10 @@ total  : 142 crystals
 
 `loci` is the read-shaped CLI for a loci workfolder: a small Rust binary that walks
 the palace structure (PALACE.md / CLAUDE.md / rooms / crystals) and prints what
-it finds. Read-only. No network, no inference, no daemons. Your AI does the
-thinking; the CLI just shows the files.
+it finds. Most commands only read. Three write or hand off: `loci new` lays down a
+workfolder, `loci init` writes `~/.config/loci/config.toml`, and `loci rain --fire`
+starts your agent runtime. No network, no inference, no daemons. Your AI does the
+thinking; the CLI shows the files.
 
 ## Install
 

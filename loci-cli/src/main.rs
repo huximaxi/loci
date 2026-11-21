@@ -1,6 +1,7 @@
 //! loci: read your local workfolder from the terminal.
 //!
-//! Read-shaped commands. No network. No inference. No daemons.
+//! Mostly read-shaped commands. No network. No inference. No daemons.
+//! Three commands write or hand off: `new` (scaffold), `init` (config file), `rain --fire`.
 //! Honest about what it is: a CLI that knows the palace layout and prints what's there.
 //! The one hand-off: `rain --fire` execs your agent runtime and exits; the CLI
 //! itself still does no inference.
@@ -14,6 +15,7 @@ use loci_wal::{ChainError, EgressClass, Frame, ProofBundle, Wal};
 use std::process::ExitCode;
 
 mod palace;
+mod reads;
 mod scaffold;
 mod tokens;
 
@@ -24,7 +26,8 @@ mod tokens;
     about = "Read your local workfolder from the terminal.",
     long_about = "Read your local workfolder from the terminal.\n\n\
                   loci is a local AI topology: one workfolder your AI reads and writes.\n\
-                  This CLI walks the workfolder and prints what's there. Read-only.\n\
+                  This CLI walks the workfolder and prints what's there. Most commands\n\
+                  only read; `new`, `init` and `rain --fire` write or hand off.\n\
                   No network, no inference, no daemons. The templates kit is the other\n\
                   door; the CLI is the terminal-native one. Files, flags and output\n\
                   still say palace: --palace and $LOCI_PALACE point at the workfolder."
@@ -64,6 +67,12 @@ enum Cmd {
     Handover,
     /// Approximate agent-runtime session-window status (5h rolling) from local transcripts.
     Tokens,
+    /// How often the agent reads the palace: user turns followed by a palace read, from local Claude Code transcripts (counts only).
+    Reads {
+        /// Look back this many days (1-90).
+        #[arg(long, default_value_t = reads::DEFAULT_DAYS)]
+        days: u64,
+    },
     /// Garden watering weather: window headroom + garden state + how to fire a rain round.
     Rain {
         /// Hand off to the agent runtime now (`claude -p "rain"` from the palace root).
@@ -134,6 +143,7 @@ fn run(cli: Cli) -> Result<(), Error> {
         Cmd::Read { slug, room } => cmd_read(cli.palace, &slug, room.as_deref(), cli.json),
         Cmd::Handover => cmd_handover(cli.palace, cli.json),
         Cmd::Tokens => cmd_tokens(cli.json),
+        Cmd::Reads { days } => cmd_reads(cli.palace, days, cli.json),
         Cmd::Rain { fire } => cmd_rain(cli.palace, fire, cli.json),
         Cmd::New { path, force } => cmd_new(&path, force, cli.json),
         Cmd::Init => cmd_init(None),
@@ -168,6 +178,7 @@ const OVERVIEW_GROUPS: &[(&str, &[(&str, &str)])] = &[
         "Garden & session",
         &[
             ("tokens", "loci tokens"),
+            ("reads", "loci reads --days 30"),
             ("rain", "loci rain            (add --fire to hand off a round)"),
         ],
     ),
@@ -307,7 +318,7 @@ fn cmd_overview(palace_arg: Option<PathBuf>, json: bool) -> Result<(), Error> {
         "loci {} · read your local workfolder from the terminal",
         env!("CARGO_PKG_VERSION")
     );
-    println!("Read-only. No network, no inference, no daemons.");
+    println!("Mostly reads (new, init and rain --fire write or hand off). No network, no inference, no daemons.");
     match &palace {
         Some(p) => println!("palace : {p}"),
         None => println!("palace : (none detected — pass --palace <path> or run inside one)"),
@@ -811,6 +822,54 @@ fn cmd_tokens(json: bool) -> Result<(), Error> {
         w.messages
     );
     println!("note    : {}", w.note);
+    Ok(())
+}
+
+fn cmd_reads(palace_arg: Option<PathBuf>, days: u64, json: bool) -> Result<(), Error> {
+    let p = require_palace(palace_arg)?;
+    let r = reads::read_rate(&p.root, days);
+    if json {
+        println!("{}", serde_json::to_string_pretty(&r)?);
+        return Ok(());
+    }
+    let pct = |x: Option<f64>| x.map_or_else(|| "n/a".to_string(), |x| format!("{x:.1}%"));
+    println!("root     : {}", r.root);
+    println!("window   : last {} day(s), {} transcript file(s)", r.days, r.files_scanned);
+    println!("turns    : {} user turn(s) in {} session(s)", r.user_turns, r.sessions);
+    if r.user_turns == 0 {
+        println!(
+            "rates    : n/a, no user turns found in the last {} day(s) ({} transcript file(s) scanned)",
+            r.days, r.files_scanned
+        );
+        if r.files_scanned == 0 {
+            println!(
+                "           no Claude Code transcripts modified in the last {} day(s) under ~/.claude/projects, ~/.config/claude/projects or $CLAUDE_CONFIG_DIR (try a larger --days)",
+                r.days
+            );
+        }
+    } else {
+        println!(
+            "read rate: {} of turns read the palace ({} of {}; tool reads, the floor)",
+            pct(r.read_rate_pct),
+            r.turns_with_read,
+            r.user_turns
+        );
+        println!(
+            "touch    : {} of turns read it or ran a shell command naming it ({} of {}; a wider count; misses shell commands that spell it relative, ~, $HOME or with escaped spaces)",
+            pct(r.touch_rate_pct),
+            r.turns_with_touch,
+            r.user_turns
+        );
+    }
+    println!(
+        "palace   : {} read(s) · {} write(s) · {} shell touch(es) · {} of {} session(s) read it",
+        r.palace_reads, r.palace_writes, r.shell_touches, r.sessions_with_read, r.sessions
+    );
+    println!(
+        "delegated: {} read(s) · {} write(s) by subagents (outside the rate)",
+        r.delegated_reads, r.delegated_writes
+    );
+    println!("note     : {}", r.note);
     Ok(())
 }
 
