@@ -94,7 +94,8 @@ enum Cmd {
     /// Nothing in loci writes this log yet; a runtime that wants receipts calls
     /// `loci_wal::record_egress`. An empty receipt means nothing was recorded, not
     /// that nothing left. Frames are grouped by class with a hash-chain sanity
-    /// check. For cryptographic proof, export a bundle and `wal verify` it.
+    /// check. For cryptographic proof, a runtime that holds the signing key exports a
+    /// bundle and `wal verify` checks it.
     Audit {
         /// WAL path (default: ~/.loci/wal/egress.jsonl).
         #[arg(long)]
@@ -115,7 +116,10 @@ enum Cmd {
 
 #[derive(Subcommand)]
 enum WalCmd {
-    /// Verify an exported proof bundle offline (pure, no network).
+    /// Verify an exported proof bundle offline (experimental; pure, no network).
+    ///
+    /// Bundles are minted by a runtime that holds the signing key; nothing in this
+    /// CLI mints one.
     Verify {
         /// Path to the bundle JSON.
         bundle: PathBuf,
@@ -582,6 +586,10 @@ struct AuditOut {
     degraded_latest: Option<String>,
     disabled_at: Option<String>,
     unreadable_lines: usize,
+    /// Always true while nothing in loci writes the log.
+    experimental: bool,
+    /// Set when the log holds no frames: an empty receipt is not proof of no egress.
+    note: Option<&'static str>,
     classes: Vec<AuditClassOut>,
 }
 
@@ -606,6 +614,9 @@ fn default_wal_path() -> Result<PathBuf, Error> {
     let home = dirs::home_dir().ok_or_else(|| Error::io("could not resolve home dir".to_string()))?;
     Ok(home.join(".loci").join("wal").join("egress.jsonl"))
 }
+
+const EMPTY_RECEIPT_NOTE: &str =
+    "nothing in loci writes this log yet, so an empty receipt is not evidence that nothing left the device";
 
 fn cmd_audit(wal_arg: Option<PathBuf>, since: Option<String>, json: bool) -> Result<(), Error> {
     let path = match wal_arg {
@@ -682,6 +693,8 @@ fn cmd_audit(wal_arg: Option<PathBuf>, since: Option<String>, json: bool) -> Res
             degraded_latest,
             disabled_at,
             unreadable_lines,
+            experimental: true,
+            note: all.is_empty().then_some(EMPTY_RECEIPT_NOTE),
             classes,
         };
         println!("{}", serde_json::to_string_pretty(&out)?);
@@ -707,8 +720,7 @@ fn cmd_audit(wal_arg: Option<PathBuf>, since: Option<String>, json: bool) -> Res
     }
     if all.is_empty() {
         println!("frames         : 0 recorded");
-        println!("note           : nothing in loci writes this log yet, so an empty receipt");
-        println!("                 is not evidence that nothing left the device");
+        println!("note           : {EMPTY_RECEIPT_NOTE}");
         return Ok(());
     }
     let chain = if chain_ok {

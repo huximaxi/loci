@@ -90,7 +90,7 @@ in the local log and never travel in an exported bundle. Frames are
 hash-chained, so an interior edit, a reorder, or a dropped frame breaks the
 chain; `loci audit` reports the break by sequence number. The chain alone is
 not keyed tamper-evidence (a tail edit or a wholesale re-chain is not caught
-without a key); for cryptographic proof, export a signed bundle and check it
+without a key); for cryptographic proof, a runtime that holds the signing key exports a signed bundle, and you check it
 with `loci wal verify`. The primitive lives in the `loci-wal` crate; see its
 crate docs for the exact guarantees.
 
