@@ -33,8 +33,6 @@ Then, from the repository root:
 cargo install --path loci-cli
 ```
 
-A pre-built binary will follow once release tagging stabilises.
-
 ## Layouts it accepts
 
 Three shapes:
@@ -65,9 +63,14 @@ Each command resolves the workfolder in this order:
 | `loci read <slug>` | Print a crystal's contents |
 | `loci read <slug> --room <name>` | Disambiguate when the same slug lives in two rooms |
 | `loci handover` | Print the most recent handover by mtime |
+| `loci tokens` | Approximate status of your agent runtime's 5-hour session window, read from local transcripts (timing, not quota) |
+| `loci rain` | Garden watering weather: window headroom, garden state, last rain |
+| `loci rain --fire` | Start a rain round by handing off to your agent runtime from the palace root |
+| `loci new <path>` | Scaffold a starter palace at `<path>`, then offer `loci init`. `--force` writes into a non-empty directory |
 | `loci init` | Interactive wizard. Writes `~/.config/loci/config.toml` |
 | `loci audit` | Egress receipt: what left the device, grouped by class, with a hash-chain check. `--wal <path>` and `--since <ISO-8601>` narrow it |
 | `loci wal verify <bundle>` | Verify an exported proof bundle offline. `--expect-key <hex>` pins the signer for provenance |
+| `loci overview` | Every command, grouped, with one example each (alias `loci commands`) |
 
 Add `--json` to any read command for machine-readable output.
 
