@@ -89,8 +89,12 @@ enum Cmd {
     },
     /// Interactive setup wizard. Writes `~/.config/loci/config.toml`.
     Init,
-    /// Egress receipt: what left the device, grouped by class, over the live WAL,
-    /// with a hash-chain sanity check. For cryptographic proof, export a bundle and `wal verify` it.
+    /// Egress receipt (experimental): what a runtime recorded as leaving the device.
+    ///
+    /// Nothing in loci writes this log yet; a runtime that wants receipts calls
+    /// `loci_wal::record_egress`. An empty receipt means nothing was recorded, not
+    /// that nothing left. Frames are grouped by class with a hash-chain sanity
+    /// check. For cryptographic proof, export a bundle and `wal verify` it.
     Audit {
         /// WAL path (default: ~/.loci/wal/egress.jsonl).
         #[arg(long)]
@@ -99,7 +103,7 @@ enum Cmd {
         #[arg(long)]
         since: Option<String>,
     },
-    /// Proof-bundle tools (verify an exported egress receipt).
+    /// Proof-bundle tools (experimental): verify an exported egress receipt.
     Wal {
         #[command(subcommand)]
         cmd: WalCmd,
@@ -684,7 +688,7 @@ fn cmd_audit(wal_arg: Option<PathBuf>, since: Option<String>, json: bool) -> Res
         return Ok(());
     }
 
-    println!("egress receipt : {}", path.display());
+    println!("egress receipt : {} (experimental)", path.display());
     if let Some(ref t) = disabled_at {
         println!(
             "⚠ WARNING      : egress logging was DISABLED (LOCI_WAL_DISABLED) as of {t} — receipt is INCOMPLETE"
@@ -702,7 +706,9 @@ fn cmd_audit(wal_arg: Option<PathBuf>, since: Option<String>, json: bool) -> Res
         );
     }
     if all.is_empty() {
-        println!("frames         : 0 (no egress recorded)");
+        println!("frames         : 0 recorded");
+        println!("note           : nothing in loci writes this log yet, so an empty receipt");
+        println!("                 is not evidence that nothing left the device");
         return Ok(());
     }
     let chain = if chain_ok {

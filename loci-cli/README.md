@@ -68,13 +68,18 @@ Each command resolves the workfolder in this order:
 | `loci rain --fire` | Start a rain round by handing off to your agent runtime from the palace root |
 | `loci new <path>` | Scaffold a starter palace at `<path>`, then offer `loci init`. `--force` writes into a non-empty directory |
 | `loci init` | Interactive wizard. Writes `~/.config/loci/config.toml` |
-| `loci audit` | Egress receipt: what left the device, grouped by class, with a hash-chain check. `--wal <path>` and `--since <ISO-8601>` narrow it |
-| `loci wal verify <bundle>` | Verify an exported proof bundle offline. `--expect-key <hex>` pins the signer for provenance |
+| `loci audit` | Egress receipt (experimental): what a runtime recorded as leaving the device, grouped by class, with a hash-chain check. `--wal <path>` and `--since <ISO-8601>` narrow it |
+| `loci wal verify <bundle>` | Verify an exported proof bundle offline (experimental). `--expect-key <hex>` pins the signer for provenance |
 | `loci overview` | Every command, grouped, with one example each (alias `loci commands`) |
 
 Add `--json` to any read command for machine-readable output.
 
 ## The egress receipt
+
+**Experimental.** Nothing in loci writes this log yet: the writer left with the
+desktop app in v0.7. A runtime that wants receipts calls `record_egress` from
+the `loci-wal` crate. Until something does, `loci audit` reads an empty log, and
+an empty receipt is not evidence that nothing left the device.
 
 `~/.loci/wal/egress.jsonl` is an append-only write-ahead log of what left the
 device: one frame per outbound call, recording that a call went out, to which
