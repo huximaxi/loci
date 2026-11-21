@@ -18,6 +18,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   reads and writes. README, setup guide, tutorials, the feature helper and `loci --help` say
   "workfolder"; file names, flags, CLI output and `templates/` still say palace.
 
+### Fixed
+- The CLI stops instead of falling back quietly. A `$LOCI_PALACE` that names no palace is now
+  an error (exit 2), not a silent walk to whatever palace the current directory holds.
+- `loci audit` no longer hides frames behind a bad line. The WAL reader skipped everything after
+  the first unparseable line, so a crash mid-write followed by more appends left later frames
+  unread while the chain still read ok. Unreadable lines are now skipped and counted, audit
+  warns about them (`unreadable_lines` in `--json`), and a lost interior frame fails the chain.
+  An `egress.degraded` or `egress.disabled` marker that exists but cannot be read is an error,
+  not zero failures.
+
 ---
 
 ## [v0.7.0-beta] - 2026-11-10

@@ -34,23 +34,45 @@ pub struct Room {
     pub crystal_count: usize,
 }
 
+/// `$LOCI_PALACE` is set but names no palace. Detection stops here instead of
+/// falling back to the current directory, so a typo never silently points the
+/// CLI at a different workfolder.
+pub struct BadEnv(pub PathBuf);
+
 /// Resolution order: explicit override, then `$LOCI_PALACE`, then walk up from cwd.
-pub fn detect(override_path: Option<PathBuf>) -> Option<Palace> {
+/// An empty `$LOCI_PALACE` counts as unset.
+pub fn detect(override_path: Option<PathBuf>) -> Result<Option<Palace>, BadEnv> {
+    detect_from(
+        override_path,
+        std::env::var_os("LOCI_PALACE"),
+        std::env::current_dir().ok(),
+    )
+}
+
+fn detect_from(
+    override_path: Option<PathBuf>,
+    env: Option<std::ffi::OsString>,
+    cwd: Option<PathBuf>,
+) -> Result<Option<Palace>, BadEnv> {
     if let Some(p) = override_path {
-        return validate(&p);
+        return Ok(validate(&p));
     }
-    if let Some(env) = std::env::var_os("LOCI_PALACE") {
-        if let Some(p) = validate(Path::new(&env)) {
-            return Some(p);
-        }
+    if let Some(env) = env.filter(|e| !e.is_empty()) {
+        let p = PathBuf::from(env);
+        return match validate(&p) {
+            Some(palace) => Ok(Some(palace)),
+            None => Err(BadEnv(p)),
+        };
     }
-    let mut cwd = std::env::current_dir().ok()?;
+    let Some(mut cwd) = cwd else {
+        return Ok(None);
+    };
     loop {
         if let Some(p) = validate(&cwd) {
-            return Some(p);
+            return Ok(Some(p));
         }
         if !cwd.pop() {
-            return None;
+            return Ok(None);
         }
     }
 }
@@ -315,6 +337,30 @@ mod tests {
         fs::create_dir_all(root.join("rooms")).unwrap();
         assert!(validate(&root).is_none());
         let _ = fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn bad_env_stops_instead_of_falling_back_to_cwd() {
+        let good = scratch("env_good");
+        fs::write(good.join("CLAUDE.md"), "# master\n").unwrap();
+        room(&good, "work-room");
+        let missing = good.join("no-such-palace");
+        // cwd holds a valid palace, but the env var names a bad path: stop, do not fall back.
+        let r = detect_from(None, Some(missing.clone().into_os_string()), Some(good.clone()));
+        match r {
+            Err(BadEnv(p)) => assert_eq!(p, missing),
+            _ => panic!("a bad LOCI_PALACE must not fall back to the cwd palace"),
+        }
+        // Empty env counts as unset: the cwd walk finds the palace.
+        let r = detect_from(None, Some("".into()), Some(good.clone()));
+        assert!(matches!(r, Ok(Some(_))));
+        // A good env wins over cwd; an explicit override wins over env.
+        assert!(matches!(detect_from(None, Some(good.clone().into_os_string()), None), Ok(Some(_))));
+        assert!(matches!(
+            detect_from(Some(missing.clone()), Some(good.clone().into_os_string()), None),
+            Ok(None)
+        ));
+        let _ = fs::remove_dir_all(&good);
     }
 
     #[test]

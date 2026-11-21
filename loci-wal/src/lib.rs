@@ -123,6 +123,41 @@ mod tests {
     }
 
     #[test]
+    fn partial_line_does_not_hide_later_frames() {
+        // A crash leaves a partial line; later appends chain past it.
+        let path = tmp("partial");
+        let _ = std::fs::remove_file(&path);
+        let wal = Wal::open(&path);
+        wal.append(mkframe("a.com")).unwrap();
+        {
+            use std::io::Write;
+            let mut f = std::fs::OpenOptions::new().append(true).open(&path).unwrap();
+            writeln!(f, "{{\"seq\":1,\"ts\":\"2026-07-13T00:00:00Z\",\"event_ty").unwrap();
+        }
+        wal.append(mkframe("b.com")).unwrap();
+        wal.append(mkframe("c.com")).unwrap();
+        let (frames, unreadable) = wal.read_counted().unwrap();
+        assert_eq!(frames.len(), 3, "frames after the partial line must be read");
+        assert_eq!(unreadable, 1);
+        assert!(Wal::verify_full(&frames).is_ok());
+        let _ = std::fs::remove_file(&path);
+    }
+
+    #[test]
+    fn corrupted_interior_frame_fails_the_chain() {
+        let (path, _) = chained("corrupt", &["a.com", "b.com", "c.com"]);
+        let text = std::fs::read_to_string(&path).unwrap();
+        let mut lines: Vec<&str> = text.lines().collect();
+        lines[1] = "not json";
+        std::fs::write(&path, lines.join("\n") + "\n").unwrap();
+        let (frames, unreadable) = Wal::open(&path).read_counted().unwrap();
+        assert_eq!(unreadable, 1);
+        assert_eq!(frames.len(), 2);
+        assert!(Wal::verify_full(&frames).is_err(), "a lost interior frame must fail the chain check");
+        let _ = std::fs::remove_file(&path);
+    }
+
+    #[test]
     fn record_egress_writes_a_classed_frame() {
         let path = tmp("rec");
         let _ = std::fs::remove_file(&path);
