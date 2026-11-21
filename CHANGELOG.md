@@ -8,6 +8,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Changed
+- loci is held by themapisnory OÜ: the LICENSE copyright line and the README name it. The licence
+  stays MIT.
 - Claims now match the code. The README no longer says "nothing leaves": loci sends nothing
   itself, but the AI you run sees what it reads, and the gate is a rule your AI follows, not a
   lock. The CLI no longer calls itself read-only: `new`, `init` and `rain --fire` write or hand

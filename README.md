@@ -87,7 +87,7 @@ contribute to the cognitive substrate itself, see [CONTRIBUTING.md](CONTRIBUTING
 
 ## License
 
-MIT · [loci.garden](https://loci.garden) · 2026
+MIT · © 2026 themapisnory OÜ · [loci.garden](https://loci.garden)
 
 ---
 
