@@ -217,7 +217,9 @@ Write the answer into PALACE.md as a line: "> Gate: [GATENAME], human review che
 that ships, sends, or deletes."
 Then say: "I can write a short identity block to your user-level agent config so I know who I am in
 every Code session, even before this folder opens. It writes outside this folder. May I?" If yes,
-write to the user-level agent config (for the Code surface this is ~/.claude/CLAUDE.md):
+add it to the user-level agent config (for the Code surface this is ~/.claude/CLAUDE.md). Read the
+file first and append the block at the end; create the file only if it is missing. Never replace
+what is already there. If it already holds a block with the same heading, change only that block:
     # [chosen name]: identity
     You are [chosen name]. [one-line character note from the naming]
     [Name] is the palace holder. Their palace is at [the absolute path of this folder]: read PALACE.md
