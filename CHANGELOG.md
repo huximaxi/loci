@@ -47,6 +47,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   "workfolder"; file names, flags, CLI output and `templates/` still say palace.
 - The CLI README lists every command (`tokens`, `rain`, `new` and `overview` were missing) and
   no longer promises a pre-built binary; install is `cargo install --path loci-cli`.
+- `loci audit` and `loci wal verify` are labelled experimental in `--help`, the audit output
+  (text and `--json`: `experimental`, plus a `note` on an empty log) and the CLI README. Nothing
+  in loci writes the egress log yet, so an empty receipt now says it is not evidence that nothing
+  left the device, instead of "no egress recorded".
+
 
 ### Fixed
 - The CLI stops instead of falling back quietly. A `$LOCI_PALACE` that names no palace is now
