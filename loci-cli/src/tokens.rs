@@ -126,7 +126,7 @@ pub fn window_status() -> WindowStatus {
 
 // ── scanning ────────────────────────────────────────────────────────────────
 
-fn data_dirs() -> Vec<PathBuf> {
+pub(crate) fn data_dirs() -> Vec<PathBuf> {
     let mut dirs_v = Vec::new();
     if let Ok(d) = std::env::var("CLAUDE_CONFIG_DIR") {
         dirs_v.push(PathBuf::from(d).join("projects"));
@@ -136,6 +136,9 @@ fn data_dirs() -> Vec<PathBuf> {
         dirs_v.push(home.join(".claude/projects"));
     }
     dirs_v.retain(|d| d.is_dir());
+    // CLAUDE_CONFIG_DIR may name the same tree as the home default; scan it once.
+    let mut seen = HashSet::new();
+    dirs_v.retain(|d| seen.insert(std::fs::canonicalize(d).unwrap_or_else(|_| d.clone())));
     dirs_v
 }
 
@@ -149,7 +152,7 @@ const MAX_LINE_BYTES: usize = 8 * 1024 * 1024;
 /// level: `BufRead::lines()` still buffers one arbitrarily long line in
 /// full before yielding it, which `read_to_string` avoids for the whole
 /// file but not for one hostile unterminated line within it.
-fn for_each_bounded_line(f: impl std::io::Read, mut on_line: impl FnMut(&str)) {
+pub(crate) fn for_each_bounded_line(f: impl std::io::Read, mut on_line: impl FnMut(&str)) {
     let mut reader = std::io::BufReader::new(f);
     let mut buf: Vec<u8> = Vec::new();
     let mut overflowed = false;
@@ -326,7 +329,7 @@ fn floor_hour(t: u64) -> u64 {
 }
 
 /// Parse RFC3339 ("2026-07-02T11:51:03.123Z" or with ±HH:MM offset) to epoch seconds.
-fn parse_rfc3339(s: &str) -> Option<u64> {
+pub(crate) fn parse_rfc3339(s: &str) -> Option<u64> {
     let b = s.as_bytes();
     if b.len() < 20 {
         return None;
