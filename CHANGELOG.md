@@ -45,6 +45,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - loci is now defined as a local AI topology: one nested workfolder with fixed places your AI
   reads and writes. README, setup guide, tutorials, the feature helper and `loci --help` say
   "workfolder"; file names, flags, CLI output and `templates/` still say palace.
+- The CLI README lists every command (`tokens`, `rain`, `new` and `overview` were missing) and
+  no longer promises a pre-built binary; install is `cargo install --path loci-cli`.
 
 ### Fixed
 - The CLI stops instead of falling back quietly. A `$LOCI_PALACE` that names no palace is now
@@ -60,6 +62,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   projects use. It now reads the file first, appends, and only edits a block with the same heading.
 
 ### Removed
+- `RC-1.6-SCOPE.md`, the v0.6.0-rc.3 scope draft. It still promised commands that never shipped
+  (`loci -z`, `sync`, `feedback`) and described the desktop cockpit removed in v0.7.0-beta.
 - `loci init` no longer asks for an Ollama endpoint and model. Nothing in the CLI read them,
   and the CLI runs no inference. `config.toml` now records only the palace path. No command reads
   it yet: they resolve the palace from `--palace`, `$LOCI_PALACE` or the current directory.
