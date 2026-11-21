@@ -9,14 +9,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 - `loci reads [--days N]`: does the agent read the palace at all? Counts, from local Claude Code
-  transcripts, the user turns followed by at least one read of a palace file before the next
-  turn. Two rates, because a shell command cannot say whether it read or wrote: the read rate
-  (tool reads only, the floor) and the touch rate (reads or shell commands naming the palace,
-  a wider count that still misses relative-path shell commands). A turn copied into a new
-  transcript on resume or fork counts once. Also palace reads, writes and shell touches, sessions that read the palace, and
-  subagent reads and writes kept outside the rate. Read-only and offline, counts only: no
-  transcript text, path or command is printed or kept. Same line bounds and symlink rule as
-  `loci tokens`; `--json` supported.
+  transcripts, the turns a person typed that were followed by at least one read of a palace
+  file before the next one. Harness entries (task notifications, reminders, interrupt markers,
+  slash and bash-mode echoes) are not turns: `origin.kind` decides where a transcript records
+  it, known harness shapes where it does not. Two rates, because a shell command cannot say
+  whether it read or wrote: the read rate (tool reads only, the floor) and the touch rate
+  (reads or shell commands naming the palace, a wider count that still misses commands that
+  spell the palace relative, with `~` or `$HOME`, or with escaped spaces). A turn copied into
+  a new transcript on resume or fork counts once, and files are read in a fixed order. Also
+  palace reads, writes and shell touches, sessions that read the palace, and subagent reads
+  and writes kept outside the rate. Prints the measured palace root, so a run from a parent
+  folder cannot silently measure the wrong one. Read-only and offline, counts only: no
+  transcript text, transcript path or command is printed or kept. Same line bounds and
+  symlink rule as `loci tokens`, which now scans a transcript folder once even when
+  `CLAUDE_CONFIG_DIR` names the default; `--json` supported.
 
 ### Changed
 - loci is now defined as a local AI topology: one nested workfolder with fixed places your AI

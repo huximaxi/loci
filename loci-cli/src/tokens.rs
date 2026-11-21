@@ -136,6 +136,9 @@ pub(crate) fn data_dirs() -> Vec<PathBuf> {
         dirs_v.push(home.join(".claude/projects"));
     }
     dirs_v.retain(|d| d.is_dir());
+    // CLAUDE_CONFIG_DIR may name the same tree as the home default; scan it once.
+    let mut seen = HashSet::new();
+    dirs_v.retain(|d| seen.insert(std::fs::canonicalize(d).unwrap_or_else(|_| d.clone())));
     dirs_v
 }
 

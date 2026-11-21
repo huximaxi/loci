@@ -831,6 +831,7 @@ fn cmd_reads(palace_arg: Option<PathBuf>, days: u64, json: bool) -> Result<(), E
         return Ok(());
     }
     let pct = |x: Option<f64>| x.map_or_else(|| "n/a".to_string(), |x| format!("{x:.1}%"));
+    println!("root     : {}", r.root);
     println!("window   : last {} day(s), {} transcript file(s)", r.days, r.files_scanned);
     println!("turns    : {} user turn(s) in {} session(s)", r.user_turns, r.sessions);
     if r.user_turns == 0 {
@@ -852,7 +853,7 @@ fn cmd_reads(palace_arg: Option<PathBuf>, days: u64, json: bool) -> Result<(), E
             r.user_turns
         );
         println!(
-            "touch    : {} of turns read it or ran a shell command naming it ({} of {}; a wider count, still misses relative-path shell commands)",
+            "touch    : {} of turns read it or ran a shell command naming it ({} of {}; a wider count; misses shell commands that spell it relative, ~, $HOME or with escaped spaces)",
             pct(r.touch_rate_pct),
             r.turns_with_touch,
             r.user_turns

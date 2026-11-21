@@ -23,7 +23,8 @@
 //!   whose path resolves inside the palace root.
 //! - a **shell touch** is a Bash call whose command names the palace root.
 //!   Counted apart: a command string cannot say whether it read or wrote, and
-//!   a command using a relative path from inside the palace is not seen. So
+//!   a command that spells the palace as a relative path, with `~` or `$HOME`,
+//!   or with backslash-escaped spaces is not seen. So
 //!   two rates: the read rate (tool reads only, the floor) and the touch rate
 //!   (reads or shell touches, a wider count). The truth usually sits between
 //!   them; shell reads by relative path from inside the palace are not seen
@@ -44,6 +45,8 @@ pub const MAX_DAYS: u64 = 90;
 
 #[derive(Serialize, Clone, Default, Debug, PartialEq)]
 pub struct ReadRate {
+    /// The palace root that was measured (the user's own setting, not transcript data).
+    pub root: String,
     pub days: u64,
     pub user_turns: usize,
     /// User turns followed by at least one palace read before the next turn.
@@ -52,7 +55,8 @@ pub struct ReadRate {
     pub read_rate_pct: Option<f64>,
     /// User turns followed by a palace read OR a shell touch: a wider count,
     /// since a shell command naming the palace may have read it or written it.
-    /// Not an upper bound: relative-path shell commands are still missed.
+    /// Not an upper bound: shell commands that spell the palace as a relative
+    /// path, with `~` or `$HOME`, or with escaped spaces are still missed.
     pub turns_with_touch: usize,
     pub touch_rate_pct: Option<f64>,
     pub palace_reads: usize,
@@ -138,22 +142,56 @@ fn is_user_turn(v: &serde_json::Value) -> bool {
     {
         return false;
     }
+    // A person's prompt, not harness traffic. Newer transcripts say so directly:
+    // origin.kind is "human" for a typed prompt and something else (for example
+    // "task-notification") for what the harness injects. Older entries carry no
+    // origin, so fall back to the shapes the harness is known to inject.
+    let origin_human = match v.pointer("/origin/kind").and_then(|x| x.as_str()) {
+        Some("human") => true,
+        Some(_) => return false,
+        None => false,
+    };
+    let keep = |t: &str| {
+        let t = t.trim_start();
+        !t.is_empty() && !t.starts_with("<local-command-") && (origin_human || !harness_shaped(t))
+    };
     match v.pointer("/message/content") {
-        Some(serde_json::Value::String(s)) => {
-            let t = s.trim_start();
-            !t.is_empty() && !t.starts_with("<local-command-")
-        }
+        Some(serde_json::Value::String(s)) => keep(s),
         Some(serde_json::Value::Array(blocks)) => {
             let ty =
                 |b: &serde_json::Value| b.get("type").and_then(|x| x.as_str()).map(str::to_owned);
-            let has_text = blocks.iter().any(|b| ty(b).as_deref() == Some("text"));
             let has_result = blocks
                 .iter()
                 .any(|b| ty(b).as_deref() == Some("tool_result"));
-            has_text && !has_result
+            let first_text = blocks
+                .iter()
+                .find(|b| ty(b).as_deref() == Some("text"))
+                .and_then(|b| b.get("text").and_then(|x| x.as_str()));
+            !has_result && first_text.is_some_and(keep)
         }
         _ => false,
     }
+}
+
+/// Content shapes the harness injects as user entries (used only when an entry
+/// carries no `origin`): notifications, reminders, slash and bash-mode echoes,
+/// scheduled prompts, and the interrupt marker.
+fn harness_shaped(t: &str) -> bool {
+    const SHAPES: &[&str] = &[
+        "<task-notification",
+        "<system-reminder",
+        "<command-name",
+        "<command-message",
+        "<command-args",
+        "<bash-input",
+        "<bash-stdout",
+        "<bash-stderr",
+        "<scheduled-task",
+        "<ci-monitor-event",
+        "<preview-annotation",
+        "[Request interrupted",
+    ];
+    SHAPES.iter().any(|p| t.starts_with(p))
 }
 
 fn classify(
@@ -394,8 +432,10 @@ pub fn read_rate(root: &Path, days: u64) -> ReadRate {
     let horizon = now.saturating_sub(days * 86_400);
     let roots = roots_for(root);
 
-    let mut t = Tally::new(&roots, horizon);
-    let mut files = 0usize;
+    // Collect first, then feed in a fixed order: when a resumed or forked
+    // transcript repeats ids, the first file seen wins, so the order must not
+    // depend on how the filesystem lists a folder.
+    let mut paths: Vec<PathBuf> = Vec::new();
     for dir in tokens::data_dirs() {
         let mut stack = vec![dir];
         while let Some(d) = stack.pop() {
@@ -422,27 +462,35 @@ pub fn read_rate(root: &Path, days: u64) -> ReadRate {
                     .and_then(|m| m.duration_since(UNIX_EPOCH).ok())
                     .map(|d| d.as_secs() >= horizon)
                     .unwrap_or(false);
-                if !fresh {
-                    continue;
+                if fresh {
+                    paths.push(p);
                 }
-                let Ok(f) = std::fs::File::open(&p) else {
-                    continue;
-                };
-                let fi = files;
-                files += 1;
-                tokens::for_each_bounded_line(f, |line| {
-                    // Cheap prefilter: only lines that can be a turn or a tool call.
-                    if line.contains("\"type\":\"user\"") || line.contains("\"tool_use\"") {
-                        t.feed(fi, line);
-                    }
-                });
             }
         }
     }
+    paths.sort();
+    paths.dedup();
+
+    let mut t = Tally::new(&roots, horizon);
+    let mut files = 0usize;
+    for p in &paths {
+        let Ok(f) = std::fs::File::open(p) else {
+            continue;
+        };
+        let fi = files;
+        files += 1;
+        tokens::for_each_bounded_line(f, |line| {
+            // Cheap prefilter: only lines that can be a turn or a tool call.
+            if line.contains("\"type\":\"user\"") || line.contains("\"tool_use\"") {
+                t.feed(fi, line);
+            }
+        });
+    }
     let mut r = t.finish();
+    r.root = root.display().to_string();
     r.days = days;
     r.files_scanned = files;
-    r.note = "counts only; no transcript text, path or command is printed or kept".into();
+    r.note = "counts only; no transcript text, transcript path or command is printed or kept (root is the palace you measured)".into();
     r
 }
 
@@ -577,6 +625,74 @@ mod tests {
     fn relative_root_is_made_absolute() {
         let v = roots_for(Path::new("palace"));
         assert!(v.iter().all(|r| r.is_absolute()));
+    }
+
+    fn user(sess: &str, origin: Option<&str>, content: &str) -> String {
+        let o = origin.map_or(String::new(), |k| format!(r#""origin":{{"kind":"{k}"}},"#));
+        format!(
+            r#"{{"type":"user",{o}"sessionId":"{sess}","timestamp":"{TS}","cwd":"/home/u/palace","message":{{"role":"user","content":{content}}}}}"#
+        )
+    }
+
+    #[test]
+    fn only_human_origin_counts_when_origin_is_present() {
+        let r = run(&[
+            user("s", Some("human"), r#""a typed prompt""#),
+            user(
+                "s",
+                Some("task-notification"),
+                r#""<task-notification>done</task-notification>""#,
+            ),
+            user(
+                "s",
+                Some("human"),
+                r#"[{"type":"text","text":"also typed"}]"#,
+            ),
+        ]);
+        assert_eq!(r.user_turns, 2, "a task notification is not a turn");
+    }
+
+    #[test]
+    fn harness_shapes_are_not_turns_when_origin_is_absent() {
+        let shapes = [
+            r#""<task-notification>x</task-notification>""#,
+            r#""<system-reminder>x</system-reminder>""#,
+            r#""[Request interrupted by user]""#,
+            r#""<command-name>/clear</command-name>""#,
+            r#""<bash-input>ls</bash-input>""#,
+            r#""<scheduled-task name=\"x\">go</scheduled-task>""#,
+            r#"[{"type":"text","text":"<system-reminder>x</system-reminder>"}]"#,
+        ];
+        let mut lines: Vec<String> = shapes.iter().map(|c| user("s", None, c)).collect();
+        lines.push(user("s", None, r#""plain words from a person""#));
+        assert_eq!(run(&lines).user_turns, 1);
+    }
+
+    #[test]
+    fn a_notification_does_not_close_the_human_turns_read_window() {
+        let r = run(&[
+            user("s", Some("human"), r#""check the palace""#),
+            user(
+                "s",
+                Some("task-notification"),
+                r#""<task-notification>x</task-notification>""#,
+            ),
+            tool(
+                "s",
+                "2026-11-19T10:00:05Z",
+                "t1",
+                "Read",
+                r#"{"file_path":"/home/u/palace/a.md"}"#,
+            ),
+        ]);
+        assert_eq!((r.user_turns, r.turns_with_read), (1, 1));
+    }
+
+    #[test]
+    fn pathless_search_outside_the_palace_is_not_a_read() {
+        let line = r#"{"type":"assistant","sessionId":"s","timestamp":"2026-11-19T10:00:05Z","cwd":"/home/u/other","message":{"content":[{"type":"tool_use","id":"t1","name":"Glob","input":{"pattern":"**/*.md"}}]}}"#.to_string();
+        let r = run(&[turn("s", TS), line]);
+        assert_eq!(r.palace_reads, 0);
     }
 
     #[test]
