@@ -50,7 +50,7 @@ feature_sets:
     name: Trust & Governance
     value: You decide what changes and what goes out.
     does: A named human-review gate, foreign-process quarantine, confirm-against-disk, and a read-only structural audit.
-    templates: [palace-audit-process.md, CLAUDE-master.md, .lociignore]
+    templates: [palace-audit-process.md, CLAUDE-master.md, .lociignore, quarantine-fixtures.md]
     tutorial: tutorials/set-a-gate.md
 
   - id: interop
