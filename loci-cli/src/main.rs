@@ -1019,14 +1019,6 @@ fn cmd_rain(palace_arg: Option<PathBuf>, fire: bool, json: bool) -> Result<(), E
 #[derive(serde::Serialize, serde::Deserialize)]
 struct Config {
     palace_path: Option<String>,
-    backend: Backend,
-}
-
-#[derive(serde::Serialize, serde::Deserialize)]
-struct Backend {
-    kind: String,
-    endpoint: String,
-    model: String,
 }
 
 // ── new (scaffold a palace) ─────────────────────────────────────────────────
@@ -1089,7 +1081,7 @@ fn cmd_new(path: &Path, force: bool, json: bool) -> Result<(), Error> {
 
     // Hand off to the config step, defaulting the palace path to the new palace.
     if std::io::stdin().is_terminal() {
-        print!("\nConfigure loci to use this palace now? [Y/n]: ");
+        print!("\nRecord this palace in ~/.config/loci/config.toml now? (no command reads it yet) [Y/n]: ");
         std::io::stdout().flush()?;
         let mut buf = String::new();
         std::io::stdin().read_line(&mut buf)?;
@@ -1099,7 +1091,7 @@ fn cmd_new(path: &Path, force: bool, json: bool) -> Result<(), Error> {
             return cmd_init(Some(path.display().to_string()));
         }
     }
-    println!("\nWhen ready: loci init   (configure the backend)");
+    println!("\nWhen ready: loci init   (records the palace path; no command reads it yet)");
     Ok(())
 }
 
@@ -1124,21 +1116,11 @@ fn cmd_init(default_palace: Option<String>) -> Result<(), Error> {
         );
     }
 
-    // Backend: this slice is Ollama-only. Other backends land in a later release.
-    println!("\nAI backend: ollama (this slice ships only the local backend).");
-    let endpoint = prompt("Ollama endpoint", Some("http://localhost:11434"))?;
-    let model = prompt("Ollama model", Some("qwen3:8b"))?;
-
     let cfg = Config {
         palace_path: if trimmed.is_empty() {
             None
         } else {
             Some(trimmed.to_string())
-        },
-        backend: Backend {
-            kind: "ollama".to_string(),
-            endpoint: endpoint.trim().to_string(),
-            model: model.trim().to_string(),
         },
     };
 
