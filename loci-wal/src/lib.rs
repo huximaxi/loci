@@ -144,6 +144,46 @@ mod tests {
     }
 
     #[test]
+    fn torn_tail_without_newline_does_not_swallow_the_next_frame() {
+        // The ordinary crash: a fragment with no trailing newline. The next append
+        // must start on its own line, or it is glued to the fragment and lost.
+        let path = tmp("torn_nonl");
+        let _ = std::fs::remove_file(&path);
+        let wal = Wal::open(&path);
+        wal.append(mkframe("a.com")).unwrap();
+        {
+            use std::io::Write;
+            let mut f = std::fs::OpenOptions::new().append(true).open(&path).unwrap();
+            write!(f, "{{\"seq\":1,\"ts\":\"2026-07-13T00:00:00Z\",\"event_ty").unwrap();
+        }
+        let b = wal.append(mkframe("b.com")).unwrap();
+        let c = wal.append(mkframe("c.com")).unwrap();
+        assert_eq!((b.seq, c.seq), (1, 2), "an acknowledged frame must keep its own seq");
+        let (frames, unreadable) = wal.read_counted().unwrap();
+        assert_eq!(frames.len(), 3, "both frames written after the fragment must be read");
+        assert_eq!(unreadable, 1);
+        assert!(Wal::verify_full(&frames).is_ok());
+        let _ = std::fs::remove_file(&path);
+    }
+
+    #[test]
+    fn complete_frame_missing_its_newline_is_kept() {
+        // A crash between the frame and its newline leaves a whole frame unterminated.
+        let path = tmp("torn_whole");
+        let _ = std::fs::remove_file(&path);
+        let wal = Wal::open(&path);
+        wal.append(mkframe("a.com")).unwrap();
+        let text = std::fs::read_to_string(&path).unwrap();
+        std::fs::write(&path, text.trim_end_matches('\n')).unwrap();
+        wal.append(mkframe("b.com")).unwrap();
+        let (frames, unreadable) = wal.read_counted().unwrap();
+        assert_eq!(frames.len(), 2, "the unterminated frame must not be glued to the next");
+        assert_eq!(unreadable, 0);
+        assert!(Wal::verify_full(&frames).is_ok());
+        let _ = std::fs::remove_file(&path);
+    }
+
+    #[test]
     fn corrupted_interior_frame_fails_the_chain() {
         let (path, _) = chained("corrupt", &["a.com", "b.com", "c.com"]);
         let text = std::fs::read_to_string(&path).unwrap();
