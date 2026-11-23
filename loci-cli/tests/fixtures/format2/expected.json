@@ -1,0 +1,269 @@
+{
+ "rooms-dir": {
+  "layout": "rooms-dir",
+  "rooms": [
+   "general",
+   "work"
+  ],
+  "documents": [
+   "rooms/work/notes.md",
+   "rooms/work/shard.md"
+  ],
+  "notes": 1,
+  "crystals": [
+   {
+    "file": "CLAUDE.md",
+    "fact": "Ada, researcher at a small lab",
+    "tier": "confirmed",
+    "name": "Owner"
+   },
+   {
+    "file": "CLAUDE.md",
+    "fact": "Standup at 10:30 daily",
+    "tier": "confirmed"
+   },
+   {
+    "file": "CLAUDE.md",
+    "fact": "ship the beta",
+    "tier": "contextual",
+    "name": "Sprint",
+    "valid_until": "date:2026-12-31",
+    "occurred": "2026-11-01",
+    "mentioned": "2026-11-05"
+   },
+   {
+    "file": "CLAUDE.md",
+    "fact": "daily while the feature is in flight",
+    "tier": "contextual",
+    "name": "Check-in rhythm",
+    "valid_until": "label:sprint-end"
+   },
+   {
+    "file": "CLAUDE.md",
+    "fact": "growth might be the lever",
+    "tier": "exploratory",
+    "name": "Quarter",
+    "valid_until": "label:2026-Q3"
+   },
+   {
+    "file": "CLAUDE.md",
+    "fact": "users skip the settings page",
+    "tier": "exploratory",
+    "name": "Guess",
+    "valid_until": "label:2026-02-30"
+   },
+   {
+    "file": "CLAUDE.md",
+    "fact": "a capitalised key below is not a key line",
+    "tier": "contextual",
+    "name": "Casey"
+   },
+   {
+    "file": "CLAUDE.md",
+    "fact": "unknown and reserved keys are ignored",
+    "tier": "contextual",
+    "name": "Kept",
+    "valid_until": "date:2027-03-01"
+   },
+   {
+    "file": "CLAUDE.md",
+    "fact": "keys after a blank line are not read",
+    "tier": "exploratory",
+    "name": "After a blank"
+   },
+   {
+    "file": "rooms/work/CLAUDE.md",
+    "fact": "Acme for hosting",
+    "tier": "contextual",
+    "name": "Vendor",
+    "valid_until": "date:2027-01-15"
+   },
+   {
+    "file": "rooms/work/CLAUDE.md",
+    "fact": "bullet points",
+    "tier": "confirmed",
+    "name": "Style preference",
+    "pinned": true
+   },
+   {
+    "file": "rooms/work/CLAUDE.md",
+    "fact": "leave no trace of working",
+    "tier": "confirmed",
+    "name": "Privacy",
+    "pinned": true
+   },
+   {
+    "file": "rooms/work/CLAUDE.md",
+    "fact": "renewal pending",
+    "tier": "contextual",
+    "name": "Contract",
+    "pinned_until": "2026-12-01",
+    "valid_until": "date:2026-12-31"
+   },
+   {
+    "file": "rooms/work/CLAUDE.md",
+    "fact": "plain labels win",
+    "tier": "exploratory",
+    "name": "Framing",
+    "superseded_by": "Framing v2"
+   },
+   {
+    "file": "rooms/work/CLAUDE.md",
+    "fact": "plain labels win in every segment",
+    "tier": "exploratory",
+    "name": "Framing v2"
+   },
+   {
+    "file": "rooms/work/CLAUDE.md",
+    "fact": "daily 9am check-in",
+    "tier": "contextual",
+    "name": "Old rhythm",
+    "retired": "2026-06-01"
+   },
+   {
+    "file": "rooms/work/CLAUDE.md",
+    "fact": "no retired line follows",
+    "tier": "exploratory",
+    "name": "Struck alone",
+    "retired": "struck"
+   },
+   {
+    "file": "rooms/work/CLAUDE.md",
+    "fact": "was a guess",
+    "tier": "contextual",
+    "name": "Promoted"
+   },
+   {
+    "file": "rooms/work/decision.md",
+    "fact": "We use Postgres for the store.",
+    "tier": "contextual",
+    "name": "Database choice",
+    "valid_until": "date:2026-12-31",
+    "superseded_by": "Hosting choice"
+   },
+   {
+    "file": "rooms/work/pinned-fact.md",
+    "fact": "Simplicity first.",
+    "tier": "confirmed",
+    "name": "Core value",
+    "pinned": true,
+    "occurred": "2026-01-15"
+   },
+   {
+    "file": "garden/first.md",
+    "fact": "What the person said first.",
+    "tier": "contextual",
+    "name": "First fact",
+    "valid_until": "label:growing"
+   },
+   {
+    "file": "garden/untiered.md",
+    "fact": "A missing tier reads as exploratory.",
+    "tier": "exploratory",
+    "name": "Untiered"
+   },
+   {
+    "file": "garden/odd-tier.md",
+    "fact": "An unreadable tier reads as exploratory.",
+    "tier": "exploratory",
+    "name": "Odd tier"
+   },
+   {
+    "file": "garden/plants/seed.md",
+    "fact": "A seed with no heading takes its name from the file.",
+    "tier": "exploratory",
+    "name": "seed",
+    "retired": "2026-05-01",
+    "pinned_until": "2027-01-01",
+    "mentioned": "2026-04-01"
+   }
+  ]
+ },
+ "palace-subdir": {
+  "layout": "palace-subdir",
+  "rooms": [
+   "ideas"
+  ],
+  "documents": [],
+  "notes": 0,
+  "crystals": [
+   {
+    "file": "PALACE.md",
+    "fact": "Bo",
+    "tier": "confirmed",
+    "name": "Owner"
+   },
+   {
+    "file": "PALACE.md",
+    "fact": "discovery",
+    "tier": "contextual",
+    "name": "Phase",
+    "valid_until": "label:after-research"
+   },
+   {
+    "file": "_palace/ideas/CLAUDE.md",
+    "fact": "a quiet one",
+    "tier": "exploratory",
+    "name": "Idea"
+   },
+   {
+    "file": "_palace/ideas/sketch.md",
+    "fact": "A rough shape.",
+    "tier": "exploratory",
+    "name": "Sketch"
+   }
+  ]
+ },
+ "rooms-at-root": {
+  "layout": "rooms-at-root",
+  "rooms": [
+   "home",
+   "work"
+  ],
+  "documents": [
+   "docs/guide.md",
+   "rooms/README.md"
+  ],
+  "notes": 0,
+  "crystals": [
+   {
+    "file": "CLAUDE.md",
+    "fact": "Cy",
+    "tier": "confirmed",
+    "name": "Owner"
+   },
+   {
+    "file": "CLAUDE.md",
+    "fact": "planting",
+    "tier": "contextual",
+    "name": "Season",
+    "valid_until": "date:2027-03-20"
+   },
+   {
+    "file": "work/CLAUDE.md",
+    "fact": "the shed needs a roof",
+    "tier": "exploratory",
+    "name": "Hunch"
+   },
+   {
+    "file": "home/CLAUDE.md",
+    "fact": "paint the fence",
+    "tier": "contextual",
+    "name": "Plan",
+    "valid_until": "date:2026-12-24"
+   },
+   {
+    "file": "home/plan.md",
+    "fact": "Paint it blue.",
+    "tier": "contextual",
+    "name": "Fence plan"
+   },
+   {
+    "file": "garden/pea.md",
+    "fact": "Counted once, though garden/ sits under the scan root here.",
+    "tier": "exploratory",
+    "name": "Pea"
+   }
+  ]
+ }
+}

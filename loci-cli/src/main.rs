@@ -15,6 +15,8 @@ use loci_wal::{ChainError, EgressClass, Frame, ProofBundle, Wal};
 use std::process::ExitCode;
 
 mod palace;
+#[cfg(test)]
+mod format2;
 mod reads;
 mod scaffold;
 mod tokens;

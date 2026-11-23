@@ -95,7 +95,7 @@ Frontmatter keys and `type` values are matched without regard to case. Line keys
 |---|---|
 | `tier: working` or `tier: provisional` in a file's frontmatter | Contextual and Exploratory. |
 | A tier called Working or Provisional in prose or a heading | The alias. It reads the same as the canonical name. |
-| `◈ Name: fact - valid_until: 2026-12-31` on one line | The same crystal, with the key read from the end of the line. Writers use the next-line form. |
+| `◈ Name: fact - valid_until: 2026-12-31` on one line | The same crystal, with the key read from the end of the line and removed before the name is split. Writers use the next-line form. |
 | `◆ Name: fact · pinned` | The same crystal, pinned. Writers use `pinned: true` on the next line. |
 | `~~◈ Name: fact~~` (the whole line struck through), usually with a `retired:` line after it | A retired crystal. Not live. Kept for the history. |
 | A bullet with no glyph (`- **Name** = fact`) | A note, not a crystal. It is read as text and never counted as a crystal. |
