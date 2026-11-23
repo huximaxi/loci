@@ -150,11 +150,13 @@ Demotion also happens. If a ◆ crystal turns out to be false or phase-dependent
 
 **Two kinds of value:**
 ```
-valid_until: 2026-06-30          # a date: scheduled, a machine can check it
-valid_until: sprint-end          # an event: kept as written, reported unscheduled
-valid_until: 2026-Q3             # a quarter reads as an event too
-valid_until: after-user-research # a milestone
+valid_until: 2026-06-30
+valid_until: sprint-end
+valid_until: 2026-Q3
+valid_until: after-user-research
 ```
+
+The first is a date: scheduled, so a machine can check it. The other three are events or labels: kept as written, reported unscheduled (a quarter reads as an event too). Write nothing after the value on the same line.
 
 Only a real `YYYY-MM-DD` date is scheduled. Anything else is a label you read yourself. Prefer a date when you know one.
 
@@ -186,7 +188,7 @@ Crystals can be duplicated across files if they're relevant in multiple contexts
 ◈ Current focus: [Sprint or project goal]
 valid_until: [DATE or EVENT]
 
-◈ Check-in rhythm: [How they're currently working - could change]
+◈ Check-in rhythm: [The cadence they work to right now - could change]
 valid_until: [DATE or EVENT]
 
 ◇ Hypothesis: [Something believed but not yet confirmed]
@@ -215,17 +217,12 @@ Pinned crystals are protected from the garden health pass and from any agent-dri
 pinned: true
 ```
 
-Or inline:
-```
-◆ [crystal name]: [value] · pinned
-```
-
 **Rules:**
 - Any tier can be pinned (◆ ◈ ◇)
 - Pinning does not prevent the human from updating or retiring the crystal manually
 - Pinning only protects against *agent-initiated* review and cleanup
 - The agent will note pinned crystals during a health check but will not propose action on them
-- To unpin, remove the `pinned: true` field or the `· pinned` marker
+- To unpin, remove the `pinned: true` field (or the older `· pinned` marker, which is still read)
 
 **In the health report:**
 ```
@@ -239,7 +236,7 @@ For crystals that should be protected during a specific period but eventually re
 valid_until: 2026-12-31
 pinned_until: 2026-09-01
 ```
-The crystal is protected until `pinned_until`, then becomes subject to normal health checks from that date forward.
+The crystal is protected up to and including `pinned_until`, then becomes subject to normal health checks from the next day. `pinned_until` alone is enough: it needs no `pinned: true`.
 
 ---
 
@@ -252,7 +249,7 @@ CONTEXTUAL (◈), often with a valid_until
   ↓ confirmed across contexts, no longer phase-bound
 CONFIRMED (◆)
   ↓ [optional] flagged as special
-PINNED (◆ · pinned) - protected indefinitely
+PINNED (◆ with pinned: true) - protected indefinitely
 ```
 
 Composting (retirement) can happen at any tier. Always add a note when a crystal is retired:

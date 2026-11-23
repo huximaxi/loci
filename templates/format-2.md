@@ -22,10 +22,11 @@ mentioned: 2026-11-05
 superseded_by: Other name
 ```
 
-- The first line is the crystal: a tier glyph, a space, a name, a colon, the fact. It is the only required line.
-- Keys sit on the lines directly after it, unindented, one `key: value` per line, until a blank line or the next crystal line.
-- Every key is optional. Key names are lowercase.
-- A crystal line with no colon is still a crystal: the whole text is the fact and it has no name.
+- The first line is the crystal: a tier glyph as the very first character of the line, a space, a name, a colon and a space, the fact. It is the only required line.
+- The name is everything before the first `: ` (a colon followed by a space). A line with no `: ` is still a crystal: the whole text is the fact and it has no name. So `◆ Standup at 10:30 daily` is a nameless fact.
+- Keys sit on the lines directly after it, unindented, one per line, in the form `key: value` with a lowercase key (letters and underscores). Every key is optional.
+- The key block ends at the first line that is not a key line: a blank line, the next crystal, or any prose (a `→ Promoted to ◆ ...` note, say). Keys written after that line are not read.
+- A value is the text after `: `, trimmed. Nothing after it on the line is a comment: write none.
 
 ## Tiers
 
@@ -35,44 +36,46 @@ superseded_by: Other name
 | ◈ | Contextual | Working | True now, tied to a phase, sprint or situation. May shift. |
 | ◇ | Exploratory | Provisional | A hypothesis or early finding. Promote it or retire it. |
 
-On a crystal line the glyph carries the tier. In frontmatter, `tier` is the glyph or a tier name in any case. Writers use the canonical names. Readers accept the aliases without a warning.
+On a crystal line the glyph carries the tier. In frontmatter, `tier` is the glyph or a tier name in any case. A file crystal whose `tier` is missing or unreadable reads as Exploratory, the least trusted tier. Writers use the canonical names. Readers accept the aliases without a warning.
 
 ## Keys
 
 | Key | Value | Notes |
 |---|---|---|
-| `valid_until` | a date `YYYY-MM-DD`, or a free label | See the grammar below. |
-| `occurred` | a date `YYYY-MM-DD` | When the thing the crystal records happened. |
-| `mentioned` | a date `YYYY-MM-DD` | When the crystal was last said or confirmed. |
+| `valid_until` | a date `YYYY-MM-DD`, or a free label | See below. |
+| `occurred` | a date | When the thing the crystal records happened. |
+| `mentioned` | a date | When the crystal was last said or confirmed. |
 | `superseded_by` | the name of another crystal | The crystal stays in place. History matters. |
 | `pinned` | `true` | Protects the crystal from agent-initiated cleanup. |
-| `pinned_until` | a date `YYYY-MM-DD` | The pin ends on that day. |
-| `retired` | a date, then optionally a reason | Marks a composted crystal. See legacy forms. |
+| `pinned_until` | a date | Protects it up to and including that day. Enough on its own, with no `pinned: true`. Normal review resumes the next day. |
+| `retired` | a date, then optionally a space and a reason | Marks a composted crystal. The date is the first word. |
 
-A key with a date value whose date is not a real calendar day is ignored, never an error.
+A date is a real calendar day written `YYYY-MM-DD`. A value that is not a date (`2026-02-30` included) is not a date: for `valid_until` it reads as a label, for every other date key it is ignored. Never an error.
+
+`superseded_by` matches a crystal name without regard to case, within the same file or room first, then the workfolder. A reader that cannot find the name, or finds several, still marks the crystal superseded.
 
 ### `valid_until`
 
-- A value that is a real calendar date in `YYYY-MM-DD` form is **scheduled**. A checker may flag the crystal for review on or after that day. It never deletes it.
+- A real `YYYY-MM-DD` date is **scheduled**. A checker may flag the crystal for review on or after that day, and may warn earlier (the morning check-in warns seven days ahead). It never deletes it.
 - Any other value (`sprint-end`, `2026-Q3`, `after-user-research`, `growing`) is an **event or label**. It is kept as written and reported as **unscheduled**: a machine cannot know when it happens, so it does not guess.
-- The key goes on the line after the crystal, as above. It is valid on any tier, and is most useful on ◈ and ◇.
+- It is valid on any tier and is most useful on ◈ and ◇.
 
 ## Accepted layouts
 
-A reader looks for crystals in a workfolder. A workfolder is a directory with `PALACE.md` or `CLAUDE.md` at its root, and rooms laid out in one of three shapes:
+A workfolder is a directory with `PALACE.md` or `CLAUDE.md` at its root and a scan root. A room is a directory holding a `CLAUDE.md`. The **scan root** is the directory the rooms live in. A reader picks the first that applies:
 
-| Layout | Rooms live in |
-|---|---|
-| Subdirectory | `_palace/` under the root |
-| Rooms directory | `rooms/` under the root (what the kit builds) |
-| Rooms at root | sibling directories of the root, each holding a `CLAUDE.md` |
+| Order | Scan root | When |
+|---|---|---|
+| 1 | `_palace/` under the root | the directory exists, even with no room in it |
+| 2 | `rooms/` under the root | it exists and holds a room (what the kit builds) |
+| 3 | the root itself | at least one sibling directory of the root holds a `CLAUDE.md` |
 
-A room is a directory with a `CLAUDE.md`. Hidden directories and `_palace`, `node_modules`, `target` and `cron` are never scanned.
+If more than one shape is present, the first wins and the rest are not read. Within the scan root, hidden directories and `node_modules`, `target` and `cron` are not scanned.
 
 Crystals are stored in two ways, and both read as the same crystal:
 
-1. **Lines**, in a `CLAUDE.md` (the root one, or a room's), in the shape above.
-2. **A file per crystal**, any `.md` file in a room with `type: crystal` in its frontmatter. The same keys go in the frontmatter, plus `tier`, written as the glyph (`tier: "◈"`) or as a tier name. The crystal's name is the first `#` heading, or the file name without `.md` when there is none. Its fact is the first paragraph after the heading. The rest of the body is free text.
+1. **Lines**, in the root `PALACE.md` or `CLAUDE.md`, or in a room's `CLAUDE.md`, in the shape above.
+2. **A file per crystal**: any `.md` file under the scan root with `type: crystal` in its frontmatter. It need not sit in a room, so the kit's `garden/` counts. The same keys go in the frontmatter, plus `tier`, written as the glyph (`tier: "◈"`) or as a tier name. The crystal's name is the first `#` heading, or the file name without `.md` when there is none. Its fact is the first paragraph after the heading. The rest of the body is free text.
 
 ```
 ---
@@ -84,7 +87,7 @@ valid_until: 2026-12-31
 The fact in one line.
 ```
 
-Lines inside a fenced code block are examples and never crystals.
+Keys and `type` values are lowercase and matched without regard to case. Fenced code blocks (opened with three backticks or three tildes, closed by the same) hold examples: nothing inside one is a crystal.
 
 ## Legacy forms and how they read
 
@@ -94,7 +97,7 @@ Lines inside a fenced code block are examples and never crystals.
 | A tier called Working or Provisional in prose or a heading | The alias. It reads the same as the canonical name. |
 | `◈ Name: fact - valid_until: 2026-12-31` on one line | The same crystal, with the key read from the end of the line. Writers use the next-line form. |
 | `◆ Name: fact · pinned` | The same crystal, pinned. Writers use `pinned: true` on the next line. |
-| `~~◈ Name: fact~~` with a `retired:` line | A retired crystal. Not live. Kept for the history. |
+| `~~◈ Name: fact~~` (the whole line struck through), usually with a `retired:` line after it | A retired crystal. Not live. Kept for the history. |
 | A bullet with no glyph (`- **Name** = fact`) | A note, not a crystal. It is read as text and never counted as a crystal. |
 | A `.md` file with no `type: crystal` | A document. It is read as text and is not a crystal. |
 

@@ -45,8 +45,8 @@ decides what loads when.
   sessions; the ceremony does not write it.
 - **Rooms** are modes of thinking, not topics. Each carries its own context, and only the room in
   use loads. Moving rooms is a mode switch, not starting over.
-- **Crystals** are facts you never re-derive: ◆ confirmed, ◈ contextual (true now, may shift), ◇ exploratory (a hypothesis still being
-  tested). Promote them as they prove out, compost them when they stop being true.
+- **Crystals** are facts you never re-derive: ◆ confirmed, ◈ contextual (true now, may shift),
+  ◇ exploratory (a hypothesis still being tested). Promote them as they prove out, compost them when they stop being true.
 - **The garden** is for what is not a fact yet: ideas worth returning to. One file per idea,
   watered over time. A seed can grow into a crystal.
 - **Handovers** bridge sessions. Each close writes one, each open reads the last. That is how a

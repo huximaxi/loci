@@ -52,7 +52,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Crystal tier names are one set across the kit: Confirmed, Contextual, Exploratory. Working and
   Provisional stay readable as aliases. The guide's inline `valid_until` form is gone, so the key
   has one placement (the line after the crystal). Two guide example crystals were renamed so a
-  name no longer reads as a tier label.
+  name no longer reads as a tier label. The master template's CONTEXT CRYSTALS placeholders are
+  now glyph-led crystal lines (they were bullets the spec would not count), and the guide's
+  trailing `# comment` examples and inline `· pinned` example are gone.
 - CI supply chain: every third-party action in `.github/workflows/` is pinned to a full commit
   SHA (version kept as a comment), the trufflehog scanner image is pinned by digest, and the
   workflows run with read-only tokens (secrets-scan keeps `pull-requests: read`; the gitleaks PR

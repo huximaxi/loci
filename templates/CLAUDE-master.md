@@ -96,10 +96,10 @@ Can one clear-headed agent handle this?
 
 *(Start with a few and add more over time. These are things Claude should always know about you and your world.)*
 
-- **[YOUR_NAME]** = [your role and context]
-- **[KEY PROJECT/THING]** = [what it is and why it matters]
-- **[KEY TOOL/STACK]** = [what you use and any specifics Claude should know]
-- **[A PREFERENCE]** = [e.g. "prefers bullet points over prose" / "never uses jargon" / "KISS first, always"]
+◆ [YOUR_NAME]: [your role and context]
+◆ [KEY PROJECT/THING]: [what it is and why it matters]
+◆ [KEY TOOL/STACK]: [what you use and any specifics Claude should know]
+◆ [A PREFERENCE]: [e.g. "prefers bullet points over prose" / "never uses jargon" / "KISS first, always"]
 
 **Crystal metadata:**
 - All crystals have a tier: `◆ Confirmed` (verified), `◈ Contextual` (true now, may shift), `◇ Exploratory` (hypothesis)

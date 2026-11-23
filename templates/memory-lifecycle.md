@@ -28,7 +28,7 @@ Forgetting is maintenance, not loss. A crystal that has stopped being true, or s
 
 Three first-class ways things fade:
 
-- **Expiry.** `valid_until` on ◈ and ◇ crystals. When the date passes, the fact is flagged for review, never silently dropped.
+- **Expiry.** `valid_until` on any crystal, most useful on ◈ and ◇. When the date passes, the fact is flagged for review, never silently dropped.
 - **Demotion.** A ◆ that turns out to be phase-dependent moves down to ◈, with a note on why. Understanding evolving is worth recording.
 - **Composting.** Retirement at any tier. Strike it through, add the reason and the date. The history tells the story of how you learned.
 
