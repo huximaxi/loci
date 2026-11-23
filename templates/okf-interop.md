@@ -64,7 +64,7 @@ Two axes, not one. A palace tier says how **stable** a fact is. An OKF trust tie
 | ◇ Exploratory | `status: draft` | Exploratory, possibly incomplete |
 | ◆ Confirmed, ◈ Contextual | `status: stable` | The default; may be left out |
 | Composted (retired with a note) | `status: deprecated` | Kept for history, no longer current: the same promise composting makes |
-| `valid_until` on ◈ / ◇ | `stale_after` | Both mean "review on or after this point". Only a calendar date maps: `2026-06-30` becomes `2026-06-30T00:00:00Z` (start of day, so it errs early). An event value (`sprint-end`, `growing`) has no OKF equivalent: keep it as a producer key `valid_until` and write no `stale_after` |
+| `valid_until` | `stale_after` | Both mean "review on or after this point". Only a calendar date maps: `2026-06-30` becomes `2026-06-30T00:00:00Z` (start of day, so it errs early). An event value (`sprint-end`, `growing`) has no OKF equivalent: keep it as a producer key `valid_until` and write no `stale_after` |
 | You promoted or confirmed it | `verified: { by: human:<your-handle>, at: <datetime> }` | Only a person is written as `human:`. Never stamp it on an agent's own write |
 | Who wrote it | `generated: { by: <ai-name>/<model>, at: <datetime> }`, or `human:<your-handle>` if you wrote it yourself | OKF actors: `human:<id>`, `process:<id>`, `<producer>/<version>` (here the producer is your companion and the version is the model it ran on) |
 | Where it came from | `sources:` entries with an `id`, cited in the body as footnotes `[^id]` | Keyed ids survive an agent reordering the list; positions do not |

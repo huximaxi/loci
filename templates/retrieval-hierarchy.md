@@ -181,8 +181,8 @@ This is L3 history: deep but focused.
 Crystals appear at all levels. Their tier indicates confidence:
 
 - **◆ Confirmed:** Verified true. Treat as ground truth.
-- **◈ Working:** Likely true, not fully confirmed. Open to update.
-- **◇ Provisional:** Hypothesis. Needs validation before crystalizing.
+- **◈ Contextual:** True now, may shift. Open to update.
+- **◇ Exploratory:** Hypothesis. Needs validation before crystalizing.
 
 When promoting a crystal from ◇ → ◈ → ◆, note the date and reasoning. History matters.
 

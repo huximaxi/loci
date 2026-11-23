@@ -45,8 +45,8 @@ decides what loads when.
   sessions; the ceremony does not write it.
 - **Rooms** are modes of thinking, not topics. Each carries its own context, and only the room in
   use loads. Moving rooms is a mode switch, not starting over.
-- **Crystals** are facts you never re-derive: ◆ confirmed, ◈ working, ◇ a hypothesis still being
-  tested. Promote them as they prove out, compost them when they stop being true.
+- **Crystals** are facts you never re-derive: ◆ confirmed, ◈ contextual (true now, may shift),
+  ◇ exploratory (a hypothesis still being tested). Promote them as they prove out, compost them when they stop being true.
 - **The garden** is for what is not a fact yet: ideas worth returning to. One file per idea,
   watered over time. A seed can grow into a crystal.
 - **Handovers** bridge sessions. Each close writes one, each open reads the last. That is how a
@@ -62,7 +62,7 @@ these, placed the first time by a conversation instead of a template.
 
 Read for yourself now, so the ceremony runs clean:
 
-- `templates/crystals-guide.md`: the ◆ ◈ ◇ tiers.
+- `templates/crystals-guide.md`: the ◆ ◈ ◇ tiers. `templates/format-2.md`: the exact on-disk shape.
 - `templates/handover-template.md`: the delta shape, for the close.
 
 If a kit fetch or the `loci new` CLI has already left a skeleton here (a `PALACE.md` marker, a
@@ -132,7 +132,7 @@ Wait for a yes.
   ```
 - **Says after:**
   > "That's your first crystal: a fact I'll keep so you never have to say it twice. I've marked it
-  > working, not settled, because where you are today will move, and the mark stays honest about
+  > contextual, not settled, because where you are today will move, and the mark stays honest about
   > that. It'll still be here in three months."
 
 ### Phase 3 · The curiosity

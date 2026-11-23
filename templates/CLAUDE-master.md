@@ -94,17 +94,20 @@ Can one clear-headed agent handle this?
 ## CONTEXT CRYSTALS
 > Established facts. Never re-derive. Treat as ground truth.
 
-*(Start with a few and add more over time. These are things Claude should always know about you and your world.)*
+*(Start with a few and add more over time. These are things Claude should always know about you and your world. Replace each line below or delete it: a line left as a placeholder still reads as a crystal.)*
 
-- **[YOUR_NAME]** = [your role and context]
-- **[KEY PROJECT/THING]** = [what it is and why it matters]
-- **[KEY TOOL/STACK]** = [what you use and any specifics Claude should know]
-- **[A PREFERENCE]** = [e.g. "prefers bullet points over prose" / "never uses jargon" / "KISS first, always"]
+◆ [YOUR_NAME]: [your role and context]
+
+◆ [KEY PROJECT/THING]: [what it is and why it matters]
+
+◆ [KEY TOOL/STACK]: [what you use and any specifics Claude should know]
+
+◆ [A PREFERENCE]: [e.g. "prefers bullet points over prose" / "never uses jargon" / "KISS first, always"]
 
 **Crystal metadata:**
-- All crystals have a tier: `◆ Confirmed` (verified), `◈ Working` (likely), `◇ Provisional` (hypothesis)
+- All crystals have a tier: `◆ Confirmed` (verified), `◈ Contextual` (true now, may shift), `◇ Exploratory` (hypothesis)
 - New crystals: check `soul/handovers/` for dates added
-- Optional: `valid_until: YYYY-MM-DD`, when this crystal expires (leave blank for eternal crystals)
+- Optional keys go on the lines after the crystal, e.g. `valid_until: YYYY-MM-DD` (when it expires; leave it out for eternal crystals). The full shape is in `templates/format-2.md`
 
 ---
 
@@ -260,8 +263,8 @@ SOUL.md must be read first in every scheduled task run: it is what makes the out
 
 ### Crystal tiers:
 - `◆ Confirmed`: verified, stable
-- `◈ Working`: likely true, not yet fully confirmed
-- `◇ Provisional`: hypothesis, needs validation
+- `◈ Contextual`: true now, may shift
+- `◇ Exploratory`: hypothesis, needs validation
 
 ---
 

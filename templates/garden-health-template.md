@@ -31,7 +31,7 @@ For each crystal in the Global Context Crystals table:
 | `valid_until` date passed | Crystal may be stale | Flag for review - don't delete, ask |
 | Not referenced in 5+ sessions | Crystal may be dormant | Surface to human: confirm, update, or retire |
 | Contradicts newer information | Crystal may be wrong | Flag with newer evidence alongside |
-| Pinned (`pinned: true`) | Protected | Skip - never flag, never retire without explicit request |
+| Pinned (`pinned: true`, an unexpired `pinned_until`, or the older `· pinned` marker) | Protected | Skip - never flag, never retire without explicit request |
 
 **Output format:**
 ```
@@ -123,7 +123,7 @@ Generate a brief health report at the end of the check:
 
 - **Never deletes** a crystal, plant, or handover
 - **Never archives** without explicit human confirmation
-- **Never skips** pinned crystals
+- **Never skips** pinned crystals (`pinned: true`, or a `pinned_until` that has not passed)
 - **Never conflates** "not recently used" with "no longer relevant"
 
 The health check is a **surfacing mechanism**, not a cleanup script. The human decides. The agent shows what it sees.
