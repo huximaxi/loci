@@ -1,10 +1,10 @@
 //! loci: read your local workfolder from the terminal.
 //!
 //! Mostly read-shaped commands. No network. No inference. No daemons.
-//! Three commands write or hand off: `new` (scaffold), `init` (config file), `rain --fire`.
+//! Two commands write: `new` (scaffold) and `init` (config file).
 //! Honest about what it is: a CLI that knows the palace layout and prints what's there.
-//! The one hand-off: `rain --fire` execs your agent runtime and exits; the CLI
-//! itself still does no inference.
+//! It never starts an agent runtime: `loci rain` shows the weather, and the person
+//! starts the round in their own agent.
 
 use clap::{CommandFactory, Parser, Subcommand};
 use serde::Serialize;
@@ -27,7 +27,7 @@ mod tokens;
     long_about = "Read your local workfolder from the terminal.\n\n\
                   loci is a local AI topology: one workfolder your AI reads and writes.\n\
                   This CLI walks the workfolder and prints what's there. Most commands\n\
-                  only read; `new`, `init` and `rain --fire` write or hand off.\n\
+                  only read; `new` and `init` write. It never starts an agent.\n\
                   No network, no inference, no daemons. The templates kit is the other\n\
                   door; the CLI is the terminal-native one. Files, flags and output\n\
                   still say palace: --palace and $LOCI_PALACE point at the workfolder."
@@ -73,10 +73,11 @@ enum Cmd {
         #[arg(long, default_value_t = reads::DEFAULT_DAYS)]
         days: u64,
     },
-    /// Garden watering weather: window headroom + garden state + how to fire a rain round.
+    /// Garden watering weather: window headroom + garden state + how to start a rain round.
     Rain {
-        /// Hand off to the agent runtime now (`claude -p "rain"` from the palace root).
-        #[arg(long)]
+        /// Removed in 2.0: the CLI no longer starts an agent. Kept hidden so an old
+        /// habit gets a clear message instead of a usage error.
+        #[arg(long, hide = true)]
         fire: bool,
     },
     /// Scaffold a new palace at PATH: a starter palace + the lifecycle skills.
@@ -187,7 +188,7 @@ const OVERVIEW_GROUPS: &[(&str, &[(&str, &str)])] = &[
         &[
             ("tokens", "loci tokens"),
             ("reads", "loci reads --days 30"),
-            ("rain", "loci rain            (add --fire to hand off a round)"),
+            ("rain", "loci rain"),
         ],
     ),
     (
@@ -335,7 +336,7 @@ fn cmd_overview(palace_arg: Option<PathBuf>, json: bool) -> Result<(), Error> {
         "loci {} · read your local workfolder from the terminal",
         env!("CARGO_PKG_VERSION")
     );
-    println!("Mostly reads (new, init and rain --fire write or hand off). No network, no inference, no daemons.");
+    println!("Mostly reads (new and init write). Starts no agent. No network, no inference, no daemons.");
     match &palace {
         Some(p) => println!("palace : {p}"),
         None => println!("palace : (none detected — pass --palace <path> or run inside one)"),
@@ -918,7 +919,8 @@ struct RainGardenOut {
 struct RainOut {
     garden: RainGardenOut,
     window: tokens::WindowStatus,
-    invocation: String,
+    /// The word to say in your own agent. A hint for the person, not a command to run.
+    start_phrase: String,
 }
 
 fn rain_garden(p: &palace::Palace) -> RainGardenOut {
@@ -963,38 +965,24 @@ fn rain_garden(p: &palace::Palace) -> RainGardenOut {
 }
 
 fn cmd_rain(palace_arg: Option<PathBuf>, fire: bool, json: bool) -> Result<(), Error> {
+    if fire {
+        return Err(Error::bad_input(
+            "`loci rain --fire` was removed in 2.0: the CLI no longer starts an agent. \
+             Start the round in your own agent (say `rain`); `loci rain` shows the weather."
+                .to_string(),
+        ));
+    }
     let p = require_palace(palace_arg)?;
     let garden = rain_garden(&p);
     let window = tokens::window_status();
-    let invocation = "claude -p \"rain\"".to_string();
-
-    if fire {
-        println!(
-            "firing rain from {} ({} {})…",
-            p.root.display(),
-            signal_glyph(&window.signal),
-            window.signal
-        );
-        let status = std::process::Command::new("claude")
-            .args(["-p", "rain"])
-            .current_dir(&p.root)
-            .status()
-            .map_err(|e| {
-                Error::io(format!(
-                    "could not launch agent runtime `claude`: {e}. Is it on PATH?"
-                ))
-            })?;
-        if !status.success() {
-            return Err(Error::io(format!("rain round exited with {status}")));
-        }
-        return Ok(());
-    }
+    // A hint for the person, never executed by the CLI.
+    let start_phrase = "rain".to_string();
 
     if json {
         let out = RainOut {
             garden,
             window,
-            invocation,
+            start_phrase,
         };
         println!("{}", serde_json::to_string_pretty(&out)?);
         return Ok(());
@@ -1023,7 +1011,7 @@ fn cmd_rain(palace_arg: Option<PathBuf>, fire: bool, json: bool) -> Result<(), E
         _ => "no rain on record".to_string(),
     };
     println!("garden  : {} plants · {last}", garden.plants);
-    println!("fire    : loci rain --fire   (or in-session: Workflow({{ name: \"rain\" }}))");
+    println!("start   : say `rain` in your own agent (or Workflow({{ name: \"rain\" }})); loci starts nothing");
     if window.signal == "fresh" {
         println!("          window is fresh: full headroom. Good weather for rain.");
     } else if window.signal == "closing" {
@@ -1311,6 +1299,42 @@ mod overview_tests {
                 );
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod rain_tests {
+    use super::*;
+
+    /// `--fire` is gone: it must say so (bad input, exit 3), even with no palace
+    /// around, rather than fail as an unknown flag. That the CLI starts no agent
+    /// rests on there being no process spawn in the crate; this test cannot see one.
+    #[test]
+    fn fire_is_refused_with_a_clear_message() {
+        let err = cmd_rain(Some(PathBuf::from("/nonexistent-loci-rain-test")), true, false)
+            .expect_err("--fire must be refused");
+        assert!(matches!(err.kind(), ErrKind::BadInput));
+        assert!(err.to_string().contains("removed in 2.0"), "got: {err}");
+    }
+
+    /// The same refusal through the real parse and dispatch: clap must accept the
+    /// hidden flag (not turn it into a usage error, exit 2) and `run` must map it
+    /// to bad input.
+    #[test]
+    fn fire_parses_and_is_refused_through_run() {
+        let cli = Cli::try_parse_from(["loci", "rain", "--fire"])
+            .expect("the hidden flag must still parse");
+        let err = run(cli).expect_err("--fire must be refused");
+        assert!(matches!(err.kind(), ErrKind::BadInput), "got: {err}");
+    }
+
+    /// The hidden flag must not show in `loci rain --help`.
+    #[test]
+    fn fire_is_hidden_from_help() {
+        let mut app = Cli::command();
+        let rain = app.find_subcommand_mut("rain").expect("rain command");
+        let help = rain.render_long_help().to_string();
+        assert!(!help.contains("--fire"), "help still advertises --fire:\n{help}");
     }
 }
 

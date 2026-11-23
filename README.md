@@ -74,7 +74,7 @@ Two ways, and the door is the first. The workfolder is the same underneath both.
 | Run mode | What it is |
 |---|---|
 | **Plain markdown** | The door. Clone `templates/`, point any file-aware AI at `PALACE.md`. No build. |
-| **CLI** | [`loci-cli/`](loci-cli/) (v0.7.0-beta, optional). A small Rust binary that reads your workfolder from the terminal: `loci status`, `loci crystals`, `loci read`, `loci handover`, `loci tokens`, `loci rain`, `loci init`. Read-only, with one hand-off: `loci rain --fire` execs your agent runtime. No network. No inference. See [loci-cli/README.md](loci-cli/README.md). |
+| **CLI** | [`loci-cli/`](loci-cli/) (v0.7.0-beta, optional). A small Rust binary that reads your workfolder from the terminal: `loci status`, `loci crystals`, `loci read`, `loci handover`, `loci tokens`, `loci rain`, `loci init`. Mostly reads (`new` and `init` write); it never starts an agent. No network. No inference. See [loci-cli/README.md](loci-cli/README.md). |
 
 The methodology version and full changelog: [PALACE-METHODOLOGY.md](PALACE-METHODOLOGY.md).
 

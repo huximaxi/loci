@@ -37,11 +37,12 @@ picking the same plant) is itself a signal a single tender can never produce.
 - Never automatically. Weather is a suggestion; spending is a gate. A human
   nod fires the round.
 
-One wiring note: the `--fire` hand-off sends the literal word `rain` as the
-prompt to your agent runtime. Your palace's orchestrator instructions
-(CLAUDE.md or equivalent) must define that trigger and route it to this
-procedure; without it the word arrives bare, and the politest thing your
-runtime can do with bare weather is ask about it.
+One wiring note: start the round yourself, in your own agent session, by
+saying `rain`. `loci rain` only shows the weather; the CLI never starts an
+agent. Your palace's orchestrator instructions (CLAUDE.md or equivalent) must
+define that trigger and route it to this procedure; without it the word
+arrives bare, and the politest thing your runtime can do with bare weather is
+ask about it.
 
 ## The procedure
 

@@ -18,10 +18,9 @@ total  : 142 crystals
 
 `loci` is the read-shaped CLI for a loci workfolder: a small Rust binary that walks
 the palace structure (PALACE.md / CLAUDE.md / rooms / crystals) and prints what
-it finds. Most commands only read. Three write or hand off: `loci new` lays down a
-workfolder, `loci init` writes `~/.config/loci/config.toml`, and `loci rain --fire`
-starts your agent runtime. No network, no inference, no daemons. Your AI does the
-thinking; the CLI shows the files.
+it finds. Most commands only read. Two write: `loci new` lays down a workfolder and
+`loci init` writes `~/.config/loci/config.toml`. The CLI never starts an agent. No
+network, no inference, no daemons. Your AI does the thinking; the CLI shows the files.
 
 ## Install
 
@@ -64,8 +63,7 @@ Each command resolves the workfolder in this order:
 | `loci read <slug> --room <name>` | Disambiguate when the same slug lives in two rooms |
 | `loci handover` | Print the most recent handover by mtime |
 | `loci tokens` | Approximate status of your agent runtime's 5-hour session window, read from local transcripts (timing, not quota) |
-| `loci rain` | Garden watering weather: window headroom, garden state, last rain |
-| `loci rain --fire` | Start a rain round by handing off to your agent runtime from the palace root |
+| `loci rain` | Garden watering weather: window headroom, garden state, last rain. Start the round yourself, in your own agent |
 | `loci new <path>` | Scaffold a starter palace at `<path>`, then offer `loci init`. `--force` writes into a non-empty directory |
 | `loci init` | Interactive wizard. Writes `~/.config/loci/config.toml` |
 | `loci audit` | Egress receipt (experimental): what a runtime recorded as leaving the device, grouped by class, with a hash-chain check. `--wal <path>` and `--since <ISO-8601>` narrow it |
