@@ -42,7 +42,7 @@ relationship: [colleague / collaborator / peer / mentor / other]
 ◆ [Crystal about who they are or what they do]
 ◆ [Crystal about their role or context]
 ◈ [Contextual crystal: something true now, may shift]
-◇ [Provisional: something you believe about how they work, but haven't confirmed]
+◇ [Exploratory: something you believe about how they work, but haven't confirmed]
 
 ---
 

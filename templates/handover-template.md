@@ -49,8 +49,8 @@ written-by: [YOUR_AI_NAME]
 - [Fact established as true this session]
 - [Another confirmed fact]
 
-**◈ Working:**
-- [Something probably true, but not yet confirmed]
+**◈ Contextual:**
+- [Something true now that may shift]
 
-**◇ Provisional:**
+**◇ Exploratory:**
 - [A hypothesis that needs testing or confirmation]

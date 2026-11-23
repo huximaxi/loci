@@ -102,9 +102,9 @@ Can one clear-headed agent handle this?
 - **[A PREFERENCE]** = [e.g. "prefers bullet points over prose" / "never uses jargon" / "KISS first, always"]
 
 **Crystal metadata:**
-- All crystals have a tier: `◆ Confirmed` (verified), `◈ Working` (likely), `◇ Provisional` (hypothesis)
+- All crystals have a tier: `◆ Confirmed` (verified), `◈ Contextual` (true now, may shift), `◇ Exploratory` (hypothesis)
 - New crystals: check `soul/handovers/` for dates added
-- Optional: `valid_until: YYYY-MM-DD`, when this crystal expires (leave blank for eternal crystals)
+- Optional keys go on the lines after the crystal, e.g. `valid_until: YYYY-MM-DD` (when it expires; leave it out for eternal crystals). The full shape is in `templates/format-2.md`
 
 ---
 
@@ -260,8 +260,8 @@ SOUL.md must be read first in every scheduled task run: it is what makes the out
 
 ### Crystal tiers:
 - `◆ Confirmed`: verified, stable
-- `◈ Working`: likely true, not yet fully confirmed
-- `◇ Provisional`: hypothesis, needs validation
+- `◈ Contextual`: true now, may shift
+- `◇ Exploratory`: hypothesis, needs validation
 
 ---
 

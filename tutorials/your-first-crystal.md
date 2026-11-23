@@ -2,7 +2,7 @@
 
 Capture a fact once, and your AI treats it as ground truth from then on. That is a crystal.
 
-Uses: `templates/crystals-guide.md`, `templates/memory-lifecycle.md`
+Uses: `templates/crystals-guide.md`, `templates/memory-lifecycle.md`, `templates/format-2.md`
 
 ## Steps
 
@@ -11,10 +11,10 @@ Uses: `templates/crystals-guide.md`, `templates/memory-lifecycle.md`
 2. Write one fact your AI should never have to re-derive. Keep it to a line.
    Example: `◈ I prefer bullet points over prose.`
 3. Give it a tier:
-   - `◇` provisional: a hypothesis, churns fast
-   - `◈` working: likely true
+   - `◇` exploratory: a hypothesis, churns fast
+   - `◈` contextual: true now, may shift
    - `◆` confirmed: verified, almost never changes
-4. Optional: add `valid_until: YYYY-MM-DD` if the fact has a shelf life.
+4. Optional: add `valid_until: YYYY-MM-DD` on the next line if the fact has a shelf life.
 5. Start a session. Your AI reads the crystal early and stops asking.
 
 ## You are done when

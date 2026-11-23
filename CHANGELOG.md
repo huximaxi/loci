@@ -8,6 +8,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- `templates/format-2.md`: the loci format 2 spec. One crystal shape (`◈ Name: fact` with keys on
+  the next lines), the tiers and their aliases, the `valid_until` grammar (a calendar date is
+  scheduled, anything else is an unscheduled label), the time keys `occurred`, `mentioned` and
+  `superseded_by`, the accepted layouts, and how each legacy form reads. Readers ignore keys and
+  `type` values they do not know; `type: shard`, `address` and `signed_by` are reserved. The CLI
+  catches up to it across rc.1: `status` and `crystals` still count every `.md` file today.
 - `scripts/release-sums.sh`: writes, signs and verifies a `SHA256SUMS` for release artifacts
   with an SSH signing key (namespace `loci-release`), offline. `verify` is strict both ways: the
   signature must cover the sums, the sums must name exactly the artifacts in the folder, and
@@ -43,6 +49,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   on the agent's word, and a teardown removes the copy.
 
 ### Changed
+- Crystal tier names are one set across the kit: Confirmed, Contextual, Exploratory. Working and
+  Provisional stay readable as aliases. The guide's inline `valid_until` form is gone, so the key
+  has one placement (the line after the crystal). Two guide example crystals were renamed so a
+  name no longer reads as a tier label.
 - CI supply chain: every third-party action in `.github/workflows/` is pinned to a full commit
   SHA (version kept as a comment), the trufflehog scanner image is pinned by digest, and the
   workflows run with read-only tokens (secrets-scan keeps `pull-requests: read`; the gitleaks PR

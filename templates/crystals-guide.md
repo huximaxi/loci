@@ -8,6 +8,8 @@ type: guide
 
 *How facts live in the palace. What changes. What doesn't. How to tell the difference.*
 
+*This guide teaches the tiers. The exact on-disk shape, and how every reader parses it, is in `format-2.md`.*
+
 Crystals are the palace's memory system - established truths about you, your work, your world. But not all truths are equally stable. The three-tier system captures that difference explicitly, so the palace knows what to trust, what to revisit, and what to treat as a working hypothesis.
 
 ---
@@ -36,7 +38,7 @@ Crystals are the palace's memory system - established truths about you, your wor
 ◆ Owner: [YOUR_NAME] - [your role and where you work]
 ◆ Stack: [your primary tools, e.g. Next.js 14 / Postgres / Vercel]
 ◆ Core value: Simplicity first. No over-engineering.
-◆ Working preference: Bullet points over prose. KISS, always.
+◆ Style preference: Bullet points over prose. KISS, always.
 ```
 
 ---
@@ -68,7 +70,7 @@ valid_until: 2026-05-30
 ◈ Vendor: [your vendor] for [service] - active contract
 valid_until: 2026-12-31
 
-◈ Working approach: Daily 9am check-in while this feature is in flight
+◈ Check-in rhythm: Daily 9am check-in while this feature is in flight
 valid_until: sprint-end
 ```
 
@@ -112,7 +114,8 @@ During a session, add crystals as you learn them. You don't have to wait for a f
 **Quick format** (inline in CLAUDE.md or room files):
 ```
 ◆ [name]: [value]
-◈ [name]: [value] - valid_until: [date or event]
+◈ [name]: [value]
+valid_until: [YYYY-MM-DD or event]
 ◇ [name]: [value]
 ```
 
@@ -140,20 +143,22 @@ Demotion also happens. If a ◆ crystal turns out to be false or phase-dependent
 
 ## `valid_until` Usage
 
-`valid_until` is an optional field on ◈ and ◇ crystals. Use it when:
+`valid_until` is an optional key on the line after a crystal. It works on any tier and is most useful on ◈ and ◇. Use it when:
 - The fact is tied to a specific date (contract end, sprint close, deadline)
 - The fact is tied to an event (after the feature ships, after the research round)
 - You know roughly when you'll learn more
 
-**Format options:**
+**Two kinds of value:**
 ```
-valid_until: 2026-06-30          # specific date
-valid_until: sprint-end          # event-based
-valid_until: 2026-Q3             # quarter
-valid_until: after-user-research # milestone
+valid_until: 2026-06-30          # a date: scheduled, a machine can check it
+valid_until: sprint-end          # an event: kept as written, reported unscheduled
+valid_until: 2026-Q3             # a quarter reads as an event too
+valid_until: after-user-research # a milestone
 ```
 
-**Morning check-in surfacing:** The `morning-check-in` process scans for crystals whose `valid_until` is within 7 days and flags them for review. This is the palace's built-in insight decay mechanism - facts don't go stale silently.
+Only a real `YYYY-MM-DD` date is scheduled. Anything else is a label you read yourself. Prefer a date when you know one.
+
+**Morning check-in surfacing:** The `morning-check-in` process scans for crystals whose `valid_until` is a date within 7 days and flags them for review. This is the palace's built-in insight decay mechanism - facts don't go stale silently.
 
 ---
 
@@ -181,7 +186,7 @@ Crystals can be duplicated across files if they're relevant in multiple contexts
 ◈ Current focus: [Sprint or project goal]
 valid_until: [DATE or EVENT]
 
-◈ Working approach: [How they're currently working - could change]
+◈ Check-in rhythm: [How they're currently working - could change]
 valid_until: [DATE or EVENT]
 
 ◇ Hypothesis: [Something believed but not yet confirmed]
@@ -243,7 +248,7 @@ The crystal is protected until `pinned_until`, then becomes subject to normal he
 ```
 SEEDED (◇)
   ↓ confirmed once
-CONTEXTUAL (◈) - valid_until: [event/date]
+CONTEXTUAL (◈), often with a valid_until
   ↓ confirmed across contexts, no longer phase-bound
 CONFIRMED (◆)
   ↓ [optional] flagged as special
@@ -252,7 +257,7 @@ PINNED (◆ · pinned) - protected indefinitely
 
 Composting (retirement) can happen at any tier. Always add a note when a crystal is retired:
 ```
-~~◈ Working approach: Daily 9am check-in~~
+~~◈ Check-in rhythm: Daily 9am check-in~~
 retired: 2026-06-01 - sprint ended, back to async
 ```
 
