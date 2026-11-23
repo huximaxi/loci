@@ -244,6 +244,49 @@ When a change is a release (not every merge is), tag it from the merge commit:
   in history. The trail of how a release reached final *is* the release-quality
   record. Never force-move a tag.
 
+### Release artifacts
+
+Once the maintainer key is published, any file attached to a release (a binary,
+an archive) ships with a signed `SHA256SUMS`. Until then a release says it is
+unsigned. `scripts/release-sums.sh` writes and checks the sums; offline, no
+network.
+
+```bash
+# maintainer, once the artifacts sit in one folder
+scripts/release-sums.sh sign ./dist <path-to-private-signing-key>
+
+# anyone who downloaded the release
+scripts/release-sums.sh verify ./downloads docs/allowed_signers
+```
+
+- The signature uses `ssh-keygen -Y sign` in the namespace `loci-release`. The
+  public half lives in `docs/allowed_signers` under the principal
+  `loci-maintainer`; verification needs nothing else.
+- An artifact is a regular, non-hidden file directly inside the folder. Hidden
+  files (`.DS_Store`) are skipped on both sides. A subfolder, or a name with a
+  backslash or newline, is refused, so nothing ships outside the sums by accident.
+- `verify` checks three things in order: the signature covers `SHA256SUMS`, the
+  sums name exactly the artifacts in the folder (an extra or missing file fails),
+  and every artifact matches its hash. A wrong key, a wrong principal, an edited
+  sums file, a modified artifact, an unlisted file and a missing signature each fail.
+- `sign` does not know which key your users trust. After signing, run `verify`
+  against the published `docs/allowed_signers`; a key that is not listed there
+  only fails for the people downloading.
+- The key is only as trustworthy as where it is read from. `docs/allowed_signers`
+  lives in the same repo that serves the artifacts, so when the key is published,
+  publish its fingerprint in a second place too (the release notes and the site)
+  and compare against that.
+- `scripts/release-sums.sh selftest` builds a throwaway key and proves each failure
+  above, including the signature check on its own (a consistently rewritten sums
+  file with the old signature). Run it after any edit to the script.
+- Publishing the public key (adding `docs/allowed_signers`) is a maintainer
+  decision, the same one as the signed tag above.
+- Third-party actions in `.github/workflows/` are pinned to a full commit SHA
+  with the version in a trailing comment; the trufflehog image is pinned by
+  digest. The pins also freeze the scanners' rules: bump them on purpose, in
+  their own change, and look for new releases when you do. (The gitleaks action
+  downloads its scanner at run time, so that one is pinned by version only.)
+
 ---
 
 ## Rollback
