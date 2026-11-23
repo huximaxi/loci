@@ -94,11 +94,14 @@ Can one clear-headed agent handle this?
 ## CONTEXT CRYSTALS
 > Established facts. Never re-derive. Treat as ground truth.
 
-*(Start with a few and add more over time. These are things Claude should always know about you and your world.)*
+*(Start with a few and add more over time. These are things Claude should always know about you and your world. Replace each line below or delete it: a line left as a placeholder still reads as a crystal.)*
 
 ◆ [YOUR_NAME]: [your role and context]
+
 ◆ [KEY PROJECT/THING]: [what it is and why it matters]
+
 ◆ [KEY TOOL/STACK]: [what you use and any specifics Claude should know]
+
 ◆ [A PREFERENCE]: [e.g. "prefers bullet points over prose" / "never uses jargon" / "KISS first, always"]
 
 **Crystal metadata:**

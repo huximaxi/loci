@@ -128,10 +128,12 @@ valid_until: [YYYY-MM-DD or event]
 Promotion is explicit. Don't silently upgrade a crystal - note what changed.
 
 ```
-◇ Framing: [your wording hypothesis, e.g. "Plain-language labels beat technical ones"]
+◆ Framing: [your wording hypothesis, e.g. "Plain-language labels beat technical ones"]
 → Promoted to ◈ 2026-04-15: confirmed by 3 user interviews. Still A/B testing.
 → Promoted to ◆ 2026-05-01: A/B concluded - plain-language wins across all segments.
 ```
+
+Promotion rewrites the glyph (here ◇ became ◈, then ◆) and keeps the arrow lines below as history. Put any keys such as `valid_until:` directly under the crystal line, before the arrows: a reader stops at the first arrow line.
 
 **Promotion criteria:**
 - ◇ → ◈: hypothesis confirmed once, or corroborated by evidence

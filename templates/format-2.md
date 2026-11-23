@@ -50,13 +50,13 @@ On a crystal line the glyph carries the tier. In frontmatter, `tier` is the glyp
 | `pinned_until` | a date | Protects it up to and including that day. Enough on its own, with no `pinned: true`. Normal review resumes the next day. |
 | `retired` | a date, then optionally a space and a reason | Marks a composted crystal. The date is the first word. |
 
-A date is a real calendar day written `YYYY-MM-DD`. A value that is not a date (`2026-02-30` included) is not a date: for `valid_until` it reads as a label, for every other date key it is ignored. Never an error.
+A date is a real calendar day written `YYYY-MM-DD`. A value that is not a date (`2026-02-30` included) is not a date: for `valid_until` it reads as a label, for every other date key it is ignored. Never an error. `retired` is the exception: its date is the first word and the rest is a reason.
 
 `superseded_by` matches a crystal name without regard to case, within the same file or room first, then the workfolder. A reader that cannot find the name, or finds several, still marks the crystal superseded.
 
 ### `valid_until`
 
-- A real `YYYY-MM-DD` date is **scheduled**. A checker may flag the crystal for review on or after that day, and may warn earlier (the morning check-in warns seven days ahead). It never deletes it.
+- A real `YYYY-MM-DD` date is **scheduled**. A checker may flag the crystal for review on or after that day, and may warn earlier (the guide's morning check-in example warns seven days ahead). It never deletes it.
 - Any other value (`sprint-end`, `2026-Q3`, `after-user-research`, `growing`) is an **event or label**. It is kept as written and reported as **unscheduled**: a machine cannot know when it happens, so it does not guess.
 - It is valid on any tier and is most useful on ◈ and ◇.
 
@@ -68,14 +68,14 @@ A workfolder is a directory with `PALACE.md` or `CLAUDE.md` at its root and a sc
 |---|---|---|
 | 1 | `_palace/` under the root | the directory exists, even with no room in it |
 | 2 | `rooms/` under the root | it exists and holds a room (what the kit builds) |
-| 3 | the root itself | at least one sibling directory of the root holds a `CLAUDE.md` |
+| 3 | the root itself | at least one subdirectory of the root holds a `CLAUDE.md` |
 
 If more than one shape is present, the first wins and the rest are not read. Within the scan root, hidden directories and `node_modules`, `target` and `cron` are not scanned.
 
 Crystals are stored in two ways, and both read as the same crystal:
 
 1. **Lines**, in the root `PALACE.md` or `CLAUDE.md`, or in a room's `CLAUDE.md`, in the shape above.
-2. **A file per crystal**: any `.md` file under the scan root with `type: crystal` in its frontmatter. It need not sit in a room, so the kit's `garden/` counts. The same keys go in the frontmatter, plus `tier`, written as the glyph (`tier: "◈"`) or as a tier name. The crystal's name is the first `#` heading, or the file name without `.md` when there is none. Its fact is the first paragraph after the heading. The rest of the body is free text.
+2. **A file per crystal**: any `.md` file with `type: crystal` in its frontmatter, under the scan root or under `garden/` at the workfolder root (the first-session ceremony writes there, and `garden/` is a sibling of `rooms/`, not inside it). It need not sit in a room. The same keys go in the frontmatter, plus `tier`, written as the glyph (`tier: "◈"`) or as a tier name. The crystal's name is the first `#` heading, or the file name without `.md` when there is none. Its fact is the first paragraph after the heading. The rest of the body is free text.
 
 ```
 ---
@@ -87,7 +87,7 @@ valid_until: 2026-12-31
 The fact in one line.
 ```
 
-Keys and `type` values are lowercase and matched without regard to case. Fenced code blocks (opened with three backticks or three tildes, closed by the same) hold examples: nothing inside one is a crystal.
+Frontmatter keys and `type` values are matched without regard to case. Line keys must be lowercase to count as key lines. Fenced code blocks (opened with three backticks or three tildes, closed by the same) hold examples: nothing inside one is a crystal. A fence that is never closed runs to the end of the file.
 
 ## Legacy forms and how they read
 

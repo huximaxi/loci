@@ -54,7 +54,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   has one placement (the line after the crystal). Two guide example crystals were renamed so a
   name no longer reads as a tier label. The master template's CONTEXT CRYSTALS placeholders are
   now glyph-led crystal lines (they were bullets the spec would not count), and the guide's
-  trailing `# comment` examples and inline `· pinned` example are gone.
+  trailing `# comment` examples and inline `· pinned` example are gone. `valid_until` is valid on
+  any tier (the lifecycle and interop pages said otherwise), and `pinned_until` alone is enough
+  to protect a crystal, which the health template now honours.
 - CI supply chain: every third-party action in `.github/workflows/` is pinned to a full commit
   SHA (version kept as a comment), the trufflehog scanner image is pinned by digest, and the
   workflows run with read-only tokens (secrets-scan keeps `pull-requests: read`; the gitleaks PR
