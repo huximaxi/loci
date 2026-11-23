@@ -40,8 +40,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   stays MIT.
 - Claims now match the code. The README no longer says "nothing leaves": loci sends nothing
   itself, but the AI you run sees what it reads, and the gate is a rule your AI follows, not a
-  lock. The CLI no longer calls itself read-only: `new`, `init` and `rain --fire` write or hand
-  off (it still makes no network calls and runs no inference).
+  lock. The CLI no longer calls itself read-only: `new` and `init` write (it still makes no
+  network calls and runs no inference).
 - loci is now defined as a local AI topology: one nested workfolder with fixed places your AI
   reads and writes. README, setup guide, tutorials, the feature helper and `loci --help` say
   "workfolder"; file names, flags, CLI output and `templates/` still say palace.
@@ -67,6 +67,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   projects use. It now reads the file first, appends, and only edits a block with the same heading.
 
 ### Removed
+- `loci rain --fire`. It ran `claude -p rain` with no timeout, no tool restriction and no
+  receipt, which made the CLI an agent launcher. The CLI now starts no agent: `loci rain` shows
+  the weather and the person starts the round in their own agent (`templates/skills/rain.md`).
+  The flag is kept hidden and answers with a message that says so (exit 3), so an old habit
+  does not hit a bare usage error.
 - `RC-1.6-SCOPE.md`, the v0.6.0-rc.3 scope draft. It still promised commands that never shipped
   (`loci -z`, `sync`, `feedback`) and described the desktop cockpit removed in v0.7.0-beta.
 - `loci init` no longer asks for an Ollama endpoint and model. Nothing in the CLI read them,
