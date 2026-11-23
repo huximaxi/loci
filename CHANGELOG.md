@@ -71,7 +71,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   receipt, which made the CLI an agent launcher. The CLI now starts no agent: `loci rain` shows
   the weather and the person starts the round in their own agent (`templates/skills/rain.md`).
   The flag is kept hidden and answers with a message that says so (exit 3), so an old habit
-  does not hit a bare usage error.
+  does not hit a bare usage error. In `loci rain --json`, the `invocation` field (a runnable
+  `claude -p "rain"` string) is replaced by `start_phrase` (`"rain"`), so no field carries a
+  command to pipe into a shell. A scheduled `loci rain --fire` now fails with exit 3 and a
+  message on stderr only: check any cron or launchd entry that used it.
 - `RC-1.6-SCOPE.md`, the v0.6.0-rc.3 scope draft. It still promised commands that never shipped
   (`loci -z`, `sync`, `feedback`) and described the desktop cockpit removed in v0.7.0-beta.
 - `loci init` no longer asks for an Ollama endpoint and model. Nothing in the CLI read them,

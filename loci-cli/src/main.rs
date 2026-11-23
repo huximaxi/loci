@@ -919,7 +919,8 @@ struct RainGardenOut {
 struct RainOut {
     garden: RainGardenOut,
     window: tokens::WindowStatus,
-    invocation: String,
+    /// The word to say in your own agent. A hint for the person, not a command to run.
+    start_phrase: String,
 }
 
 fn rain_garden(p: &palace::Palace) -> RainGardenOut {
@@ -975,13 +976,13 @@ fn cmd_rain(palace_arg: Option<PathBuf>, fire: bool, json: bool) -> Result<(), E
     let garden = rain_garden(&p);
     let window = tokens::window_status();
     // A hint for the person, never executed by the CLI.
-    let invocation = "claude -p \"rain\"".to_string();
+    let start_phrase = "rain".to_string();
 
     if json {
         let out = RainOut {
             garden,
             window,
-            invocation,
+            start_phrase,
         };
         println!("{}", serde_json::to_string_pretty(&out)?);
         return Ok(());
@@ -1305,14 +1306,26 @@ mod overview_tests {
 mod rain_tests {
     use super::*;
 
-    /// `--fire` is gone: it must say so (bad input, exit 3) and start nothing,
-    /// even with no palace around, rather than fail as an unknown flag.
+    /// `--fire` is gone: it must say so (bad input, exit 3), even with no palace
+    /// around, rather than fail as an unknown flag. That the CLI starts no agent
+    /// rests on there being no process spawn in the crate; this test cannot see one.
     #[test]
-    fn fire_is_refused_with_a_clear_message_and_spawns_nothing() {
+    fn fire_is_refused_with_a_clear_message() {
         let err = cmd_rain(Some(PathBuf::from("/nonexistent-loci-rain-test")), true, false)
             .expect_err("--fire must be refused");
         assert!(matches!(err.kind(), ErrKind::BadInput));
         assert!(err.to_string().contains("removed in 2.0"), "got: {err}");
+    }
+
+    /// The same refusal through the real parse and dispatch: clap must accept the
+    /// hidden flag (not turn it into a usage error, exit 2) and `run` must map it
+    /// to bad input.
+    #[test]
+    fn fire_parses_and_is_refused_through_run() {
+        let cli = Cli::try_parse_from(["loci", "rain", "--fire"])
+            .expect("the hidden flag must still parse");
+        let err = run(cli).expect_err("--fire must be refused");
+        assert!(matches!(err.kind(), ErrKind::BadInput), "got: {err}");
     }
 
     /// The hidden flag must not show in `loci rain --help`.
