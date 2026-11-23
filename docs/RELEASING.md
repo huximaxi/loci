@@ -244,6 +244,34 @@ When a change is a release (not every merge is), tag it from the merge commit:
   in history. The trail of how a release reached final *is* the release-quality
   record. Never force-move a tag.
 
+### Release artifacts
+
+Any file attached to a release (a binary, an archive) ships with a signed
+`SHA256SUMS`. `scripts/release-sums.sh` writes and checks it; offline, no network.
+
+```bash
+# maintainer, once the artifacts sit in one folder
+scripts/release-sums.sh sign ./dist <path-to-private-signing-key>
+
+# anyone who downloaded the release
+scripts/release-sums.sh verify ./downloads docs/allowed_signers
+```
+
+- The signature uses `ssh-keygen -Y sign` in the namespace `loci-release`. The
+  public half lives in `docs/allowed_signers` under the principal
+  `loci-maintainer`; verification needs nothing else.
+- `verify` checks two things in order: the signature covers `SHA256SUMS`, then
+  every artifact matches its line. A wrong key, an edited sums file, a modified
+  artifact and a missing signature each fail.
+- `scripts/release-sums.sh selftest` builds a throwaway key and proves those
+  failures. Run it after any edit to the script.
+- Publishing the public key (adding `docs/allowed_signers`) is a maintainer
+  decision, the same one as the signed tag above. Until it lands, the sums are
+  unsigned and a release says so.
+- Third-party actions in `.github/workflows/` are pinned to a full commit SHA
+  with the version in a trailing comment; the scanner images are pinned by
+  digest. Bump them on purpose, in their own change.
+
 ---
 
 ## Rollback

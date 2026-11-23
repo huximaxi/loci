@@ -8,6 +8,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- `scripts/release-sums.sh`: writes, signs and verifies a `SHA256SUMS` for release artifacts
+  with an SSH signing key (namespace `loci-release`), offline. `selftest` proves that a wrong
+  key, an edited sums file, a modified artifact and a missing signature each fail. The
+  procedure is in `docs/RELEASING.md` ("Release artifacts"). The public key is not published
+  yet, so releases stay unsigned until `docs/allowed_signers` lands.
 - `loci reads [--days N]`: does the agent read the palace at all? Counts, from local Claude Code
   transcripts, the turns a person typed that were followed by at least one read of a palace
   file before the next one. Harness entries (task notifications, reminders, interrupt markers,
@@ -36,6 +41,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   on the agent's word, and a teardown removes the copy.
 
 ### Changed
+- CI supply chain: every third-party action in `.github/workflows/` is pinned to a full commit
+  SHA (version kept as a comment), the trufflehog scanner image is pinned by digest, and the
+  secrets-scan workflow drops its write scopes (`contents: read`, `pull-requests: read`; the
+  gitleaks PR comment is turned off).
 - loci is held by themapisnory OÜ: the LICENSE copyright line and the README name it. The licence
   stays MIT.
 - Claims now match the code. The README no longer says "nothing leaves": loci sends nothing
