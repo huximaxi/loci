@@ -1,11 +1,11 @@
-//! reads: does the agent read the palace at all? Counts, from local Claude
+//! reads: does the agent read the workfolder at all? Counts, from local Claude
 //! Code transcripts (the Claude Code JSONL format only), how many user turns
-//! were followed by at least one read of a file inside the palace before the
+//! were followed by at least one read of a file inside the workfolder before the
 //! next user turn. Read-only, no network.
 //!
 //! Why: writes are easy to see; reads are not. A memory that is written every
 //! session and read on almost no turn is a diary, not a memory. This counter
-//! makes the read rate visible so the palace's own instructions can be judged
+//! makes the read rate visible so the workfolder's own instructions can be judged
 //! by what the agent does, not by what they say.
 //!
 //! Privacy: counts only. No transcript text, path or command is printed,
@@ -16,18 +16,18 @@
 //! - a **user turn** is a main-thread user entry carrying text (a string, or a
 //!   text block with no tool result). Meta entries, compaction summaries,
 //!   local-command echoes and subagent (sidechain) entries are not turns.
-//! - a **palace read** is a Read / Grep / Glob / NotebookRead call whose path
-//!   resolves inside the palace root. Relative paths resolve against the
+//! - a **workfolder read** is a Read / Grep / Glob / NotebookRead call whose path
+//!   resolves inside the workfolder root. Relative paths resolve against the
 //!   entry's `cwd`; `..` is folded before the check, so it cannot escape.
-//! - a **palace write** is a Write / Edit / MultiEdit / NotebookEdit call
-//!   whose path resolves inside the palace root.
-//! - a **shell touch** is a Bash call whose command names the palace root.
+//! - a **workfolder write** is a Write / Edit / MultiEdit / NotebookEdit call
+//!   whose path resolves inside the workfolder root.
+//! - a **shell touch** is a Bash call whose command names the workfolder root.
 //!   Counted apart: a command string cannot say whether it read or wrote, and
-//!   a command that spells the palace as a relative path, with `~` or `$HOME`,
+//!   a command that spells the workfolder as a relative path, with `~` or `$HOME`,
 //!   or with backslash-escaped spaces is not seen. So
 //!   two rates: the read rate (tool reads only, the floor) and the touch rate
 //!   (reads or shell touches, a wider count). The truth usually sits between
-//!   them; shell reads by relative path from inside the palace are not seen
+//!   them; shell reads by relative path from inside the workfolder are not seen
 //!   and can lift it above the touch rate.
 //! - a user turn copied into a new transcript on resume or fork counts once:
 //!   turns are deduped by their entry `uuid`, as tool calls are by tool id.
@@ -45,17 +45,17 @@ pub const MAX_DAYS: u64 = 90;
 
 #[derive(Serialize, Clone, Default, Debug, PartialEq)]
 pub struct ReadRate {
-    /// The palace root that was measured (the user's own setting, not transcript data).
+    /// The workfolder root that was measured (the user's own setting, not transcript data).
     pub root: String,
     pub days: u64,
     pub user_turns: usize,
-    /// User turns followed by at least one palace read before the next turn.
+    /// User turns followed by at least one workfolder read before the next turn.
     pub turns_with_read: usize,
     /// turns_with_read / user_turns, in percent (None when there are no turns).
     pub read_rate_pct: Option<f64>,
-    /// User turns followed by a palace read OR a shell touch: a wider count,
-    /// since a shell command naming the palace may have read it or written it.
-    /// Not an upper bound: shell commands that spell the palace as a relative
+    /// User turns followed by a workfolder read OR a shell touch: a wider count,
+    /// since a shell command naming the workfolder may have read it or written it.
+    /// Not an upper bound: shell commands that spell the workfolder as a relative
     /// path, with `~` or `$HOME`, or with escaped spaces are still missed.
     pub turns_with_touch: usize,
     pub touch_rate_pct: Option<f64>,
@@ -65,7 +65,7 @@ pub struct ReadRate {
     pub delegated_reads: usize,
     pub delegated_writes: usize,
     pub sessions: usize,
-    /// Sessions with at least one main-thread palace read.
+    /// Sessions with at least one main-thread workfolder read.
     pub sessions_with_read: usize,
     pub files_scanned: usize,
     pub note: String,
@@ -79,10 +79,10 @@ enum Kind {
     Shell,
 }
 
-/// The palace root in every spelling a transcript may use: as given, and
+/// The workfolder root in every spelling a transcript may use: as given, and
 /// canonicalized (macOS `/var` vs `/private/var`, symlinked home folders).
 pub fn roots_for(root: &Path) -> Vec<PathBuf> {
-    // Absolute first: a relative root (`--palace palace`) would otherwise
+    // Absolute first: a relative root (`--palace workfolder`) would otherwise
     // match any command that merely contains the word.
     let abs = if root.is_absolute() {
         root.to_path_buf()
@@ -204,7 +204,7 @@ fn classify(
     match name {
         "Read" => inside(s("file_path"), cwd, roots).then_some(Kind::Read),
         "Grep" | "Glob" => {
-            // No path means the cwd: a search run from inside the palace reads it.
+            // No path means the cwd: a search run from inside the workfolder reads it.
             let p = s("path");
             let hit = if p.is_empty() {
                 cwd.is_some_and(|c| inside(c, None, roots))
@@ -228,7 +228,7 @@ fn classify(
 }
 
 /// Streaming tally: feed lines one at a time, then `finish`. Holds event
-/// kinds, session ids and the ids of palace tool calls (none of which reach
+/// kinds, session ids and the ids of workfolder tool calls (none of which reach
 /// the output), never the line text.
 pub struct Tally<'r> {
     r: ReadRate,
@@ -309,7 +309,7 @@ impl<'r> Tally<'r> {
                     let Some(k) = classify(name, input, cwd, roots) else {
                         continue;
                     };
-                    // Dedupe only palace hits, so memory grows with palace events,
+                    // Dedupe only workfolder hits, so memory grows with workfolder events,
                     // not with every tool call in the window.
                     if let Some(id) = b.get("id").and_then(|x| x.as_str()) {
                         if !self.seen_tools.insert(id.to_owned()) {
@@ -425,7 +425,7 @@ pub fn tally<'a>(
 }
 
 /// Scan local Claude Code transcripts touched in the last `days` and tally them against
-/// the palace at `root`.
+/// the workfolder at `root`.
 pub fn read_rate(root: &Path, days: u64) -> ReadRate {
     let days = days.clamp(1, MAX_DAYS);
     let now = tokens::epoch_now();
@@ -490,7 +490,7 @@ pub fn read_rate(root: &Path, days: u64) -> ReadRate {
     r.root = root.display().to_string();
     r.days = days;
     r.files_scanned = files;
-    r.note = "counts only; no transcript text, transcript path or command is printed or kept (root is the palace you measured)".into();
+    r.note = "counts only; no transcript text, transcript path or command is printed or kept (root is the workfolder you measured)".into();
     r
 }
 
@@ -571,7 +571,7 @@ mod tests {
         ]);
         assert_eq!(
             r.palace_reads, 0,
-            "neither a folded escape nor a prefix sibling is the palace"
+            "neither a folded escape nor a prefix sibling is the workfolder"
         );
     }
 
@@ -596,7 +596,7 @@ mod tests {
         ]);
         assert_eq!(
             r.shell_touches, 0,
-            "a sibling prefix or a longer path is not the palace"
+            "a sibling prefix or a longer path is not the workfolder"
         );
         let r = run(&[
             turn("s", TS),
@@ -623,7 +623,7 @@ mod tests {
 
     #[test]
     fn relative_root_is_made_absolute() {
-        let v = roots_for(Path::new("palace"));
+        let v = roots_for(Path::new("workfolder"));
         assert!(v.iter().all(|r| r.is_absolute()));
     }
 

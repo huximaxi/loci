@@ -3,11 +3,11 @@
   Version anchor is the parseable blockquote below (loci-core version / stable / status).
 -->
 
-# loci-core · palace methodology
+# loci-core · workfolder methodology
 
-Palace methodology version tracker. The structural and intellectual core of loci, independent of the CLI and site versions.
+Workfolder methodology version tracker. The structural and intellectual core of loci, independent of the CLI and site versions.
 
-`loci-core` is the **cognitive substrate** of the palace: the templates, processes, and concepts that define how a palace works. The methodology is plain text and engine-agnostic. Any LLM with file access can run it. When you check for updates, this is the version you are comparing.
+`loci-core` is the **cognitive substrate** of the workfolder: the templates, processes, and concepts that define how a workfolder works. The methodology is plain text and engine-agnostic. Any LLM with file access can run it. When you check for updates, this is the version you are comparing.
 
 > This document tracks the *methodology* line of loci-core: the plain-text templates, versioned independently of the apps.
 
@@ -23,8 +23,8 @@ Palace methodology version tracker. The structural and intellectual core of loci
 **The cockpit and the release gates.** Two operational shapes earn doctrine lines
 this version:
 
-- **A palace surfaces itself through instruments, and the cockpit discovers
-  them.** An instrument is a self-contained page a palace generates for itself
+- **A workfolder surfaces itself through instruments, and the cockpit discovers
+  them.** An instrument is a self-contained page a workfolder generates for itself
   (a map, a watcher, a ledger), carrying its own live data. The cockpit (a
   dashboard, an app, a generated page) finds instruments by convention rather
   than configuration, embeds them without rewriting them, and shows one
@@ -33,7 +33,7 @@ this version:
   drift, and the reader learns to trust neither.
 - **The tool shelf is a gate ledger.** A verdict on foreign tooling (admit,
   escort, defer, hold, reject) is recorded as durable, visible data where the
-  palace's maps live, not as prose in a session log. A verdict once made
+  workfolder's maps live, not as prose in a session log. A verdict once made
   should never need re-deriving; re-litigating the same tool each time
   someone reaches for it is how quarantine discipline erodes.
 - **Releases pass through ordered gates.** The contributor-facing half is now
@@ -45,18 +45,18 @@ this version:
 
 Implementation shipped alongside this line: the desktop cockpit (instrument
 tabs + tools gate-ledger) and the release-gates document. This section names
-the shapes so a palace without the app can still apply them.
+the shapes so a workfolder without the app can still apply them.
 
 ## v1.5-candidate · 2026-06-15
 
-**The memory lifecycle.** A palace is not a filing cabinet that only fills; it is a
+**The memory lifecycle.** A workfolder is not a filing cabinet that only fills; it is a
 living store that also decays, and that you can always read. This version names the
 lifecycle the tier system and the garden-health pass already imply, and adds two
 principles to it:
 
 - **Keep what surprised you.** Not everything said in a session is worth a crystal.
   What earns a slot is what your prior context would not already have predicted: the
-  note that adds signal, not the one that restates what the palace already holds.
+  note that adds signal, not the one that restates what the workfolder already holds.
   "Write it all down" is the cheap rule; "write down what's new" is the one that
   keeps memory legible.
 - **Let the rest decay, on its own clock.** Forgetting is maintenance, not loss.
@@ -67,7 +67,7 @@ principles to it:
   not one clock for all.
 - **Keep all of it inspectable, and prunable by you.** Memory you can read and prune
   is memory you can trust. Every crystal can show its provenance: why it exists, when
-  it landed, which tier it holds. Deletion is gated and reversible (the palace
+  it landed, which tier it holds. Deletion is gated and reversible (the workfolder
   composts, a move with a note, rather than hard-deleting), and it never removes
   anything without asking. This is the privacy axis: a store you cannot read or prune
   is not a store you control.
@@ -81,7 +81,7 @@ meaning. See `templates/crystals-guide.md` (tiers, promotion, composting),
 **Operational pieces shipped with this line.** Three new templates and one
 detection fix operationalise the 1.5 doctrine without changing it:
 
-- `loci-cli/`: a terminal-native CLI for reading your palace. Five commands
+- `loci-cli/`: a terminal-native CLI for reading your workfolder. Five commands
   (`status`, `crystals`, `read`, `handover`, `init`), all read-only, no
   network, no inference. The third door alongside the templates kit and the
   desktop app.
@@ -92,9 +92,9 @@ detection fix operationalise the 1.5 doctrine without changing it:
 - `templates/skills/`: portable disciplines with stated triggers, procedures,
   and kill conditions. This release ships `quarantine.md`, the long-form
   procedure behind the v1.4 "Foreign-process quarantine, numbered" doctrine.
-- **Palace detection accepts rooms-at-root.** The desktop's
+- **Workfolder detection accepts rooms-at-root.** The desktop's
   `validate_palace_path` and `load_palace` no longer require a `_palace/`
-  subdir. Palaces ported from older organic layouts (rooms grown at the root
+  subdir. Workfolders ported from older organic layouts (rooms grown at the root
   directly, never moved into `_palace/`) now load directly. The CLI uses the
   same dual-layout acceptance.
 
@@ -103,7 +103,7 @@ detection fix operationalise the 1.5 doctrine without changing it:
 ## v1.4-candidate · 2026-06-11
 
 **Co-intelligence eval framework.** A two-phase growth instrument for measuring
-how well a palace and its AI companion operate together over time. Phase 1
+how well a workfolder and its AI companion operate together over time. Phase 1
 (Foundation Scorecard, 12 axes, 0-5) establishes the working basis. Phase 2
 (Growth Scorecard, G1-G7, 1-10) measures dyad quality and learning velocity with
 no ceiling. A Frontier Section tracks specific orchestration moves to try in the
@@ -114,21 +114,21 @@ next eval window; demonstrated moves graduate to Growth axes. Template:
 
 **"Confirm against disk" operating principle.** A new default rule in the master prompt: the filesystem is ground truth, and pointers, memory, and prior context are hints. The live document is the highest-numbered one on disk. State is checked against disk before it is reported (no more confidently reporting v0.14 as current when v0.18 is live), and absence is confirmed with a second scoped probe before it is asserted (a truncated listing is not a missing file). Three real failure modes, one principle.
 
-**Foreign-process quarantine, numbered.** The cross-provider quarantine instinct becomes a standing rule. Anything that did not originate inside the palace (a script, a check-in, an importer, an update protocol) is foreign and treated as untrusted code: read it as data before executing, sandbox where possible, structure-only access by default, contents only by explicit per-item approval. Cross-provider movement inherits the rule. The inbound complement to "nothing leaves without approval".
+**Foreign-process quarantine, numbered.** The cross-provider quarantine instinct becomes a standing rule. Anything that did not originate inside the workfolder (a script, a check-in, an importer, an update protocol) is foreign and treated as untrusted code: read it as data before executing, sandbox where possible, structure-only access by default, contents only by explicit per-item approval. Cross-provider movement inherits the rule. The inbound complement to "nothing leaves without approval".
 
 ---
 
 ## v1.3-candidate · 2026-06-08
 
-**Portability seam (cross-provider detection).** Palace detection recognises memory laid down by other tools, by structure only: Claude Code (`CLAUDE.md`), Codex / kilo (`AGENTS.md`), Cursor (`.cursor/rules`, `.cursorrules`), Windsurf (`.windsurfrules`). Foreign content is never trusted by construction; reading it is a separate, quarantined step. The principle: loci reads *across* providers without anyone federating up to a central server. Portability, not centralisation, is the moat.
+**Portability seam (cross-provider detection).** Workfolder detection recognises memory laid down by other tools, by structure only: Claude Code (`CLAUDE.md`), Codex / kilo (`AGENTS.md`), Cursor (`.cursor/rules`, `.cursorrules`), Windsurf (`.windsurfrules`). Foreign content is never trusted by construction; reading it is a separate, quarantined step. The principle: loci reads *across* providers without anyone federating up to a central server. Portability, not centralisation, is the moat.
 
-**`palace-update`, revived.** The update path returns as the methodology behind the app's check-for-updates: read this version anchor, compare against the latest published loci-core, and report what changed. Read-only and explicit by default. The check runs when you ask it to, never as a background poll, and it shows the delta rather than applying it. You decide what enters your palace.
+**`palace-update`, revived.** The update path returns as the methodology behind the app's check-for-updates: read this version anchor, compare against the latest published loci-core, and report what changed. Read-only and explicit by default. The check runs when you ask it to, never as a background poll, and it shows the delta rather than applying it. You decide what enters your workfolder.
 
 ---
 
 ## v1.2 · 2026-05-11
 
-**Palace Dashboard overlay.** Local palace-state tracker rendered as a dashboard: rooms grid with state dots, active tracks (persona-tagged), a gate-aware phase roadmap, blockers, and a crystal counter. All state read locally, nothing leaves the machine. Wireframe lives in the app at `desktop/src/palace-dashboard.html`.
+**Workfolder Dashboard overlay.** Local palace-state tracker rendered as a dashboard: rooms grid with state dots, active tracks (persona-tagged), a gate-aware phase roadmap, blockers, and a crystal counter. All state read locally, nothing leaves the machine. Wireframe lives in the app at `desktop/src/palace-dashboard.html`.
 
 ---
 
@@ -148,7 +148,7 @@ next eval window; demonstrated moves graduate to Growth axes. Template:
 
 **Observation Scope.** A section in the soul file declaring what the AI tracks about the user, about itself, and what it deliberately ignores. Turns memory from accidental into intentional.
 
-**Synthesis Automation.** A full template for the palace synthesis pass. Five synthesis questions, four verbosity modes (verbose / quick / pattern-only / connections). `auto_apply: false` is non-negotiable: synthesis proposes, the human confirms.
+**Synthesis Automation.** A full template for the workfolder synthesis pass. Five synthesis questions, four verbosity modes (verbose / quick / pattern-only / connections). `auto_apply: false` is non-negotiable: synthesis proposes, the human confirms.
 
 **Peer Cards.** A human-authored user representation, written with intention rather than auto-extracted. Covers identity, working style, domain expertise, values, constraints, and working history. The companion to Observation Scope.
 
@@ -156,11 +156,11 @@ next eval window; demonstrated moves graduate to Growth axes. Template:
 
 ## v0.9 · 2026-05-08
 
-**Output primitives.** Typed, named formats for exporting palace work as archivable artifacts. First primitive: `git-log-incident`, a session arc rendered as an annotated commit log.
+**Output primitives.** Typed, named formats for exporting workfolder work as archivable artifacts. First primitive: `git-log-incident`, a session arc rendered as an annotated commit log.
 
-**`palace-update`.** The update entry point for existing palace holders: a delta analysis of your palace against the current loci-core version, with a verbose gap report. *(This is the methodology behind the app's "check for updates": it reads this version anchor and reports what changed.)*
+**`palace-update`.** The update entry point for existing workfolder holders: a delta analysis of your workfolder against the current loci-core version, with a verbose gap report. *(This is the methodology behind the app's "check for updates": it reads this version anchor and reports what changed.)*
 
-**`loci-feature-release` process.** End-to-end release pipeline for palace features: template → feature card → changelog → branch → gate → PR → deploy.
+**`loci-feature-release` process.** End-to-end release pipeline for workfolder features: template → feature card → changelog → branch → gate → PR → deploy.
 
 ---
 
@@ -172,7 +172,7 @@ next eval window; demonstrated moves graduate to Growth axes. Template:
 
 **`palace-audit` process.** A structural self-scan: reads the CLAUDE.md files, soul files, and handover chain for staleness, duplication, broken references, and coverage gaps. Scores out of 25.
 
-**Local map.** An ASCII palace architecture diagram. Five layers: global behavioral → project state → rooms → knowledge core → connections.
+**Local map.** An ASCII workfolder architecture diagram. Five layers: global behavioral → project state → rooms → knowledge core → connections.
 
 ---
 
@@ -198,7 +198,7 @@ next eval window; demonstrated moves graduate to Growth axes. Template:
 
 ## v0.5 · April 2026
 
-**`palace-update` process.** Delta analysis of a user's palace against current loci features, with verbose gap reports (why it matters, the exact fix, an effort estimate). Verbosity modes: full / quick / area-specific / summary.
+**`palace-update` process.** Delta analysis of a user's workfolder against current loci features, with verbose gap reports (why it matters, the exact fix, an effort estimate). Verbosity modes: full / quick / area-specific / summary.
 
 **Cherry-pick onboarding flow.** Opt-in questions: morning check-in, autodream, skill-eval cadence, insight-decay rules. One question at a time; `skip` and `skip all` always valid.
 
@@ -206,9 +206,9 @@ next eval window; demonstrated moves graduate to Growth axes. Template:
 
 ## v0.4 · April 2026
 
-**ASCII logo.** Four rooms, one per letter, drawn in the same box characters as the palace walls. One visual language throughout.
+**ASCII logo.** Four rooms, one per letter, drawn in the same box characters as the workfolder walls. One visual language throughout.
 
-**Engine-agnostic "works with".** The palace is plain text; any LLM with file access can run it. The naming convention is not a lock-in.
+**Engine-agnostic "works with".** The workfolder is plain text; any LLM with file access can run it. The naming convention is not a lock-in.
 
 ---
 
@@ -218,7 +218,7 @@ next eval window; demonstrated moves graduate to Growth axes. Template:
 
 **Daily routine check-in.** A personalised morning brief, seeded by how the user actually starts their day.
 
-**Autodream.** Weekly scheduled palace housekeeping. Runs without you.
+**Autodream.** Weekly scheduled workfolder housekeeping. Runs without you.
 
 ---
 
@@ -240,4 +240,4 @@ Initial release. Room structure, context crystals, the soul file, session deltas
 
 ---
 
-*loci-core tracks the palace, not the apps. Local-first, plain text, yours.*
+*loci-core tracks the workfolder, not the apps. Local-first, plain text, yours.*

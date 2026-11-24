@@ -102,5 +102,5 @@ The plant stays. It's the history of the growth.
 
 ---
 
-*The garden is how the palace learns.*
+*The garden is how the workfolder learns.*
 *[YOUR_AI_NAME] grows here.*

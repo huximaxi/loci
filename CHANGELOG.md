@@ -14,6 +14,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   `plants/` or `.rain/` and the older one does.
 
 ### Changed
+- The docs, templates and the CLI's own text say "workfolder" where they said "palace". Kept as
+  they were, because tools read them: the old spellings (`--palace`, `$LOCI_PALACE`, `PALACE.md`,
+  the `Palace:` and `Palace holder:` lines), the `_palace/` folder, the update-check files
+  (`PALACE-METHODOLOGY.md`, `PALACE-UPDATE.md`), skill and process names (`palace-audit`,
+  `palace-update`), and every `--json` key (`palace`, `palace_reads`, `palace_writes`). On screen,
+  `status` and `overview` print `workfolder :` where they printed `palace :`, `reads` prints
+  `activity :` for its counts line, and the not-found message reads "no workfolder found". Scripts
+  should key on the exit code and on `--json`, as `CONTRACT.md` says; a test now fails if help
+  text, overview or an error says "palace" again.
 - Usage errors (an unknown flag or command, a missing or malformed argument) now exit 3, printed
   to stderr as before. Exit 2 means only "not found". A script that treated 2 as "usage error"
   should read 3; `--help` and `--version` still exit 0 on stdout.

@@ -64,14 +64,14 @@ release. The tests compare the key sets exactly, so adding one is a change to th
 ### `loci status`
 
 Layout, rooms and crystal counts by tier. Exit 2: no workfolder.
-`--json` keys: `palace`, `layout`, `rooms`, `crystal_total`, `files_total`, `tiered`, `documents`,
+`--json` keys: `workfolder`, `layout`, `rooms`, `crystal_total`, `files_total`, `tiered`, `documents`,
 `legacy_lines_not_counted`. `crystal_total` and each room's `crystals` are `.md` file counts (their
 1.x meaning); `tiered` is the format 2 count.
 
 ### `loci crystals`
 
 List crystals. Argument: `--room <name>`. Exit 2: no workfolder, no such room.
-`--json` keys: `palace`, `rooms`, `unrooted`. Each room has `room`, `crystals` (slugs) and `entries`.
+`--json` keys: `workfolder`, `rooms`, `unrooted`. Each room has `room`, `crystals` (slugs) and `entries`.
 
 ### `loci read`
 
@@ -110,7 +110,7 @@ Exit 2: no workfolder. Exit 3: `--fire` (removed in 2.0).
 Scaffold a starter workfolder. Arguments: `<path>`, `--force`. Writes files; exit 3 when the target is
 not empty, or already looks like a workfolder, and `--force` is absent. On a terminal it then offers
 `init`.
-`--json` keys: `palace`, `created`.
+`--json` keys: `workfolder`, `created`.
 
 ### `loci init`
 
@@ -137,7 +137,7 @@ stderr. Exit 1: unreadable or malformed bundle (nothing on stdout).
 ### `loci overview`
 
 Every command, grouped, with one example each. Alias: `loci commands`. Works with no workfolder.
-`--json` keys: `tool`, `version`, `palace`, `groups`, `doors`.
+`--json` keys: `tool`, `version`, `workfolder`, `groups`, `doors`.
 
 ## What the tests hold
 

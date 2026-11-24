@@ -6,11 +6,11 @@ type: guide
 
 # Crystal Tiers - Guide
 
-*How facts live in the palace. What changes. What doesn't. How to tell the difference.*
+*How facts live in the workfolder. What changes. What doesn't. How to tell the difference.*
 
 *This guide teaches the tiers. The exact on-disk shape, and how every reader parses it, is in `format-2.md`.*
 
-Crystals are the palace's memory system - established truths about you, your work, your world. But not all truths are equally stable. The three-tier system captures that difference explicitly, so the palace knows what to trust, what to revisit, and what to treat as a working hypothesis.
+Crystals are the workfolder's memory system - established truths about you, your work, your world. But not all truths are equally stable. The three-tier system captures that difference explicitly, so the workfolder knows what to trust, what to revisit, and what to treat as a working hypothesis.
 
 ---
 
@@ -86,7 +86,7 @@ valid_until: sprint-end
 - A framing you're trying out
 - Something you believe but haven't proven
 
-**Rule:** Exploratory crystals are not disposable - they're the palace's research in progress. Name them clearly. When you learn more, promote or retire them explicitly.
+**Rule:** Exploratory crystals are not disposable - they're the workfolder's research in progress. Name them clearly. When you learn more, promote or retire them explicitly.
 
 **Format:**
 ```
@@ -119,7 +119,7 @@ valid_until: [YYYY-MM-DD or event]
 ◇ [name]: [value]
 ```
 
-**Agent rule:** When a crystal is established in conversation, write it to the appropriate file immediately - don't leave it in chat. Crystals live in `CLAUDE.md` (palace-wide) or in the relevant room's `CLAUDE.md` (room-specific).
+**Agent rule:** When a crystal is established in conversation, write it to the appropriate file immediately - don't leave it in chat. Crystals live in `CLAUDE.md` (workfolder-wide) or in the relevant room's `CLAUDE.md` (room-specific).
 
 ---
 
@@ -162,7 +162,7 @@ The first is a date: scheduled, so a machine can check it. The other three are e
 
 Only a real `YYYY-MM-DD` date is scheduled. Anything else is a label you read yourself. Prefer a date when you know one.
 
-**Morning check-in surfacing:** The `morning-check-in` process scans for crystals whose `valid_until` is a date within 7 days and flags them for review. This is the palace's built-in insight decay mechanism - facts don't go stale silently.
+**Morning check-in surfacing:** The `morning-check-in` process scans for crystals whose `valid_until` is a date within 7 days and flags them for review. This is the workfolder's built-in insight decay mechanism - facts don't go stale silently.
 
 ---
 
@@ -170,11 +170,11 @@ Only a real `YYYY-MM-DD` date is scheduled. Anything else is a label you read yo
 
 | Where | What goes there |
 |-------|----------------|
-| `CLAUDE.md` (root) | Palace-wide facts - identity, stack, values, global working style |
+| `CLAUDE.md` (root) | Workfolder-wide facts - identity, stack, values, global working style |
 | `rooms/[room]/CLAUDE.md` | Room-specific facts - project state, room context, relevant crystals for that mode |
 | `soul/SOUL.md` | Identity-level facts - who you are, what you care about, the soul's core |
 
-Crystals can be duplicated across files if they're relevant in multiple contexts. The palace is spatial - the same truth can live in multiple rooms.
+Crystals can be duplicated across files if they're relevant in multiple contexts. The workfolder is spatial - the same truth can live in multiple rooms.
 
 ---
 

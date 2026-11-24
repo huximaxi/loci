@@ -2,7 +2,7 @@
 //!
 //! Mostly read-shaped commands. No network. No inference. No daemons.
 //! Two commands write: `new` (scaffold) and `init` (config file).
-//! Honest about what it is: a CLI that knows the palace layout and prints what's there.
+//! Honest about what it is: a CLI that knows the workfolder layout and prints what's there.
 //! It never starts an agent runtime: `loci rain` shows the weather, and the person
 //! starts the round in their own agent.
 
@@ -30,10 +30,10 @@ mod tokens;
                   This CLI walks the workfolder and prints what's there. Most commands\n\
                   only read; `new` and `init` write. It never starts an agent.\n\
                   No network, no inference, no daemons. The templates kit is the other\n\
-                  door; the CLI is the terminal-native one. Files, flags and output\n\
-                  still say palace in places: --workfolder (alias --palace) and\n\
-                  $LOCI_WORKFOLDER (alias $LOCI_PALACE) point at the workfolder, and\n\
-                  WORKFOLDER.md, PALACE.md or CLAUDE.md at its root marks it."
+                  door; the CLI is the terminal-native one. --workfolder and\n\
+                  $LOCI_WORKFOLDER point at the workfolder, and WORKFOLDER.md or\n\
+                  CLAUDE.md at its root marks it. The older spellings (--palace,\n\
+                  $LOCI_PALACE, PALACE.md) keep working, with no warning."
 )]
 struct Cli {
     /// Workfolder path (alias --palace). Overrides $LOCI_WORKFOLDER, $LOCI_PALACE and cwd auto-detect.
@@ -50,7 +50,7 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Cmd {
-    /// Print palace path, layout, rooms, and crystal counts by tier.
+    /// Print workfolder path, layout, rooms, and crystal counts by tier.
     Status,
     /// List crystals: tier, name and keys, read as format 2 says.
     Crystals {
@@ -70,7 +70,7 @@ enum Cmd {
     Handover,
     /// Approximate agent-runtime session-window status (5h rolling) from local transcripts.
     Tokens,
-    /// How often the agent reads the palace: user turns followed by a palace read, from local Claude Code transcripts (counts only).
+    /// How often the agent reads the workfolder: user turns followed by a workfolder read, from local Claude Code transcripts (counts only).
     Reads {
         /// Look back this many days (1-90).
         #[arg(long, default_value_t = reads::DEFAULT_DAYS)]
@@ -83,11 +83,11 @@ enum Cmd {
         #[arg(long, hide = true)]
         fire: bool,
     },
-    /// Scaffold a new palace at PATH: a starter palace + the lifecycle skills.
+    /// Scaffold a new workfolder at PATH: a starter workfolder + the lifecycle skills.
     New {
-        /// Where to create the palace (e.g. ~/my-palace).
+        /// Where to create the workfolder (e.g. ~/my-workfolder).
         path: PathBuf,
-        /// Scaffold into a non-empty or existing-palace directory instead of refusing.
+        /// Scaffold into a non-empty or existing-workfolder directory instead of refusing.
         #[arg(long)]
         force: bool,
     },
@@ -196,7 +196,7 @@ fn run(cli: Cli) -> Result<(), Error> {
 /// once, so a new command cannot silently drop out of the overview.
 const OVERVIEW_GROUPS: &[(&str, &[(&str, &str)])] = &[
     (
-        "Read the palace",
+        "Read the workfolder",
         &[
             ("status", "loci status"),
             ("crystals", "loci crystals --room soul"),
@@ -222,23 +222,23 @@ const OVERVIEW_GROUPS: &[(&str, &[(&str, &str)])] = &[
     (
         "Setup",
         &[
-            ("new", "loci new ~/my-palace"),
+            ("new", "loci new ~/my-workfolder"),
             ("init", "loci init"),
         ],
     ),
     ("Meta", &[("overview", "loci overview")]),
 ];
 
-/// The two ways into a palace. Named in the CLI's own `long_about`; restated
+/// The two ways into a workfolder. Named in the CLI's own `long_about`; restated
 /// here so the overview places this terminal door among its siblings.
 const DOORS: &[(&str, &str)] = &[
     (
         "CLI (this door)",
-        "terminal-native: walk the palace and print what's there",
+        "terminal-native: walk the workfolder and print what's there",
     ),
     (
         "Templates kit",
-        "scaffold a new palace to fork: personas, skills, structure",
+        "scaffold a new workfolder to fork: personas, skills, structure",
     ),
 ];
 
@@ -308,12 +308,12 @@ fn brief(s: &str, max: usize) -> String {
 
 fn cmd_overview(palace_arg: Option<PathBuf>, json: bool) -> Result<(), Error> {
     let abouts = command_abouts();
-    // Soft detection: overview must work with no palace (unlike require_palace).
+    // Soft detection: overview must work with no workfolder (unlike require_palace).
     let palace = match palace::detect(palace_arg) {
         Ok(found) => found.map(|p| p.root.display().to_string()),
         Err(palace::BadEnv { var, path }) => {
             eprintln!(
-                "loci: warning: {var} is set to {} but no palace is there",
+                "loci: warning: {var} is set to {} but no workfolder is there",
                 path.display()
             );
             None
@@ -359,8 +359,8 @@ fn cmd_overview(palace_arg: Option<PathBuf>, json: bool) -> Result<(), Error> {
     );
     println!("Mostly reads (new and init write). Starts no agent. No network, no inference, no daemons.");
     match &palace {
-        Some(p) => println!("palace : {p}"),
-        None => println!("palace : (none detected — pass --workfolder <path> or run inside one)"),
+        Some(p) => println!("workfolder : {p}"),
+        None => println!("workfolder : (none detected — pass --workfolder <path> or run inside one)"),
     }
     println!();
     for (gname, cmds) in OVERVIEW_GROUPS {
@@ -492,34 +492,34 @@ fn cmd_status(palace_arg: Option<PathBuf>, json: bool) -> Result<(), Error> {
         return Ok(());
     }
 
-    println!("palace : {}", out.palace);
-    println!("layout : {}", out.layout);
-    println!("rooms  : {}", out.rooms.len());
+    println!("workfolder : {}", out.palace);
+    println!("layout     : {}", out.layout);
+    println!("rooms      : {}", out.rooms.len());
     for r in &out.rooms {
         println!(
-            "         {:<24} ({}: {})",
+            "             {:<24} ({}: {})",
             r.name,
             plural(r.tiered.live, "crystal", "crystals"),
             tally_line(&r.tiered)
         );
     }
     println!(
-        "total  : {} ({})",
+        "total      : {} ({})",
         plural(out.tiered.live, "crystal", "crystals"),
         tally_line(&out.tiered)
     );
     let unrooted = out.tiered.live - out.rooms.iter().map(|r| r.tiered.live).sum::<usize>();
     if unrooted > 0 {
-        println!("         {} in no room", unrooted);
+        println!("             {} in no room", unrooted);
     }
-    println!("files  : {}", plural(out.files_total, ".md file", ".md files"));
+    println!("files      : {}", plural(out.files_total, ".md file", ".md files"));
     println!(
-        "         {}",
+        "             {}",
         plural(out.documents, "document (not a crystal)", "documents (not crystals)")
     );
     if out.legacy_lines_not_counted > 0 {
         println!(
-            "         {} not counted (bullets without a tier glyph)",
+            "             {} not counted (bullets without a tier glyph)",
             plural(out.legacy_lines_not_counted, "legacy line", "legacy lines")
         );
     }
@@ -763,7 +763,7 @@ struct HandoverOut {
 fn cmd_handover(palace_arg: Option<PathBuf>, json: bool) -> Result<(), Error> {
     let p = require_palace(palace_arg)?;
     let path = palace::latest_handover(&p)
-        .ok_or_else(|| Error::not_found("no handover found in palace".to_string()))?;
+        .ok_or_else(|| Error::not_found("no handover found in workfolder".to_string()))?;
     let content = std::fs::read_to_string(&path)?;
     if json {
         let out = HandoverOut {
@@ -1100,7 +1100,7 @@ fn cmd_reads(palace_arg: Option<PathBuf>, days: u64, json: bool) -> Result<(), E
         }
     } else {
         println!(
-            "read rate: {} of turns read the palace ({} of {}; tool reads, the floor)",
+            "read rate: {} of turns read the workfolder ({} of {}; tool reads, the floor)",
             pct(r.read_rate_pct),
             r.turns_with_read,
             r.user_turns
@@ -1113,7 +1113,7 @@ fn cmd_reads(palace_arg: Option<PathBuf>, days: u64, json: bool) -> Result<(), E
         );
     }
     println!(
-        "palace   : {} read(s) · {} write(s) · {} shell touch(es) · {} of {} session(s) read it",
+        "activity : {} read(s) · {} write(s) · {} shell touch(es) · {} of {} session(s) read it",
         r.palace_reads, r.palace_writes, r.shell_touches, r.sessions_with_read, r.sessions
     );
     println!(
@@ -1258,7 +1258,7 @@ struct Config {
     palace_path: Option<String>,
 }
 
-// ── new (scaffold a palace) ─────────────────────────────────────────────────
+// ── new (scaffold a workfolder) ─────────────────────────────────────────────────
 
 #[derive(Serialize)]
 struct NewOut {
@@ -1267,12 +1267,12 @@ struct NewOut {
 }
 
 fn cmd_new(path: &Path, force: bool, json: bool) -> Result<(), Error> {
-    // Overwrite policy: refuse an existing palace or a non-empty directory
+    // Overwrite policy: refuse an existing workfolder or a non-empty directory
     // unless --force, so `new` never silently writes over someone's work.
     if !force {
         if palace::validate(path).is_some() {
             return Err(Error::bad_input(format!(
-                "{} already looks like a palace. Pass --force to scaffold into it anyway.",
+                "{} already looks like a workfolder. Pass --force to scaffold into it anyway.",
                 path.display()
             )));
         }
@@ -1301,9 +1301,9 @@ fn cmd_new(path: &Path, force: bool, json: bool) -> Result<(), Error> {
         return Ok(());
     }
 
-    println!("Created a starter palace at {}", path.display());
+    println!("Created a starter workfolder at {}", path.display());
     for p in &written {
-        // Compact tree: show paths relative to the palace root.
+        // Compact tree: show paths relative to the workfolder root.
         let shown = p.strip_prefix(path).unwrap_or(p);
         println!("  {}", shown.display());
     }
@@ -1316,9 +1316,9 @@ fn cmd_new(path: &Path, force: bool, json: bool) -> Result<(), Error> {
     );
     println!("  3. The full templates kit (personas, more skills) is at loci.garden.");
 
-    // Hand off to the config step, defaulting the palace path to the new palace.
+    // Hand off to the config step, defaulting the workfolder path to the new workfolder.
     if std::io::stdin().is_terminal() {
-        print!("\nRecord this palace in ~/.config/loci/config.toml now? (no command reads it yet) [Y/n]: ");
+        print!("\nRecord this workfolder in ~/.config/loci/config.toml now? (no command reads it yet) [Y/n]: ");
         std::io::stdout().flush()?;
         let mut buf = String::new();
         std::io::stdin().read_line(&mut buf)?;
@@ -1328,7 +1328,7 @@ fn cmd_new(path: &Path, force: bool, json: bool) -> Result<(), Error> {
             return cmd_init(Some(path.display().to_string()));
         }
     }
-    println!("\nWhen ready: loci init   (records the palace path; no command reads it yet)");
+    println!("\nWhen ready: loci init   (records the workfolder path; no command reads it yet)");
     Ok(())
 }
 
@@ -1345,11 +1345,11 @@ fn cmd_init(default_palace: Option<String>) -> Result<(), Error> {
 
     let default =
         default_palace.or_else(|| std::env::current_dir().ok().map(|p| p.display().to_string()));
-    let palace_path = prompt("Palace path", default.as_deref())?;
+    let palace_path = prompt("Workfolder path", default.as_deref())?;
     let trimmed = palace_path.trim();
     if !trimmed.is_empty() && palace::validate(std::path::Path::new(trimmed)).is_none() {
         eprintln!(
-            "  warning: '{trimmed}' does not look like a palace (no WORKFOLDER.md, PALACE.md or CLAUDE.md at root, or no rooms). Saving anyway."
+            "  warning: '{trimmed}' does not look like a workfolder (no WORKFOLDER.md, PALACE.md or CLAUDE.md at root, or no rooms). Saving anyway."
         );
     }
 
@@ -1409,11 +1409,11 @@ fn require_palace(arg: Option<PathBuf>) -> Result<palace::Palace, Error> {
     match palace::detect(arg) {
         Ok(Some(p)) => Ok(p),
         Ok(None) => Err(Error::not_found(
-            "no palace found. Pass --workfolder <path>, set LOCI_WORKFOLDER, or run from inside a palace."
+            "no workfolder found. Pass --workfolder <path>, set LOCI_WORKFOLDER, or run from inside a workfolder."
                 .to_string(),
         )),
         Err(palace::BadEnv { var, path }) => Err(Error::not_found(format!(
-            "{var} is set to {} but no palace is there. Fix or unset it; \
+            "{var} is set to {} but no workfolder is there. Fix or unset it; \
              loci does not fall back to the current directory.",
             path.display()
         ))),
@@ -1621,7 +1621,7 @@ mod rain_tests {
         let _ = std::fs::remove_dir_all(&root);
     }
 
-    /// `--fire` is gone: it must say so (bad input, exit 3), even with no palace
+    /// `--fire` is gone: it must say so (bad input, exit 3), even with no workfolder
     /// around, rather than fail as an unknown flag. That the CLI starts no agent
     /// rests on there being no process spawn in the crate; this test cannot see one.
     #[test]

@@ -1,15 +1,15 @@
 ---
 type: palace-context
-palace: [YOUR_PALACE_NAME]
+workfolder: [YOUR_PALACE_NAME]
 version: 0.1
 updated: [DATE]
 ---
 
-# Palace Context
+# Workfolder Context
 
-*The palace's current state. Always up to date. Not a delta. A snapshot.*
+*The workfolder's current state. Always up to date. Not a delta. A snapshot.*
 
-This file is different from a handover. Handovers are session deltas: what changed, what was decided, what's next. This file is the palace's present tense: where it is right now, in a form that loads fast and orients quickly.
+This file is different from a handover. Handovers are session deltas: what changed, what was decided, what's next. This file is the workfolder's present tense: where it is right now, in a form that loads fast and orients quickly.
 
 Update this file at the end of every session. Read it at the start of every session, before anything else.
 
@@ -43,13 +43,13 @@ Last handover: soul/handovers/[filename].md
 
 *Recent crystals and insights that haven't made it into CLAUDE.md yet. Staging area.*
 
-These are real findings from recent sessions (things worth knowing) but not yet integrated into the main palace context file. The morning check-in should read these. At autodream, any scroll older than 2 sessions gets promoted or explicitly discarded.
+These are real findings from recent sessions (things worth knowing) but not yet integrated into the main workfolder context file. The morning check-in should read these. At autodream, any scroll older than 2 sessions gets promoted or explicitly discarded.
 
 - [DATE] [◆/◈/◇] [Crystal or insight]: [one-line context]
 - [DATE] [◆/◈/◇] [Crystal or insight]: [one-line context]
 - [DATE] [◆/◈/◇] [Crystal or insight]: [one-line context]
 
-*Empty scrolls = clean palace.*
+*Empty scrolls = clean workfolder.*
 
 ---
 
@@ -99,4 +99,4 @@ Full log: `soul/entanglement.md`
 
 *Updated by [YOUR_AI_NAME] at the close of every session.*
 *Read at the start of every session, before anything else.*
-*This file is the palace's pulse.*
+*This file is the workfolder's pulse.*

@@ -4,15 +4,15 @@ type: mindmap-starter
 obsidian: true
 ---
 
-# Palace Mindmap: Self-Starter
+# Workfolder Mindmap: Self-Starter
 
-> **For Obsidian users.** This creates an initial mindmap of your palace structure during onboarding.
+> **For Obsidian users.** This creates an initial mindmap of your workfolder structure during onboarding.
 
 ---
 
 ## Auto-generated during setup
 
-When the agent completes onboarding, it creates this mindmap in your palace vault:
+When the agent completes onboarding, it creates this mindmap in your workfolder vault:
 
 ```
 palace-map.canvas
@@ -22,7 +22,7 @@ palace-map.canvas
 
 ```mermaid
 mindmap
-  root((Palace))
+  root((Workfolder))
     Soul
       Identity
       Crystals
@@ -67,8 +67,8 @@ The agent writes this to `palace-map.canvas`:
 
 During **Step 3** of onboarding (after interview, while writing files):
 
-1. Check if user wants Obsidian integration: *"Do you use Obsidian? I can set up a visual mindmap of your palace."*
-2. If yes, create `palace-map.canvas` in the root of their palace folder
+1. Check if user wants Obsidian integration: *"Do you use Obsidian? I can set up a visual mindmap of your workfolder."*
+2. If yes, create `palace-map.canvas` in the root of their workfolder
 3. Add nodes for each room created
 4. Link soul file as the central node
 5. Add placeholder for friends (for future soul-sharing)
@@ -97,4 +97,4 @@ Add edge: {"fromNode": "friends", "toNode": "friend-[name]"}
 
 ---
 
-*Obsidian mindmap integration: palace-starter*
+*Obsidian mindmap integration: workfolder-starter*

@@ -7,9 +7,9 @@ process: synthesis-automation
 
 # Synthesis Automation
 
-*Making the palace reflect on itself. The step between raw session work and crystallised understanding.*
+*Making the workfolder reflect on itself. The step between raw session work and crystallised understanding.*
 
-Synthesis is what turns accumulated sessions into deepening knowledge. Without it, the palace grows in volume but not in depth - more handovers, more plants seeded, but fewer crystals formed and fewer connections made. This template covers both the manual synthesis pass and the optional scheduled automation.
+Synthesis is what turns accumulated sessions into deepening knowledge. Without it, the workfolder grows in volume but not in depth - more handovers, more plants seeded, but fewer crystals formed and fewer connections made. This template covers both the manual synthesis pass and the optional scheduled automation.
 
 ---
 
@@ -37,7 +37,7 @@ Invoke with:
 - `"synthesise recent sessions"`
 - `"run synthesis pass"`
 - `"what have we learned lately that we haven't crystallised?"`
-- `"palace synthesis"`
+- `"workfolder synthesis"`
 
 Or as part of the Process Adjustment Trigger.
 
@@ -102,7 +102,7 @@ Invoke with: `"run synthesis pass (verbose)"` or `"quick synthesis"`
 
 ## Scheduled Synthesis (Optional)
 
-For palaces that want periodic automatic synthesis passes without manual triggering:
+For workfolders that want periodic automatic synthesis passes without manual triggering:
 
 ### Setup
 
@@ -116,16 +116,16 @@ schedule: every 5 sessions
 
 verbosity: verbose
 sessions_to_review: 5
-output_to: [palace-root]/synthesis/[DATE]-synthesis.md
+output_to: [workfolder-root]/synthesis/[DATE]-synthesis.md
 auto_apply: false       # always false - synthesis proposals require human review
-notify: "Synthesis ready: [palace-root]/synthesis/[DATE]-synthesis.md"
+notify: "Synthesis ready: [workfolder-root]/synthesis/[DATE]-synthesis.md"
 ```
 
-**`auto_apply: false` is non-negotiable.** Synthesis automation produces proposals. A human reads them. A human confirms. Then the palace updates. Automating the proposal is fine. Automating the write is not.
+**`auto_apply: false` is non-negotiable.** Synthesis automation produces proposals. A human reads them. A human confirms. Then the workfolder updates. Automating the proposal is fine. Automating the write is not.
 
 ### Local Setup
 
-Add to your palace `CLAUDE.md` (or your global identity file):
+Add to your workfolder `CLAUDE.md` (or your global identity file):
 
 ```markdown
 ## Synthesis Schedule
@@ -168,4 +168,4 @@ Automation here means: *don't make me remember to do the synthesis pass*. Not: *
 
 ---
 
-*The palace synthesises. The human crystallises. That's the order.*
+*The workfolder synthesises. The human crystallises. That's the order.*

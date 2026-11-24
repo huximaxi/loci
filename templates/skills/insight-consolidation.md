@@ -18,7 +18,7 @@ file.*
 Converts the non-obvious things a session figured out (a fix, a pattern, a
 preference, a decision and its *why*) into small single-fact notes plus
 one-line index pointers, so future sessions recall them instead of
-re-deriving them. It is the write-side of a palace's memory: deliberately
+re-deriving them. It is the write-side of a workfolder's memory: deliberately
 narrow, surprise-gated, and prunable.
 
 ## When to apply
@@ -66,7 +66,7 @@ things only true for today's task. The gate question is in the procedure.
 If notes pile up but are never recalled, the index has become too noisy to
 search and the discipline is feeding the problem. Consolidate the
 consolidator: merge, prune, and shorten the index before adding anything
-more. If the palace has no recall mechanism at all yet, build that first;
+more. If the workfolder has no recall mechanism at all yet, build that first;
 write-only memory is a diary, not memory.
 
 ---

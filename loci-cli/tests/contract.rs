@@ -266,7 +266,7 @@ fn not_found_is_exit_2_and_nothing_else_is() {
     let o = w.run(&["--palace", bare.to_str().unwrap(), "handover"]);
     let _ = fs::remove_dir_all(&bare);
     assert_eq!(code(&o), 2);
-    assert!(String::from_utf8_lossy(&o.stderr).contains("no palace found"));
+    assert!(String::from_utf8_lossy(&o.stderr).contains("no workfolder found"));
     // A real workfolder with no handover: its own error, still 2.
     fs::remove_dir_all(w.root.join("handovers")).unwrap();
     let o = w.with_palace(&["handover"]);
@@ -274,7 +274,7 @@ fn not_found_is_exit_2_and_nothing_else_is() {
     assert!(o.stdout.is_empty());
     let err = String::from_utf8_lossy(&o.stderr).to_lowercase();
     assert!(
-        err.contains("handover") && !err.contains("no palace found"),
+        err.contains("handover") && !err.contains("no workfolder found"),
         "{err}"
     );
 }
@@ -418,4 +418,62 @@ fn workfolder_md_marks_a_workfolder_and_reads_like_the_other_two() {
         String::from_utf8_lossy(&after.stderr)
     );
     same(&before, &after, "status after renaming the marker");
+}
+
+/// 2.0 speaks "workfolder". The old word survives only as a legacy spelling (`--palace`,
+/// `LOCI_PALACE`, `PALACE.md`), so no help text, overview or error may use it as prose.
+#[test]
+fn user_facing_text_says_workfolder_not_palace() {
+    let w = World::new("words");
+    let scrub = |s: &[u8]| {
+        String::from_utf8_lossy(s)
+            .replace("--palace", "")
+            .replace("LOCI_PALACE", "")
+            .replace("PALACE.md", "")
+            .to_lowercase()
+    };
+    let mut seen: Vec<(String, String)> = Vec::new();
+    for cmd in [
+        "", "status", "crystals", "read", "handover", "tokens", "reads", "rain", "new", "init",
+        "audit", "overview",
+    ] {
+        let mut args: Vec<&str> = Vec::new();
+        if !cmd.is_empty() {
+            args.push(cmd);
+        }
+        args.push("--help");
+        let o = w.run(&args);
+        seen.push((format!("{args:?}"), scrub(&o.stdout)));
+    }
+    let o = w.run(&["wal", "verify", "--help"]);
+    seen.push(("wal verify --help".into(), scrub(&o.stdout)));
+    seen.push((
+        "overview".into(),
+        scrub(&w.with_palace(&["overview"]).stdout),
+    ));
+    seen.push(("overview, none".into(), scrub(&w.run(&["overview"]).stdout)));
+    seen.push(("status".into(), scrub(&w.with_palace(&["status"]).stdout)));
+    seen.push(("reads".into(), scrub(&w.with_palace(&["reads"]).stdout)));
+    seen.push(("no workfolder".into(), scrub(&w.run(&["status"]).stderr)));
+    seen.push((
+        "bad variable".into(),
+        scrub(
+            &Command::new(BIN)
+                .arg("status")
+                .current_dir(&w.cwd)
+                .env("HOME", &w.home)
+                .env("LOCI_WORKFOLDER", "/nonexistent-loci-words")
+                .env_remove("LOCI_PALACE")
+                .output()
+                .unwrap()
+                .stderr,
+        ),
+    ));
+    for (what, text) in seen {
+        assert!(
+            !text.contains("palace"),
+            "{what}: still says palace:\n{text}"
+        );
+        assert!(!text.is_empty(), "{what}: nothing to check");
+    }
 }

@@ -13,7 +13,7 @@
 //!   is NOT keyed tamper-evidence (a whole re-chain or tail edit is not caught
 //!   without a key — HMAC live-seal is deferred).
 //! - A `ProofBundle` proves "the holder of `signer_pubkey`'s secret signed this
-//!   contiguous run." Provenance ("this is *your* palace") needs a pinned key
+//!   contiguous run." Provenance ("this is *your* workfolder") needs a pinned key
 //!   via `verify_against`.
 //! - `payload_hash`/`byte_count` are local-audit-only and never travel in a
 //!   bundle (an unsalted content hash is a confirmation oracle).

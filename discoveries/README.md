@@ -1,6 +1,6 @@
 # discoveries
 
-A community folder. Each entry is a palace portrait — a curated snapshot of how someone built and uses their loci palace.
+A community folder. Each entry is a workfolder portrait — a curated snapshot of how someone built and uses their loci workfolder.
 
 These are not bug reports or feature requests. They are records of what the framework became in someone else's hands.
 

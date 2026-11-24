@@ -2,7 +2,7 @@
 name = "loci-cli"
 version = "0.7.0-beta"
 edition = "2021"
-description = "Read your local palace from the terminal."
+description = "Read your local workfolder from the terminal."
 license = "MIT"
 repository = "https://github.com/huximaxi/loci"
 

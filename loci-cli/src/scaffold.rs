@@ -1,14 +1,14 @@
-//! Initial-palace scaffold for `loci new`.
+//! Initial-workfolder scaffold for `loci new`.
 //!
 //! The starter content is embedded in the binary (not read from `templates/` at
-//! runtime), so a `cargo install`ed `loci` can lay down a palace with no network
-//! and no external files. This is a *minimal* working palace plus the four
+//! runtime), so a `cargo install`ed `loci` can lay down a workfolder with no network
+//! and no external files. This is a *minimal* working workfolder plus the four
 //! lifecycle skills; the full templates kit (personas, more skills) is the
 //! richer door at loci.garden.
 
 use std::path::{Path, PathBuf};
 
-/// Files written into a fresh palace, as (relative path, contents). The layout
+/// Files written into a fresh workfolder, as (relative path, contents). The layout
 /// is the `rooms/<room>/CLAUDE.md` shape that `palace::validate` accepts, with a
 /// `PALACE.md` marker at the root.
 pub const STARTER_FILES: &[(&str, &str)] = &[
@@ -24,7 +24,7 @@ pub const STARTER_FILES: &[(&str, &str)] = &[
     ("tracker.json", TRACKER_JSON),
 ];
 
-/// Write the starter palace under `root`. Creates parent directories as needed.
+/// Write the starter workfolder under `root`. Creates parent directories as needed.
 /// Returns the paths written, in declaration order. Callers are responsible for
 /// the overwrite policy (see `main::cmd_new`); this function writes unconditionally.
 pub fn write_files(root: &Path) -> std::io::Result<Vec<PathBuf>> {
@@ -40,14 +40,14 @@ pub fn write_files(root: &Path) -> std::io::Result<Vec<PathBuf>> {
     Ok(written)
 }
 
-const PALACE_MD: &str = r#"# [Your name]'s Palace
+const PALACE_MD: &str = r#"# [Your name]'s Workfolder
 > Palace holder: [your name]
 > Companion: (to be named)
 > Gate: [name your gate], the review checkpoint for anything that ships, sends, or deletes outside this folder.
 
-This is the palace root and the primary operating file: whose palace this is, how
+This is the workfolder root and the primary operating file: whose workfolder this is, how
 it works, and where to look first. It belongs to no particular tool, so it is not
-named for one. Change your AI and the palace stays; the `CLAUDE.md` beside it is
+named for one. Change your AI and the workfolder stays; the `CLAUDE.md` beside it is
 just a thin pointer for one specific agent.
 
 ## Read order (every session)
@@ -71,20 +71,20 @@ it.
 - `CLAUDE.md`: a thin pointer that sends Claude here first.
 
 ## How we work
-- Read the palace first; act from context, not from scratch.
+- Read the workfolder first; act from context, not from scratch.
 - Be direct and concrete: say the tradeoff, then the recommendation.
-- Keep the palace current: prune what is stale, name what recurred.
+- Keep the workfolder current: prune what is stale, name what recurred.
 - At session close, run the `session-close` skill.
 
 ## More
-This is a starter palace. The full templates kit (personas, more skills) is the
+This is a starter workfolder. The full templates kit (personas, more skills) is the
 richer door: loci.garden.
 "#;
 
 const CLAUDE_MD: &str = r#"# CLAUDE.md: pointer to PALACE.md
 
 > A thin pointer for Claude. The operating instructions live in `PALACE.md`, the
-> primary file, so a person who switches tools carries the palace, not this.
+> primary file, so a person who switches tools carries the workfolder, not this.
 
 Read PALACE.md first. Then soul/SOUL.md if it exists. Then the newest file in
 soul/handovers/. Then the room we are in.
@@ -104,7 +104,7 @@ const SOUL_MD: &str = r#"# SOUL.md — [your AI's name]
 from how you actually work together.]
 
 ## Working principles
-- Read the palace first; act from context, not from scratch.
+- Read the workfolder first; act from context, not from scratch.
 - Precision over eloquence. Name the move before making it.
 - [Add principles as they prove themselves.]
 "#;
@@ -133,7 +133,7 @@ const SKILL_SESSION_OPEN: &str = r#"# Skill: session-open
 
 **Output:** a short orientation — current focus + the first concrete step.
 
-**Kill criteria:** on a fresh palace (empty handovers and tracker), skip straight
+**Kill criteria:** on a fresh workfolder (empty handovers and tracker), skip straight
 to the work and write the first handover at close.
 "#;
 
@@ -157,7 +157,7 @@ the writes. Don't manufacture a handover for a no-op session.
 
 const SKILL_PALACE_MAINTENANCE: &str = r#"# Skill: palace-maintenance
 
-**When:** periodically, or when the palace feels stale or cluttered.
+**When:** periodically, or when the workfolder feels stale or cluttered.
 
 **Do:**
 1. **Memory** — fold long logs into durable facts; prune what's wrong or dead.
@@ -168,9 +168,9 @@ const SKILL_PALACE_MAINTENANCE: &str = r#"# Skill: palace-maintenance
 4. **Tracker** — close finished tracks, unblock what's unblocked, drop noise.
 5. **Audit** — confirm what you assert against what's on disk before reporting.
 
-**Output:** a shorter, truer palace and a note of what changed.
+**Output:** a shorter, truer workfolder and a note of what changed.
 
-**Kill criteria:** the palace is small and current — a quick read is enough; do
+**Kill criteria:** the workfolder is small and current — a quick read is enough; do
 not restructure for its own sake.
 "#;
 
@@ -181,7 +181,7 @@ where to grow.
 
 **Do:**
 1. Look back over the recent sessions (handovers).
-2. Rate, honestly and concretely: did the palace help you start faster? Did we
+2. Rate, honestly and concretely: did the workfolder help you start faster? Did we
    avoid re-deriving what we already knew? Where did friction repeat?
 3. Name one thing working well (keep it) and one thing to change (a new rule, a
    pruned skill, a clearer room).
@@ -211,14 +211,14 @@ mod tests {
         std::env::temp_dir().join(format!("loci-new-test-{unique}"))
     }
 
-    /// The invariant that matters: the scaffold must be a palace `loci` can read,
+    /// The invariant that matters: the scaffold must be a workfolder `loci` can read,
     /// in the rooms-dir layout the kit builds.
     #[test]
     fn scaffold_produces_a_valid_palace() {
         let dir = temp_dir();
         write_files(&dir).unwrap();
 
-        let p = palace::validate(&dir).expect("scaffold should be a valid palace");
+        let p = palace::validate(&dir).expect("scaffold should be a valid workfolder");
         assert!(matches!(p.layout, palace::Layout::RoomsDir));
         assert!(dir.join("PALACE.md").exists());
         assert!(dir.join("CLAUDE.md").exists());
@@ -241,7 +241,7 @@ mod tests {
         }
     }
 
-    /// tracker.json must be valid JSON so the palace ships parseable.
+    /// tracker.json must be valid JSON so the workfolder ships parseable.
     #[test]
     fn tracker_json_is_valid_json() {
         let v: serde_json::Value = serde_json::from_str(TRACKER_JSON).unwrap();

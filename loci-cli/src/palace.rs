@@ -1,4 +1,4 @@
-//! Palace detection + read primitives for the CLI.
+//! Workfolder detection + read primitives for the CLI.
 //!
 //! Accepts three layouts:
 //!   * legacy:        marker at root + `_palace/` subdir holding rooms.
@@ -314,9 +314,9 @@ mod tests {
     #[test]
     fn palace_subdir_layout() {
         let root = scratch("subdir");
-        fs::write(root.join("PALACE.md"), "# palace\n").unwrap();
+        fs::write(root.join("PALACE.md"), "# workfolder\n").unwrap();
         room(&root.join("_palace"), "ideas-room");
-        let p = validate(&root).expect("palace detected");
+        let p = validate(&root).expect("workfolder detected");
         assert!(matches!(p.layout, Layout::PalaceSubdir));
         assert_eq!(p.scan_root, root.join("_palace"));
         assert_eq!(list_rooms(&p).len(), 1);
@@ -333,7 +333,7 @@ mod tests {
         fs::write(root.join("_templates").join("CLAUDE-master.md"), "# tpl\n").unwrap();
         room(&root.join("rooms"), "work-room");
         room(&root.join("rooms"), "writing-room");
-        let p = validate(&root).expect("kit palace detected");
+        let p = validate(&root).expect("kit workfolder detected");
         assert!(matches!(p.layout, Layout::RoomsDir));
         assert_eq!(p.scan_root, root.join("rooms"));
         let names: Vec<String> = list_rooms(&p).into_iter().map(|r| r.name).collect();
@@ -348,7 +348,7 @@ mod tests {
         fs::write(root.join("CLAUDE.md"), "# master\n").unwrap();
         room(&root, "creative-room");
         room(&root, "research-room");
-        let p = validate(&root).expect("palace detected");
+        let p = validate(&root).expect("workfolder detected");
         assert!(matches!(p.layout, Layout::RoomsAtRoot));
         assert_eq!(p.scan_root, root);
         assert_eq!(list_rooms(&p).len(), 2);
@@ -369,8 +369,8 @@ mod tests {
         let good = scratch("env_good");
         fs::write(good.join("CLAUDE.md"), "# master\n").unwrap();
         room(&good, "work-room");
-        let missing = good.join("no-such-palace");
-        // cwd holds a valid palace, but the env var names a bad path: stop, do not fall back.
+        let missing = good.join("no-such-workfolder");
+        // cwd holds a valid workfolder, but the env var names a bad path: stop, do not fall back.
         let r = detect_from(
             None,
             None,
@@ -382,9 +382,9 @@ mod tests {
                 assert_eq!(path, missing);
                 assert_eq!(var, "LOCI_PALACE");
             }
-            _ => panic!("a bad LOCI_PALACE must not fall back to the cwd palace"),
+            _ => panic!("a bad LOCI_PALACE must not fall back to the cwd workfolder"),
         }
-        // Empty env counts as unset: the cwd walk finds the palace.
+        // Empty env counts as unset: the cwd walk finds the workfolder.
         let r = detect_from(None, None, Some("".into()), Some(good.clone()));
         assert!(matches!(r, Ok(Some(_))));
         // A good env wins over cwd; an explicit override wins over env.

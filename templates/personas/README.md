@@ -1,10 +1,10 @@
 # Persona templates
 
-*A shelf of filled-out persona examples, ready to fork into your own palace.*
+*A shelf of filled-out persona examples, ready to fork into your own workfolder.*
 
 `templates/persona-template.md` is the empty skeleton. The files here are
-**filled examples**: actual personas, scrubbed of any single palace's
-specifics, that you can copy into your own palace and adapt.
+**filled examples**: actual personas, scrubbed of any single workfolder's
+specifics, that you can copy into your own workfolder and adapt.
 
 ## Why personas
 
@@ -28,7 +28,7 @@ Cipher finds what breaks. Praxis keeps things running and turns the findings
 into shipped procedure. The tension is generative.
 
 You don't need both. You don't need either. They are an example of a working
-pair you can lift directly into your palace and adapt.
+pair you can lift directly into your workfolder and adapt.
 
 ## The third seat, and the chair at the head
 
@@ -43,8 +43,8 @@ daily companion, and naming it is yours to do (the file says so itself).
 
 ## How to use a template
 
-1. Copy the file into your palace under `souls/<persona-name>.md` (or wherever
-   your palace stores persona souls).
+1. Copy the file into your workfolder under `souls/<persona-name>.md` (or wherever
+   your workfolder stores persona souls).
 2. Adapt the working principles to your domain.
 3. Add the persona row to your master prompt's roster (see
    `templates/CLAUDE-master.md` § Persona Roster).

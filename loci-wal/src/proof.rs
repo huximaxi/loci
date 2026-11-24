@@ -8,7 +8,7 @@
 //!
 //! What `verify()` proves: "the holder of `signer_pubkey`'s private key signed
 //! this contiguous, correctly-linked run of frames." It does NOT prove the key
-//! is *your* palace's — that is provenance, and it requires a pinned/published
+//! is *your* workfolder's — that is provenance, and it requires a pinned/published
 //! key via `verify_against`.
 
 use crate::frame::{hash_basis, verify_links, ChainBasis, ChainError, Chained, EgressClass, Frame};
@@ -18,7 +18,7 @@ use serde::{Deserialize, Serialize};
 pub const SIG_ALGORITHM: &str = "ed25519-raw";
 pub const BUNDLE_VERSION: u32 = 1;
 /// Domain-separation tag: this key must never sign another message type without
-/// its own tag (guards cross-protocol replay when the palace key is reused).
+/// its own tag (guards cross-protocol replay when the workfolder key is reused).
 const DOMAIN: &[u8] = b"loci-wal-proof-bundle-v1";
 
 /// A frame as it appears in a bundle: the chain basis only. No payload of any
@@ -135,7 +135,7 @@ impl ProofBundle {
     }
 
     /// Verify structure + chain + signature against the EMBEDDED key. Proves the
-    /// signer holds that key's secret — NOT that the key is your palace's. Use
+    /// signer holds that key's secret — NOT that the key is your workfolder's. Use
     /// `verify_against` with a pinned key for provenance.
     pub fn verify(&self) -> Result<(), VerifyError> {
         if self.version != BUNDLE_VERSION {

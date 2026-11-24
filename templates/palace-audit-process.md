@@ -1,12 +1,12 @@
-# Palace Audit: Structural Autodream Process
+# Workfolder Audit: Structural Autodream Process
 
-> Agent-executable process. Trigger: "palace audit" / "structural autodream" / "check our architecture" / "is our file structure healthy"
+> Agent-executable process. Trigger: "workfolder audit" / "structural autodream" / "check our architecture" / "is our file structure healthy"
 
 ---
 
 ## What this does
 
-Scans the full palace setup (CLAUDE.md files, soul files, skills, handover chain, and the project tracker) for staleness, duplication, broken references, coverage gaps, architectural drift, and tracker integrity. Scores health across 6 dimensions and outputs a report.
+Scans the full workfolder setup (CLAUDE.md files, soul files, skills, handover chain, and the project tracker) for staleness, duplication, broken references, coverage gaps, architectural drift, and tracker integrity. Scores health across 6 dimensions and outputs a report.
 
 Run after major sprints, when architecture feels heavy, or when CLAUDE.md files haven't been reviewed in more than 3 weeks.
 
@@ -67,7 +67,7 @@ Step 3: SCORE + REPORT
    ▼
 Step 4: PRESENT + OFFER
    ├── Summary: score + verdict + top 3 actions
-   ├── Save full report to: [palace]/audits/YYYY-MM-DD.md
+   ├── Save full report to: [workfolder]/audits/YYYY-MM-DD.md
    └── Ask: "Want me to execute any of these fixes now?"
 ```
 
@@ -95,7 +95,7 @@ For each track in `tracker.json`:
 1. **Broken artifact refs.** Every path in `artifacts` must exist on disk. Normalise both the tracked name and the directory listing to Unicode **NFC** before comparing. An em-dash or accented filename stored NFD on disk will otherwise read as "missing" when it is present. This is a real false-positive, not a hypothetical. And if a missing ref carries a version, look for a higher-numbered sibling before calling it broken: a missing `v2.3` beside a `v2.4` on disk is a stale pointer (see staleness below), not a lost file.
 2. **Version staleness.** If an artifact name carries a version (`v0.14`, `rev-40`), find the highest-numbered sibling on disk. If the tracker points below it, the live document has moved and the tracker is stale. (Highest-numbered on disk is the live document; see the "confirm against disk" principle.)
 3. **Placeholder tracks.** A track marked `active` with empty `artifacts` and a "not started" `current_step` is either mislabelled or genuinely queued. Flag for confirm-or-close.
-4. **Unreferenced drafts.** Recent files on disk inside a track's `room` that no track references. The work happened outside a palace session and never made it back to the tracker.
+4. **Unreferenced drafts.** Recent files on disk inside a track's `room` that no track references. The work happened outside a workfolder session and never made it back to the tracker.
 
 Scope the walk with `.lociignore` (below) so "material" does not swamp it.
 
@@ -103,9 +103,9 @@ Scope the walk with `.lociignore` (below) so "material" does not swamp it.
 
 ## .lociignore (memory vs material)
 
-A palace holds two kinds of thing. **Memory** is soul, handovers, crystals, the tracker, CLAUDE.md, garden, rooms. **Material** is vendored codebases, reference dumps, PDFs, and binaries the work consumes. Audits and structural scans should walk memory, not material. A palace with a 10k-file vendored tree will otherwise swamp every scan and time out.
+A workfolder holds two kinds of thing. **Memory** is soul, handovers, crystals, the tracker, CLAUDE.md, garden, rooms. **Material** is vendored codebases, reference dumps, PDFs, and binaries the work consumes. Audits and structural scans should walk memory, not material. A workfolder with a 10k-file vendored tree will otherwise swamp every scan and time out.
 
-Drop a `.lociignore` at the palace root: one glob per line, listing material to skip. The audit scan (and any other structural scanner) honours it. An example ships in `templates/.lociignore`; copy it to your palace root and edit.
+Drop a `.lociignore` at the workfolder root: one glob per line, listing material to skip. The audit scan (and any other structural scanner) honours it. An example ships in `templates/.lociignore`; copy it to your workfolder root and edit.
 
 ---
 
@@ -130,14 +130,14 @@ SKILLS                         →  reusable process commands
 
 ROOM CLAUDE.MD                 →  room-scoped context only
   ✓ Room-specific tools, active work, local decisions
-  ✗ Palace-wide context (belongs in project CLAUDE.md)
+  ✗ Workfolder-wide context (belongs in project CLAUDE.md)
 ```
 
 ---
 
 ## Report format
 
-Reports go to `[palace]/audits/YYYY-MM-DD.md`. They accumulate. The audit history is itself an architectural signal.
+Reports go to `[workfolder]/audits/YYYY-MM-DD.md`. They accumulate. The audit history is itself an architectural signal.
 
 ```markdown
 ---
@@ -147,7 +147,7 @@ score: XX/30
 verdict: HEALTHY | NEEDS_ATTENTION | DRIFT_DETECTED
 ---
 
-# Palace Audit: YYYY-MM-DD
+# Workfolder Audit: YYYY-MM-DD
 
 ## Scorecard
 | Dimension | Score | Notes |

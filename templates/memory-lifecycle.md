@@ -6,9 +6,9 @@ type: guide
 
 # The Memory Lifecycle
 
-*A palace fills, decays, and stays readable. Four principles for memory that keeps its signal, not just its volume.*
+*A workfolder fills, decays, and stays readable. Four principles for memory that keeps its signal, not just its volume.*
 
-Most note systems only grow. They fill until search stops working and the oldest, truest facts are buried under the newest noise. A palace treats memory as a living store with a full lifecycle: things enter when they earn it, fade when they stop mattering, and stay inspectable the whole way through. These four principles state that lifecycle. The mechanics live in `crystals-guide.md` (the tiers) and `garden-health-template.md` (the surfacing pass); this page is the doctrine they serve.
+Most note systems only grow. They fill until search stops working and the oldest, truest facts are buried under the newest noise. A workfolder treats memory as a living store with a full lifecycle: things enter when they earn it, fade when they stop mattering, and stay inspectable the whole way through. These four principles state that lifecycle. The mechanics live in `crystals-guide.md` (the tiers) and `garden-health-template.md` (the surfacing pass); this page is the doctrine they serve.
 
 ---
 
@@ -16,7 +16,7 @@ Most note systems only grow. They fill until search stops working and the oldest
 
 Not everything said in a session deserves a crystal. The cheap rule is "write it all down." The better rule is "write down what's new": the thing your prior context would not already have predicted.
 
-Before you crystallise something, ask: would the palace, as it already stands, have known this? If the answer is yes, you are about to store a restatement, not a fact. Fold it into the crystal that already covers it instead. If the answer is no, the session genuinely surprised you, and that is exactly what earns a slot.
+Before you crystallise something, ask: would the workfolder, as it already stands, have known this? If the answer is yes, you are about to store a restatement, not a fact. Fold it into the crystal that already covers it instead. If the answer is no, the session genuinely surprised you, and that is exactly what earns a slot.
 
 This keeps memory legible. A store where only the surprising earns a place stays small enough to read. A store where everything earns a place becomes a second inbox.
 
@@ -51,11 +51,11 @@ Match the review cadence to the tier. One clock for all of memory either nags yo
 Memory you can read and prune is memory you can trust. This is the privacy axis, and it is the whole point of keeping memory in plain files you own.
 
 - **Provenance.** Any crystal can show why it exists, when it landed, and which tier it holds. Nothing in the store is anonymous to you.
-- **Gated, reversible deletion.** The palace composts rather than deletes: a move with a note, not a hard delete. It is reversible, and it never happens without you asking for it.
+- **Gated, reversible deletion.** The workfolder composts rather than deletes: a move with a note, not a hard delete. It is reversible, and it never happens without you asking for it.
 - **No silent edits.** The agent surfaces candidates (stale, redundant, overdue) and you make the call. A machine can flag structure; it must not adjudicate meaning.
 
-A memory store you cannot read, or cannot prune, is not one you control. The plain-text palace is the bet that you should be able to do both, at any time, by hand.
+A memory store you cannot read, or cannot prune, is not one you control. The plain-text workfolder is the bet that you should be able to do both, at any time, by hand.
 
 ---
 
-*A palace you cannot read is just a bigger inbox. Keep it small, keep it yours.*
+*A workfolder you cannot read is just a bigger inbox. Keep it small, keep it yours.*
