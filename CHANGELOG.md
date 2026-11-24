@@ -8,6 +8,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Changed
+- Usage errors (an unknown flag or command, a missing or malformed argument) now exit 3, printed
+  to stderr as before. Exit 2 means only "not found". A script that treated 2 as "usage error"
+  should read 3; `--help` and `--version` still exit 0 on stdout.
 - `loci status` and `loci crystals` count crystals as format 2 defines them (a tiered line or a
   `type: crystal` file), by tier, with retired, superseded and unscheduled shown apart. The `.md`
   file count stays as its own line. Numbers on screen change for 1.x workfolders: documents are
@@ -22,6 +25,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   by two paths once.
 
 ### Added
+- `loci-cli/CONTRACT.md`: the written CLI contract (commands, flags, exit codes, stdout and stderr
+  rules, each command's `--json` keys), frozen from 2.0 until 3.0. Tests hold it: every command has
+  a README row and a contract section, every `--json` command emits exactly the listed keys on the
+  fixture workfolder, and each exit code is checked against the real binary. `loci reads` was
+  missing from the README table and now has its row.
 - A format 2 conformance fixture and test: three fixture workfolders (one per layout) under
   `loci-cli/tests/fixtures/format2/`, a hand-written `expected.json`, and a reference reader that
   follows `templates/format-2.md`. The test fails on a deliberately broken fixture or a crystal
