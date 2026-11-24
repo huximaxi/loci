@@ -1542,9 +1542,13 @@ mod contract_tests {
         }
         assert!(paths.len() >= 12, "found too few commands: {paths:?}");
         for path in &paths {
-            let row = format!("| `loci {path}");
-            assert!(README.contains(&row), "README table has no row for `loci {path}`");
-            let heading = format!("### `loci {path}");
+            // Match the whole command word: `loci read` must not be satisfied by `loci reads`.
+            let (bare, with_args) = (format!("| `loci {path}`"), format!("| `loci {path} "));
+            assert!(
+                README.contains(&bare) || README.contains(&with_args),
+                "README table has no row for `loci {path}`"
+            );
+            let heading = format!("### `loci {path}`");
             assert!(CONTRACT.contains(&heading), "CONTRACT.md has no section for `loci {path}`");
         }
     }
@@ -1552,6 +1556,7 @@ mod contract_tests {
     #[test]
     fn help_and_version_are_clean_and_real_usage_errors_are_bad_input() {
         for ok in [["loci", "--help"], ["loci", "--version"], ["loci", "status"]] {
+            // `status` parses fine and never reaches `usage_code`; only help and version do.
             let e = Cli::try_parse_from(ok);
             if let Err(e) = e {
                 assert_eq!(usage_code(&e), 0, "{ok:?}");

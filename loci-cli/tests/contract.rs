@@ -235,7 +235,8 @@ fn help_and_version_are_exit_0_on_stdout() {
 #[test]
 fn not_found_is_exit_2_and_nothing_else_is() {
     let w = World::new("notfound");
-    // No workfolder anywhere (empty cwd, no env).
+    // No workfolder anywhere (empty cwd, no env). The walk climbs through the system temp dir, so
+    // this assumes no ancestor of it is itself a workfolder.
     let o = w.run(&["status"]);
     assert_eq!(code(&o), 2);
     assert!(o.stdout.is_empty());
@@ -251,11 +252,23 @@ fn not_found_is_exit_2_and_nothing_else_is() {
         code(&w.with_palace(&["crystals", "--room", "no-such-room"])),
         2
     );
-    let empty = scratch("notfound_empty");
-    fs::write(empty.join("CLAUDE.md"), "# p\n").unwrap();
-    let o = w.run(&["--palace", empty.to_str().unwrap(), "handover"]);
-    let _ = fs::remove_dir_all(&empty);
+    // A directory with only a CLAUDE.md is not a workfolder (it has no room).
+    let bare = scratch("notfound_bare");
+    fs::write(bare.join("CLAUDE.md"), "# p\n").unwrap();
+    let o = w.run(&["--palace", bare.to_str().unwrap(), "handover"]);
+    let _ = fs::remove_dir_all(&bare);
     assert_eq!(code(&o), 2);
+    assert!(String::from_utf8_lossy(&o.stderr).contains("no palace found"));
+    // A real workfolder with no handover: its own error, still 2.
+    fs::remove_dir_all(w.root.join("handovers")).unwrap();
+    let o = w.with_palace(&["handover"]);
+    assert_eq!(code(&o), 2);
+    assert!(o.stdout.is_empty());
+    let err = String::from_utf8_lossy(&o.stderr).to_lowercase();
+    assert!(
+        err.contains("handover") && !err.contains("no palace found"),
+        "{err}"
+    );
 }
 
 #[test]
@@ -289,4 +302,31 @@ fn the_fixture_selftest_a_broken_expectation_fails() {
     let w = World::new("selftest");
     let o = w.with_palace(&["--json", "handover"]);
     assert_ne!(keys(&o), want(&["path"]));
+}
+
+#[test]
+fn a_bundle_that_does_not_verify_is_exit_3_with_the_verdict_on_stdout() {
+    // The one documented exception to "errors leave stdout empty": the verdict is the output.
+    let w = World::new("walfail");
+    let bundle = w.cwd.join("bundle.json");
+    fs::write(
+        &bundle,
+        r#"{"version":999,"sig_algorithm":"x","signer_pubkey":"","range":[0,0],"frames":[],"signature":""}"#,
+    )
+    .unwrap();
+    let b = bundle.to_str().unwrap();
+    let o = w.run(&["--json", "wal", "verify", b]);
+    assert_eq!(code(&o), 3);
+    let v: serde_json::Value = serde_json::from_slice(&o.stdout).expect("verdict is JSON");
+    assert_eq!(v["result"], "fail");
+    assert!(String::from_utf8_lossy(&o.stderr).starts_with("loci: "));
+    // Human output: FAIL on stdout, same code.
+    let o = w.run(&["wal", "verify", b]);
+    assert_eq!(code(&o), 3);
+    assert!(String::from_utf8_lossy(&o.stdout).starts_with("FAIL"));
+    // A malformed bundle is exit 1 with nothing on stdout.
+    fs::write(&bundle, "not json").unwrap();
+    let o = w.run(&["wal", "verify", b]);
+    assert_eq!(code(&o), 1);
+    assert!(o.stdout.is_empty());
 }
