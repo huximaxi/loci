@@ -309,7 +309,7 @@ fn crystal_line(line: &str, file: &str) -> Option<Crystal> {
     Some(c)
 }
 
-/// Crystal lines in a container file (`PALACE.md` or a `CLAUDE.md`). Returns the crystals and the
+/// Crystal lines in a container file (`WORKFOLDER.md`, `PALACE.md` or a `CLAUDE.md`). Returns the crystals and the
 /// number of glyph-less bullets shaped like a legacy crystal (`- **Name** = fact`). Fenced blocks hold examples; an unclosed fence runs to
 /// the end of the file. The key block ends at the first line that is not a key line.
 pub fn read_lines(text: &str, file: &str) -> (Vec<Crystal>, usize) {
@@ -492,7 +492,8 @@ pub struct Reading {
     pub layout: &'static str,
     pub rooms: Vec<String>,
     pub crystals: Vec<Crystal>,
-    /// `.md` files that are not crystals, other than the `CLAUDE.md` and `PALACE.md` containers.
+    /// `.md` files that are not crystals, other than the marker containers (`WORKFOLDER.md`,
+    /// `PALACE.md`, `CLAUDE.md`).
     pub documents: Vec<String>,
     /// Glyph-less bullets shaped like a legacy crystal (`- **Name** = fact`): read as notes.
     pub notes: usize,
@@ -507,7 +508,7 @@ fn rel(root: &Path, p: &Path) -> String {
         .join("/")
 }
 
-/// Read a workfolder as the spec says: crystal lines in the root `PALACE.md` and `CLAUDE.md` and
+/// Read a workfolder as the spec says: crystal lines in the root `WORKFOLDER.md`, `PALACE.md` and `CLAUDE.md` and
 /// in each room's `CLAUDE.md`; file crystals under the scan root and under `garden/` at the root.
 #[cfg(test)]
 pub fn read(root: &Path) -> Option<Reading> {
@@ -522,7 +523,8 @@ pub fn read_palace(p: &palace::Palace) -> Reading {
         Layout::RoomsAtRoot => "rooms-at-root",
     };
     let rooms = palace::list_rooms(p);
-    let mut containers = vec![root.join("PALACE.md"), root.join("CLAUDE.md")];
+    let mut containers: Vec<std::path::PathBuf> =
+        palace::MARKERS.iter().map(|m| root.join(m)).collect();
     containers.extend(rooms.iter().map(|r| r.path.join("CLAUDE.md")));
 
     let mut crystals = Vec::new();
@@ -550,7 +552,7 @@ pub fn read_palace(p: &palace::Palace) -> Reading {
         let text = read_capped(&f, FILE_CAP).unwrap_or_default();
         match read_file_crystal(&text, &rel(root, &f)) {
             Some(c) => crystals.push(c),
-            None if name == "CLAUDE.md" || name == "PALACE.md" => {}
+            None if palace::is_marker(&name) => {}
             None => documents.push(rel(root, &f)),
         }
     }
@@ -1182,6 +1184,20 @@ mod tests {
         if have_fifo {
             assert!(!r.documents.iter().any(|d| d.ends_with("pipe.md")));
         }
+    }
+
+    #[test]
+    fn workfolder_md_is_read_as_a_container_and_is_not_a_document() {
+        // `WORKFOLDER.md` as the only marker, at a rooms-at-root workfolder (the scan root is the
+        // root, so the file is also walked as a .md file: it must not become a document).
+        let root = tree("wfmd", &["work"]);
+        fs::write(root.join("WORKFOLDER.md"), "# w\n◆ Owner: Ada\n").unwrap();
+        fs::write(root.join("work/CLAUDE.md"), "# w\n").unwrap();
+        let r = read(&root).unwrap();
+        let _ = fs::remove_dir_all(&root);
+        assert_eq!(r.crystals.len(), 1);
+        assert_eq!(r.crystals[0].name.as_deref(), Some("Owner"));
+        assert!(r.documents.is_empty(), "documents: {:?}", r.documents);
     }
 
     #[test]

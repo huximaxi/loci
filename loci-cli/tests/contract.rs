@@ -57,14 +57,22 @@ impl World {
 
     /// Run `loci` from an empty directory with an empty home and no `LOCI_PALACE`.
     fn run(&self, args: &[&str]) -> Output {
-        Command::new(BIN)
-            .args(args)
+        self.run_env(args, &[])
+    }
+
+    /// As `run`, with these environment variables set.
+    fn run_env(&self, args: &[&str], env: &[(&str, &str)]) -> Output {
+        let mut c = Command::new(BIN);
+        c.args(args)
             .current_dir(&self.cwd)
             .env("HOME", &self.home)
             .env_remove("LOCI_PALACE")
-            .env_remove("CLAUDE_CONFIG_DIR")
-            .output()
-            .expect("run loci")
+            .env_remove("LOCI_WORKFOLDER")
+            .env_remove("CLAUDE_CONFIG_DIR");
+        for (k, v) in env {
+            c.env(k, v);
+        }
+        c.output().expect("run loci")
     }
 
     fn with_palace(&self, args: &[&str]) -> Output {
@@ -329,4 +337,85 @@ fn a_bundle_that_does_not_verify_is_exit_3_with_the_verdict_on_stdout() {
     let o = w.run(&["wal", "verify", b]);
     assert_eq!(code(&o), 1);
     assert!(o.stdout.is_empty());
+}
+
+fn same(a: &Output, b: &Output, what: &str) {
+    assert_eq!(code(a), code(b), "{what}: exit code");
+    assert_eq!(a.stdout, b.stdout, "{what}: stdout");
+    assert_eq!(a.stderr, b.stderr, "{what}: stderr");
+}
+
+#[test]
+fn the_flag_and_the_variable_have_two_spellings_and_one_behaviour() {
+    let w = World::new("aliases");
+    let root = w.root.to_str().unwrap().to_string();
+    // The flag: `--workfolder` and the old `--palace` read the same, and neither warns.
+    for args in [
+        vec!["--json", "status"],
+        vec!["--json", "crystals"],
+        vec!["--json", "read", "decision"],
+        vec!["--json", "handover"],
+        vec!["status"],
+    ] {
+        let mut new = vec!["--workfolder", root.as_str()];
+        new.extend(&args);
+        let mut old = vec!["--palace", root.as_str()];
+        old.extend(&args);
+        let (n, o) = (w.run(&new), w.run(&old));
+        assert_eq!(code(&n), 0, "{args:?}");
+        assert!(
+            n.stderr.is_empty(),
+            "{args:?}: stderr: {}",
+            String::from_utf8_lossy(&n.stderr)
+        );
+        same(&n, &o, &format!("{args:?}"));
+    }
+    // The variable: `LOCI_WORKFOLDER` and the old `LOCI_PALACE`, from an empty directory.
+    let args = ["--json", "status"];
+    let n = w.run_env(&args, &[("LOCI_WORKFOLDER", &root)]);
+    let o = w.run_env(&args, &[("LOCI_PALACE", &root)]);
+    assert_eq!(code(&n), 0);
+    assert!(n.stderr.is_empty() && o.stderr.is_empty());
+    same(&n, &o, "env");
+    // Both set: the new name wins; a bad old name is not even looked at.
+    let b = w.run_env(
+        &args,
+        &[
+            ("LOCI_WORKFOLDER", &root),
+            ("LOCI_PALACE", "/nonexistent-loci-x"),
+        ],
+    );
+    same(&n, &b, "both set");
+    // A bad variable stops (exit 2) and names itself.
+    for var in ["LOCI_WORKFOLDER", "LOCI_PALACE"] {
+        let o = w.run_env(&args, &[(var, "/nonexistent-loci-x")]);
+        assert_eq!(code(&o), 2);
+        assert!(o.stdout.is_empty());
+        assert!(
+            String::from_utf8_lossy(&o.stderr).contains(var),
+            "names {var}"
+        );
+    }
+}
+
+#[test]
+fn workfolder_md_marks_a_workfolder_and_reads_like_the_other_two() {
+    let w = World::new("marker");
+    let before = w.with_palace(&["--json", "status"]);
+    assert_eq!(code(&before), 0);
+    // Move whichever marker the fixture has to the new name.
+    let old = ["PALACE.md", "CLAUDE.md"]
+        .iter()
+        .map(|m| w.root.join(m))
+        .find(|p| p.exists())
+        .expect("fixture has a root marker");
+    fs::rename(&old, w.root.join("WORKFOLDER.md")).unwrap();
+    let after = w.with_palace(&["--json", "status"]);
+    assert_eq!(
+        code(&after),
+        0,
+        "{}",
+        String::from_utf8_lossy(&after.stderr)
+    );
+    same(&before, &after, "status after renaming the marker");
 }

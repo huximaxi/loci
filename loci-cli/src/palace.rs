@@ -1,10 +1,12 @@
 //! Palace detection + read primitives for the CLI.
 //!
 //! Accepts three layouts:
-//!   * legacy:        PALACE.md/CLAUDE.md at root + `_palace/` subdir holding rooms.
-//!   * rooms-dir:     PALACE.md/CLAUDE.md at root + `rooms/` subdir holding rooms
+//!   * legacy:        marker at root + `_palace/` subdir holding rooms.
+//!   * rooms-dir:     marker at root + `rooms/` subdir holding rooms
 //!                    (the shape the templates kit and the setup guides build).
-//!   * rooms-at-root: PALACE.md/CLAUDE.md at root + sibling dirs each holding CLAUDE.md.
+//!   * rooms-at-root: marker at root + sibling dirs each holding CLAUDE.md.
+//!
+//! A marker is `WORKFOLDER.md`, `PALACE.md` or `CLAUDE.md` (see `MARKERS`).
 //!
 //! `rooms/` is checked before rooms-at-root because an explicit rooms directory
 //! is the stronger signal.
@@ -34,16 +36,29 @@ pub struct Room {
     pub crystal_count: usize,
 }
 
-/// `$LOCI_PALACE` is set but names no palace. Detection stops here instead of
-/// falling back to the current directory, so a typo never silently points the
-/// CLI at a different workfolder.
-pub struct BadEnv(pub PathBuf);
+/// The root marker files, canonical spelling first. `WORKFOLDER.md` is the 2.0 name; `PALACE.md`
+/// and `CLAUDE.md` stay valid for good, with no warning. All three are read the same way.
+pub const MARKERS: [&str; 3] = ["WORKFOLDER.md", "PALACE.md", "CLAUDE.md"];
 
-/// Resolution order: explicit override, then `$LOCI_PALACE`, then walk up from cwd.
-/// An empty `$LOCI_PALACE` counts as unset.
+pub fn is_marker(file_name: &str) -> bool {
+    MARKERS.contains(&file_name)
+}
+
+/// An environment variable is set but names no workfolder. Detection stops here instead of
+/// falling back to the current directory, so a typo never silently points the CLI at a different
+/// workfolder. `var` is the variable that was read, so the message names the right one.
+pub struct BadEnv {
+    pub var: &'static str,
+    pub path: PathBuf,
+}
+
+/// Resolution order: explicit override (`--workfolder`, alias `--palace`), then `$LOCI_WORKFOLDER`,
+/// then `$LOCI_PALACE`, then walk up from cwd. An empty variable counts as unset. When both
+/// variables are set, `$LOCI_WORKFOLDER` wins and nothing is printed about the other.
 pub fn detect(override_path: Option<PathBuf>) -> Result<Option<Palace>, BadEnv> {
     detect_from(
         override_path,
+        std::env::var_os("LOCI_WORKFOLDER"),
         std::env::var_os("LOCI_PALACE"),
         std::env::current_dir().ok(),
     )
@@ -51,17 +66,26 @@ pub fn detect(override_path: Option<PathBuf>) -> Result<Option<Palace>, BadEnv> 
 
 fn detect_from(
     override_path: Option<PathBuf>,
-    env: Option<std::ffi::OsString>,
+    workfolder_env: Option<std::ffi::OsString>,
+    palace_env: Option<std::ffi::OsString>,
     cwd: Option<PathBuf>,
 ) -> Result<Option<Palace>, BadEnv> {
     if let Some(p) = override_path {
         return Ok(validate(&p));
     }
-    if let Some(env) = env.filter(|e| !e.is_empty()) {
-        let p = PathBuf::from(env);
-        return match validate(&p) {
+    let env = workfolder_env
+        .filter(|e| !e.is_empty())
+        .map(|e| ("LOCI_WORKFOLDER", e))
+        .or_else(|| {
+            palace_env
+                .filter(|e| !e.is_empty())
+                .map(|e| ("LOCI_PALACE", e))
+        });
+    if let Some((var, env)) = env {
+        let path = PathBuf::from(env);
+        return match validate(&path) {
             Some(palace) => Ok(Some(palace)),
-            None => Err(BadEnv(p)),
+            None => Err(BadEnv { var, path }),
         };
     }
     let Some(mut cwd) = cwd else {
@@ -81,7 +105,7 @@ pub fn validate(root: &Path) -> Option<Palace> {
     if !root.is_dir() {
         return None;
     }
-    if !(root.join("PALACE.md").exists() || root.join("CLAUDE.md").exists()) {
+    if !MARKERS.iter().any(|m| root.join(m).exists()) {
         return None;
     }
     let palace_dir = root.join("_palace");
@@ -273,7 +297,8 @@ mod tests {
 
     /// Fresh scratch dir per test, keyed by name + pid so parallel tests never collide.
     fn scratch(name: &str) -> PathBuf {
-        let p = std::env::temp_dir().join(format!("loci_cli_palace_{}_{}", name, std::process::id()));
+        let p =
+            std::env::temp_dir().join(format!("loci_cli_palace_{}_{}", name, std::process::id()));
         let _ = fs::remove_dir_all(&p);
         fs::create_dir_all(&p).unwrap();
         p
@@ -346,21 +371,94 @@ mod tests {
         room(&good, "work-room");
         let missing = good.join("no-such-palace");
         // cwd holds a valid palace, but the env var names a bad path: stop, do not fall back.
-        let r = detect_from(None, Some(missing.clone().into_os_string()), Some(good.clone()));
+        let r = detect_from(
+            None,
+            None,
+            Some(missing.clone().into_os_string()),
+            Some(good.clone()),
+        );
         match r {
-            Err(BadEnv(p)) => assert_eq!(p, missing),
+            Err(BadEnv { var, path }) => {
+                assert_eq!(path, missing);
+                assert_eq!(var, "LOCI_PALACE");
+            }
             _ => panic!("a bad LOCI_PALACE must not fall back to the cwd palace"),
         }
         // Empty env counts as unset: the cwd walk finds the palace.
-        let r = detect_from(None, Some("".into()), Some(good.clone()));
+        let r = detect_from(None, None, Some("".into()), Some(good.clone()));
         assert!(matches!(r, Ok(Some(_))));
         // A good env wins over cwd; an explicit override wins over env.
-        assert!(matches!(detect_from(None, Some(good.clone().into_os_string()), None), Ok(Some(_))));
         assert!(matches!(
-            detect_from(Some(missing.clone()), Some(good.clone().into_os_string()), None),
+            detect_from(None, None, Some(good.clone().into_os_string()), None),
+            Ok(Some(_))
+        ));
+        assert!(matches!(
+            detect_from(
+                Some(missing.clone()),
+                None,
+                Some(good.clone().into_os_string()),
+                None
+            ),
             Ok(None)
         ));
         let _ = fs::remove_dir_all(&good);
+    }
+
+    #[test]
+    fn workfolder_md_is_a_marker_like_the_other_two() {
+        for marker in ["WORKFOLDER.md", "PALACE.md", "CLAUDE.md"] {
+            let root = scratch("marker");
+            fs::write(root.join(marker), "# w\n").unwrap();
+            room(&root.join("rooms"), "work-room");
+            assert!(validate(&root).is_some(), "{marker} must mark a workfolder");
+            let _ = fs::remove_dir_all(&root);
+        }
+        // The marker alone, with no room, is still not a workfolder.
+        let root = scratch("marker_alone");
+        fs::write(root.join("WORKFOLDER.md"), "# w\n").unwrap();
+        assert!(validate(&root).is_none());
+        let _ = fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn workfolder_env_wins_and_the_old_name_still_works() {
+        let good = scratch("env_pair");
+        fs::write(good.join("WORKFOLDER.md"), "# w\n").unwrap();
+        room(&good, "work-room");
+        let other = scratch("env_pair_other");
+        fs::write(other.join("CLAUDE.md"), "# o\n").unwrap();
+        room(&other, "other-room");
+        let os = |p: &PathBuf| Some(p.clone().into_os_string());
+        // Either name alone resolves.
+        let a = detect_from(None, os(&good), None, None)
+            .ok()
+            .flatten()
+            .expect("LOCI_WORKFOLDER");
+        let b = detect_from(None, None, os(&good), None)
+            .ok()
+            .flatten()
+            .expect("LOCI_PALACE");
+        assert_eq!(a.root, b.root);
+        // Both set: the new name wins, with no error about the old one.
+        let both = detect_from(None, os(&good), os(&other), None)
+            .ok()
+            .flatten()
+            .unwrap();
+        assert_eq!(both.root, good);
+        // An empty new name falls through to the old one.
+        let r = detect_from(None, Some("".into()), os(&other), None)
+            .ok()
+            .flatten()
+            .unwrap();
+        assert_eq!(r.root, other);
+        // A bad new name stops, naming itself, even though the old one is good.
+        let missing = good.join("nope");
+        match detect_from(None, os(&missing), os(&good), None) {
+            Err(BadEnv { var, .. }) => assert_eq!(var, "LOCI_WORKFOLDER"),
+            _ => panic!("a bad LOCI_WORKFOLDER must not fall through to LOCI_PALACE"),
+        }
+        let _ = fs::remove_dir_all(&good);
+        let _ = fs::remove_dir_all(&other);
     }
 
     #[test]

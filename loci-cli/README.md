@@ -47,15 +47,21 @@ Three shapes:
 - **rooms-at-root**: workfolders ported from older organic structures (rooms grew
   at root, never moved into `_palace/`)
 
-Any of the three works. The root must hold a `PALACE.md` or `CLAUDE.md`.
+Any of the three works. The root must hold a `WORKFOLDER.md`, `PALACE.md` or `CLAUDE.md`, and the
+three are read the same way. `PALACE.md` and `CLAUDE.md` stay readable until 3.0 at least; neither prints a warning. Migrate by renaming,
+not copying: a crystal line in two marker files is read twice.
 
 ## Workfolder resolution
 
 Each command resolves the workfolder in this order:
 
-1. `--palace <path>` (explicit override)
-2. `$LOCI_PALACE` (environment variable)
+1. `--workfolder <path>` (explicit override; `--palace` is the same flag)
+2. `$LOCI_WORKFOLDER`, then `$LOCI_PALACE` (environment variables; the first one set and non-empty is used)
 3. Walk up from the current directory until a workfolder marker is found
+
+The old spellings (`--palace`, `$LOCI_PALACE`) stay readable until 3.0 at least, with no warning. Tools
+that set only `LOCI_PALACE` need no change. If both variables are set, `LOCI_WORKFOLDER` wins and
+nothing is printed about the other, so unset it (or use `--workfolder`) for a per-run override.
 
 ## Commands
 

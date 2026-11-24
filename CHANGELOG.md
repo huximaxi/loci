@@ -7,6 +7,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+- `loci rain` looks for `garden/` at the workfolder root, where the spec and the first-session
+  ceremony put it. With the `rooms/` layout it looked inside `rooms/` and always found no plants.
+  A garden inside the scan root (`_palace/garden/`) is still read when the root garden holds no
+  `plants/` or `.rain/` and the older one does.
+
 ### Changed
 - Usage errors (an unknown flag or command, a missing or malformed argument) now exit 3, printed
   to stderr as before. Exit 2 means only "not found". A script that treated 2 as "usage error"
@@ -25,6 +31,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   by two paths once.
 
 ### Added
+- The workfolder has its own spellings, as aliases: `--workfolder` (the old `--palace` is the same
+  flag), `$LOCI_WORKFOLDER` (read before `$LOCI_PALACE`), and `WORKFOLDER.md` as a root marker next
+  to `PALACE.md` and `CLAUDE.md`, read like them (crystal lines count). The old names keep working
+  and print no warning. An environment variable that names no workfolder is still an error, now
+  naming the variable it read.
 - `loci-cli/CONTRACT.md`: the written CLI contract (commands, flags, exit codes, stdout and stderr
   rules, each command's `--json` keys), frozen from 2.0 until 3.0. Tests hold it: every command has
   a README row and a contract section, every `--json` command emits exactly the listed keys on the

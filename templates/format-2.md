@@ -30,7 +30,7 @@ superseded_by: Other name
 
 ## Tiers
 
-| Glyph | Name | Aliases (readable forever) | Means |
+| Glyph | Name | Aliases (readable until 3.0 at least) | Means |
 |---|---|---|---|
 | ◆ | Confirmed | none | Verified. Treat as ground truth. |
 | ◈ | Contextual | Working | True now, tied to a phase, sprint or situation. May shift. |
@@ -62,7 +62,7 @@ A date is a real calendar day written `YYYY-MM-DD`. A value that is not a date (
 
 ## Accepted layouts
 
-A workfolder is a directory with `PALACE.md` or `CLAUDE.md` at its root and a scan root. A room is a directory holding a `CLAUDE.md`. The **scan root** is the directory the rooms live in. A reader picks the first that applies:
+A workfolder is a directory with `WORKFOLDER.md`, `PALACE.md` or `CLAUDE.md` at its root and a scan root. The three markers are read the same way. A room is a directory holding a `CLAUDE.md`. The **scan root** is the directory the rooms live in. A reader picks the first that applies:
 
 | Order | Scan root | When |
 |---|---|---|
@@ -74,7 +74,7 @@ If more than one shape is present, the first wins and the rest are not read. Wit
 
 Crystals are stored in two ways, and both read as the same crystal:
 
-1. **Lines**, in the root `PALACE.md` or `CLAUDE.md`, or in a room's `CLAUDE.md`, in the shape above.
+1. **Lines**, in the root `WORKFOLDER.md`, `PALACE.md` or `CLAUDE.md`, or in a room's `CLAUDE.md`, in the shape above.
 2. **A file per crystal**: any `.md` file with `type: crystal` in its frontmatter, under the scan root or under `garden/` at the workfolder root (the first-session ceremony writes there, and `garden/` is a sibling of `rooms/`, not inside it). It need not sit in a room. The same keys go in the frontmatter, plus `tier`, written as the glyph (`tier: "◈"`) or as a tier name. The crystal's name is the first `#` heading, or the file name without `.md` when there is none. Its fact is the first paragraph after the heading. The rest of the body is free text.
 
 ```

@@ -244,8 +244,9 @@ Wait for a yes.
   ```
   The `Palace:` line is the one place the palace's location is written down. Tools and shared
   rituals read it to find the palace, so keep it an absolute path and update it if the folder moves.
-  For shells and the `loci` CLI, the equivalent is the `LOCI_PALACE` environment variable (the CLI
-  checks `--palace`, then `LOCI_PALACE`, then walks up from the current directory).
+  For shells and the `loci` CLI, the equivalent is the `LOCI_WORKFOLDER` environment variable (the old
+  name `LOCI_PALACE` still works; the CLI checks `--workfolder`, then `LOCI_WORKFOLDER`, then
+  `LOCI_PALACE`, then walks up from the current directory).
 - **Says after:**
   > "Done, and notice that's the first time the gate fired: writing outside the folder asked your
   > yes. Two layers now: who I am travels with me, in a file above the palace; where we are, and

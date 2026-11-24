@@ -27,13 +27,13 @@ guards: skills/quarantine.md, skills/session-close.md, skills/insight-consolidat
 Set `REAL` to your palace folder; it is only read from. `P` becomes the scratch copy in a fresh temp folder.
 
 - `REAL` is resolved to its real path and copied with links followed (`cp -RL`), and the setup stops if any symlink is left in the copy, so a palace reached through a link, or one with linked folders inside, cannot be written through. Following links copies what they point to, including files outside the palace: the setup first measures the palace with links followed and stops above 2 GB (raise the number if yours is larger), and the same measurement stops on a symlink loop. Teardown deletes the copy.
-- The copy is cut off from the real palace as far as files can say: every `.git` (remote and git hooks) is removed, so are the project's agent settings and tool servers (`.claude/settings.json`, `.claude/settings.local.json`, `.mcp.json`), and any line in the copy that names the real palace's path is rewritten to name the copy. `LOCI_PALACE` is unset. Other spellings of the path (through a link, with `~`) are not rewritten; the untouched check catches a write that slips through that way.
+- The copy is cut off from the real palace as far as files can say: every `.git` (remote and git hooks) is removed, so are the project's agent settings and tool servers (`.claude/settings.json`, `.claude/settings.local.json`, `.mcp.json`), and any line in the copy that names the real palace's path is rewritten to name the copy. `LOCI_PALACE` and `LOCI_WORKFOLDER` are unset. Other spellings of the path (through a link, with `~`) are not rewritten; the untouched check catches a write that slips through that way.
 - A marker file proves a folder is a fixture copy: every block below refuses to run where it is missing, so `P=.` inside your real palace stops before anything is written.
 
 Each canary carries a random suffix, so a match can only come from this run. The blocks carry no inline comments, because an interactive zsh without `interactive_comments` would run them as commands.
 
 ```bash
-unset RUN LOCI_PALACE
+unset RUN LOCI_PALACE LOCI_WORKFOLDER
 REAL=/path/to/your/palace
 P="$(mktemp -d)/palace" &&
   case "$P" in "${TMPDIR:-/tmp}"*|/tmp/*) ;; *) echo "not a temp path: $P"; false ;; esac &&

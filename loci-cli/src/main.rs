@@ -31,11 +31,13 @@ mod tokens;
                   only read; `new` and `init` write. It never starts an agent.\n\
                   No network, no inference, no daemons. The templates kit is the other\n\
                   door; the CLI is the terminal-native one. Files, flags and output\n\
-                  still say palace: --palace and $LOCI_PALACE point at the workfolder."
+                  still say palace in places: --workfolder (alias --palace) and\n\
+                  $LOCI_WORKFOLDER (alias $LOCI_PALACE) point at the workfolder, and\n\
+                  WORKFOLDER.md, PALACE.md or CLAUDE.md at its root marks it."
 )]
 struct Cli {
-    /// Palace path. Overrides $LOCI_PALACE and cwd auto-detect.
-    #[arg(long, global = true)]
+    /// Workfolder path (alias --palace). Overrides $LOCI_WORKFOLDER, $LOCI_PALACE and cwd auto-detect.
+    #[arg(long = "workfolder", alias = "palace", value_name = "PATH", global = true)]
     palace: Option<PathBuf>,
 
     /// Emit machine-readable JSON.
@@ -309,10 +311,10 @@ fn cmd_overview(palace_arg: Option<PathBuf>, json: bool) -> Result<(), Error> {
     // Soft detection: overview must work with no palace (unlike require_palace).
     let palace = match palace::detect(palace_arg) {
         Ok(found) => found.map(|p| p.root.display().to_string()),
-        Err(palace::BadEnv(p)) => {
+        Err(palace::BadEnv { var, path }) => {
             eprintln!(
-                "loci: warning: LOCI_PALACE is set to {} but no palace is there",
-                p.display()
+                "loci: warning: {var} is set to {} but no palace is there",
+                path.display()
             );
             None
         }
@@ -358,7 +360,7 @@ fn cmd_overview(palace_arg: Option<PathBuf>, json: bool) -> Result<(), Error> {
     println!("Mostly reads (new and init write). Starts no agent. No network, no inference, no daemons.");
     match &palace {
         Some(p) => println!("palace : {p}"),
-        None => println!("palace : (none detected — pass --palace <path> or run inside one)"),
+        None => println!("palace : (none detected — pass --workfolder <path> or run inside one)"),
     }
     println!();
     for (gname, cmds) in OVERVIEW_GROUPS {
@@ -392,9 +394,9 @@ struct StatusOut {
     files_total: usize,
     /// Crystals as format 2 defines them: tiered lines and `type: crystal` files.
     tiered: format2::Tally,
-    /// Glyph-less bullets in `PALACE.md` and `CLAUDE.md` files: read, never counted.
+    /// Glyph-less bullets in `WORKFOLDER.md`, `PALACE.md` and `CLAUDE.md` files: read, never counted.
     legacy_lines_not_counted: usize,
-    /// `.md` files that are not crystals (other than the `CLAUDE.md` and `PALACE.md` containers).
+    /// `.md` files that are not crystals (other than the `WORKFOLDER.md`, `PALACE.md` and `CLAUDE.md` containers).
     documents: usize,
 }
 
@@ -528,7 +530,7 @@ fn cmd_status(palace_arg: Option<PathBuf>, json: bool) -> Result<(), Error> {
 struct CrystalsOut {
     palace: String,
     rooms: Vec<RoomListOut>,
-    /// Crystals outside any room: lines in the root `PALACE.md` or `CLAUDE.md`, and `garden/`.
+    /// Crystals outside any room: lines in the root `WORKFOLDER.md`, `PALACE.md` or `CLAUDE.md`, and `garden/`.
     unrooted: Vec<EntryOut>,
 }
 
@@ -566,7 +568,7 @@ fn entry_out(c: &format2::Crystal) -> EntryOut {
         .strip_suffix(".md")
         .filter(|_| {
             let base = c.file.rsplit('/').next().unwrap_or("");
-            base != "CLAUDE.md" && base != "PALACE.md"
+            !palace::is_marker(base)
         })
         .and_then(|f| f.rsplit('/').next())
         .map(str::to_string);
@@ -1137,8 +1139,23 @@ struct RainOut {
     start_phrase: String,
 }
 
+/// Where the garden lives: `garden/` at the workfolder root, which is where the spec and the
+/// first-session ceremony put it (a sibling of `rooms/`, not inside it). A garden inside the scan
+/// root (`_palace/garden/`) is the older shape and is read only when the root garden holds neither
+/// `plants/` nor `.rain/` and the older one does (an empty `garden/` must not hide a real one).
+fn garden_dir(p: &palace::Palace) -> PathBuf {
+    let holds = |d: &Path| d.join("plants").is_dir() || d.join(".rain").is_dir();
+    let at_root = p.root.join("garden");
+    let older = p.scan_root.join("garden");
+    if !holds(&at_root) && holds(&older) {
+        older
+    } else {
+        at_root
+    }
+}
+
 fn rain_garden(p: &palace::Palace) -> RainGardenOut {
-    let garden = p.scan_root.join("garden");
+    let garden = garden_dir(p);
     let plants = std::fs::read_dir(garden.join("plants"))
         .map(|rd| {
             rd.filter_map(|e| e.ok())
@@ -1294,7 +1311,7 @@ fn cmd_new(path: &Path, force: bool, json: bool) -> Result<(), Error> {
     println!("Next:");
     println!("  1. Edit PALACE.md and soul/SOUL.md: say who you are, name your collaborator.");
     println!(
-        "  2. Run `loci status --palace {}` to confirm it reads.",
+        "  2. Run `loci status --workfolder {}` to confirm it reads.",
         path.display()
     );
     println!("  3. The full templates kit (personas, more skills) is at loci.garden.");
@@ -1332,7 +1349,7 @@ fn cmd_init(default_palace: Option<String>) -> Result<(), Error> {
     let trimmed = palace_path.trim();
     if !trimmed.is_empty() && palace::validate(std::path::Path::new(trimmed)).is_none() {
         eprintln!(
-            "  warning: '{trimmed}' does not look like a palace (no PALACE.md or CLAUDE.md at root, or no rooms). Saving anyway."
+            "  warning: '{trimmed}' does not look like a palace (no WORKFOLDER.md, PALACE.md or CLAUDE.md at root, or no rooms). Saving anyway."
         );
     }
 
@@ -1392,13 +1409,13 @@ fn require_palace(arg: Option<PathBuf>) -> Result<palace::Palace, Error> {
     match palace::detect(arg) {
         Ok(Some(p)) => Ok(p),
         Ok(None) => Err(Error::not_found(
-            "no palace found. Pass --palace <path>, set LOCI_PALACE, or run from inside a palace."
+            "no palace found. Pass --workfolder <path>, set LOCI_WORKFOLDER, or run from inside a palace."
                 .to_string(),
         )),
-        Err(palace::BadEnv(p)) => Err(Error::not_found(format!(
-            "LOCI_PALACE is set to {} but no palace is there. Fix or unset it; \
+        Err(palace::BadEnv { var, path }) => Err(Error::not_found(format!(
+            "{var} is set to {} but no palace is there. Fix or unset it; \
              loci does not fall back to the current directory.",
-            p.display()
+            path.display()
         ))),
     }
 }
@@ -1578,6 +1595,31 @@ mod contract_tests {
 #[cfg(test)]
 mod rain_tests {
     use super::*;
+
+    /// The garden is `garden/` at the workfolder root, as the spec says, also when the rooms live
+    /// under `rooms/`. A garden inside the scan root is read only when the root has none.
+    #[test]
+    fn the_garden_is_read_at_the_workfolder_root() {
+        let root = std::env::temp_dir().join(format!("loci_rain_garden_{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&root);
+        std::fs::create_dir_all(root.join("rooms/work")).unwrap();
+        std::fs::create_dir_all(root.join("garden/plants")).unwrap();
+        std::fs::create_dir_all(root.join("rooms/garden/plants")).unwrap();
+        std::fs::write(root.join("CLAUDE.md"), "# p\n").unwrap();
+        std::fs::write(root.join("rooms/work/CLAUDE.md"), "# w\n").unwrap();
+        std::fs::write(root.join("garden/plants/a.md"), "# a\n").unwrap();
+        std::fs::write(root.join("garden/plants/b.md"), "# b\n").unwrap();
+        std::fs::write(root.join("rooms/garden/plants/old.md"), "# old\n").unwrap();
+        let p = palace::validate(&root).expect("workfolder");
+        assert_eq!(rain_garden(&p).plants, 2, "the root garden wins over the scan-root one");
+        // No garden at the root: the older location is still read.
+        std::fs::remove_dir_all(root.join("garden")).unwrap();
+        assert_eq!(rain_garden(&p).plants, 1);
+        // An empty root garden does not hide the older one.
+        std::fs::create_dir_all(root.join("garden")).unwrap();
+        assert_eq!(rain_garden(&p).plants, 1, "an empty garden/ at the root must not win");
+        let _ = std::fs::remove_dir_all(&root);
+    }
 
     /// `--fire` is gone: it must say so (bad input, exit 3), even with no palace
     /// around, rather than fail as an unknown flag. That the CLI starts no agent

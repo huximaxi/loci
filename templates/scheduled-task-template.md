@@ -21,8 +21,8 @@ Palace files move between sessions. The folder structure changes. The only stabl
 When a scheduled task runs:
 
 ```bash
-# Find the palace dynamically: LOCI_PALACE if set, else search under $HOME
-PALACE_ROOT="${LOCI_PALACE:-$(find "$HOME" -maxdepth 4 -name "CLAUDE.md" -path "*/${PALACE_NAME}/*" 2>/dev/null | head -1 | xargs dirname)}"
+# Find the palace dynamically: LOCI_WORKFOLDER or LOCI_PALACE if set, else search under $HOME
+PALACE_ROOT="${LOCI_WORKFOLDER:-${LOCI_PALACE:-$(find "$HOME" -maxdepth 4 -name "CLAUDE.md" -path "*/${PALACE_NAME}/*" 2>/dev/null | head -1 | xargs dirname)}}"
 ```
 
 Use `$PALACE_ROOT` to construct all other paths. Always.
@@ -279,8 +279,8 @@ All scheduled tasks should include:
 
 # Find palace dynamically
 PALACE_NAME="my-palace"  # User sets this once during setup
-# LOCI_PALACE wins if set; otherwise search under $HOME (never a host-specific mount)
-PALACE_ROOT="${LOCI_PALACE:-$(find "$HOME" -maxdepth 4 -name "CLAUDE.md" -path "*/${PALACE_NAME}/*" 2>/dev/null | head -1 | xargs dirname)}"
+# LOCI_WORKFOLDER (then LOCI_PALACE) wins if set; otherwise search under $HOME (never a host-specific mount)
+PALACE_ROOT="${LOCI_WORKFOLDER:-${LOCI_PALACE:-$(find "$HOME" -maxdepth 4 -name "CLAUDE.md" -path "*/${PALACE_NAME}/*" 2>/dev/null | head -1 | xargs dirname)}}"
 
 if [ -z "$PALACE_ROOT" ]; then
   echo "Palace not found. Is it in the expected location?"
