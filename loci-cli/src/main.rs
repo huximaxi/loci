@@ -394,9 +394,9 @@ struct StatusOut {
     files_total: usize,
     /// Crystals as format 2 defines them: tiered lines and `type: crystal` files.
     tiered: format2::Tally,
-    /// Glyph-less bullets in `PALACE.md` and `CLAUDE.md` files: read, never counted.
+    /// Glyph-less bullets in `WORKFOLDER.md`, `PALACE.md` and `CLAUDE.md` files: read, never counted.
     legacy_lines_not_counted: usize,
-    /// `.md` files that are not crystals (other than the `CLAUDE.md` and `PALACE.md` containers).
+    /// `.md` files that are not crystals (other than the `WORKFOLDER.md`, `PALACE.md` and `CLAUDE.md` containers).
     documents: usize,
 }
 
@@ -530,7 +530,7 @@ fn cmd_status(palace_arg: Option<PathBuf>, json: bool) -> Result<(), Error> {
 struct CrystalsOut {
     palace: String,
     rooms: Vec<RoomListOut>,
-    /// Crystals outside any room: lines in the root `PALACE.md` or `CLAUDE.md`, and `garden/`.
+    /// Crystals outside any room: lines in the root `WORKFOLDER.md`, `PALACE.md` or `CLAUDE.md`, and `garden/`.
     unrooted: Vec<EntryOut>,
 }
 
@@ -1141,13 +1141,16 @@ struct RainOut {
 
 /// Where the garden lives: `garden/` at the workfolder root, which is where the spec and the
 /// first-session ceremony put it (a sibling of `rooms/`, not inside it). A garden inside the scan
-/// root (`_palace/garden/`) is the older shape and is read only when the root has none.
+/// root (`_palace/garden/`) is the older shape and is read only when the root garden holds neither
+/// `plants/` nor `.rain/` and the older one does (an empty `garden/` must not hide a real one).
 fn garden_dir(p: &palace::Palace) -> PathBuf {
+    let holds = |d: &Path| d.join("plants").is_dir() || d.join(".rain").is_dir();
     let at_root = p.root.join("garden");
-    if at_root.is_dir() {
-        at_root
+    let older = p.scan_root.join("garden");
+    if !holds(&at_root) && holds(&older) {
+        older
     } else {
-        p.scan_root.join("garden")
+        at_root
     }
 }
 
@@ -1612,6 +1615,9 @@ mod rain_tests {
         // No garden at the root: the older location is still read.
         std::fs::remove_dir_all(root.join("garden")).unwrap();
         assert_eq!(rain_garden(&p).plants, 1);
+        // An empty root garden does not hide the older one.
+        std::fs::create_dir_all(root.join("garden")).unwrap();
+        assert_eq!(rain_garden(&p).plants, 1, "an empty garden/ at the root must not win");
         let _ = std::fs::remove_dir_all(&root);
     }
 

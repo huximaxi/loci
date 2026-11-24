@@ -309,7 +309,7 @@ fn crystal_line(line: &str, file: &str) -> Option<Crystal> {
     Some(c)
 }
 
-/// Crystal lines in a container file (`PALACE.md` or a `CLAUDE.md`). Returns the crystals and the
+/// Crystal lines in a container file (`WORKFOLDER.md`, `PALACE.md` or a `CLAUDE.md`). Returns the crystals and the
 /// number of glyph-less bullets shaped like a legacy crystal (`- **Name** = fact`). Fenced blocks hold examples; an unclosed fence runs to
 /// the end of the file. The key block ends at the first line that is not a key line.
 pub fn read_lines(text: &str, file: &str) -> (Vec<Crystal>, usize) {

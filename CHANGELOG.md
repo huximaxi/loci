@@ -10,7 +10,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 - `loci rain` looks for `garden/` at the workfolder root, where the spec and the first-session
   ceremony put it. With the `rooms/` layout it looked inside `rooms/` and always found no plants.
-  A garden inside the scan root (`_palace/garden/`) is still read when the root has none.
+  A garden inside the scan root (`_palace/garden/`) is still read when the root garden holds no
+  `plants/` or `.rain/` and the older one does.
 
 ### Changed
 - Usage errors (an unknown flag or command, a missing or malformed argument) now exit 3, printed

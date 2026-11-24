@@ -30,7 +30,7 @@ superseded_by: Other name
 
 ## Tiers
 
-| Glyph | Name | Aliases (readable forever) | Means |
+| Glyph | Name | Aliases (readable until 3.0 at least) | Means |
 |---|---|---|---|
 | ◆ | Confirmed | none | Verified. Treat as ground truth. |
 | ◈ | Contextual | Working | True now, tied to a phase, sprint or situation. May shift. |
