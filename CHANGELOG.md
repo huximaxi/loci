@@ -8,6 +8,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- A format 2 conformance fixture and test: three fixture workfolders (one per layout) under
+  `loci-cli/tests/fixtures/format2/`, a hand-written `expected.json`, and a reference reader that
+  follows `templates/format-2.md`. The test fails on a deliberately broken fixture or a crystal
+  read twice, and rule-by-rule tests hold the parse rules (name split, legacy suffixes, key block,
+  fences, dates, case, symlinks). `superseded_by` resolution and the `pinned_until` last-day rule
+  are left to the change that counts crystals. Test-only for now: `status` and `crystals` count
+  tiered crystals in a later change.
 - `templates/format-2.md`: the loci format 2 spec. One crystal shape (`◈ Name: fact` with keys on
   the next lines), the tiers and their aliases, the `valid_until` grammar (a calendar date is
   scheduled, anything else is an unscheduled label), the time keys `occurred`, `mentioned` and
