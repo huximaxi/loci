@@ -131,8 +131,26 @@ enum WalCmd {
     },
 }
 
+/// Exit code for a clap parse outcome. `--help` and `--version` are not failures (0, printed to
+/// stdout). Any real usage error (unknown flag or command, missing argument, bad value) is bad
+/// input, 3, printed to stderr: clap's own 2 would collide with "not found".
+fn usage_code(e: &clap::Error) -> u8 {
+    if e.use_stderr() {
+        3
+    } else {
+        0
+    }
+}
+
 fn main() -> ExitCode {
-    let cli = Cli::parse();
+    let cli = match Cli::try_parse() {
+        Ok(cli) => cli,
+        Err(e) => {
+            let code = usage_code(&e);
+            let _ = e.print();
+            return ExitCode::from(code);
+        }
+    };
     match run(cli) {
         Ok(()) => ExitCode::SUCCESS,
         Err(e) => {
@@ -1494,6 +1512,60 @@ mod overview_tests {
                     "command `{n}` has no clap `about` (add a doc comment on its Cmd variant)"
                 );
             }
+        }
+    }
+}
+
+#[cfg(test)]
+mod contract_tests {
+    use super::*;
+
+    const README: &str = include_str!("../README.md");
+    const CONTRACT: &str = include_str!("../CONTRACT.md");
+
+    /// Every command (and subcommand) has a row in the README table and a section in the contract.
+    /// Adding one without either fails here.
+    #[test]
+    fn every_command_is_in_the_readme_table_and_the_contract() {
+        let app = Cli::command();
+        let mut paths: Vec<String> = Vec::new();
+        for c in app.get_subcommands() {
+            let name = c.get_name().to_string();
+            let subs: Vec<_> = c.get_subcommands().collect();
+            if subs.is_empty() {
+                paths.push(name);
+            } else {
+                for sc in subs {
+                    paths.push(format!("{name} {}", sc.get_name()));
+                }
+            }
+        }
+        assert!(paths.len() >= 12, "found too few commands: {paths:?}");
+        for path in &paths {
+            let row = format!("| `loci {path}");
+            assert!(README.contains(&row), "README table has no row for `loci {path}`");
+            let heading = format!("### `loci {path}");
+            assert!(CONTRACT.contains(&heading), "CONTRACT.md has no section for `loci {path}`");
+        }
+    }
+
+    #[test]
+    fn help_and_version_are_clean_and_real_usage_errors_are_bad_input() {
+        for ok in [["loci", "--help"], ["loci", "--version"], ["loci", "status"]] {
+            let e = Cli::try_parse_from(ok);
+            if let Err(e) = e {
+                assert_eq!(usage_code(&e), 0, "{ok:?}");
+            }
+        }
+        for bad in [
+            vec!["loci", "--bogus"],
+            vec!["loci", "bogus"],
+            vec!["loci", "read"],
+            vec!["loci", "reads", "--days", "x"],
+            vec!["loci"],
+        ] {
+            let e = Cli::try_parse_from(&bad).err().expect("must be a usage error");
+            assert_eq!(usage_code(&e), 3, "{bad:?}");
         }
     }
 }

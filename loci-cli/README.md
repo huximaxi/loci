@@ -68,6 +68,7 @@ Each command resolves the workfolder in this order:
 | `loci read <slug> --room <name>` | Disambiguate when the same slug lives in two rooms |
 | `loci handover` | Print the most recent handover by mtime |
 | `loci tokens` | Approximate status of your agent runtime's 5-hour session window, read from local transcripts (timing, not quota) |
+| `loci reads` | How often your agent read the workfolder: user turns followed by a read, counts only, from local transcripts. `--days <n>` (default 7) |
 | `loci rain` | Garden watering weather: window headroom, garden state, last rain. Start the round yourself, in your own agent |
 | `loci new <path>` | Scaffold a starter palace at `<path>`, then offer `loci init`. `--force` writes into a non-empty directory |
 | `loci init` | Interactive wizard. Writes `~/.config/loci/config.toml` |
@@ -109,8 +110,11 @@ crate docs for the exact guarantees.
 |---|---|
 | `0` | Clean |
 | `1` | I/O or unexpected error |
-| `2` | Palace or crystal not found |
-| `3` | Bad input (ambiguous slug, malformed args) |
+| `2` | Palace or crystal not found (nothing else) |
+| `3` | Bad input: a usage error (unknown flag or command, missing argument), an ambiguous slug |
+
+Errors go to stderr and leave stdout empty, with or without `--json`. The full contract, with each
+command's flags and `--json` keys, is [`CONTRACT.md`](CONTRACT.md); tests hold it.
 
 ## What's not here
 
