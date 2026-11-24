@@ -14,9 +14,8 @@ use std::path::{Path, PathBuf};
 use loci_wal::{ChainError, EgressClass, Frame, ProofBundle, Wal};
 use std::process::ExitCode;
 
-mod palace;
-#[cfg(test)]
 mod format2;
+mod palace;
 mod reads;
 mod scaffold;
 mod tokens;
@@ -49,9 +48,9 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Cmd {
-    /// Print palace path, layout, room and crystal counts.
+    /// Print palace path, layout, rooms, and crystal counts by tier.
     Status,
-    /// List crystals (`.md` files inside rooms).
+    /// List crystals: tier, name and keys, read as format 2 says.
     Crystals {
         /// Only list crystals inside this room.
         #[arg(long)]
@@ -369,49 +368,141 @@ struct StatusOut {
     palace: String,
     layout: &'static str,
     rooms: Vec<RoomOut>,
+    /// Legacy: the number of `.md` files, kept so existing readers see the same number. Same
+    /// value as `files_total`.
     crystal_total: usize,
+    files_total: usize,
+    /// Crystals as format 2 defines them: tiered lines and `type: crystal` files.
+    tiered: format2::Tally,
+    /// Glyph-less bullets in `PALACE.md` and `CLAUDE.md` files: read, never counted.
+    legacy_lines_not_counted: usize,
+    /// `.md` files that are not crystals (other than the `CLAUDE.md` and `PALACE.md` containers).
+    documents: usize,
 }
 
 #[derive(Serialize)]
 struct RoomOut {
     name: String,
+    /// Legacy: `.md` files in the room. Same value as `files`.
     crystals: usize,
+    files: usize,
+    tiered: format2::Tally,
+}
+
+fn status_out(p: &palace::Palace) -> StatusOut {
+    let rooms = palace::list_rooms(p);
+    let reading = format2::read_palace(p);
+    let files_total = palace::count_md_files(&p.scan_root);
+    StatusOut {
+        palace: p.root.display().to_string(),
+        layout: layout_name(p),
+        rooms: rooms
+            .iter()
+            .map(|r| RoomOut {
+                name: r.name.clone(),
+                crystals: r.crystal_count,
+                files: r.crystal_count,
+                tiered: format2::Tally::of(
+                    reading
+                        .crystals
+                        .iter()
+                        .filter(|c| c.room.as_deref() == Some(r.name.as_str())),
+                ),
+            })
+            .collect(),
+        crystal_total: files_total,
+        files_total,
+        tiered: format2::Tally::of(&reading.crystals),
+        legacy_lines_not_counted: reading.notes,
+        documents: reading.documents.len(),
+    }
+}
+
+fn layout_name(p: &palace::Palace) -> &'static str {
+    match p.layout {
+        palace::Layout::PalaceSubdir => "palace-subdir",
+        palace::Layout::RoomsDir => "rooms-dir",
+        palace::Layout::RoomsAtRoot => "rooms-at-root",
+    }
+}
+
+/// `5 ◆ · 9 ◈ · 7 ◇`, then whatever is worth a flag.
+fn tally_line(t: &format2::Tally) -> String {
+    let mut s = format!(
+        "{} ◆ · {} ◈ · {} ◇",
+        t.confirmed, t.contextual, t.exploratory
+    );
+    for (n, word) in [
+        (t.superseded, "superseded"),
+        (t.unscheduled, "unscheduled"),
+        (t.retired, "retired"),
+    ] {
+        if n > 0 {
+            s.push_str(&format!(" · {n} {word}"));
+        }
+    }
+    s
+}
+
+fn plural(n: usize, one: &str, many: &str) -> String {
+    format!("{n} {}", if n == 1 { one } else { many })
+}
+
+/// One line, control characters replaced, at most `max` characters.
+fn clean_label(s: &str, max: usize) -> String {
+    let flat: String = s
+        .chars()
+        .map(|c| if c.is_control() { ' ' } else { c })
+        .collect();
+    let flat = flat.trim();
+    if flat.chars().count() <= max {
+        flat.to_string()
+    } else {
+        let cut: String = flat.chars().take(max - 1).collect();
+        format!("{}…", cut.trim_end())
+    }
 }
 
 fn cmd_status(palace_arg: Option<PathBuf>, json: bool) -> Result<(), Error> {
     let p = require_palace(palace_arg)?;
-    let rooms = palace::list_rooms(&p);
-    let crystal_total = palace::count_md_files(&p.scan_root);
-    let layout = match p.layout {
-        palace::Layout::PalaceSubdir => "palace-subdir",
-        palace::Layout::RoomsDir => "rooms-dir",
-        palace::Layout::RoomsAtRoot => "rooms-at-root",
-    };
+    let out = status_out(&p);
 
     if json {
-        let out = StatusOut {
-            palace: p.root.display().to_string(),
-            layout,
-            rooms: rooms
-                .iter()
-                .map(|r| RoomOut {
-                    name: r.name.clone(),
-                    crystals: r.crystal_count,
-                })
-                .collect(),
-            crystal_total,
-        };
         println!("{}", serde_json::to_string_pretty(&out)?);
         return Ok(());
     }
 
-    println!("palace : {}", p.root.display());
-    println!("layout : {layout}");
-    println!("rooms  : {}", rooms.len());
-    for r in &rooms {
-        println!("         {:<24} ({} crystals)", r.name, r.crystal_count);
+    println!("palace : {}", out.palace);
+    println!("layout : {}", out.layout);
+    println!("rooms  : {}", out.rooms.len());
+    for r in &out.rooms {
+        println!(
+            "         {:<24} ({}: {})",
+            r.name,
+            plural(r.tiered.live, "crystal", "crystals"),
+            tally_line(&r.tiered)
+        );
     }
-    println!("total  : {crystal_total} crystals");
+    println!(
+        "total  : {} ({})",
+        plural(out.tiered.live, "crystal", "crystals"),
+        tally_line(&out.tiered)
+    );
+    let unrooted = out.tiered.live - out.rooms.iter().map(|r| r.tiered.live).sum::<usize>();
+    if unrooted > 0 {
+        println!("         {} in no room", unrooted);
+    }
+    println!("files  : {}", plural(out.files_total, ".md file", ".md files"));
+    println!(
+        "         {}",
+        plural(out.documents, "document (not a crystal)", "documents (not crystals)")
+    );
+    if out.legacy_lines_not_counted > 0 {
+        println!(
+            "         {} not counted (bullets without a tier glyph)",
+            plural(out.legacy_lines_not_counted, "legacy line", "legacy lines")
+        );
+    }
     Ok(())
 }
 
@@ -419,12 +510,90 @@ fn cmd_status(palace_arg: Option<PathBuf>, json: bool) -> Result<(), Error> {
 struct CrystalsOut {
     palace: String,
     rooms: Vec<RoomListOut>,
+    /// Crystals outside any room: lines in the root `PALACE.md` or `CLAUDE.md`, and `garden/`.
+    unrooted: Vec<EntryOut>,
 }
 
 #[derive(Serialize)]
 struct RoomListOut {
     room: String,
+    /// Legacy: the slug of every `.md` file in the room.
     crystals: Vec<String>,
+    entries: Vec<EntryOut>,
+}
+
+/// One crystal as `loci crystals --json` shows it.
+#[derive(Serialize)]
+struct EntryOut {
+    name: Option<String>,
+    fact: String,
+    tier: format2::Tier,
+    file: String,
+    /// A file crystal's slug, for `loci read`; lines have none.
+    slug: Option<String>,
+    valid_until: Option<String>,
+    scheduled: bool,
+    occurred: Option<String>,
+    mentioned: Option<String>,
+    superseded_by: Option<String>,
+    pinned: bool,
+    pinned_until: Option<String>,
+    retired: bool,
+    retired_on: Option<String>,
+}
+
+fn entry_out(c: &format2::Crystal) -> EntryOut {
+    let slug = c
+        .file
+        .strip_suffix(".md")
+        .filter(|_| {
+            let base = c.file.rsplit('/').next().unwrap_or("");
+            base != "CLAUDE.md" && base != "PALACE.md"
+        })
+        .and_then(|f| f.rsplit('/').next())
+        .map(str::to_string);
+    EntryOut {
+        name: c.name.clone(),
+        fact: c.fact.clone(),
+        tier: c.tier,
+        file: c.file.clone(),
+        slug,
+        valid_until: c.valid_until_text().map(str::to_string),
+        scheduled: c.is_scheduled(),
+        occurred: c.occurred.clone(),
+        mentioned: c.mentioned.clone(),
+        superseded_by: c.superseded_by.clone(),
+        pinned: c.pinned,
+        pinned_until: c.pinned_until.clone(),
+        retired: c.is_retired(),
+        retired_on: c.retired_on().map(str::to_string),
+    }
+}
+
+fn entry_line(e: &EntryOut) -> String {
+    let glyph = e.tier.glyph();
+    let label = match (&e.name, &e.slug) {
+        (Some(n), _) => n.clone(),
+        (None, Some(s)) => s.clone(),
+        (None, None) => e.fact.clone(),
+    };
+    let mut line = format!("{glyph} {}", clean_label(&label, 120));
+    if e.retired {
+        line.push_str(" (retired)");
+    }
+    if let Some(by) = &e.superseded_by {
+        line.push_str(&format!(" (superseded by {})", clean_label(by, 60)));
+    }
+    if let Some(v) = &e.valid_until {
+        let kind = if e.scheduled { "until" } else { "unscheduled" };
+        line.push_str(&format!(" ({kind} {})", clean_label(v, 60)));
+    }
+    if let (Some(slug), Some(name)) = (&e.slug, &e.name) {
+        if !slug.eq_ignore_ascii_case(name) {
+            line.push_str(&format!(" [{}]", clean_label(slug, 60)));
+        }
+    }
+    line
 }
 
 fn cmd_crystals(
@@ -440,6 +609,7 @@ fn cmd_crystals(
             return Err(Error::not_found(format!("room not found: {filter}")));
         }
     }
+    let reading = format2::read_palace(&p);
 
     let mut per_room: Vec<RoomListOut> = Vec::new();
     for r in &rooms {
@@ -448,13 +618,30 @@ fn cmd_crystals(
         per_room.push(RoomListOut {
             room: r.name.clone(),
             crystals: slugs,
+            entries: reading
+                .crystals
+                .iter()
+                .filter(|c| c.room.as_deref() == Some(r.name.as_str()))
+                .map(entry_out)
+                .collect(),
         });
     }
+    let unrooted: Vec<EntryOut> = if room.is_some() {
+        Vec::new()
+    } else {
+        reading
+            .crystals
+            .iter()
+            .filter(|c| c.room.is_none())
+            .map(entry_out)
+            .collect()
+    };
 
     if json {
         let out = CrystalsOut {
             palace: p.root.display().to_string(),
             rooms: per_room,
+            unrooted,
         };
         println!("{}", serde_json::to_string_pretty(&out)?);
         return Ok(());
@@ -462,8 +649,15 @@ fn cmd_crystals(
 
     for r in &per_room {
         println!("# {}", r.room);
-        for slug in &r.crystals {
-            println!("  {slug}");
+        for e in &r.entries {
+            println!("  {}", entry_line(e));
+        }
+        println!();
+    }
+    if !unrooted.is_empty() {
+        println!("# (no room)");
+        for e in &unrooted {
+            println!("  {}", entry_line(e));
         }
         println!();
     }

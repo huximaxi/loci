@@ -1,18 +1,17 @@
 //! Reference reader for loci format 2 (`templates/format-2.md`).
 //!
-//! The spec is the contract and this file is the smallest reader that follows it. It is test-only
-//! until P4 wires crystal counting into `status` and `crystals`; the conformance tests at the
-//! bottom read the fixture workfolders under `tests/fixtures/format2/` and compare them with
-//! `expected.json`, which is written by hand from the spec and never generated from this code.
-//! The spec defines what is read; how it is shown is the harness's: `date:` and `label:` prefixes
-//! on `valid_until`, and `struck` for a retired line with no date, are encodings of this file.
+//! The spec is the contract and this file is the smallest reader that follows it. `status` and
+//! `crystals` count through it; the conformance tests at the bottom read the same fixture
+//! workfolders under `tests/fixtures/format2/` and compare them with `expected.json`, which is
+//! written by hand from the spec and never generated from this code. The spec defines what is
+//! read; how it is stored here is this file's: `date:` and `label:` prefixes on `valid_until`,
+//! and `struck` for a retired line with no date. The accessors below hide them from output.
 //!
 //! Layout detection is not repeated here: `palace::validate` already follows the spec's table.
 //!
-//! Left to P4, on purpose: `superseded_by` name resolution and the `pinned_until` last-day rule
-//! are stored here but not evaluated. P4 also points this conformance test at the production
-//! reader, and reconciles `palace::count_md_files`, which does not skip `cron` as the spec does.
-#![allow(dead_code)]
+//! Not evaluated, on purpose: `superseded_by` name resolution and the `pinned_until` last-day
+//! rule are stored, and a checker (rc.2) decides them. `palace::count_md_files`, which feeds the
+//! legacy file counts, does not skip `cron` as the spec does; the legacy keys keep that number.
 
 use crate::palace::{self, Layout};
 use serde::Serialize;
@@ -28,6 +27,14 @@ pub enum Tier {
 }
 
 impl Tier {
+    pub fn glyph(self) -> char {
+        match self {
+            Tier::Confirmed => '◆',
+            Tier::Contextual => '◈',
+            Tier::Exploratory => '◇',
+        }
+    }
+
     fn from_glyph(c: char) -> Option<Tier> {
         match c {
             '◆' => Some(Tier::Confirmed),
@@ -45,6 +52,48 @@ impl Tier {
             "◇" | "exploratory" | "provisional" => Some(Tier::Exploratory),
             _ => None,
         }
+    }
+}
+
+/// Counts over crystals. `live` is every crystal that is not retired, superseded ones included
+/// (a superseded crystal stays in place); the three tiers add up to it. `superseded`,
+/// `scheduled` and `unscheduled` count within the live ones.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize)]
+pub struct Tally {
+    pub live: usize,
+    pub confirmed: usize,
+    pub contextual: usize,
+    pub exploratory: usize,
+    pub retired: usize,
+    pub superseded: usize,
+    pub scheduled: usize,
+    pub unscheduled: usize,
+}
+
+impl Tally {
+    pub fn of<'a>(crystals: impl IntoIterator<Item = &'a Crystal>) -> Tally {
+        let mut t = Tally::default();
+        for c in crystals {
+            if c.is_retired() {
+                t.retired += 1;
+                continue;
+            }
+            t.live += 1;
+            match c.tier {
+                Tier::Confirmed => t.confirmed += 1,
+                Tier::Contextual => t.contextual += 1,
+                Tier::Exploratory => t.exploratory += 1,
+            }
+            if c.superseded_by.is_some() {
+                t.superseded += 1;
+            }
+            if c.is_scheduled() {
+                t.scheduled += 1;
+            } else if c.valid_until.is_some() {
+                t.unscheduled += 1;
+            }
+        }
+        t
     }
 }
 
@@ -71,6 +120,10 @@ pub struct Crystal {
     /// The retired date, or `struck` for a struck-through line with no `retired:` key.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub retired: Option<String>,
+    /// The room it was read in, if any (a root or `garden/` crystal has none). Not part of the
+    /// conformance oracle.
+    #[serde(skip)]
+    pub room: Option<String>,
 }
 
 impl Crystal {
@@ -87,7 +140,30 @@ impl Crystal {
             pinned: false,
             pinned_until: None,
             retired: None,
+            room: None,
         }
+    }
+
+    /// `valid_until` as the person wrote it.
+    pub fn valid_until_text(&self) -> Option<&str> {
+        let v = self.valid_until.as_deref()?;
+        v.strip_prefix("date:").or_else(|| v.strip_prefix("label:"))
+    }
+
+    /// A real date: a checker can schedule it. Anything else is an unscheduled label.
+    pub fn is_scheduled(&self) -> bool {
+        self.valid_until
+            .as_deref()
+            .is_some_and(|v| v.starts_with("date:"))
+    }
+
+    pub fn is_retired(&self) -> bool {
+        self.retired.is_some()
+    }
+
+    /// The `retired:` date, if the crystal carries one.
+    pub fn retired_on(&self) -> Option<&str> {
+        self.retired.as_deref().filter(|r| *r != "struck")
     }
 
     fn apply_key(&mut self, key: &str, val: &str) {
@@ -234,7 +310,7 @@ fn crystal_line(line: &str, file: &str) -> Option<Crystal> {
 }
 
 /// Crystal lines in a container file (`PALACE.md` or a `CLAUDE.md`). Returns the crystals and the
-/// number of glyph-less bullets (notes). Fenced blocks hold examples; an unclosed fence runs to
+/// number of glyph-less bullets shaped like a legacy crystal (`- **Name** = fact`). Fenced blocks hold examples; an unclosed fence runs to
 /// the end of the file. The key block ends at the first line that is not a key line.
 pub fn read_lines(text: &str, file: &str) -> (Vec<Crystal>, usize) {
     let mut out: Vec<Crystal> = Vec::new();
@@ -271,8 +347,12 @@ pub fn read_lines(text: &str, file: &str) -> (Vec<Crystal>, usize) {
             }
         }
         open = false;
-        if t.starts_with("- ") || t.starts_with("* ") {
-            notes += 1;
+        // Only a bullet shaped like a 1.x crystal (`- **Name** = fact`) is worth a count: it is
+        // the one a person may want to move to the glyph form. Plain instruction bullets are not.
+        if let Some(rest) = t.strip_prefix("- ").or_else(|| t.strip_prefix("* ")) {
+            if rest.trim_start().starts_with("**") {
+                notes += 1;
+            }
         }
     }
     (out, notes)
@@ -342,34 +422,79 @@ fn skipped(name: &str) -> bool {
     name.starts_with('.') || name == "node_modules" || name == "target" || name == "cron"
 }
 
+/// A container file may hold many crystal lines; a file crystal needs only its frontmatter and
+/// first paragraph. Neither is read past these caps, so a huge file cannot stall a count.
+const CONTAINER_CAP: u64 = 8 * 1024 * 1024;
+const FILE_CAP: u64 = 64 * 1024;
+
+/// Read at most `cap` bytes of a regular file as text. A leading BOM is dropped and bytes that are
+/// not UTF-8 read as U+FFFD. `None` when the path is not a regular file or cannot be opened.
+fn read_capped(path: &Path, cap: u64) -> Option<String> {
+    use std::io::Read;
+    let f = fs::File::open(path).ok()?;
+    if !f.metadata().ok()?.is_file() {
+        return None;
+    }
+    let mut buf = Vec::new();
+    f.take(cap).read_to_end(&mut buf).ok()?;
+    let text = String::from_utf8_lossy(&buf);
+    Some(text.strip_prefix('\u{feff}').unwrap_or(&text).to_string())
+}
+
+/// Regular `.md` files under `dir`. Symlinks to files and directories are followed, as room
+/// discovery and the file count do; a directory already seen (by its real path) is not entered
+/// again, so a link back up the tree is read once; a file reached by two paths counts once. FIFOs, sockets and devices are never opened.
 fn md_files(dir: &Path, out: &mut Vec<std::path::PathBuf>) {
+    let mut seen = std::collections::HashSet::new();
+    let mut found = Vec::new();
+    md_walk(dir, &mut found, &mut seen);
+    // A file reached by two paths (a link and its target) is one file: keep the first by name.
+    found.sort();
+    let mut real = std::collections::HashSet::new();
+    for f in found {
+        if real.insert(fs::canonicalize(&f).unwrap_or_else(|_| f.clone())) {
+            out.push(f);
+        }
+    }
+}
+
+fn md_walk(
+    dir: &Path,
+    out: &mut Vec<std::path::PathBuf>,
+    seen: &mut std::collections::HashSet<std::path::PathBuf>,
+) {
+    if let Ok(real) = fs::canonicalize(dir) {
+        if !seen.insert(real) {
+            return;
+        }
+    }
     let Ok(entries) = fs::read_dir(dir) else {
         return;
     };
     for e in entries.filter_map(|e| e.ok()) {
         let name = e.file_name().to_string_lossy().to_string();
         let p = e.path();
-        // Never follow a symlink: a link back up the tree would be read again and again.
-        let Ok(kind) = e.file_type() else { continue };
-        if kind.is_symlink() {
-            continue;
-        }
-        if kind.is_dir() {
+        // `metadata` follows a symlink; a dangling link has none and is skipped.
+        let Ok(meta) = fs::metadata(&p) else { continue };
+        if meta.is_dir() {
             if !skipped(&name) {
-                md_files(&p, out);
+                md_walk(&p, out, seen);
             }
-        } else if p.extension().and_then(|x| x.to_str()) == Some("md") {
+        } else if meta.is_file() && p.extension().and_then(|x| x.to_str()) == Some("md") {
             out.push(p);
         }
     }
 }
 
+/// What a workfolder holds. `layout` and `rooms` are read by the conformance tests.
+#[allow(dead_code)]
 pub struct Reading {
     pub layout: &'static str,
     pub rooms: Vec<String>,
     pub crystals: Vec<Crystal>,
     /// `.md` files that are not crystals, other than the `CLAUDE.md` and `PALACE.md` containers.
     pub documents: Vec<String>,
+    /// Glyph-less bullets shaped like a legacy crystal (`- **Name** = fact`): read as notes.
     pub notes: usize,
 }
 
@@ -384,21 +509,28 @@ fn rel(root: &Path, p: &Path) -> String {
 
 /// Read a workfolder as the spec says: crystal lines in the root `PALACE.md` and `CLAUDE.md` and
 /// in each room's `CLAUDE.md`; file crystals under the scan root and under `garden/` at the root.
+#[cfg(test)]
 pub fn read(root: &Path) -> Option<Reading> {
-    let p = palace::validate(root)?;
+    Some(read_palace(&palace::validate(root)?))
+}
+
+pub fn read_palace(p: &palace::Palace) -> Reading {
+    let root = p.root.as_path();
     let layout = match p.layout {
         Layout::PalaceSubdir => "palace-subdir",
         Layout::RoomsDir => "rooms-dir",
         Layout::RoomsAtRoot => "rooms-at-root",
     };
-    let rooms = palace::list_rooms(&p);
+    let rooms = palace::list_rooms(p);
     let mut containers = vec![root.join("PALACE.md"), root.join("CLAUDE.md")];
     containers.extend(rooms.iter().map(|r| r.path.join("CLAUDE.md")));
 
     let mut crystals = Vec::new();
     let mut notes = 0;
-    for c in containers.iter().filter(|c| c.exists()) {
-        let text = fs::read_to_string(c).unwrap_or_default();
+    for c in containers.iter() {
+        let Some(text) = read_capped(c, CONTAINER_CAP) else {
+            continue;
+        };
         let (found, n) = read_lines(&text, &rel(root, c));
         crystals.extend(found);
         notes += n;
@@ -415,20 +547,27 @@ pub fn read(root: &Path) -> Option<Reading> {
     let mut documents = Vec::new();
     for f in files {
         let name = f.file_name().unwrap().to_string_lossy().to_string();
-        let text = fs::read_to_string(&f).unwrap_or_default();
+        let text = read_capped(&f, FILE_CAP).unwrap_or_default();
         match read_file_crystal(&text, &rel(root, &f)) {
             Some(c) => crystals.push(c),
             None if name == "CLAUDE.md" || name == "PALACE.md" => {}
             None => documents.push(rel(root, &f)),
         }
     }
-    Some(Reading {
+    // A crystal belongs to the room whose directory holds its file.
+    for c in &mut crystals {
+        c.room = rooms
+            .iter()
+            .find(|r| c.file.starts_with(&format!("{}/", rel(root, &r.path))))
+            .map(|r| r.name.clone());
+    }
+    Reading {
         layout,
         rooms: rooms.into_iter().map(|r| r.name).collect(),
         crystals,
         documents,
         notes,
-    })
+    }
 }
 
 #[cfg(test)]
@@ -921,7 +1060,7 @@ mod tests {
 
     #[cfg(unix)]
     #[test]
-    fn a_symlink_is_never_followed() {
+    fn a_linked_file_is_read_once_and_a_loop_ends() {
         let root = tree("link", &["rooms/r"]);
         fs::write(
             root.join("rooms/r/c.md"),
@@ -933,5 +1072,169 @@ mod tests {
         let r = read(&root).unwrap();
         let _ = fs::remove_dir_all(&root);
         assert_eq!(r.crystals.len(), 1, "{:?}", r.crystals);
+    }
+
+    fn tally(
+        (live, c, x, e): (usize, usize, usize, usize),
+        (retired, superseded, scheduled, unscheduled): (usize, usize, usize, usize),
+    ) -> Tally {
+        Tally {
+            live,
+            confirmed: c,
+            contextual: x,
+            exploratory: e,
+            retired,
+            superseded,
+            scheduled,
+            unscheduled,
+        }
+    }
+
+    /// `status` counts tiered crystals the way the spec says. The numbers are tallied by hand from
+    /// `expected.json`: live crystals by tier, then retired, superseded, scheduled, unscheduled.
+    #[test]
+    fn status_counts_tiered_crystals_per_the_spec() {
+        let cases = [
+            ("rooms-dir", tally((21, 5, 9, 7), (3, 2, 5, 4)), 1, 2),
+            ("palace-subdir", tally((4, 1, 1, 2), (0, 0, 0, 1)), 0, 0),
+            ("rooms-at-root", tally((6, 1, 3, 2), (0, 0, 2, 0)), 0, 2),
+        ];
+        for (name, want, notes, docs) in cases {
+            let root = materialise(name, "status");
+            let p = palace::validate(&root).unwrap();
+            let out = crate::status_out(&p);
+            let files = palace::count_md_files(&p.scan_root);
+            let _ = fs::remove_dir_all(&root);
+            assert_eq!(out.tiered, want, "{name}: tiered");
+            assert_eq!(out.legacy_lines_not_counted, notes, "{name}: legacy lines");
+            assert_eq!(out.documents, docs, "{name}: documents");
+            // The old keys keep their old meaning: every `.md` file, the same number as before.
+            assert_eq!(out.crystal_total, files, "{name}: crystal_total");
+            assert_eq!(out.files_total, files, "{name}: files_total");
+            for r in &out.rooms {
+                assert_eq!(r.crystals, r.files, "{name}/{}: legacy room count", r.name);
+            }
+        }
+    }
+
+    #[test]
+    fn status_attributes_crystals_to_their_room() {
+        let root = materialise("rooms-dir", "rooms");
+        let out = crate::status_out(&palace::validate(&root).unwrap());
+        let _ = fs::remove_dir_all(&root);
+        let work = out.rooms.iter().find(|r| r.name == "work").unwrap();
+        assert_eq!(work.tiered, tally((9, 3, 4, 2), (2, 2, 3, 0)));
+        let general = out.rooms.iter().find(|r| r.name == "general").unwrap();
+        assert_eq!(general.tiered, Tally::default());
+        // The rest (root CLAUDE.md, garden/) belongs to no room but is in the total.
+        assert_eq!(out.tiered.live, 21);
+
+        let root = materialise("palace-subdir", "rooms2");
+        let out = crate::status_out(&palace::validate(&root).unwrap());
+        let _ = fs::remove_dir_all(&root);
+        let ideas = out.rooms.iter().find(|r| r.name == "ideas").unwrap();
+        assert_eq!(ideas.tiered, tally((2, 0, 0, 2), (0, 0, 0, 0)));
+    }
+
+    #[test]
+    fn a_retired_or_superseded_crystal_is_counted_apart() {
+        let (c, _) = read_lines(
+            "◆ Live: yes\n◈ Old: gone\nsuperseded_by: Live\n~~◇ Dead: bye~~\nretired: 2026-06-01\n",
+            "f.md",
+        );
+        let t = Tally::of(&c);
+        assert_eq!((t.live, t.retired, t.superseded), (2, 1, 1));
+        assert_eq!(t.confirmed + t.contextual + t.exploratory, t.live);
+    }
+
+    #[test]
+    fn output_hides_the_stored_encoding() {
+        let (c, _) = read_lines(
+            "◈ A: b\nvalid_until: 2026-12-31\n◈ C: d\nvalid_until: sprint-end\n~~◇ E: f~~\n",
+            "CLAUDE.md",
+        );
+        assert_eq!(c[0].valid_until_text(), Some("2026-12-31"));
+        assert!(c[0].is_scheduled());
+        assert_eq!(c[1].valid_until_text(), Some("sprint-end"));
+        assert!(!c[1].is_scheduled());
+        assert_eq!(c[2].retired_on(), None);
+        assert!(c[2].is_retired());
+        let line = crate::entry_line(&crate::entry_out(&c[1]));
+        assert_eq!(line, "◈ C (unscheduled sprint-end)");
+    }
+
+    #[test]
+    fn a_fifo_is_never_opened_and_a_huge_file_is_read_only_to_its_cap() {
+        let root = tree("hazards", &["rooms", "rooms/work"]);
+        fs::write(root.join("CLAUDE.md"), "# p\n").unwrap();
+        fs::write(root.join("rooms/work/CLAUDE.md"), "# w\n").unwrap();
+        let fifo = root.join("rooms/work/pipe.md");
+        let made = std::process::Command::new("mkfifo").arg(&fifo).status();
+        let have_fifo = matches!(made, Ok(s) if s.success());
+        // A crystal whose frontmatter is followed by far more than the cap.
+        let mut big = String::from("---\ntype: crystal\ntier: \"◆\"\n---\n# Big\nThe fact.\n\n");
+        big.push_str(&"x".repeat(FILE_CAP as usize * 4));
+        fs::write(root.join("rooms/work/big.md"), &big).unwrap();
+        let r = read(&root).unwrap();
+        let _ = fs::remove_dir_all(&root);
+        assert_eq!(r.crystals.len(), 1);
+        assert_eq!(r.crystals[0].fact, "The fact.");
+        if have_fifo {
+            assert!(!r.documents.iter().any(|d| d.ends_with("pipe.md")));
+        }
+    }
+
+    #[test]
+    fn a_bom_does_not_hide_a_crystal() {
+        let root = tree("bom", &["rooms", "rooms/work"]);
+        fs::write(root.join("CLAUDE.md"), "\u{feff}◆ First: yes\n").unwrap();
+        fs::write(root.join("rooms/work/CLAUDE.md"), "# w\n").unwrap();
+        fs::write(
+            root.join("rooms/work/c.md"),
+            "\u{feff}---\ntype: crystal\ntier: \"◈\"\n---\n# C\nfact\n",
+        )
+        .unwrap();
+        let r = read(&root).unwrap();
+        let _ = fs::remove_dir_all(&root);
+        assert_eq!(r.crystals.len(), 2);
+        assert!(r.documents.is_empty());
+    }
+
+    #[test]
+    fn a_symlinked_room_is_read_once_and_a_loop_ends() {
+        let root = tree("links", &["rooms"]);
+        let outside = scratch("links_outside");
+        fs::write(root.join("CLAUDE.md"), "# p\n").unwrap();
+        fs::write(outside.join("CLAUDE.md"), "◇ Linked: seen\n").unwrap();
+        std::os::unix::fs::symlink(&outside, root.join("rooms/linked")).unwrap();
+        std::os::unix::fs::symlink(&root, outside.join("back")).unwrap();
+        let r = read(&root).unwrap();
+        let _ = fs::remove_dir_all(&root);
+        let _ = fs::remove_dir_all(&outside);
+        assert_eq!(r.crystals.len(), 1);
+        assert_eq!(r.crystals[0].name.as_deref(), Some("Linked"));
+    }
+
+    #[test]
+    fn a_file_named_like_a_container_keeps_its_slug_and_labels_are_one_clean_line() {
+        let (c, _) = read_lines("◆ A: b\n", "rooms/w/MYCLAUDE.md");
+        let e = crate::entry_out(&c[0]);
+        assert_eq!(e.slug.as_deref(), Some("MYCLAUDE"));
+        let (c, _) = read_lines("◆ A: b\n", "rooms/w/CLAUDE.md");
+        assert_eq!(crate::entry_out(&c[0]).slug, None);
+
+        assert_eq!(crate::clean_label("a\u{1b}[31m\nb", 20), "a [31m b");
+        let long = "x".repeat(300);
+        assert_eq!(crate::clean_label(&long, 120).chars().count(), 120);
+        assert_eq!(crate::plural(1, "crystal", "crystals"), "1 crystal");
+        assert_eq!(crate::plural(0, "crystal", "crystals"), "0 crystals");
+    }
+
+    #[test]
+    fn only_legacy_shaped_bullets_count_as_notes() {
+        let text = "- Ask before you write\n* Keep it short\n- **Gardening** = old style\n* **Other** = too\n";
+        let (c, notes) = read_lines(text, "CLAUDE.md");
+        assert!(c.is_empty());
+        assert_eq!(notes, 2);
     }
 }

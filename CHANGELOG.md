@@ -7,6 +7,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+- `loci status` and `loci crystals` count crystals as format 2 defines them (a tiered line or a
+  `type: crystal` file), by tier, with retired, superseded and unscheduled shown apart. The `.md`
+  file count stays as its own line. Numbers on screen change for 1.x workfolders: documents are
+  no longer counted as crystals, and a count of old-style bullets (`- **Name** = fact`) that are
+  read but not counted is printed when there are any. `--json` keeps every old key with its old value (`crystal_total` and a room's
+  `crystals` are still file counts) and adds the new ones (`tiered`, `files_total`, `documents`,
+  `legacy_lines_not_counted`, and `entries` in `crystals`).
+  A human `crystals` line shows one cleaned label (control characters replaced, 120 characters at
+  most); `entries[].fact` in `--json` carries the whole fact. The reader opens regular files only
+  (a FIFO is never read), reads at most 64 KiB of a file crystal and 8 MiB of a `CLAUDE.md`,
+  ignores a leading BOM, and follows symlinks the way room discovery does, reading a file reached
+  by two paths once.
+
 ### Added
 - A format 2 conformance fixture and test: three fixture workfolders (one per layout) under
   `loci-cli/tests/fixtures/format2/`, a hand-written `expected.json`, and a reference reader that
