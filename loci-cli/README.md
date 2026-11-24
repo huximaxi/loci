@@ -7,12 +7,17 @@ $ loci status
 palace : /Users/you/palace
 layout : rooms-at-root
 rooms  : 4
-         engine-room              (18 crystals)
-         great-hall               (37 crystals)
-         observatory              (12 crystals)
-         soul                     (9 crystals)
-total  : 142 crystals
+         engine-room              (18 crystals: 6 ◆ · 8 ◈ · 4 ◇)
+         great-hall               (37 crystals: 20 ◆ · 12 ◈ · 5 ◇ · 2 retired)
+         observatory              (12 crystals: 3 ◆ · 6 ◈ · 3 ◇)
+         soul                     (9 crystals: 9 ◆)
+total  : 76 crystals (38 ◆ · 26 ◈ · 12 ◇ · 2 retired)
+files  : 142 .md files, 66 not crystals
 ```
+
+A crystal is a tiered line (`◆ Name: fact`) or a file with `type: crystal`, as
+[`templates/format-2.md`](../templates/format-2.md) defines it. Other `.md` files are documents:
+counted as files, never as crystals.
 
 ## What it is
 
@@ -56,8 +61,8 @@ Each command resolves the workfolder in this order:
 
 | Command | What it does |
 |---|---|
-| `loci status` | Palace path, layout, room and crystal counts |
-| `loci crystals` | List every crystal slug across all rooms |
+| `loci status` | Palace path, layout, and crystal counts by room and tier, with the `.md` file count beside them |
+| `loci crystals` | List every crystal across all rooms, with its tier |
 | `loci crystals --room <name>` | Restrict to one room |
 | `loci read <slug>` | Print a crystal's contents |
 | `loci read <slug> --room <name>` | Disambiguate when the same slug lives in two rooms |
@@ -71,6 +76,12 @@ Each command resolves the workfolder in this order:
 | `loci overview` | Every command, grouped, with one example each (alias `loci commands`) |
 
 Add `--json` to any read command for machine-readable output.
+
+`status --json` keeps its old keys with their old meaning: `crystal_total` and each room's
+`crystals` are still the number of `.md` files. The tiered counts are new keys beside them
+(`tiered`, per room and in total; `files_total`; `documents`; `legacy_lines_not_counted`).
+`crystals --json` keeps each room's `crystals` slug list and adds `entries`, the crystals as the
+spec reads them.
 
 ## The egress receipt
 

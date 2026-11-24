@@ -1,18 +1,17 @@
 //! Reference reader for loci format 2 (`templates/format-2.md`).
 //!
-//! The spec is the contract and this file is the smallest reader that follows it. It is test-only
-//! until P4 wires crystal counting into `status` and `crystals`; the conformance tests at the
-//! bottom read the fixture workfolders under `tests/fixtures/format2/` and compare them with
-//! `expected.json`, which is written by hand from the spec and never generated from this code.
-//! The spec defines what is read; how it is shown is the harness's: `date:` and `label:` prefixes
-//! on `valid_until`, and `struck` for a retired line with no date, are encodings of this file.
+//! The spec is the contract and this file is the smallest reader that follows it. `status` and
+//! `crystals` count through it; the conformance tests at the bottom read the same fixture
+//! workfolders under `tests/fixtures/format2/` and compare them with `expected.json`, which is
+//! written by hand from the spec and never generated from this code. The spec defines what is
+//! read; how it is stored here is this file's: `date:` and `label:` prefixes on `valid_until`,
+//! and `struck` for a retired line with no date. The accessors below hide them from output.
 //!
 //! Layout detection is not repeated here: `palace::validate` already follows the spec's table.
 //!
-//! Left to P4, on purpose: `superseded_by` name resolution and the `pinned_until` last-day rule
-//! are stored here but not evaluated. P4 also points this conformance test at the production
-//! reader, and reconciles `palace::count_md_files`, which does not skip `cron` as the spec does.
-#![allow(dead_code)]
+//! Not evaluated, on purpose: `superseded_by` name resolution and the `pinned_until` last-day
+//! rule are stored, and a checker (rc.2) decides them. `palace::count_md_files`, which feeds the
+//! legacy file counts, does not skip `cron` as the spec does; the legacy keys keep that number.
 
 use crate::palace::{self, Layout};
 use serde::Serialize;
@@ -28,6 +27,14 @@ pub enum Tier {
 }
 
 impl Tier {
+    pub fn glyph(self) -> char {
+        match self {
+            Tier::Confirmed => '◆',
+            Tier::Contextual => '◈',
+            Tier::Exploratory => '◇',
+        }
+    }
+
     fn from_glyph(c: char) -> Option<Tier> {
         match c {
             '◆' => Some(Tier::Confirmed),
@@ -45,6 +52,48 @@ impl Tier {
             "◇" | "exploratory" | "provisional" => Some(Tier::Exploratory),
             _ => None,
         }
+    }
+}
+
+/// Counts over crystals. `live` is every crystal that is not retired, superseded ones included
+/// (a superseded crystal stays in place); the three tiers add up to it. `superseded`,
+/// `scheduled` and `unscheduled` count within the live ones.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize)]
+pub struct Tally {
+    pub live: usize,
+    pub confirmed: usize,
+    pub contextual: usize,
+    pub exploratory: usize,
+    pub retired: usize,
+    pub superseded: usize,
+    pub scheduled: usize,
+    pub unscheduled: usize,
+}
+
+impl Tally {
+    pub fn of<'a>(crystals: impl IntoIterator<Item = &'a Crystal>) -> Tally {
+        let mut t = Tally::default();
+        for c in crystals {
+            if c.is_retired() {
+                t.retired += 1;
+                continue;
+            }
+            t.live += 1;
+            match c.tier {
+                Tier::Confirmed => t.confirmed += 1,
+                Tier::Contextual => t.contextual += 1,
+                Tier::Exploratory => t.exploratory += 1,
+            }
+            if c.superseded_by.is_some() {
+                t.superseded += 1;
+            }
+            if c.is_scheduled() {
+                t.scheduled += 1;
+            } else if c.valid_until.is_some() {
+                t.unscheduled += 1;
+            }
+        }
+        t
     }
 }
 
@@ -71,6 +120,10 @@ pub struct Crystal {
     /// The retired date, or `struck` for a struck-through line with no `retired:` key.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub retired: Option<String>,
+    /// The room it was read in, if any (a root or `garden/` crystal has none). Not part of the
+    /// conformance oracle.
+    #[serde(skip)]
+    pub room: Option<String>,
 }
 
 impl Crystal {
@@ -87,7 +140,30 @@ impl Crystal {
             pinned: false,
             pinned_until: None,
             retired: None,
+            room: None,
         }
+    }
+
+    /// `valid_until` as the person wrote it.
+    pub fn valid_until_text(&self) -> Option<&str> {
+        let v = self.valid_until.as_deref()?;
+        v.strip_prefix("date:").or_else(|| v.strip_prefix("label:"))
+    }
+
+    /// A real date: a checker can schedule it. Anything else is an unscheduled label.
+    pub fn is_scheduled(&self) -> bool {
+        self.valid_until
+            .as_deref()
+            .is_some_and(|v| v.starts_with("date:"))
+    }
+
+    pub fn is_retired(&self) -> bool {
+        self.retired.is_some()
+    }
+
+    /// The `retired:` date, if the crystal carries one.
+    pub fn retired_on(&self) -> Option<&str> {
+        self.retired.as_deref().filter(|r| *r != "struck")
     }
 
     fn apply_key(&mut self, key: &str, val: &str) {
@@ -364,6 +440,8 @@ fn md_files(dir: &Path, out: &mut Vec<std::path::PathBuf>) {
     }
 }
 
+/// What a workfolder holds. `layout` and `rooms` are read by the conformance tests.
+#[allow(dead_code)]
 pub struct Reading {
     pub layout: &'static str,
     pub rooms: Vec<String>,
@@ -384,14 +462,19 @@ fn rel(root: &Path, p: &Path) -> String {
 
 /// Read a workfolder as the spec says: crystal lines in the root `PALACE.md` and `CLAUDE.md` and
 /// in each room's `CLAUDE.md`; file crystals under the scan root and under `garden/` at the root.
+#[cfg(test)]
 pub fn read(root: &Path) -> Option<Reading> {
-    let p = palace::validate(root)?;
+    Some(read_palace(&palace::validate(root)?))
+}
+
+pub fn read_palace(p: &palace::Palace) -> Reading {
+    let root = p.root.as_path();
     let layout = match p.layout {
         Layout::PalaceSubdir => "palace-subdir",
         Layout::RoomsDir => "rooms-dir",
         Layout::RoomsAtRoot => "rooms-at-root",
     };
-    let rooms = palace::list_rooms(&p);
+    let rooms = palace::list_rooms(p);
     let mut containers = vec![root.join("PALACE.md"), root.join("CLAUDE.md")];
     containers.extend(rooms.iter().map(|r| r.path.join("CLAUDE.md")));
 
@@ -422,13 +505,20 @@ pub fn read(root: &Path) -> Option<Reading> {
             None => documents.push(rel(root, &f)),
         }
     }
-    Some(Reading {
+    // A crystal belongs to the room whose directory holds its file.
+    for c in &mut crystals {
+        c.room = rooms
+            .iter()
+            .find(|r| c.file.starts_with(&format!("{}/", rel(root, &r.path))))
+            .map(|r| r.name.clone());
+    }
+    Reading {
         layout,
         rooms: rooms.into_iter().map(|r| r.name).collect(),
         crystals,
         documents,
         notes,
-    })
+    }
 }
 
 #[cfg(test)]
@@ -933,5 +1023,94 @@ mod tests {
         let r = read(&root).unwrap();
         let _ = fs::remove_dir_all(&root);
         assert_eq!(r.crystals.len(), 1, "{:?}", r.crystals);
+    }
+
+    fn tally(
+        (live, c, x, e): (usize, usize, usize, usize),
+        (retired, superseded, scheduled, unscheduled): (usize, usize, usize, usize),
+    ) -> Tally {
+        Tally {
+            live,
+            confirmed: c,
+            contextual: x,
+            exploratory: e,
+            retired,
+            superseded,
+            scheduled,
+            unscheduled,
+        }
+    }
+
+    /// `status` counts tiered crystals the way the spec says. The numbers are tallied by hand from
+    /// `expected.json`: live crystals by tier, then retired, superseded, scheduled, unscheduled.
+    #[test]
+    fn status_counts_tiered_crystals_per_the_spec() {
+        let cases = [
+            ("rooms-dir", tally((21, 5, 9, 7), (3, 2, 5, 4)), 1, 2),
+            ("palace-subdir", tally((4, 1, 1, 2), (0, 0, 0, 1)), 0, 0),
+            ("rooms-at-root", tally((6, 1, 3, 2), (0, 0, 2, 0)), 0, 2),
+        ];
+        for (name, want, notes, docs) in cases {
+            let root = materialise(name, "status");
+            let p = palace::validate(&root).unwrap();
+            let out = crate::status_out(&p);
+            let files = palace::count_md_files(&p.scan_root);
+            let _ = fs::remove_dir_all(&root);
+            assert_eq!(out.tiered, want, "{name}: tiered");
+            assert_eq!(out.legacy_lines_not_counted, notes, "{name}: legacy lines");
+            assert_eq!(out.documents, docs, "{name}: documents");
+            // The old keys keep their old meaning: every `.md` file, the same number as before.
+            assert_eq!(out.crystal_total, files, "{name}: crystal_total");
+            assert_eq!(out.files_total, files, "{name}: files_total");
+            for r in &out.rooms {
+                assert_eq!(r.crystals, r.files, "{name}/{}: legacy room count", r.name);
+            }
+        }
+    }
+
+    #[test]
+    fn status_attributes_crystals_to_their_room() {
+        let root = materialise("rooms-dir", "rooms");
+        let out = crate::status_out(&palace::validate(&root).unwrap());
+        let _ = fs::remove_dir_all(&root);
+        let work = out.rooms.iter().find(|r| r.name == "work").unwrap();
+        assert_eq!(work.tiered, tally((9, 3, 4, 2), (2, 2, 3, 0)));
+        let general = out.rooms.iter().find(|r| r.name == "general").unwrap();
+        assert_eq!(general.tiered, Tally::default());
+        // The rest (root CLAUDE.md, garden/) belongs to no room but is in the total.
+        assert_eq!(out.tiered.live, 21);
+
+        let root = materialise("palace-subdir", "rooms2");
+        let out = crate::status_out(&palace::validate(&root).unwrap());
+        let _ = fs::remove_dir_all(&root);
+        let ideas = out.rooms.iter().find(|r| r.name == "ideas").unwrap();
+        assert_eq!(ideas.tiered, tally((2, 0, 0, 2), (0, 0, 0, 0)));
+    }
+
+    #[test]
+    fn a_retired_or_superseded_crystal_is_counted_apart() {
+        let (c, _) = read_lines(
+            "◆ Live: yes\n◈ Old: gone\nsuperseded_by: Live\n~~◇ Dead: bye~~\nretired: 2026-06-01\n",
+            "f.md",
+        );
+        let t = Tally::of(&c);
+        assert_eq!((t.live, t.retired, t.superseded), (2, 1, 1));
+        assert_eq!(t.confirmed + t.contextual + t.exploratory, t.live);
+    }
+
+    #[test]
+    fn output_hides_the_stored_encoding() {
+        let (c, _) = read_lines(
+            "◈ A: b\nvalid_until: 2026-12-31\n◈ C: d\nvalid_until: sprint-end\n~~◇ E: f~~\n",
+            "CLAUDE.md",
+        );
+        assert_eq!(c[0].valid_until_text(), Some("2026-12-31"));
+        assert!(c[0].is_scheduled());
+        assert_eq!(c[1].valid_until_text(), Some("sprint-end"));
+        assert!(!c[1].is_scheduled());
+        assert_eq!(c[2].retired_on(), None);
+        assert!(c[2].is_retired());
+        let line = crate::entry_line(&crate::entry_out(&c[1]));
+        assert_eq!(line, "◈ C (unscheduled sprint-end)");
     }
 }
