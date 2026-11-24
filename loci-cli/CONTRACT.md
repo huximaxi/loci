@@ -11,13 +11,16 @@ covers their shape only from the release that drops the mark.
 
 ## Resolving the workfolder
 
-Commands that read a workfolder find it in this order: `--palace <path>`, `$LOCI_PALACE`, then a
-walk up from the current directory. A directory counts as a workfolder when it holds `PALACE.md` or
-`CLAUDE.md` **and** at least one room (a subdirectory with its own `CLAUDE.md`, directly or under
+Commands that read a workfolder find it in this order: `--workfolder <path>` (alias `--palace`),
+`$LOCI_WORKFOLDER`, `$LOCI_PALACE`, then a walk up from the current directory. The first of the two
+variables that is set and non-empty is used; `$LOCI_WORKFOLDER` wins when both are set, and nothing is
+printed about the other. A directory counts as a workfolder when it holds `WORKFOLDER.md`,
+`PALACE.md` or `CLAUDE.md` (all three are read the same way) **and** at least one room (a subdirectory with its own `CLAUDE.md`, directly or under
 `rooms/` or `_palace/`). The walk keeps climbing past a directory that fails this, and stops at the
-first one that passes. A path given by `--palace` or `$LOCI_PALACE` that is not a workfolder is exit 2
-at once, with no fallback to the walk. None found is exit 2. (`--palace` and `$LOCI_PALACE` keep these
-names; the workfolder spellings arrive as aliases and the old names stay.)
+first one that passes. A path given by the flag or by a variable that is not a workfolder is exit 2
+at once (the message names the variable), with no fallback to the walk or to the other variable. None
+found is exit 2. The workfolder spellings are canonical. The old ones (`--palace`, `$LOCI_PALACE`,
+`PALACE.md`) are readable until 3.0 at least and print no warning.
 
 ## Exit codes
 
@@ -47,7 +50,7 @@ workfolder.)
 
 | Flag | Meaning |
 |---|---|
-| `--palace <path>` | Workfolder path. Overrides `$LOCI_PALACE` and the walk up. |
+| `--workfolder <path>` (alias `--palace`) | Workfolder path. Overrides `$LOCI_WORKFOLDER`, `$LOCI_PALACE` and the walk up. |
 | `--json` | Machine-readable output, one document on stdout. Accepted by every command; `init` ignores it (interactive). |
 | `--help`, `-h` | Help, exit 0. |
 | `--version`, `-V` | `loci <version>`, exit 0. |
@@ -139,6 +142,9 @@ Every command, grouped, with one example each. Alias: `loci commands`. Works wit
 ## What the tests hold
 
 - Every command and subcommand in the CLI has a row in the README table and a section above.
+- `--workfolder` and `--palace`, `$LOCI_WORKFOLDER` and `$LOCI_PALACE`, read the same and print no
+  warning; the new variable wins when both are set; a bad variable names itself; a `WORKFOLDER.md`
+  marker reads like the other two.
 - Every command that takes `--json` produces one parseable document with exactly the keys above,
   run against the format 2 fixture workfolder with an empty home directory.
 - The exit code of each usage error, each not-found and each bad-input case above, and that errors
