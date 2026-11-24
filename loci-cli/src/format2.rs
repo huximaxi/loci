@@ -4,8 +4,14 @@
 //! until P4 wires crystal counting into `status` and `crystals`; the conformance tests at the
 //! bottom read the fixture workfolders under `tests/fixtures/format2/` and compare them with
 //! `expected.json`, which is written by hand from the spec and never generated from this code.
+//! The spec defines what is read; how it is shown is the harness's: `date:` and `label:` prefixes
+//! on `valid_until`, and `struck` for a retired line with no date, are encodings of this file.
 //!
 //! Layout detection is not repeated here: `palace::validate` already follows the spec's table.
+//!
+//! Left to P4, on purpose: `superseded_by` name resolution and the `pinned_until` last-day rule
+//! are stored here but not evaluated. P4 also points this conformance test at the production
+//! reader, and reconciles `palace::count_md_files`, which does not skip `cron` as the spec does.
 #![allow(dead_code)]
 
 use crate::palace::{self, Layout};
@@ -182,6 +188,7 @@ fn key_line(line: &str) -> Option<(&str, &str)> {
 /// line struck through (`~~...~~`) is a retired crystal. The legacy suffixes ` - valid_until: X`
 /// and ` · pinned` are removed before the name is split, so a nameless fact keeps its colons.
 fn crystal_line(line: &str, file: &str) -> Option<Crystal> {
+    let line = line.trim_end();
     let (struck, body) = if line.len() > 4 && line.starts_with("~~") && line.ends_with("~~") {
         (true, &line[2..line.len() - 2])
     } else {
@@ -191,14 +198,22 @@ fn crystal_line(line: &str, file: &str) -> Option<Crystal> {
     let tier = Tier::from_glyph(chars.next()?)?;
     let mut rest = chars.as_str().strip_prefix(' ')?.trim_end().to_string();
     let mut pinned = false;
-    if let Some(r) = rest.strip_suffix(" · pinned") {
-        pinned = true;
-        rest = r.to_string();
-    }
     let mut legacy_valid = None;
-    if let Some(ix) = rest.rfind(" - valid_until: ") {
-        legacy_valid = Some(rest[ix + " - valid_until: ".len()..].trim().to_string());
-        rest.truncate(ix);
+    // Either suffix may come last, so strip until neither is left.
+    loop {
+        if let Some(r) = rest.strip_suffix(" · pinned") {
+            pinned = true;
+            rest = r.trim_end().to_string();
+        } else if let Some(ix) = rest.rfind(" - valid_until: ") {
+            let value = rest[ix + " - valid_until: ".len()..].trim();
+            if value.contains(" · pinned") || legacy_valid.is_some() {
+                break;
+            }
+            legacy_valid = Some(value.to_string());
+            rest.truncate(ix);
+        } else {
+            break;
+        }
     }
     let (name, fact) = match rest.find(": ") {
         Some(ix) => (
@@ -334,7 +349,12 @@ fn md_files(dir: &Path, out: &mut Vec<std::path::PathBuf>) {
     for e in entries.filter_map(|e| e.ok()) {
         let name = e.file_name().to_string_lossy().to_string();
         let p = e.path();
-        if p.is_dir() {
+        // Never follow a symlink: a link back up the tree would be read again and again.
+        let Ok(kind) = e.file_type() else { continue };
+        if kind.is_symlink() {
+            continue;
+        }
+        if kind.is_dir() {
             if !skipped(&name) {
                 md_files(&p, out);
             }
@@ -469,6 +489,10 @@ mod tests {
         let Some(got) = read(root) else {
             return vec!["not detected as a workfolder".to_string()];
         };
+        compare(&got, want)
+    }
+
+    fn compare(got: &Reading, want: &Value) -> Vec<String> {
         let mut problems = Vec::new();
         if want["layout"] != json!(got.layout) {
             problems.push(format!(
@@ -497,11 +521,18 @@ mod tests {
                 .map(|c| serde_json::to_value(c).unwrap())
                 .collect(),
         );
-        for w in want_c.iter().filter(|w| !got_c.contains(w)) {
-            problems.push(format!("missing crystal: {w}"));
+        // Multiset: a crystal read twice is a difference, not a match.
+        let mut left = got_c.clone();
+        for w in &want_c {
+            match left.iter().position(|g| g == w) {
+                Some(i) => {
+                    left.remove(i);
+                }
+                None => problems.push(format!("missing crystal: {w}")),
+            }
         }
-        for g in got_c.iter().filter(|g| !want_c.contains(g)) {
-            problems.push(format!("unexpected crystal: {g}"));
+        for g in &left {
+            problems.push(format!("unexpected or repeated crystal: {g}"));
         }
         problems
     }
@@ -621,12 +652,25 @@ mod tests {
                 "breaking {fixture}/{file} ({from:?} -> {to:?}) went unnoticed"
             );
         }
-        // A layout change is noticed too.
+        // A layout change is noticed too: the same rooms under `_palace/` read as another layout.
         let root = materialise("rooms-dir", "layout");
-        fs::rename(root.join("rooms"), root.join("roomz")).unwrap();
+        fs::rename(root.join("rooms"), root.join("_palace")).unwrap();
         let problems = diff(&root, &want["rooms-dir"]);
         let _ = fs::remove_dir_all(&root);
-        assert!(!problems.is_empty(), "renaming rooms/ went unnoticed");
+        assert!(
+            problems.iter().any(|p| p.starts_with("layout: want")),
+            "a changed layout went unnoticed: {problems:?}"
+        );
+        // A crystal read twice is noticed.
+        let root = materialise("rooms-at-root", "twice");
+        let mut doubled = read(&root).unwrap();
+        let _ = fs::remove_dir_all(&root);
+        let again = doubled.crystals[0].clone();
+        doubled.crystals.push(again);
+        assert!(
+            !compare(&doubled, &want["rooms-at-root"]).is_empty(),
+            "a crystal read twice went unnoticed"
+        );
     }
 
     /// The fixtures must keep exercising every rule the spec states, so a tidy-up cannot quietly
@@ -726,8 +770,17 @@ mod tests {
 
     #[test]
     fn skipped_directories_are_not_scanned() {
-        let root = tree("skip", &["rooms/r", "rooms/node_modules", "rooms/target"]);
-        for d in ["node_modules", "target"] {
+        let root = tree(
+            "skip",
+            &[
+                "rooms/r",
+                "rooms/node_modules",
+                "rooms/target",
+                "rooms/cron",
+                "rooms/.old",
+            ],
+        );
+        for d in ["node_modules", "target", "cron", ".old"] {
             fs::write(
                 root.join("rooms").join(d).join("x.md"),
                 "---\ntype: crystal\n---\n# Hidden\n\nnever read\n",
@@ -792,5 +845,93 @@ mod tests {
         );
         assert_eq!(c.len(), 1);
         assert_eq!(c[0].name.as_deref(), Some("Before"));
+    }
+
+    #[test]
+    fn a_name_ends_at_the_first_colon_and_a_suffix_at_the_last_marker() {
+        let c = crystal_line("◆ Ratio: 3: 1 at the gate", "f.md").unwrap();
+        assert_eq!(c.name.as_deref(), Some("Ratio"));
+        assert_eq!(c.fact, "3: 1 at the gate");
+        let c = crystal_line(
+            "◈ Note: write \" - valid_until: x\" later - valid_until: 2026-12-31",
+            "f.md",
+        )
+        .unwrap();
+        assert_eq!(c.fact, "write \" - valid_until: x\" later");
+        assert_eq!(c.valid_until.as_deref(), Some("date:2026-12-31"));
+    }
+
+    #[test]
+    fn both_legacy_suffixes_read_in_either_order() {
+        for line in [
+            "◆ Keep: fact · pinned - valid_until: 2026-12-31",
+            "◆ Keep: fact - valid_until: 2026-12-31 · pinned",
+        ] {
+            let c = crystal_line(line, "f.md").unwrap();
+            assert!(c.pinned, "{line}");
+            assert_eq!(c.fact, "fact", "{line}");
+            assert_eq!(c.valid_until.as_deref(), Some("date:2026-12-31"), "{line}");
+        }
+    }
+
+    #[test]
+    fn a_struck_line_is_retired_even_with_trailing_space() {
+        let c = crystal_line("~~◈ Old: rhythm~~  ", "f.md").unwrap();
+        assert_eq!(c.retired.as_deref(), Some("struck"));
+        assert!(crystal_line("~~◈ Half: struck", "f.md").is_none());
+    }
+
+    #[test]
+    fn keys_are_read_only_as_the_spec_says() {
+        let (c, _) = read_lines(
+            "◆ A: b\n  valid_until: 2026-12-31\n◆ C: d\noccurred: 2026-02-30\nmentioned: soon\n\
+             pinned_until: later\nretired: someday\npinned: false\n◆ E: f\npinned: True\n",
+            "f.md",
+        );
+        assert_eq!(c[0].valid_until, None, "an indented line is not a key");
+        assert_eq!(c[1].occurred, None);
+        assert_eq!(c[1].mentioned, None);
+        assert_eq!(c[1].pinned_until, None);
+        assert_eq!(c[1].retired, None);
+        assert!(!c[1].pinned, "pinned is exactly true");
+        assert!(!c[2].pinned, "True is not true");
+    }
+
+    #[test]
+    fn a_fence_closes_only_on_its_own_marker() {
+        let (c, _) = read_lines(
+            "```\n~~~\n◆ In: no\n```\n◆ Out: yes\n~~~\n```\n◆ Still in: no\n~~~\n◆ Out2: yes\n",
+            "f.md",
+        );
+        let names: Vec<_> = c.iter().filter_map(|c| c.name.as_deref()).collect();
+        assert_eq!(names, ["Out", "Out2"]);
+    }
+
+    #[test]
+    fn frontmatter_keys_and_type_match_in_any_case() {
+        let c = read_file_crystal(
+            "---\nType: Crystal\nTier: Working\nValid_Until: 2026-12-31\nPinned: true\n---\n# N\n\nfact\n",
+            "n.md",
+        )
+        .unwrap();
+        assert_eq!(c.tier as u8, Tier::Contextual as u8);
+        assert_eq!(c.valid_until.as_deref(), Some("date:2026-12-31"));
+        assert!(c.pinned);
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn a_symlink_is_never_followed() {
+        let root = tree("link", &["rooms/r"]);
+        fs::write(
+            root.join("rooms/r/c.md"),
+            "---\ntype: crystal\ntier: \"◆\"\n---\n# One\n\nonly once\n",
+        )
+        .unwrap();
+        std::os::unix::fs::symlink(".", root.join("rooms/r/loop")).unwrap();
+        std::os::unix::fs::symlink("c.md", root.join("rooms/r/alias.md")).unwrap();
+        let r = read(&root).unwrap();
+        let _ = fs::remove_dir_all(&root);
+        assert_eq!(r.crystals.len(), 1, "{:?}", r.crystals);
     }
 }

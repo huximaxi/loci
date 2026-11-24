@@ -16,7 +16,7 @@ valid_until: sprint-end
 valid_until: 2026-Q3
 ◇ Guess: users skip the settings page
 valid_until: 2026-02-30
-◈ Casey: a capitalised key below is not a key line
+◈ Capital: a capitalised key below is not a key line
 Valid_until: 2026-12-31
 pinned: true
 ◈ Kept: unknown and reserved keys are ignored
