@@ -48,9 +48,9 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Cmd {
-    /// Print palace path, layout, room and crystal counts.
+    /// Print palace path, layout, rooms, and crystal counts by tier.
     Status,
-    /// List crystals (`.md` files inside rooms).
+    /// List crystals: tier, name and keys, read as format 2 says.
     Crystals {
         /// Only list crystals inside this room.
         #[arg(long)]
@@ -444,6 +444,25 @@ fn tally_line(t: &format2::Tally) -> String {
     s
 }
 
+fn plural(n: usize, one: &str, many: &str) -> String {
+    format!("{n} {}", if n == 1 { one } else { many })
+}
+
+/// One line, control characters replaced, at most `max` characters.
+fn clean_label(s: &str, max: usize) -> String {
+    let flat: String = s
+        .chars()
+        .map(|c| if c.is_control() { ' ' } else { c })
+        .collect();
+    let flat = flat.trim();
+    if flat.chars().count() <= max {
+        flat.to_string()
+    } else {
+        let cut: String = flat.chars().take(max - 1).collect();
+        format!("{}…", cut.trim_end())
+    }
+}
+
 fn cmd_status(palace_arg: Option<PathBuf>, json: bool) -> Result<(), Error> {
     let p = require_palace(palace_arg)?;
     let out = status_out(&p);
@@ -458,25 +477,30 @@ fn cmd_status(palace_arg: Option<PathBuf>, json: bool) -> Result<(), Error> {
     println!("rooms  : {}", out.rooms.len());
     for r in &out.rooms {
         println!(
-            "         {:<24} ({} crystals: {})",
+            "         {:<24} ({}: {})",
             r.name,
-            r.tiered.live,
+            plural(r.tiered.live, "crystal", "crystals"),
             tally_line(&r.tiered)
         );
     }
     println!(
-        "total  : {} crystals ({})",
-        out.tiered.live,
+        "total  : {} ({})",
+        plural(out.tiered.live, "crystal", "crystals"),
         tally_line(&out.tiered)
     );
+    let unrooted = out.tiered.live - out.rooms.iter().map(|r| r.tiered.live).sum::<usize>();
+    if unrooted > 0 {
+        println!("         {} in no room", unrooted);
+    }
+    println!("files  : {}", plural(out.files_total, ".md file", ".md files"));
     println!(
-        "files  : {} .md files, {} not crystals",
-        out.files_total, out.documents
+        "         {}",
+        plural(out.documents, "document (not a crystal)", "documents (not crystals)")
     );
     if out.legacy_lines_not_counted > 0 {
         println!(
-            "         {} legacy lines not counted (bullets without a tier glyph)",
-            out.legacy_lines_not_counted
+            "         {} not counted (bullets without a tier glyph)",
+            plural(out.legacy_lines_not_counted, "legacy line", "legacy lines")
         );
     }
     Ok(())
@@ -522,7 +546,10 @@ fn entry_out(c: &format2::Crystal) -> EntryOut {
     let slug = c
         .file
         .strip_suffix(".md")
-        .filter(|_| !c.file.ends_with("CLAUDE.md") && !c.file.ends_with("PALACE.md"))
+        .filter(|_| {
+            let base = c.file.rsplit('/').next().unwrap_or("");
+            base != "CLAUDE.md" && base != "PALACE.md"
+        })
         .and_then(|f| f.rsplit('/').next())
         .map(str::to_string);
     EntryOut {
@@ -550,20 +577,20 @@ fn entry_line(e: &EntryOut) -> String {
         (None, Some(s)) => s.clone(),
         (None, None) => e.fact.clone(),
     };
-    let mut line = format!("{glyph} {label}");
+    let mut line = format!("{glyph} {}", clean_label(&label, 120));
     if e.retired {
         line.push_str(" (retired)");
     }
     if let Some(by) = &e.superseded_by {
-        line.push_str(&format!(" (superseded by {by})"));
+        line.push_str(&format!(" (superseded by {})", clean_label(by, 60)));
     }
     if let Some(v) = &e.valid_until {
         let kind = if e.scheduled { "until" } else { "unscheduled" };
-        line.push_str(&format!(" ({kind} {v})"));
+        line.push_str(&format!(" ({kind} {})", clean_label(v, 60)));
     }
     if let (Some(slug), Some(name)) = (&e.slug, &e.name) {
         if !slug.eq_ignore_ascii_case(name) {
-            line.push_str(&format!(" [{slug}]"));
+            line.push_str(&format!(" [{}]", clean_label(slug, 60)));
         }
     }
     line

@@ -310,7 +310,7 @@ fn crystal_line(line: &str, file: &str) -> Option<Crystal> {
 }
 
 /// Crystal lines in a container file (`PALACE.md` or a `CLAUDE.md`). Returns the crystals and the
-/// number of glyph-less bullets (notes). Fenced blocks hold examples; an unclosed fence runs to
+/// number of glyph-less bullets shaped like a legacy crystal (`- **Name** = fact`). Fenced blocks hold examples; an unclosed fence runs to
 /// the end of the file. The key block ends at the first line that is not a key line.
 pub fn read_lines(text: &str, file: &str) -> (Vec<Crystal>, usize) {
     let mut out: Vec<Crystal> = Vec::new();
@@ -347,8 +347,12 @@ pub fn read_lines(text: &str, file: &str) -> (Vec<Crystal>, usize) {
             }
         }
         open = false;
-        if t.starts_with("- ") || t.starts_with("* ") {
-            notes += 1;
+        // Only a bullet shaped like a 1.x crystal (`- **Name** = fact`) is worth a count: it is
+        // the one a person may want to move to the glyph form. Plain instruction bullets are not.
+        if let Some(rest) = t.strip_prefix("- ").or_else(|| t.strip_prefix("* ")) {
+            if rest.trim_start().starts_with("**") {
+                notes += 1;
+            }
         }
     }
     (out, notes)
@@ -418,23 +422,65 @@ fn skipped(name: &str) -> bool {
     name.starts_with('.') || name == "node_modules" || name == "target" || name == "cron"
 }
 
+/// A container file may hold many crystal lines; a file crystal needs only its frontmatter and
+/// first paragraph. Neither is read past these caps, so a huge file cannot stall a count.
+const CONTAINER_CAP: u64 = 8 * 1024 * 1024;
+const FILE_CAP: u64 = 64 * 1024;
+
+/// Read at most `cap` bytes of a regular file as text. A leading BOM is dropped and bytes that are
+/// not UTF-8 read as U+FFFD. `None` when the path is not a regular file or cannot be opened.
+fn read_capped(path: &Path, cap: u64) -> Option<String> {
+    use std::io::Read;
+    let f = fs::File::open(path).ok()?;
+    if !f.metadata().ok()?.is_file() {
+        return None;
+    }
+    let mut buf = Vec::new();
+    f.take(cap).read_to_end(&mut buf).ok()?;
+    let text = String::from_utf8_lossy(&buf);
+    Some(text.strip_prefix('\u{feff}').unwrap_or(&text).to_string())
+}
+
+/// Regular `.md` files under `dir`. Symlinks to files and directories are followed, as room
+/// discovery and the file count do; a directory already seen (by its real path) is not entered
+/// again, so a link back up the tree is read once; a file reached by two paths counts once. FIFOs, sockets and devices are never opened.
 fn md_files(dir: &Path, out: &mut Vec<std::path::PathBuf>) {
+    let mut seen = std::collections::HashSet::new();
+    let mut found = Vec::new();
+    md_walk(dir, &mut found, &mut seen);
+    // A file reached by two paths (a link and its target) is one file: keep the first by name.
+    found.sort();
+    let mut real = std::collections::HashSet::new();
+    for f in found {
+        if real.insert(fs::canonicalize(&f).unwrap_or_else(|_| f.clone())) {
+            out.push(f);
+        }
+    }
+}
+
+fn md_walk(
+    dir: &Path,
+    out: &mut Vec<std::path::PathBuf>,
+    seen: &mut std::collections::HashSet<std::path::PathBuf>,
+) {
+    if let Ok(real) = fs::canonicalize(dir) {
+        if !seen.insert(real) {
+            return;
+        }
+    }
     let Ok(entries) = fs::read_dir(dir) else {
         return;
     };
     for e in entries.filter_map(|e| e.ok()) {
         let name = e.file_name().to_string_lossy().to_string();
         let p = e.path();
-        // Never follow a symlink: a link back up the tree would be read again and again.
-        let Ok(kind) = e.file_type() else { continue };
-        if kind.is_symlink() {
-            continue;
-        }
-        if kind.is_dir() {
+        // `metadata` follows a symlink; a dangling link has none and is skipped.
+        let Ok(meta) = fs::metadata(&p) else { continue };
+        if meta.is_dir() {
             if !skipped(&name) {
-                md_files(&p, out);
+                md_walk(&p, out, seen);
             }
-        } else if p.extension().and_then(|x| x.to_str()) == Some("md") {
+        } else if meta.is_file() && p.extension().and_then(|x| x.to_str()) == Some("md") {
             out.push(p);
         }
     }
@@ -448,6 +494,7 @@ pub struct Reading {
     pub crystals: Vec<Crystal>,
     /// `.md` files that are not crystals, other than the `CLAUDE.md` and `PALACE.md` containers.
     pub documents: Vec<String>,
+    /// Glyph-less bullets shaped like a legacy crystal (`- **Name** = fact`): read as notes.
     pub notes: usize,
 }
 
@@ -480,8 +527,10 @@ pub fn read_palace(p: &palace::Palace) -> Reading {
 
     let mut crystals = Vec::new();
     let mut notes = 0;
-    for c in containers.iter().filter(|c| c.exists()) {
-        let text = fs::read_to_string(c).unwrap_or_default();
+    for c in containers.iter() {
+        let Some(text) = read_capped(c, CONTAINER_CAP) else {
+            continue;
+        };
         let (found, n) = read_lines(&text, &rel(root, c));
         crystals.extend(found);
         notes += n;
@@ -498,7 +547,7 @@ pub fn read_palace(p: &palace::Palace) -> Reading {
     let mut documents = Vec::new();
     for f in files {
         let name = f.file_name().unwrap().to_string_lossy().to_string();
-        let text = fs::read_to_string(&f).unwrap_or_default();
+        let text = read_capped(&f, FILE_CAP).unwrap_or_default();
         match read_file_crystal(&text, &rel(root, &f)) {
             Some(c) => crystals.push(c),
             None if name == "CLAUDE.md" || name == "PALACE.md" => {}
@@ -1011,7 +1060,7 @@ mod tests {
 
     #[cfg(unix)]
     #[test]
-    fn a_symlink_is_never_followed() {
+    fn a_linked_file_is_read_once_and_a_loop_ends() {
         let root = tree("link", &["rooms/r"]);
         fs::write(
             root.join("rooms/r/c.md"),
@@ -1112,5 +1161,80 @@ mod tests {
         assert!(c[2].is_retired());
         let line = crate::entry_line(&crate::entry_out(&c[1]));
         assert_eq!(line, "◈ C (unscheduled sprint-end)");
+    }
+
+    #[test]
+    fn a_fifo_is_never_opened_and_a_huge_file_is_read_only_to_its_cap() {
+        let root = tree("hazards", &["rooms", "rooms/work"]);
+        fs::write(root.join("CLAUDE.md"), "# p\n").unwrap();
+        fs::write(root.join("rooms/work/CLAUDE.md"), "# w\n").unwrap();
+        let fifo = root.join("rooms/work/pipe.md");
+        let made = std::process::Command::new("mkfifo").arg(&fifo).status();
+        let have_fifo = matches!(made, Ok(s) if s.success());
+        // A crystal whose frontmatter is followed by far more than the cap.
+        let mut big = String::from("---\ntype: crystal\ntier: \"◆\"\n---\n# Big\nThe fact.\n\n");
+        big.push_str(&"x".repeat(FILE_CAP as usize * 4));
+        fs::write(root.join("rooms/work/big.md"), &big).unwrap();
+        let r = read(&root).unwrap();
+        let _ = fs::remove_dir_all(&root);
+        assert_eq!(r.crystals.len(), 1);
+        assert_eq!(r.crystals[0].fact, "The fact.");
+        if have_fifo {
+            assert!(!r.documents.iter().any(|d| d.ends_with("pipe.md")));
+        }
+    }
+
+    #[test]
+    fn a_bom_does_not_hide_a_crystal() {
+        let root = tree("bom", &["rooms", "rooms/work"]);
+        fs::write(root.join("CLAUDE.md"), "\u{feff}◆ First: yes\n").unwrap();
+        fs::write(root.join("rooms/work/CLAUDE.md"), "# w\n").unwrap();
+        fs::write(
+            root.join("rooms/work/c.md"),
+            "\u{feff}---\ntype: crystal\ntier: \"◈\"\n---\n# C\nfact\n",
+        )
+        .unwrap();
+        let r = read(&root).unwrap();
+        let _ = fs::remove_dir_all(&root);
+        assert_eq!(r.crystals.len(), 2);
+        assert!(r.documents.is_empty());
+    }
+
+    #[test]
+    fn a_symlinked_room_is_read_once_and_a_loop_ends() {
+        let root = tree("links", &["rooms"]);
+        let outside = scratch("links_outside");
+        fs::write(root.join("CLAUDE.md"), "# p\n").unwrap();
+        fs::write(outside.join("CLAUDE.md"), "◇ Linked: seen\n").unwrap();
+        std::os::unix::fs::symlink(&outside, root.join("rooms/linked")).unwrap();
+        std::os::unix::fs::symlink(&root, outside.join("back")).unwrap();
+        let r = read(&root).unwrap();
+        let _ = fs::remove_dir_all(&root);
+        let _ = fs::remove_dir_all(&outside);
+        assert_eq!(r.crystals.len(), 1);
+        assert_eq!(r.crystals[0].name.as_deref(), Some("Linked"));
+    }
+
+    #[test]
+    fn a_file_named_like_a_container_keeps_its_slug_and_labels_are_one_clean_line() {
+        let (c, _) = read_lines("◆ A: b\n", "rooms/w/MYCLAUDE.md");
+        let e = crate::entry_out(&c[0]);
+        assert_eq!(e.slug.as_deref(), Some("MYCLAUDE"));
+        let (c, _) = read_lines("◆ A: b\n", "rooms/w/CLAUDE.md");
+        assert_eq!(crate::entry_out(&c[0]).slug, None);
+
+        assert_eq!(crate::clean_label("a\u{1b}[31m\nb", 20), "a [31m b");
+        let long = "x".repeat(300);
+        assert_eq!(crate::clean_label(&long, 120).chars().count(), 120);
+        assert_eq!(crate::plural(1, "crystal", "crystals"), "1 crystal");
+        assert_eq!(crate::plural(0, "crystal", "crystals"), "0 crystals");
+    }
+
+    #[test]
+    fn only_legacy_shaped_bullets_count_as_notes() {
+        let text = "- Ask before you write\n* Keep it short\n- **Gardening** = old style\n* **Other** = too\n";
+        let (c, notes) = read_lines(text, "CLAUDE.md");
+        assert!(c.is_empty());
+        assert_eq!(notes, 2);
     }
 }
