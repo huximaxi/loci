@@ -61,7 +61,7 @@ relationship: [colleague / collaborator / peer / mentor / other]
 *If this friend also uses Loci, note their AI's name and any key context about their workfolder.*
 
 AI name: [their AI's name, or unknown]
-Workfolder location: [path or URL, or unknown]
+Palace location: [path or URL, or unknown]
 Last synced: [DATE or unknown]
 
 ---

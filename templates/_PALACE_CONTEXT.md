@@ -1,6 +1,6 @@
 ---
 type: palace-context
-workfolder: [YOUR_PALACE_NAME]
+palace: [YOUR_PALACE_NAME]
 version: 0.1
 updated: [DATE]
 ---

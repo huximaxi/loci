@@ -28,6 +28,7 @@ Takes about 60 seconds. Do it before you show the delta.
 - "Update my workfolder"
 - "What's new in loci"
 - "Check if my workfolder is up to date"
+- "Update my palace" and "Check if my palace is up to date" (older phrasing, still honoured)
 - "What am I missing"
 - `palace-update`
 

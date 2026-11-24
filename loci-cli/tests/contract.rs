@@ -421,7 +421,8 @@ fn workfolder_md_marks_a_workfolder_and_reads_like_the_other_two() {
 }
 
 /// 2.0 speaks "workfolder". The old word survives only as a legacy spelling (`--palace`,
-/// `LOCI_PALACE`, `PALACE.md`), so no help text, overview or error may use it as prose.
+/// `LOCI_PALACE`, `PALACE.md`) and in kept names (the `palace-maintenance` skill, the
+/// `palace-subdir` layout value), so no help text, overview or error may use it as prose.
 #[test]
 fn user_facing_text_says_workfolder_not_palace() {
     let w = World::new("words");
@@ -430,6 +431,8 @@ fn user_facing_text_says_workfolder_not_palace() {
             .replace("--palace", "")
             .replace("LOCI_PALACE", "")
             .replace("PALACE.md", "")
+            .replace("palace-maintenance", "")
+            .replace("palace-subdir", "")
             .to_lowercase()
     };
     let mut seen: Vec<(String, String)> = Vec::new();
@@ -454,6 +457,26 @@ fn user_facing_text_says_workfolder_not_palace() {
     seen.push(("overview, none".into(), scrub(&w.run(&["overview"]).stdout)));
     seen.push(("status".into(), scrub(&w.with_palace(&["status"]).stdout)));
     seen.push(("reads".into(), scrub(&w.with_palace(&["reads"]).stdout)));
+    for args in [
+        vec!["crystals"],
+        vec!["read", "decision"],
+        vec!["rain"],
+        vec!["handover"],
+    ] {
+        let o = w.with_palace(&args);
+        seen.push((format!("{args:?}"), scrub(&o.stdout)));
+    }
+    for args in [
+        vec!["read", "no-such-slug"],
+        vec!["crystals", "--room", "no-such-room"],
+    ] {
+        let o = w.with_palace(&args);
+        seen.push((format!("{args:?} stderr"), scrub(&o.stderr)));
+        // An error leaves stdout empty, so only its stderr is checked for words.
+    }
+    let fresh = w.cwd.join("words-fresh");
+    let o = w.run(&["new", fresh.to_str().unwrap()]);
+    seen.push(("new".into(), scrub(&o.stdout)));
     seen.push(("no workfolder".into(), scrub(&w.run(&["status"]).stderr)));
     seen.push((
         "bad variable".into(),

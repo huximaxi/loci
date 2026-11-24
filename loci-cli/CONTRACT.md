@@ -4,6 +4,10 @@ What a script may rely on. This page and the tests beside it (`tests/contract.rs
 `contract_tests` module in `src/main.rs`) are the contract; the README teaches, this page promises.
 If the two disagree, this page wins and the README is the bug.
 
+`palace` is the frozen `--json` key for the workfolder path; the key keeps its 1.x name, as do
+`palace_reads` and `palace_writes`. Human-readable output is for people and is not part of the
+freeze: its labels and wording may change in any release, and so may the free-text `note` values.
+
 From 2.0 the commands, flags, exit codes and `--json` keys below are frozen until 3.0. A release may
 **add** a command, a flag, an optional argument or a `--json` key. It may not remove or rename one,
 or change what one means. Experimental commands (`audit`, `wal verify`) are marked, and the freeze
@@ -64,14 +68,14 @@ release. The tests compare the key sets exactly, so adding one is a change to th
 ### `loci status`
 
 Layout, rooms and crystal counts by tier. Exit 2: no workfolder.
-`--json` keys: `workfolder`, `layout`, `rooms`, `crystal_total`, `files_total`, `tiered`, `documents`,
+`--json` keys: `palace`, `layout`, `rooms`, `crystal_total`, `files_total`, `tiered`, `documents`,
 `legacy_lines_not_counted`. `crystal_total` and each room's `crystals` are `.md` file counts (their
 1.x meaning); `tiered` is the format 2 count.
 
 ### `loci crystals`
 
 List crystals. Argument: `--room <name>`. Exit 2: no workfolder, no such room.
-`--json` keys: `workfolder`, `rooms`, `unrooted`. Each room has `room`, `crystals` (slugs) and `entries`.
+`--json` keys: `palace`, `rooms`, `unrooted`. Each room has `room`, `crystals` (slugs) and `entries`.
 
 ### `loci read`
 
@@ -110,7 +114,7 @@ Exit 2: no workfolder. Exit 3: `--fire` (removed in 2.0).
 Scaffold a starter workfolder. Arguments: `<path>`, `--force`. Writes files; exit 3 when the target is
 not empty, or already looks like a workfolder, and `--force` is absent. On a terminal it then offers
 `init`.
-`--json` keys: `workfolder`, `created`.
+`--json` keys: `palace`, `created`.
 
 ### `loci init`
 
@@ -137,7 +141,7 @@ stderr. Exit 1: unreadable or malformed bundle (nothing on stdout).
 ### `loci overview`
 
 Every command, grouped, with one example each. Alias: `loci commands`. Works with no workfolder.
-`--json` keys: `tool`, `version`, `workfolder`, `groups`, `doors`.
+`--json` keys: `tool`, `version`, `palace`, `groups`, `doors`.
 
 ## What the tests hold
 

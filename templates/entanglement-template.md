@@ -2,7 +2,7 @@
 created: [DATE]
 version: 0.1
 type: entanglement-log
-workfolder: [YOUR_PALACE_NAME]
+palace: [YOUR_PALACE_NAME]
 ---
 
 # Entanglement Log

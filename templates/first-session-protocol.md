@@ -130,7 +130,7 @@ MOMENT 1. Ask: "What should I call you?"
     # [Name]'s Workfolder
     > Palace holder: [Name]
     > Named: [today's date]
-    > Workfolder location: [the absolute path of this folder]
+    > Palace location: [the absolute path of this folder]
     > Companion: (to be named)
   Write CLAUDE.md with exactly: "Read PALACE.md first. Then soul/SOUL.md if it exists. Then the newest
   file in soul/handovers/. Then the room file for the room we are in."
