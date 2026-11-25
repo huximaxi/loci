@@ -107,7 +107,7 @@ Nothing legacy is rewritten for you. You can move a line to the current form whe
 
 Readers ignore keys and `type` values they do not know.
 
-Reserved: `type: shard`, `address`, `signed_by`.
+Reserved: `type: shard`, `address`, `signed_by`, `author`, `promoted_from`.
 
 Reserved means these names are held for a later format. A writer does not use them for anything else today. A reader that meets one ignores it, as it would any unknown key.
 

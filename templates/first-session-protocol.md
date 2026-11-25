@@ -143,7 +143,6 @@ MOMENT 2. Ask: "What are you in the middle of right now?"
     type: crystal
     tier: "◈"
     created: [date]
-    author: [Name]
     ---
     # [four to six words from the more specific answer]
     [the specific answer]
@@ -174,7 +173,6 @@ YOUR OWN CRYSTAL. Write garden/[chosen-name]-origin.md:
     type: crystal
     tier: "◈"
     created: [date]
-    author: [chosen name]
     role: greeter
     valid_until: growing
     ---
