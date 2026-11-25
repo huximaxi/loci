@@ -21,6 +21,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   `plants/` or `.rain/` and the older one does.
 
 ### Changed
+- A new exit code, `4`: "ran, found problems". It is for commands that read your files and report findings
+  (`loci check`, coming in this release). `1` stays "could not run", `2` not found, `3` bad input, so
+  a script that treats any non-zero as failure is unaffected. No command returns `4` yet; the code
+  and its row in `CONTRACT.md` land first.
 - One version line. The CLI, the templates kit and the methodology are all 2.0: the CLI goes from
   0.7.0-beta to `2.0.0-rc.1`, the methodology anchor from 1.6-candidate to 2.0-candidate (`stable`
   stays 1.2; the field is still `loci-core version`), and `package.json` follows the line. The

@@ -176,21 +176,39 @@ fn main() -> ExitCode {
             return ExitCode::from(code);
         }
     };
-    match run(cli) {
-        Ok(()) => ExitCode::SUCCESS,
-        Err(e) => {
-            eprintln!("loci: {e}");
-            match e.kind() {
-                ErrKind::NotFound => ExitCode::from(2),
-                ErrKind::BadInput => ExitCode::from(3),
-                ErrKind::Io => ExitCode::from(1),
-            }
-        }
+    let result = run(cli);
+    if let Err(e) = &result {
+        eprintln!("loci: {e}");
+    }
+    ExitCode::from(exit_code(&result))
+}
+
+/// What a command that ran to the end reports. `Findings` means it ran and found
+/// problems in the files it read (exit 4, nothing on stderr: the findings are its
+/// output). It is not an error: 1 stays "could not run".
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum Outcome {
+    Clean,
+    /// No command returns this yet; `loci check` is the first. The code and its tests land first.
+    #[allow(dead_code)]
+    Findings,
+}
+
+/// The one place a result becomes a process exit code (CONTRACT.md, "Exit codes").
+fn exit_code(result: &Result<Outcome, Error>) -> u8 {
+    match result {
+        Ok(Outcome::Clean) => 0,
+        Ok(Outcome::Findings) => 4,
+        Err(e) => match e.kind() {
+            ErrKind::NotFound => 2,
+            ErrKind::BadInput => 3,
+            ErrKind::Io => 1,
+        },
     }
 }
 
-fn run(cli: Cli) -> Result<(), Error> {
-    match cli.cmd {
+fn run(cli: Cli) -> Result<Outcome, Error> {
+    let done: Result<(), Error> = match cli.cmd {
         Cmd::Status => cmd_status(cli.palace, cli.json),
         Cmd::Crystals { room } => cmd_crystals(cli.palace, room, cli.json),
         Cmd::Read { slug, room } => cmd_read(cli.palace, &slug, room.as_deref(), cli.json),
@@ -224,7 +242,8 @@ fn run(cli: Cli) -> Result<(), Error> {
             }
         },
         Cmd::Overview => cmd_overview(cli.palace, cli.json),
-    }
+    };
+    done.map(|()| Outcome::Clean)
 }
 
 // ── overview ─────────────────────────────────────────────────────────────
@@ -1660,6 +1679,17 @@ mod rain_tests {
         std::fs::create_dir_all(root.join("garden")).unwrap();
         assert_eq!(rain_garden(&p).plants, 1, "an empty garden/ at the root must not win");
         let _ = std::fs::remove_dir_all(&root);
+    }
+
+    /// Every outcome maps to its documented exit code, and only an error is an error:
+    /// "ran, found problems" is 4, apart from 1 (could not run), 2 (not found), 3 (bad input).
+    #[test]
+    fn every_outcome_has_its_own_exit_code() {
+        assert_eq!(exit_code(&Ok(Outcome::Clean)), 0);
+        assert_eq!(exit_code(&Ok(Outcome::Findings)), 4);
+        assert_eq!(exit_code(&Err(Error::io("x".into()))), 1);
+        assert_eq!(exit_code(&Err(Error::not_found("x".into()))), 2);
+        assert_eq!(exit_code(&Err(Error::bad_input("x".into()))), 3);
     }
 
     /// `--fire` is gone: it must say so (bad input, exit 3), even with no workfolder
