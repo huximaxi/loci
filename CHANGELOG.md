@@ -11,7 +11,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `loci recall <query>` (experimental): ask your files a question with no model and no network. BM25
   over a workfolder or any folder of notes, each hit a `path:line` with its crystal state (current,
   due, superseded, retired, or not a crystal). Reads one root, follows no symlink, skips hidden
-  directories, and counts every file it could not read. The JSON is not frozen until the mark is
+  directories, and counts the `.md` files it could not read (too large, not UTF-8, unreadable). The JSON is not frozen until the mark is
   dropped.
 
 ### Fixed

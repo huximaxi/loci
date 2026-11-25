@@ -11,7 +11,7 @@
 //! next to its parts. No stemming, no stopwords, no diacritic folding, no script segmentation.
 //! Any change to that rule bumps the id, so a result can be reproduced elsewhere.
 //!
-//! Nothing a folder holds may crash the command or vanish quietly: every file that was not read
+//! Nothing a folder holds may crash the command or vanish quietly: every `.md` file that was not read
 //! is counted in `scope`, and those counts never change the exit code.
 
 use crate::format2::{self, Crystal};
@@ -33,6 +33,9 @@ const B: f64 = 0.75;
 const MAX_FILE_BYTES: u64 = 1024 * 1024;
 /// The walk stops after this many `.md` files, in walk order, and says so.
 const MAX_FILES: usize = 20_000;
+/// The walk stops after this many chunks, so a folder of one-character paragraphs cannot
+/// exhaust memory, and says so.
+const MAX_CHUNKS: usize = 500_000;
 /// A paragraph chunk never spans more than this many lines.
 const MAX_CHUNK_LINES: usize = 40;
 /// Frontmatter keys passed through on a hit, and the length each value is cut to.
@@ -285,9 +288,11 @@ fn root_tag(path: &Path) -> String {
         .unwrap_or_else(|| "root".to_string())
 }
 
-/// Read what a root holds. In a palace the crystals come from the reference reader; in a plain
-/// folder the same two rules apply: `type: crystal` files anywhere, and crystal lines in a root
-/// marker file.
+/// Read what a root holds. One walk reads everything, so nothing outside the root is ever
+/// opened and no symlink is followed. A crystal is a crystal line in a container file (a root
+/// marker, and in a workfolder each room's `CLAUDE.md`) or a `type: crystal` file; in a workfolder
+/// a file crystal counts only under the folder the layout scans (and `garden/`), as the reference
+/// reader does. The reference reader itself is not used here because it follows symlinks.
 fn build_corpus(root: &Root, qtokens: &[String]) -> Corpus {
     let mut scope = Scope {
         roots: vec![RootOut {
@@ -309,17 +314,15 @@ fn build_corpus(root: &Root, qtokens: &[String]) -> Corpus {
     // Palace crystals, grouped by the file that holds them. Room membership comes with them.
     let mut crystals: Vec<Crystal> = Vec::new();
     let mut room_dirs: Vec<(String, String)> = Vec::new(); // (relative dir with trailing /, name)
+    let mut scan_prefix = String::new(); // "" when the whole root is scanned
     if let Some(p) = &root.palace {
-        let reading = format2::read_palace(p);
-        scope.legacy_lines_not_counted = reading.notes;
-        crystals = reading.crystals;
         for r in palace::list_rooms(p) {
             room_dirs.push((format!("{}/", rel_path(&p.root, &r.path)), r.name));
         }
-    }
-    let mut by_file: HashMap<String, Vec<usize>> = HashMap::new();
-    for (ix, c) in crystals.iter().enumerate() {
-        by_file.entry(c.file.clone()).or_default().push(ix);
+        let s = rel_path(&p.root, &p.scan_root);
+        if !s.is_empty() {
+            scan_prefix = format!("{s}/");
+        }
     }
 
     let mut files: Vec<FileMeta> = Vec::new();
@@ -329,13 +332,20 @@ fn build_corpus(root: &Root, qtokens: &[String]) -> Corpus {
     let mut stack: Vec<PathBuf> = vec![root.path.clone()];
     'walk: while let Some(dir) = stack.pop() {
         let Ok(rd) = fs::read_dir(&dir) else {
-            if dir != root.path {
-                scope.not_read.unreadable += 1;
-                scope.not_read.total += 1;
-            }
+            scope.not_read.unreadable += 1;
+            scope.not_read.total += 1;
             continue;
         };
-        let mut entries: Vec<_> = rd.filter_map(|e| e.ok()).collect();
+        let mut entries: Vec<_> = Vec::new();
+        for e in rd {
+            match e {
+                Ok(e) => entries.push(e),
+                Err(_) => {
+                    scope.not_read.unreadable += 1;
+                    scope.not_read.total += 1;
+                }
+            }
+        }
         entries.sort_by_key(|e| e.file_name());
         // Files in this directory are read now; subdirectories are pushed so the walk visits
         // them in name order after it.
@@ -344,6 +354,8 @@ fn build_corpus(root: &Root, qtokens: &[String]) -> Corpus {
             let name = e.file_name().to_string_lossy().to_string();
             let path = e.path();
             let Ok(meta) = fs::symlink_metadata(&path) else {
+                scope.not_read.unreadable += 1;
+                scope.not_read.total += 1;
                 continue;
             };
             if meta.file_type().is_symlink() {
@@ -361,7 +373,7 @@ fn build_corpus(root: &Root, qtokens: &[String]) -> Corpus {
             if !meta.is_file() || path.extension().and_then(|x| x.to_str()) != Some("md") {
                 continue;
             }
-            if seen_md >= MAX_FILES {
+            if seen_md >= MAX_FILES || chunks.len() >= MAX_CHUNKS {
                 scope.truncated = true;
                 break 'walk;
             }
@@ -391,32 +403,42 @@ fn build_corpus(root: &Root, qtokens: &[String]) -> Corpus {
             scope.files_read += 1;
             let rel = rel_path(&root.path, &path);
 
-            // The crystals this file holds.
-            let mut mine: Vec<usize> = Vec::new();
-            if root.palace.is_some() {
-                if let Some(ixs) = by_file.get(&rel) {
-                    mine.extend(ixs.iter().copied());
-                }
-            } else {
-                let mut found: Vec<Crystal> = Vec::new();
-                if !rel.contains('/') && palace::is_marker(&name) {
-                    let (c, n) = format2::read_lines(text, &rel);
-                    found.extend(c);
-                    scope.legacy_lines_not_counted += n;
-                }
-                if let Some(c) = format2::read_file_crystal(text, &rel) {
-                    found.push(c);
-                }
-                for c in found {
-                    mine.push(crystals.len());
-                    crystals.push(c);
-                }
-            }
-
+            // The room whose directory holds this file.
             let room = room_dirs
                 .iter()
                 .find(|(prefix, _)| rel.starts_with(prefix.as_str()))
                 .map(|(_, n)| n.clone());
+
+            // The crystals this file holds.
+            let container = if root.palace.is_some() {
+                (!rel.contains('/') && palace::is_marker(&name))
+                    || room_dirs
+                        .iter()
+                        .any(|(prefix, _)| rel == format!("{prefix}CLAUDE.md"))
+            } else {
+                !rel.contains('/') && palace::is_marker(&name)
+            };
+            let scanned = root.palace.is_none()
+                || rel.starts_with(&scan_prefix)
+                || rel.starts_with("garden/");
+            let mut found: Vec<Crystal> = Vec::new();
+            if container {
+                let (c, n) = format2::read_lines(text, &rel);
+                found.extend(c);
+                scope.legacy_lines_not_counted += n;
+            }
+            if scanned {
+                if let Some(c) = format2::read_file_crystal(text, &rel) {
+                    found.push(c);
+                }
+            }
+            let mut mine: Vec<usize> = Vec::new();
+            for mut c in found {
+                c.room = room.clone();
+                mine.push(crystals.len());
+                crystals.push(c);
+            }
+
             let file_ix = files.len();
             let (fm, malformed) = chunk_file(text, file_ix, &mine, &crystals, qtokens, &mut chunks);
             if malformed {
@@ -455,6 +477,34 @@ fn counted(text: &str, qtokens: &[String]) -> (u32, Vec<u32>) {
     (toks.len() as u32, tf)
 }
 
+/// A leading `---` opens frontmatter only when the next line is a `key:` line (or the fence
+/// closes at once). A horizontal rule above prose is not frontmatter, so its text stays searchable.
+fn opens_like_frontmatter(lines: &[&str]) -> bool {
+    match lines.get(1) {
+        None => false,
+        Some(l) if l.trim_end() == "---" => true,
+        Some(l) => {
+            let Some(ix) = l.find(':') else { return false };
+            let key = &l[..ix];
+            !key.is_empty()
+                && !key.starts_with(char::is_whitespace)
+                && key
+                    .chars()
+                    .all(|c| c.is_alphanumeric() || c == '_' || c == '-' || c == ' ')
+        }
+    }
+}
+
+/// The line of a paragraph to show: the first one that holds a query word, else the first.
+fn shown_line<'a>(lines: &[&'a str], qtokens: &[String]) -> &'a str {
+    lines
+        .iter()
+        .find(|l| tokenize(l).iter().any(|t| qtokens.contains(t)))
+        .or_else(|| lines.first())
+        .map(|l| l.trim())
+        .unwrap_or("")
+}
+
 /// Chunk one file. Returns its frontmatter pass-through and whether the frontmatter was
 /// malformed (an opening fence that never closes: the file is then read as plain text).
 fn chunk_file(
@@ -469,7 +519,7 @@ fn chunk_file(
     let mut fm: BTreeMap<String, String> = BTreeMap::new();
     let mut fm_end = 0usize; // 1-based line of the closing fence; 0 when there is none
     let mut malformed = false;
-    if lines.first().is_some_and(|l| l.trim_end() == "---") {
+    if lines.first().is_some_and(|l| l.trim_end() == "---") && opens_like_frontmatter(&lines) {
         match lines
             .iter()
             .skip(1)
@@ -490,21 +540,39 @@ fn chunk_file(
 
     if fm_end > 0 {
         let mut texts: Vec<String> = Vec::new();
+        // Whether the last top-level key holds searchable text, so its indented lines and its
+        // `- item` list lines (an Obsidian tag list) are text too.
+        let mut in_text_key = false;
         for raw in &lines[1..fm_end - 1] {
-            if raw.starts_with(char::is_whitespace) {
-                continue; // top-level keys only
+            if raw.starts_with(char::is_whitespace) || raw.trim_start().starts_with("- ") {
+                if in_text_key {
+                    let item = raw.trim().trim_start_matches("- ").trim();
+                    let item = item.trim_matches(|c| c == '"' || c == '\'');
+                    if !item.is_empty() {
+                        texts.push(item.to_string());
+                    }
+                }
+                continue; // top-level keys only below
             }
+            in_text_key = false;
             let Some(ix) = raw.find(':') else { continue };
             let key = raw[..ix].trim().to_lowercase();
             let val = raw[ix + 1..]
                 .trim()
                 .trim_matches(|c| c == '"' || c == '\'')
                 .to_string();
-            if key.is_empty() || val.is_empty() {
+            if key.is_empty() {
                 continue;
             }
             if FM_TEXT_KEYS.contains(&key.as_str()) {
-                texts.push(val.clone());
+                in_text_key = true;
+                // A block scalar (`>` or `|`) has its text on the lines below.
+                if !val.is_empty() && !val.starts_with(['>', '|']) {
+                    texts.push(val.clone());
+                }
+            }
+            if val.is_empty() || val.starts_with(['>', '|']) {
+                continue;
             }
             if fm.len() < MAX_FM_KEYS {
                 fm.entry(key)
@@ -561,6 +629,7 @@ fn chunk_file(
     let flush = |from: usize, to: usize, chunks: &mut Vec<Chunk>| {
         let body = lines[from - 1..to].join(" ");
         let first = lines[from - 1].trim();
+        let shown = shown_line(&lines[from - 1..to], qtokens);
         let note = first
             .strip_prefix("- ")
             .or_else(|| first.strip_prefix("* "))
@@ -578,7 +647,7 @@ fn chunk_file(
                 Kind::Document
             },
             crystal: file_crystal,
-            snippet: first.chars().take(160).collect(),
+            snippet: shown.chars().take(160).collect(),
             len,
             tf,
         });
@@ -936,7 +1005,23 @@ fn scope_line(s: &Scope) -> String {
     line
 }
 
+/// A folder's text may hold terminal control sequences; they must not reach the terminal.
+fn plain(s: &str) -> String {
+    s.chars()
+        .map(|c| if c.is_control() { ' ' } else { c })
+        .collect()
+}
+
 fn print_text(out: &RecallOut) {
+    // Every line below goes through `plain`, so no folder text reaches the terminal raw.
+    macro_rules! println {
+        () => {
+            std::println!()
+        };
+        ($($a:tt)*) => {
+            std::println!("{}", plain(&format!($($a)*)))
+        };
+    }
     println!(
         "recall: {} of {} matching chunks (tokenizer {}, scoring {}, as of {})",
         out.results.len(),
