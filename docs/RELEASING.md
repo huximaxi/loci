@@ -241,7 +241,11 @@ push is rejected or the PR conflicts.
 
 When a change is a release (not every merge is), tag it from the merge commit:
 
-- Annotated tag, minimum. Signed tag once a maintainer key is published.
+- Signed, annotated tag. The maintainer's public signing key is in
+  `docs/allowed_signers`. Verify a tag from a clone with
+  `git -c gpg.ssh.allowedSignersFile=docs/allowed_signers verify-tag <tag>`.
+  The file lives in the repo it vouches for, so check the key's fingerprint
+  against a second source before trusting a tag you depend on.
 - Tag from the merged commit on `main`, named for the version it carries.
 - Methodology, kit and CLI are tagged on one version line (`vX.Y.Z`, `-rc.N` before it). `loci-wal`
   keeps its own semver while `audit` is experimental.
