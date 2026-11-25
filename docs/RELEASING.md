@@ -242,10 +242,12 @@ push is rejected or the PR conflicts.
 When a change is a release (not every merge is), tag it from the merge commit:
 
 - Signed, annotated tag. The maintainer's public signing key is in
-  `docs/allowed_signers`. Verify a tag from a clone with
+  `docs/allowed_signers` on `main` (it is not in the commit of an older tag, so
+  read it from `main`). From the root of a clone of `main`, verify a tag with
   `git -c gpg.ssh.allowedSignersFile=docs/allowed_signers verify-tag <tag>`.
-  The file lives in the repo it vouches for, so check the key's fingerprint
-  against a second source before trusting a tag you depend on.
+  The key's fingerprint is `SHA256:cZGTgft1auBk1lLjPJMC6VirNrsuSSGS93DbxPk9KtI`.
+  The file lives in the repo it vouches for, so check that fingerprint against
+  a second source before trusting a tag you depend on.
 - Tag from the merged commit on `main`, named for the version it carries.
 - Methodology, kit and CLI are tagged on one version line (`vX.Y.Z`, `-rc.N` before it). `loci-wal`
   keeps its own semver while `audit` is experimental.
@@ -255,9 +257,9 @@ When a change is a release (not every merge is), tag it from the merge commit:
 
 ### Release artifacts
 
-Once the maintainer key is published, any file attached to a release (a binary,
-an archive) ships with a signed `SHA256SUMS`. Until then a release says it is
-unsigned. `scripts/release-sums.sh` writes and checks the sums; offline, no
+Any file attached to a release (a binary, an archive) ships with a signed
+`SHA256SUMS`, signed with the maintainer key in `docs/allowed_signers`.
+`scripts/release-sums.sh` writes and checks the sums; offline, no
 network.
 
 ```bash
@@ -270,7 +272,8 @@ scripts/release-sums.sh verify ./downloads docs/allowed_signers
 
 - The signature uses `ssh-keygen -Y sign` in the namespace `loci-release`. The
   public half lives in `docs/allowed_signers` under the principal
-  `loci-maintainer`; verification needs nothing else.
+  `loci-maintainer` (the same key is also listed under the maintainer's GitHub
+  noreply address); verification needs nothing else.
 - An artifact is a regular, non-hidden file directly inside the folder. Hidden
   files (`.DS_Store`) are skipped on both sides. A subfolder, or a name with a
   backslash or newline, is refused, so nothing ships outside the sums by accident.
@@ -288,8 +291,6 @@ scripts/release-sums.sh verify ./downloads docs/allowed_signers
 - `scripts/release-sums.sh selftest` builds a throwaway key and proves each failure
   above, including the signature check on its own (a consistently rewritten sums
   file with the old signature). Run it after any edit to the script.
-- Publishing the public key (adding `docs/allowed_signers`) is a maintainer
-  decision, the same one as the signed tag above.
 - Third-party actions in `.github/workflows/` are pinned to a full commit SHA
   with the version in a trailing comment; the trufflehog image is pinned by
   digest. The pins also freeze the scanners' rules: bump them on purpose, in

@@ -75,8 +75,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   signature must cover the sums, the sums must name exactly the artifacts in the folder, and
   every hash must match. Hidden files are skipped; subfolders and unsafe names are refused.
   `selftest` proves each failure, including the signature alone. The procedure is in
-  `docs/RELEASING.md` ("Release artifacts"). The public key is not published yet, so releases
-  stay unsigned until `docs/allowed_signers` lands.
+  `docs/RELEASING.md` ("Release artifacts"). The public key is published in
+  `docs/allowed_signers`.
 - `loci reads [--days N]`: does the agent read the palace at all? Counts, from local Claude Code
   transcripts, the turns a person typed that were followed by at least one read of a palace
   file before the next one. Harness entries (task notifications, reminders, interrupt markers,
