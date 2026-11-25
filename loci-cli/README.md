@@ -119,6 +119,7 @@ crate docs for the exact guarantees.
 | `1` | I/O or unexpected error |
 | `2` | Workfolder or crystal not found (nothing else) |
 | `3` | Bad input: a usage error (unknown flag or command, missing argument), an ambiguous slug |
+| `4` | Ran, found problems: the command read your files and its findings are its output (not an error) |
 
 Errors go to stderr and leave stdout empty, with or without `--json`. The full contract, with each
 command's flags and `--json` keys, is [`CONTRACT.md`](CONTRACT.md); tests hold it.

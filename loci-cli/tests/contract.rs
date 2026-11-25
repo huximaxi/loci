@@ -570,9 +570,13 @@ fn the_contract_names_every_exit_code() {
         .and_then(|t| t.split("\n## ").next())
         .expect("an Exit codes section");
     for c in 0..=4 {
-        assert!(
-            table.lines().any(|l| l.starts_with(&format!("| `{c}` |"))),
-            "CONTRACT.md Exit codes has no row for {c}"
-        );
+        let row = table
+            .lines()
+            .find(|l| l.starts_with(&format!("| `{c}` |")))
+            .unwrap_or_else(|| panic!("CONTRACT.md Exit codes has no row for {c}"));
+        assert!(row.len() > 20, "the row for {c} says nothing: {row}");
+        if c == 4 {
+            assert!(row.contains("found problems"), "row 4 must say what 4 means");
+        }
     }
 }
