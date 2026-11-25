@@ -74,7 +74,7 @@ Two ways, and the door is the first. The workfolder is the same underneath both.
 | Run mode | What it is |
 |---|---|
 | **Plain markdown** | The door. Clone `templates/`, point any file-aware AI at `PALACE.md`. No build. |
-| **CLI** | [`loci-cli/`](loci-cli/) (v2.0.0-rc.1, optional). A small Rust binary that reads your workfolder from the terminal: `loci status`, `loci crystals`, `loci read`, `loci handover`, `loci tokens`, `loci rain`, `loci init`. Mostly reads (`new` and `init` write); it never starts an agent. No network. No inference. See [loci-cli/README.md](loci-cli/README.md). |
+| **CLI** | [`loci-cli/`](loci-cli/) (v2.0.0-rc.1, optional). A small Rust binary that reads your workfolder from the terminal: `loci status`, `loci crystals`, `loci read`, `loci handover`, `loci tokens`, `loci rain`, `loci recall` (experimental), `loci init`. Mostly reads (`new` and `init` write); it never starts an agent. No network. No inference. See [loci-cli/README.md](loci-cli/README.md). |
 
 One version line: the CLI, the templates kit and the methodology are all 2.0 (this release is `2.0.0-rc.1`; `loci --version` also prints the format it reads, loci format 2). The methodology version and full changelog: [PALACE-METHODOLOGY.md](PALACE-METHODOLOGY.md).
 

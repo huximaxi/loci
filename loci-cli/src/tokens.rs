@@ -371,7 +371,7 @@ fn days_from_civil(y: i64, m: i64, d: i64) -> i64 {
     era * 146097 + doe - 719468
 }
 
-fn epoch_to_iso(t: u64) -> String {
+pub(crate) fn epoch_to_iso(t: u64) -> String {
     // Inverse civil conversion, UTC.
     let days = (t / 86400) as i64;
     let rem = t % 86400;

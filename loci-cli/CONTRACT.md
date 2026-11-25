@@ -10,7 +10,7 @@ freeze: its labels and wording may change in any release, and so may the free-te
 
 From 2.0 the commands, flags, exit codes and `--json` keys below are frozen until 3.0. A release may
 **add** a command, a flag, an optional argument or a `--json` key. It may not remove or rename one,
-or change what one means. Experimental commands (`audit`, `wal verify`) are marked, and the freeze
+or change what one means. Experimental commands (`audit`, `wal verify`, `recall`) are marked, and the freeze
 covers their shape only from the release that drops the mark.
 
 ## Resolving the workfolder
@@ -108,6 +108,26 @@ Exit 2: no workfolder. Exit 3: `--days` is not a non-negative integer (so `-1`, 
 Garden watering weather. It starts nothing: the person starts the round in their own agent.
 Exit 2: no workfolder. Exit 3: `--fire` (removed in 2.0).
 `--json` keys: `window`, `garden`, `start_phrase`.
+
+### `loci recall`
+
+**Experimental.** Ask the files a question, with no model and no network: BM25 over the text of the
+workfolder or any folder of notes, ranked, each hit a `path:line` with its crystal state. Argument: the
+query. Flags: `--root <dir>` (any folder, read as plain notes unless it is a workfolder), `--limit <n>`
+(1 to 100, default 10), `--room <name>`, `--as-of <YYYY-MM-DD>` (default today, UTC). The root is
+`--root`, then `--workfolder`, then `$LOCI_WORKFOLDER` or `$LOCI_PALACE` (the first one set wins, as
+everywhere else; a set variable naming no directory is exit 2 with no fallback to the walk), then a
+walk up from the current directory for a workfolder. A plain folder is never found by walking.
+Exit 2: no root, an unknown `--room`. Exit 3: a query with no words, a `--as-of` that is not a real
+date, a `--limit` out of range. A query that matches nothing is exit 0 and says what it searched.
+Never reads outside the root, follows no symlink (counted), skips hidden directories, `node_modules`,
+`target` and `cron`, and counts every file it did not read.
+Hit states: `current`, `due` (a real `valid_until` date on or before `--as-of`), `superseded`,
+`retired`, `none` (not a crystal). Order: state group, then score (two decimals), then recency, then
+path and line. Tokenizer `unicode-alnum-v1`: no stemming, no stopwords, no accent folding.
+`--json` keys: `query`, `query_tokens`, `unmatched_tokens`, `tokenizer`, `scoring`, `as_of`,
+`matching_chunks`, `scope`, `results`. The keys inside `scope` and `results` are not frozen until the
+mark is dropped.
 
 ### `loci new`
 

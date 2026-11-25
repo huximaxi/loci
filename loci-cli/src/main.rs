@@ -17,6 +17,7 @@ use std::process::ExitCode;
 mod format2;
 mod palace;
 mod reads;
+mod recall;
 mod scaffold;
 mod tokens;
 
@@ -68,6 +69,28 @@ enum Cmd {
     },
     /// Print the most recent handover (by mtime).
     Handover,
+    /// Ask the workfolder a question, no model (experimental): BM25 over every markdown file, results marked current, due, superseded or retired.
+    ///
+    /// Reads one root: `--root PATH` (any folder of markdown), else `--workfolder`,
+    /// `$LOCI_WORKFOLDER`, `$LOCI_PALACE`, or the workfolder you are inside. Nothing is
+    /// indexed on disk, nothing leaves the machine, and the same files and arguments give the
+    /// same output. Words are matched whole: no stemming, no accent folding.
+    Recall {
+        /// What to look for, in your own words.
+        query: String,
+        /// Read this folder, even if it is not a workfolder.
+        #[arg(long, value_name = "PATH")]
+        root: Option<PathBuf>,
+        /// How many results to print (1-100).
+        #[arg(long, default_value_t = 10, value_parser = clap::value_parser!(u32).range(1..=100))]
+        limit: u32,
+        /// Only results inside this room.
+        #[arg(long)]
+        room: Option<String>,
+        /// Treat this day (YYYY-MM-DD) as today when deciding what is due.
+        #[arg(long, value_name = "DATE")]
+        as_of: Option<String>,
+    },
     /// Approximate agent-runtime session-window status (5h rolling) from local transcripts.
     Tokens,
     /// How often the agent reads the workfolder: user turns followed by a workfolder read, from local Claude Code transcripts (counts only).
@@ -173,6 +196,23 @@ fn run(cli: Cli) -> Result<(), Error> {
         Cmd::Read { slug, room } => cmd_read(cli.palace, &slug, room.as_deref(), cli.json),
         Cmd::Handover => cmd_handover(cli.palace, cli.json),
         Cmd::Tokens => cmd_tokens(cli.json),
+        Cmd::Recall {
+            query,
+            root,
+            limit,
+            room,
+            as_of,
+        } => recall::run(
+            recall::Args {
+                query,
+                root,
+                workfolder: cli.palace,
+                limit: limit as usize,
+                room,
+                as_of,
+            },
+            cli.json,
+        ),
         Cmd::Reads { days } => cmd_reads(cli.palace, days, cli.json),
         Cmd::Rain { fire } => cmd_rain(cli.palace, fire, cli.json),
         Cmd::New { path, force } => cmd_new(&path, force, cli.json),
@@ -202,6 +242,7 @@ const OVERVIEW_GROUPS: &[(&str, &[(&str, &str)])] = &[
             ("crystals", "loci crystals --room soul"),
             ("read", "loci read <slug>"),
             ("handover", "loci handover"),
+            ("recall", "loci recall \"what did we decide about hosting\""),
         ],
     ),
     (

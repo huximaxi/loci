@@ -75,6 +75,7 @@ nothing is printed about the other, so unset it (or use `--workfolder`) for a pe
 | `loci handover` | Print the most recent handover by mtime |
 | `loci tokens` | Approximate status of your agent runtime's 5-hour session window, read from local transcripts (timing, not quota) |
 | `loci reads` | How often your agent read the workfolder: user turns followed by a read, counts only, from local transcripts. `--days <n>` (default 7) |
+| `loci recall <query>` | Ask the files a question, no model, no network (experimental): BM25 ranked hits as `path:line`, each with its crystal state (current, due, superseded, retired). `--root <dir>` reads any folder of notes; `--limit`, `--room`, `--as-of` narrow it |
 | `loci rain` | Garden watering weather: window headroom, garden state, last rain. Start the round yourself, in your own agent |
 | `loci new <path>` | Scaffold a starter workfolder at `<path>`, then offer `loci init`. `--force` writes into a non-empty directory |
 | `loci init` | Interactive wizard. Writes `~/.config/loci/config.toml` |

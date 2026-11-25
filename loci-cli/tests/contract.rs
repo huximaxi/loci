@@ -172,6 +172,20 @@ fn every_json_command_emits_one_document_with_the_contract_keys() {
         ),
         (vec!["rain"], vec!["window", "garden", "start_phrase"]),
         (
+            vec!["recall", "plain labels"],
+            vec![
+                "query",
+                "query_tokens",
+                "unmatched_tokens",
+                "tokenizer",
+                "scoring",
+                "as_of",
+                "matching_chunks",
+                "scope",
+                "results",
+            ],
+        ),
+        (
             vec!["audit"],
             vec![
                 "wal",
@@ -219,6 +233,8 @@ fn usage_errors_are_exit_3_on_stderr_with_empty_stdout() {
         vec!["bogus"],
         vec!["read"],
         vec!["reads", "--days", "x"],
+        vec!["recall"],
+        vec!["recall", "x", "--limit", "0"],
         vec!["status", "--nope"],
         vec![],
     ] {
@@ -437,7 +453,7 @@ fn user_facing_text_says_workfolder_not_palace() {
     };
     let mut seen: Vec<(String, String)> = Vec::new();
     for cmd in [
-        "", "status", "crystals", "read", "handover", "tokens", "reads", "rain", "new", "init",
+        "", "status", "crystals", "read", "handover", "tokens", "reads", "rain", "recall", "new", "init",
         "audit", "overview",
     ] {
         let mut args: Vec<&str> = Vec::new();
