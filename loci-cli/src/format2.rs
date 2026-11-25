@@ -1288,6 +1288,25 @@ mod tests {
     }
 
     #[test]
+    fn a_fence_ends_the_key_block_and_line_endings_do_not_shift_lines() {
+        // A fence right after a crystal closes its key block: the key line after the fence is
+        // not applied and does not extend the span.
+        let (c, _) = read_lines(
+            "◈ A: x\n```\nvalid_until: 2027-01-01\n```\nvalid_until: 2028-01-01\n",
+            "CLAUDE.md",
+        );
+        assert_eq!((c[0].line, c[0].end_line), (1, 1));
+        assert_eq!(c[0].valid_until, None);
+        // CRLF endings and a missing final newline count lines the same way.
+        let (c, _) = read_lines(
+            "# T\r\n◈ A: x\r\nvalid_until: 2027-01-01\r\n◆ B: y",
+            "CLAUDE.md",
+        );
+        let spans: Vec<(usize, usize)> = c.iter().map(|c| (c.line, c.end_line)).collect();
+        assert_eq!(spans, vec![(2, 3), (4, 4)]);
+    }
+
+    #[test]
     fn a_file_crystal_spans_from_its_frontmatter_to_its_fact_paragraph() {
         let with_body =
             "---\ntype: crystal\ntier: working\n---\n# Name\n\nFirst line\nsecond line\n\nNot read\n";
