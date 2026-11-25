@@ -383,8 +383,13 @@ fn build_corpus(root: &Root, qtokens: &[String]) -> Corpus {
                 scope.not_read.total += 1;
                 continue;
             }
-            let bytes = match fs::read(&path) {
-                Ok(b) => b,
+            let bytes = match read_capped(&path, &meta) {
+                Ok(Some(b)) => b,
+                Ok(None) => {
+                    scope.not_read.over_cap += 1;
+                    scope.not_read.total += 1;
+                    continue;
+                }
                 Err(_) => {
                     scope.not_read.unreadable += 1;
                     scope.not_read.total += 1;
@@ -449,6 +454,14 @@ fn build_corpus(root: &Root, qtokens: &[String]) -> Corpus {
                 room,
                 frontmatter: fm,
             });
+            // One file can hold hundreds of thousands of paragraphs: the cap is on chunks, so
+            // it applies inside a file too. The last file is then cut at the cap, and the
+            // scope says the walk stopped.
+            if chunks.len() > MAX_CHUNKS {
+                chunks.truncate(MAX_CHUNKS);
+                scope.truncated = true;
+                break 'walk;
+            }
         }
         // Visit subdirectories in name order: the stack pops from the end.
         subdirs.reverse();
@@ -477,21 +490,96 @@ fn counted(text: &str, qtokens: &[String]) -> (u32, Vec<u32>) {
     (toks.len() as u32, tf)
 }
 
-/// A leading `---` opens frontmatter only when the next line is a `key:` line (or the fence
-/// closes at once). A horizontal rule above prose is not frontmatter, so its text stays searchable.
-fn opens_like_frontmatter(lines: &[&str]) -> bool {
-    match lines.get(1) {
-        None => false,
-        Some(l) if l.trim_end() == "---" => true,
-        Some(l) => {
-            let Some(ix) = l.find(':') else { return false };
-            let key = &l[..ix];
-            !key.is_empty()
-                && !key.starts_with(char::is_whitespace)
-                && key
-                    .chars()
-                    .all(|c| c.is_alphanumeric() || c == '_' || c == '-' || c == ' ')
+/// Read one file the walk has already inspected (`meta` is its `symlink_metadata`): open it, check
+/// that what was opened is the same regular file (a file swapped for a link after the check is
+/// refused), and read at most the cap plus one byte so a file that grew is reported, not half-read.
+/// `Ok(None)` means over the cap.
+fn read_capped(path: &Path, meta: &fs::Metadata) -> std::io::Result<Option<Vec<u8>>> {
+    use std::io::Read;
+    let f = fs::File::open(path)?;
+    let now = f.metadata()?;
+    if !now.is_file() {
+        return Err(std::io::Error::other("not a regular file"));
+    }
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::MetadataExt;
+        if now.dev() != meta.dev() || now.ino() != meta.ino() {
+            return Err(std::io::Error::other("file changed during the walk"));
         }
+    }
+    #[cfg(not(unix))]
+    let _ = meta;
+    let mut buf = Vec::new();
+    f.take(MAX_FILE_BYTES + 1).read_to_end(&mut buf)?;
+    Ok(if buf.len() as u64 > MAX_FILE_BYTES {
+        None
+    } else {
+        Some(buf)
+    })
+}
+
+/// A leading `---` opens frontmatter only when its first line of content is a `key:` line (blank
+/// and `#` comment lines do not count) or the fence closes at once. A horizontal rule above prose
+/// is not frontmatter, so its text stays searchable.
+fn opens_like_frontmatter(lines: &[&str]) -> bool {
+    for l in lines.iter().skip(1) {
+        let t = l.trim_end();
+        if t == "---" {
+            return true;
+        }
+        if t.trim().is_empty() || t.trim_start().starts_with('#') {
+            continue;
+        }
+        let Some(ix) = t.find(':') else { return false };
+        let key = &t[..ix];
+        return !key.is_empty()
+            && !key.starts_with(char::is_whitespace)
+            && key
+                .chars()
+                .all(|c| c.is_alphanumeric() || c == '_' || c == '-' || c == ' ');
+    }
+    false
+}
+
+/// At most 160 characters of a line, centred on the first word that holds a query token, so a
+/// long single-line paragraph still shows what matched.
+fn snippet_of(line: &str, qtokens: &[String]) -> String {
+    const MAX: usize = 160;
+    const LEAD: usize = 60;
+    let chars: Vec<char> = line.chars().collect();
+    if chars.len() <= MAX {
+        return line.to_string();
+    }
+    let mut hit: Option<usize> = None;
+    let mut word_start = 0usize;
+    let mut in_word = false;
+    for (i, c) in chars
+        .iter()
+        .copied()
+        .chain(std::iter::once(' '))
+        .enumerate()
+    {
+        if c.is_whitespace() {
+            if in_word {
+                let w: String = chars[word_start..i].iter().collect();
+                if tokenize(&w).iter().any(|t| qtokens.contains(t)) {
+                    hit = Some(word_start);
+                    break;
+                }
+                in_word = false;
+            }
+        } else if !in_word {
+            in_word = true;
+            word_start = i;
+        }
+    }
+    let start = hit.map_or(0, |h| h.saturating_sub(LEAD));
+    let body: String = chars[start..].iter().take(MAX).collect();
+    if start > 0 {
+        format!("\u{2026}{body}")
+    } else {
+        body
     }
 }
 
@@ -544,6 +632,9 @@ fn chunk_file(
         // `- item` list lines (an Obsidian tag list) are text too.
         let mut in_text_key = false;
         for raw in &lines[1..fm_end - 1] {
+            if raw.trim().is_empty() {
+                continue; // a blank line inside a block scalar does not end the scalar
+            }
             if raw.starts_with(char::is_whitespace) || raw.trim_start().starts_with("- ") {
                 if in_text_key {
                     let item = raw.trim().trim_start_matches("- ").trim();
@@ -592,7 +683,7 @@ fn chunk_file(
                     Kind::Document
                 },
                 crystal: file_crystal,
-                snippet: joined.chars().take(160).collect(),
+                snippet: snippet_of(&joined, qtokens),
                 len,
                 tf,
             });
@@ -647,7 +738,7 @@ fn chunk_file(
                 Kind::Document
             },
             crystal: file_crystal,
-            snippet: shown.chars().take(160).collect(),
+            snippet: snippet_of(shown, qtokens),
             len,
             tf,
         });
@@ -999,7 +1090,7 @@ fn scope_line(s: &Scope) -> String {
     let mut line = format!("scope: {}", parts.join(", "));
     if s.truncated {
         line.push_str(&format!(
-            "\nthe walk stopped at {MAX_FILES} files; later files were not read"
+            "\nthe walk stopped at its cap ({MAX_FILES} files or {MAX_CHUNKS} chunks); later text was not read"
         ));
     }
     line
@@ -1008,8 +1099,26 @@ fn scope_line(s: &Scope) -> String {
 /// A folder's text may hold terminal control sequences; they must not reach the terminal.
 fn plain(s: &str) -> String {
     s.chars()
-        .map(|c| if c.is_control() { ' ' } else { c })
+        .map(|c| {
+            if c.is_control() || is_invisible_format(c) {
+                ' '
+            } else {
+                c
+            }
+        })
         .collect()
+}
+
+/// Characters that are not control codes but can still mislead a reader of a terminal: bidi
+/// overrides and isolates, zero-width marks, the line and paragraph separators, the soft hyphen.
+fn is_invisible_format(c: char) -> bool {
+    matches!(c,
+        '\u{00AD}' | '\u{061C}' | '\u{180E}'
+        | '\u{200B}'..='\u{200F}'
+        | '\u{2028}'..='\u{202E}'
+        | '\u{2060}'..='\u{2064}'
+        | '\u{2066}'..='\u{206F}'
+        | '\u{FEFF}')
 }
 
 fn print_text(out: &RecallOut) {
