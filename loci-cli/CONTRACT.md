@@ -4,6 +4,10 @@ What a script may rely on. This page and the tests beside it (`tests/contract.rs
 `contract_tests` module in `src/main.rs`) are the contract; the README teaches, this page promises.
 If the two disagree, this page wins and the README is the bug.
 
+`palace` is the frozen `--json` key for the workfolder path; the key keeps its 1.x name, as do
+`palace_reads` and `palace_writes`. Human-readable output is for people and is not part of the
+freeze: its labels and wording may change in any release, and so may the free-text `note` values.
+
 From 2.0 the commands, flags, exit codes and `--json` keys below are frozen until 3.0. A release may
 **add** a command, a flag, an optional argument or a `--json` key. It may not remove or rename one,
 or change what one means. Experimental commands (`audit`, `wal verify`) are marked, and the freeze

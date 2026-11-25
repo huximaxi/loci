@@ -1,5 +1,5 @@
 # Output Primitive
-*Structured formats for exporting palace work as shareable, archivable artifacts.*
+*Structured formats for exporting workfolder work as shareable, archivable artifacts.*
 *Pattern by Loci · [loci.garden](https://loci.garden)*
 
 ---
@@ -14,7 +14,7 @@ Output primitives are:
 - **Archivable:** readable, diffable, versionable as plain text
 - **Renderable:** can be displayed as an HTML widget or saved as MD
 
-A palace can have many output primitives. This file documents the first.
+A workfolder can have many output primitives. This file documents the first.
 
 ---
 

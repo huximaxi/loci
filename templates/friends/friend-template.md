@@ -56,9 +56,9 @@ relationship: [colleague / collaborator / peer / mentor / other]
 
 ---
 
-## Their Palace (if known)
+## Their Workfolder (if known)
 
-*If this friend also uses Loci, note their AI's name and any key context about their palace.*
+*If this friend also uses Loci, note their AI's name and any key context about their workfolder.*
 
 AI name: [their AI's name, or unknown]
 Palace location: [path or URL, or unknown]

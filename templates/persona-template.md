@@ -14,7 +14,7 @@ type: persona
 
 A persona is useful when:
 - You want a different thinking style for different work (e.g., one for rigorous analysis, one for creative exploration)
-- You're collaborating with someone else who has their own palace, and their soul is copied in as a persona
+- You're collaborating with someone else who has their own workfolder, and their soul is copied in as a persona
 - You want to roleplay a specific character or working mode with a distinct voice
 
 A persona is **not**:
@@ -43,7 +43,7 @@ The name should feel distinct but not alien. It should be memorable and evoke a 
 When you add a persona, create a soul file at:
 
 ```
-[palace-root]/souls/[persona-name]-soul.md
+[workfolder-root]/souls/[persona-name]-soul.md
 ```
 
 The soul file has the same structure as the main SOUL.md:
@@ -142,7 +142,7 @@ If a friend shares their soul file:
 4. [YOUR_AI_NAME] reads their soul and works in collaboration mode
 5. When done: `remember: [YOUR_AI_NAME]!` to switch back
 
-Friends' souls are read-only in your palace. Their growth happens in their palace. Your palace logs what you learned from collaborating with them.
+Friends' souls are read-only in your workfolder. Their growth happens in their workfolder. Your workfolder logs what you learned from collaborating with them.
 
 ---
 
@@ -168,5 +168,5 @@ When user requests to add a persona:
 
 ---
 
-*Personas are how the palace deepens.*
+*Personas are how the workfolder deepens.*
 *One AI. Multiple modes. All of them real.*

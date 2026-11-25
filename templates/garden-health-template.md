@@ -7,7 +7,7 @@ process: garden-health
 
 # Garden Health Check
 
-*A maintenance pass for the living parts of the palace. Run as part of the Process Adjustment Trigger, or on demand when the palace feels overgrown.*
+*A maintenance pass for the living parts of the workfolder. Run as part of the Process Adjustment Trigger, or on demand when the workfolder feels overgrown.*
 
 ---
 
@@ -15,8 +15,8 @@ process: garden-health
 
 - During the Process Adjustment Trigger (end-of-session reflection)
 - When crystals feel stale or context feels noisy
-- When the palace hasn't been tended in 3+ sessions
-- On demand: "run garden health" or "check palace health"
+- When the workfolder hasn't been tended in 3+ sessions
+- On demand: "run garden health" or "check workfolder health"
 
 ---
 
@@ -76,7 +76,7 @@ No auto-archival. Surface → human decides.
 
 ### 4. Rooms - Coverage Check
 
-For each room in the palace:
+For each room in the workfolder:
 
 | Check | Signal |
 |-------|--------|
@@ -156,4 +156,4 @@ The health check **does not block** the handover. It adds a section.
 
 ---
 
-*The palace is not a filing cabinet. It is a living system. Living systems need tending.*
+*The workfolder is not a filing cabinet. It is a living system. Living systems need tending.*

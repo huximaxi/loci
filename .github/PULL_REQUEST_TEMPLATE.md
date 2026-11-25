@@ -15,7 +15,7 @@
 - [ ] `extension` (Chrome extension)
 - [ ] `packages/core` (shared types)
 - [ ] `landing` (site HTML / llms.txt)
-- [ ] `palace` (templates / PROCESSES.md)
+- [ ] `workfolder` (templates / PROCESSES.md)
 - [ ] `pipeline` (ROADMAP-TRACKER, JUMP-IN briefs)
 
 ## Release checklist

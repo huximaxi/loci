@@ -1,4 +1,4 @@
-# Palace
+# Workfolder
 
 ◆ Owner: Bo
 ◈ Phase: discovery

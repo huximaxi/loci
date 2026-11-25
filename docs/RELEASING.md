@@ -151,7 +151,7 @@ fields, not YAML front matter, and the parser depends on the exact field names
 | A candidate has held up in real use and is ready to be relied on | **Graduate:** set `stable: X.Y`, set `status: stable`, and the `loci-core version` line names the now-stable version. Open the next `-candidate` only when the next change lands. |
 
 **Candidate vs stable, the discipline:** a version graduates from candidate to
-stable when it has been used against a real palace (not just authored) and nothing
+stable when it has been used against a real workfolder (not just authored) and nothing
 needed walking back. Candidate is the honest default for freshly-written
 methodology: it says "this is the current line, and it has not yet earned the
 weight of stable." Do not graduate a candidate in the same change that introduces

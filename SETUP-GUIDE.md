@@ -21,7 +21,7 @@ Think of your working relationship with Claude like a building.
 - **Rooms** are different areas of work (e.g. "Writing Room", "Work Room", "Ideas Room")
 - **Your AI** is a named collaborator who lives inside the workfolder, not a generic assistant, but someone with a character, opinions, and memory of your work
 
-The workfolder lives on your computer. Claude reads it at the start of each session and picks up right where you left off. The templates and file names still call it the palace.
+The workfolder lives on your computer. Claude reads it at the start of each session and picks up right where you left off. The templates and file names still call it the workfolder.
 
 ---
 
@@ -60,7 +60,7 @@ and save it as your `PALACE.md` (the primary file); the short `CLAUDE.md` pointe
 
 ## Step 2: Fill in the master, save it as PALACE.md
 
-This becomes `PALACE.md`, your palace's primary file, read at the start of every session by any
+This becomes `PALACE.md`, your workfolder's primary file, read at the start of every session by any
 file-aware AI. It answers:
 
 - Who is this AI? (you'll name it)
@@ -173,7 +173,7 @@ That's it. You're running.
 
 If you set up automated runs (morning check-ins, autodreams, etc.), two things matter:
 
-**Dynamic paths.** Session IDs change on every run, so hardcoded paths break immediately. Your scheduled task prompts should locate palace files relative to the palace root rather than embedding a specific session or machine path: for example `find "$PALACE_ROOT" -maxdepth 3 -name "PALACE.md"`, where the root is the one place you name once (the `Palace:` line in your identity block, or the `LOCI_WORKFOLDER` environment variable (`LOCI_PALACE` still works) if you use the CLI).
+**Dynamic paths.** Session IDs change on every run, so hardcoded paths break immediately. Your scheduled task prompts should locate workfolder files relative to the workfolder root rather than embedding a specific session or machine path: for example `find "$PALACE_ROOT" -maxdepth 3 -name "PALACE.md"`, where the root is the one place you name once (the `Palace:` line in your identity block, or the `LOCI_WORKFOLDER` environment variable (`LOCI_PALACE` still works) if you use the CLI).
 
 **SOUL.md first.** Your AI's SOUL.md must be included in every scheduled task prompt: it is what makes the output feel like your collaborator rather than a generic assistant. Read it before any state files.
 
@@ -182,7 +182,7 @@ If you set up automated runs (morning check-ins, autodreams, etc.), two things m
 ## Folder structure (what you'll end up with)
 
 ```
-my-palace/
+my-workfolder/
   PALACE.md                    ← master prompt, primary, AI-agnostic (start here)
   CLAUDE.md                    ← two-line pointer to PALACE.md (for Claude Code)
   tracker.json                 ← project tracking

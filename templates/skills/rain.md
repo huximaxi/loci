@@ -15,7 +15,7 @@ the natural spender for session-window headroom that would otherwise expire.*
 
 ## What it does
 
-Summons the palace's full persona roster in parallel. Each persona reads its
+Summons the workfolder's full persona roster in parallel. Each persona reads its
 own soul file, walks the garden's plants, and picks the ONE plant that speaks
 to something it has actually learned or been circling lately, then waters it
 with a dated, grounded entry (or seeds a new plant if something real is
@@ -39,7 +39,7 @@ picking the same plant) is itself a signal a single tender can never produce.
 
 One wiring note: start the round yourself, in your own agent session, by
 saying `rain`. `loci rain` only shows the weather; the CLI never starts an
-agent. Your palace's orchestrator instructions (CLAUDE.md or equivalent) must
+agent. Your workfolder's orchestrator instructions (CLAUDE.md or equivalent) must
 define that trigger and route it to this procedure; without it the word
 arrives bare, and the politest thing your runtime can do with bare weather is
 ask about it.

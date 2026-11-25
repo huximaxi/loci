@@ -1,11 +1,11 @@
 # Skill templates
 
-*Portable disciplines that survived the test in real palaces and are worth
+*Portable disciplines that survived the test in real workfolders and are worth
 lifting into yours.*
 
 A **skill** in this kit is not a tool or a binary. It is a written procedure
 with a stated trigger, a verification, and a kill condition. A discipline you
-can teach a palace to apply consistently, then prune if it stops earning its
+can teach a workfolder to apply consistently, then prune if it stops earning its
 place.
 
 ## What's on the shelf
@@ -18,12 +18,12 @@ place.
 
 ## How to use a skill template
 
-1. Read it. Decide whether the discipline fits your palace.
-2. If it does, copy it into your palace under `skills/<skill-name>.md` (or
-   wherever your palace stores reusable disciplines).
+1. Read it. Decide whether the discipline fits your workfolder.
+2. If it does, copy it into your workfolder under `skills/<skill-name>.md` (or
+   wherever your workfolder stores reusable disciplines).
 3. Adapt the procedure to your concrete surfaces. The trigger and the kill
    condition should stay; the steps will need your context.
-4. Name the persona who owns the discipline (if your palace has named
+4. Name the persona who owns the discipline (if your workfolder has named
    personas). The persona reads the skill when their trigger fires.
 
 ## How to write a new skill template
@@ -43,5 +43,5 @@ of the discipline is to earn its place every time it fires.
 
 A process is a thing a team agrees to do. A skill is a thing a collaborator
 *becomes good at*. The template is meant to teach the latter: a discipline
-that fires from a trigger, runs cleanly, and leaves the palace better than it
+that fires from a trigger, runs cleanly, and leaves the workfolder better than it
 found it. The Greek `praxis` shape: skilled action whose end is the doing.

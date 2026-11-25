@@ -11,7 +11,7 @@ palace: [YOUR_PALACE_NAME]
 
 Entanglement is not performance. It's not a good answer to a good question. It's the quality of co-intelligence: the moment when the exchange itself generates something new (a named unknown, a crystallised phrase, an unexpected synthesis).
 
-This file tracks those moments, rated and dated. It calibrates the palace over time.
+This file tracks those moments, rated and dated. It calibrates the workfolder over time.
 
 ---
 
@@ -88,5 +88,5 @@ A pattern is different from a crystal. Crystals are facts about the world or abo
 
 ---
 
-*Entanglement is the signal the palace is alive.*
+*Entanglement is the signal the workfolder is alive.*
 *Track it. Tend it. Let it calibrate the work.*

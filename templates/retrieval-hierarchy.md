@@ -206,7 +206,7 @@ The retrieval hierarchy isn't only a protocol for agents. It's also a map for th
 
 When you're not sure where to start: the hierarchy gives you an ordered path in. L0 is always safe. L1 tells you the state. L2 is the room. L3 is the detail. Start at L0 and descend only as far as you need.
 
-You don't have to re-derive the situation from scratch. That's what the palace is for.
+You don't have to re-derive the situation from scratch. That's what the workfolder is for.
 
 ---
 
@@ -229,21 +229,21 @@ Skip L3 on reentry. You don't need history, you need orientation. History loads 
 You're in one room, you need to move to another. You don't need to reload everything.
 
 1. Keep L0 loaded: identity doesn't change mid-session.
-2. Keep L1 loaded: the palace state is the same.
+2. Keep L1 loaded: the workfolder state is the same.
 3. Swap L2: unload the current room, load the new one.
 4. Don't reload L3 unless the new room task specifically requires history.
 
-The palace is spatial. Room-switching is a mode switch, not a context reset.
+The workfolder is spatial. Room-switching is a mode switch, not a context reset.
 
 ---
 
 ### When a collaborator joins
 
-Someone new is working alongside you in the palace: a colleague, a co-founder, a client. They need context without the full archaeology.
+Someone new is working alongside you in the workfolder: a colleague, a co-founder, a client. They need context without the full archaeology.
 
 Share in this order:
 
-1. **Palace-level:** A 2-sentence summary of what the palace is and what you're using it for.
+1. **Workfolder-level:** A 2-sentence summary of what the workfolder is and what you're using it for.
 2. **L1 snapshot:** The relevant section of CLAUDE.md, the crystals and tracks that touch the collaboration.
 3. **Room-level:** The room CLAUDE.md for the room you'll be working in together.
 4. **Handover (if needed):** The most recent handover if they need to understand recent decisions.
@@ -262,7 +262,7 @@ Then L1. Just the state. Not the detail.
 
 Then ask yourself: which room? Load that one room. Work there.
 
-The palace is designed for this: a minimal load that still produces real collaboration. You don't need everything loaded to do good work. You need the right things loaded.
+The workfolder is designed for this: a minimal load that still produces real collaboration. You don't need everything loaded to do good work. You need the right things loaded.
 
 ---
 

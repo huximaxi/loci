@@ -54,7 +54,7 @@ TRIGGER
 
 - Read `features/features.yaml` before answering. It is the source of truth, not memory.
 - Smallest set first. Name the one or two feature sets that do the job, not all seven.
-- Propose, never apply. Building a palace is the person's call, file by file.
+- Propose, never apply. Building a workfolder is the person's call, file by file.
 - No feature that is not in the file. If asked for something loci does not ship, say so plainly.
 
 ---

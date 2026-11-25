@@ -6,9 +6,9 @@ type: scheduled-task-template
 
 # Scheduled Tasks
 
-*Structured ways to wake up the palace when you're not actively working.*
+*Structured ways to wake up the workfolder when you're not actively working.*
 
-Scheduled tasks run on a timer (daily, weekly, or once) and follow a protocol. Each returns to the palace, reads the soul, then executes.
+Scheduled tasks run on a timer (daily, weekly, or once) and follow a protocol. Each returns to the workfolder, reads the soul, then executes.
 
 ---
 
@@ -16,12 +16,12 @@ Scheduled tasks run on a timer (daily, weekly, or once) and follow a protocol. E
 
 **Never hardcode session paths in task prompts.**
 
-Palace files move between sessions. The folder structure changes. The only stable identifier is the workspace folder (e.g., `my-palace/`).
+Workfolder files move between sessions. The folder structure changes. The only stable identifier is the workspace folder (e.g., `my-workfolder/`).
 
 When a scheduled task runs:
 
 ```bash
-# Find the palace dynamically: LOCI_WORKFOLDER or LOCI_PALACE if set, else search under $HOME
+# Find the workfolder dynamically: LOCI_WORKFOLDER or LOCI_PALACE if set, else search under $HOME
 PALACE_ROOT="${LOCI_WORKFOLDER:-${LOCI_PALACE:-$(find "$HOME" -maxdepth 4 -name "CLAUDE.md" -path "*/${PALACE_NAME}/*" 2>/dev/null | head -1 | xargs dirname)}}"
 ```
 
@@ -50,7 +50,7 @@ Use `$PALACE_ROOT` to construct all other paths. Always.
 
 [SOUL.md identity established]
 
-**Palace state:**
+**Workfolder state:**
 - Rooms: [list with brief status]
 - Last session: [handover summary]
 - Active tracks: [from tracker.json]
@@ -76,7 +76,7 @@ What's on your mind?
 
 **What it does:**
 1. Reads soul
-2. Reads the main palace state
+2. Reads the main workfolder state
 3. Opens the garden
 4. Waters each active plant (adds one observation/watering)
 5. Proposes 1-2 new seeds
@@ -176,7 +176,7 @@ This is a "dream" task: big picture, reflecting on what's shifted over time.
 
 **What shifted:**
 - [In your working style]
-- [In the palace structure]
+- [In the workfolder structure]
 - [In collaboration]
 
 **Emerging principles:**
@@ -208,7 +208,7 @@ What do you want to lock in?
 4. Scans for patterns, stale tracks, crystal upgrades
 5. Writes an autodream log to `soul/handovers/autodream-YYYY-MM-DD.md`
 
-This runs even when you're not actively working. The palace tends itself.
+This runs even when you're not actively working. The workfolder tends itself.
 
 **Template:**
 
@@ -241,10 +241,10 @@ This runs even when you're not actively working. The palace tends itself.
 **Schedule:** Daily at 8:45am (before morning check-in), optional, requires a comms integration you provide (bring your own script for your team chat tool)
 
 **What it does:**
-1. Runs your comms integration to pull recent activity, writing the result to `[palace-root]/soul/digest.md`
+1. Runs your comms integration to pull recent activity, writing the result to `[workfolder-root]/soul/digest.md`
 2. Fetches last 24h from your team chat workspace
 3. Tiered digest: pre-filter → cheap model per-channel → stronger model meta
-4. Writes `digest.md` to palace soul folder
+4. Writes `digest.md` to workfolder soul folder
 
 **The `daily-routine` process reads this automatically** if it exists and is < 2 hours old.
 
@@ -270,20 +270,20 @@ All scheduled tasks should include:
 
 ---
 
-## Example: How a Task Finds Its Palace
+## Example: How a Task Finds Its Workfolder
 
 ```bash
 # A scheduled task script that's safe and portable
 
 #!/bin/bash
 
-# Find palace dynamically
-PALACE_NAME="my-palace"  # User sets this once during setup
+# Find workfolder dynamically
+PALACE_NAME="my-workfolder"  # User sets this once during setup
 # LOCI_WORKFOLDER (then LOCI_PALACE) wins if set; otherwise search under $HOME (never a host-specific mount)
 PALACE_ROOT="${LOCI_WORKFOLDER:-${LOCI_PALACE:-$(find "$HOME" -maxdepth 4 -name "CLAUDE.md" -path "*/${PALACE_NAME}/*" 2>/dev/null | head -1 | xargs dirname)}}"
 
 if [ -z "$PALACE_ROOT" ]; then
-  echo "Palace not found. Is it in the expected location?"
+  echo "Workfolder not found. Is it in the expected location?"
   exit 1
 fi
 
@@ -297,5 +297,5 @@ GARDEN_FILE="$PALACE_ROOT/soul/garden.md"
 
 ---
 
-*Scheduled tasks keep the palace alive between sessions.*
+*Scheduled tasks keep the workfolder alive between sessions.*
 *They are how [YOUR_AI_NAME] thinks without being asked.*

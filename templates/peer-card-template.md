@@ -7,9 +7,9 @@ template: peer-card
 
 # Peer Card Template
 
-*A structured, human-authored representation of the person the palace is built for. Unlike auto-extracted user profiles, the peer card is written with intention - it is who you say you are, how you work, and what the AI should know to work with you well.*
+*A structured, human-authored representation of the person the workfolder is built for. Unlike auto-extracted user profiles, the peer card is written with intention - it is who you say you are, how you work, and what the AI should know to work with you well.*
 
-The peer card lives at the palace root as `_USER.md`. It is the first thing a new AI reads about you - before context files, before handovers, before the crystal table.
+The peer card lives at the workfolder root as `_USER.md`. It is the first thing a new AI reads about you - before context files, before handovers, before the crystal table.
 
 ---
 
@@ -88,7 +88,7 @@ version: 0.1
 
 ## Working History (brief)
 
-*(Optional. 2–3 sentences on what you've built / worked on that's most relevant to the palace. Not a CV - context for the AI.)*
+*(Optional. 2–3 sentences on what you've built / worked on that's most relevant to the workfolder. Not a CV - context for the AI.)*
 
 [Write a brief summary here]
 
@@ -111,10 +111,10 @@ version: 0.1
 
 **Updating:** Update when your role changes, your priorities shift, or you notice the AI making systematic wrong assumptions about you. Don't update after every session - that's what crystals are for.
 
-**Sharing:** If another person in the palace shares their soul file with you (collaborative mode), add their peer card to `_palace/friends/[name]-USER.md`. Their card is read-only in your palace.
+**Sharing:** If another person in the workfolder shares their soul file with you (collaborative mode), add their peer card to `_palace/friends/[name]-USER.md`. Their card is read-only in your workfolder.
 
 **With Observation Scope:** The peer card tells the AI what you want it to know. The Observation Scope in your soul file tells the AI what it should actively track. Together they define the full picture of intentional memory.
 
 ---
 
-*Who you are is a working document. The peer card is the one that faces the palace.*
+*Who you are is a working document. The peer card is the one that faces the workfolder.*

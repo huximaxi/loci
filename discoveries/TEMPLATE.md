@@ -1,4 +1,4 @@
-# Palace portrait — [your handle or anonymous]
+# Workfolder portrait — [your handle or anonymous]
 
 > Fill in what's useful. Leave blank what isn't. No minimum length.
 >
@@ -6,7 +6,7 @@
 
 ---
 
-## The shape of your palace
+## The shape of your workfolder
 
 - **Set up:** approximate date and loci version (check LOCI-CORE.md or PALACE-METHODOLOGY.md)
 - **Rooms:** how many, what are they called (or describe their purpose if names are private)
@@ -18,7 +18,7 @@
 
 ## What it became
 
-What use case is your palace actually serving? What did it turn into that you didn't fully plan?
+What use case is your workfolder actually serving? What did it turn into that you didn't fully plan?
 
 ---
 
@@ -36,7 +36,7 @@ What do you reach for that isn't there? What workaround did you build that shoul
 
 ## One discovery
 
-Optional. A connection the palace surfaced that surprised you, or a moment it stopped feeling like a tool.
+Optional. A connection the workfolder surfaced that surprised you, or a moment it stopped feeling like a tool.
 
 ---
 
@@ -56,7 +56,7 @@ Optional. Two sentences: how do you explain what you built to a skeptical friend
 
 This section is required for PR submissions. It is how we verify the portrait is genuine.
 
-**One crystal about your palace.** Write it in loci format:
+**One crystal about your workfolder.** Write it in loci format:
 
 ```
 ◇ / ◈ / ◆  [the thing, one line]

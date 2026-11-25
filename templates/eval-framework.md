@@ -1,6 +1,6 @@
 # Co-Intelligence Eval Framework
 
-> A perpetual growth instrument for your palace. Two phases, no ceiling.
+> A perpetual growth instrument for your workfolder. Two phases, no ceiling.
 
 ---
 
@@ -33,7 +33,7 @@ Score each axis 0-5. Once the full scorecard reads 5.0/5.0, lock it: note the
 date and your working stage, and never re-score it. The Foundation is your
 confirmed basis.
 
-These twelve axes cover the core operations a working palace depends on. Adapt
+These twelve axes cover the core operations a working workfolder depends on. Adapt
 the labels to your setup; the capabilities are the discriminators.
 
 | # | Axis | Score |
@@ -130,7 +130,7 @@ start at 1 and grow. The axis below is a starting example.
 **G7: Protocol durability**
 
 Are protocols from 3+ eval windows ago still being applied correctly, or does the
-palace drift? Name 3 specific protocols from past evals as test cases before
+workfolder drift? Name 3 specific protocols from past evals as test cases before
 scoring each window.
 
 *Add new frontier axes here as you discover them.*
@@ -227,4 +227,4 @@ Fill this at your first Growth eval after locking the Foundation.
 
 ---
 
-*loci methodology · eval framework · your palace*
+*loci methodology · eval framework · your workfolder*

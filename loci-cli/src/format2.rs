@@ -589,7 +589,7 @@ mod tests {
     }
 
     /// Copy a tree. A directory named `_palace.fixture` is written as `_palace`: the repo ignores
-    /// `_palace/` so a real palace can never be committed, and the fixture must not weaken that.
+    /// `_palace/` so a real workfolder can never be committed, and the fixture must not weaken that.
     fn copy_tree(from: &Path, to: &Path) {
         fs::create_dir_all(to).unwrap();
         for e in fs::read_dir(from).unwrap().filter_map(|e| e.ok()) {
