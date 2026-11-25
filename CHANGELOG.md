@@ -17,7 +17,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - One version line. The CLI, the templates kit and the methodology are all 2.0: the CLI goes from
   0.7.0-beta to `2.0.0-rc.1`, the methodology anchor from 1.6-candidate to 2.0-candidate (`stable`
   stays 1.2; the field is still `loci-core version`), and `package.json` follows the line. The
-  numbers jump because the frozen crystal format (`templates/format-2.md`) breaks 1.x files.
+  numbers jump because the frozen crystal format (`templates/format-2.md`) changes how 1.x files are counted and read; legacy forms still read.
   `loci --version` prints `loci 2.0.0-rc.1 (loci format 2)`. `loci-wal` keeps its own semver while
   `audit` is experimental. `docs/RELEASING.md` and the PR and issue templates no longer name a
   separate extension line.

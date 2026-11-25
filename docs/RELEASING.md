@@ -157,6 +157,10 @@ methodology: it says "this is the current line, and it has not yet earned the
 weight of stable." Do not graduate a candidate in the same change that introduces
 it.
 
+From 2.0 the anchor and the CLI share one major version (a test checks it). The minor may differ:
+a CLI-only release does not open a methodology section, and a methodology-only candidate bump does
+not move the CLI.
+
 Always set `updated:` to the release date when the anchor moves.
 
 ---

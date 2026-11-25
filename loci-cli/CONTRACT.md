@@ -141,7 +141,7 @@ stderr. Exit 1: unreadable or malformed bundle (nothing on stdout).
 ### `loci overview`
 
 Every command, grouped, with one example each. Alias: `loci commands`. Works with no workfolder.
-`--json` keys: `tool`, `version`, `palace`, `groups`, `doors`.
+`--json` keys: `tool`, `version` (the CLI version, without the format suffix), `palace`, `groups`, `doors`.
 
 ## What the tests hold
 

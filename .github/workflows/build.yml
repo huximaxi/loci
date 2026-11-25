@@ -9,10 +9,14 @@ on:
     branches: [main]
     paths:
       - "loci-cli/**"
+      - "PALACE-METHODOLOGY.md"
+      - "templates/format-2.md"
       - ".github/workflows/build.yml"
   pull_request:
     paths:
       - "loci-cli/**"
+      - "PALACE-METHODOLOGY.md"
+      - "templates/format-2.md"
       - ".github/workflows/build.yml"
 
 # Read-only token: nothing here writes to the repo.

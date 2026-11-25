@@ -502,7 +502,8 @@ fn user_facing_text_says_workfolder_not_palace() {
 }
 
 /// One version line: `--version` names the format it reads, and the methodology anchor carries the
-/// same major.minor as the CLI, so the two cannot drift apart unseen.
+/// same major as the CLI, so the two cannot drift apart unseen. (The minor may differ: a CLI-only
+/// release does not have to open a methodology section.)
 #[test]
 fn version_names_the_format_and_matches_the_methodology_anchor() {
     let w = World::new("version");
@@ -531,12 +532,12 @@ fn version_names_the_format_and_matches_the_methodology_anchor() {
         .lines()
         .find_map(|l| l.strip_prefix("> loci-core version:"))
         .expect("anchor line");
-    let majmin = |v: &str| {
-        let v = v.trim().trim_end_matches("-candidate");
-        v.split(|c: char| c == '.' || c == '-')
-            .take(2)
-            .collect::<Vec<_>>()
-            .join(".")
+    let major = |v: &str| {
+        v.trim()
+            .split(|c: char| c == '.' || c == '-')
+            .next()
+            .unwrap()
+            .to_string()
     };
-    assert_eq!(majmin(line), majmin(pkg), "anchor {line} vs CLI {pkg}");
+    assert_eq!(major(line), major(pkg), "anchor {line} vs CLI {pkg}");
 }

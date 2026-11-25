@@ -12,7 +12,6 @@
 ## Components changed
 
 - [ ] `loci-cli` (terminal CLI)
-- [ ] `extension` (Chrome extension)
 - [ ] `packages/core` (shared types)
 - [ ] `landing` (site HTML / llms.txt)
 - [ ] `workfolder` (templates / PROCESSES.md)
