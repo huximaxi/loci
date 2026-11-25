@@ -7,6 +7,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+- `loci recall <query>` (experimental): ask your files a question with no model and no network. BM25
+  over a workfolder or any folder of notes, each hit a `path:line` with its crystal state (current,
+  due, superseded, retired, or not a crystal). Reads one root, follows no symlink, skips hidden
+  directories, and counts every file it could not read. The JSON is not frozen until the mark is
+  dropped.
+
 ### Fixed
 - `loci rain` looks for `garden/` at the workfolder root, where the spec and the first-session
   ceremony put it. With the `rooms/` layout it looked inside `rooms/` and always found no plants.
