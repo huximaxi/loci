@@ -500,3 +500,43 @@ fn user_facing_text_says_workfolder_not_palace() {
         assert!(!text.is_empty(), "{what}: nothing to check");
     }
 }
+
+/// One version line: `--version` names the format it reads, and the methodology anchor carries the
+/// same major.minor as the CLI, so the two cannot drift apart unseen.
+#[test]
+fn version_names_the_format_and_matches_the_methodology_anchor() {
+    let w = World::new("version");
+    let o = w.run(&["--version"]);
+    assert_eq!(code(&o), 0);
+    let pkg = env!("CARGO_PKG_VERSION");
+    assert_eq!(
+        String::from_utf8_lossy(&o.stdout),
+        format!("loci {pkg} (loci format 2)\n")
+    );
+    let spec = fs::read_to_string(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../templates/format-2.md"
+    ))
+    .expect("templates/format-2.md");
+    assert!(
+        spec.lines().any(|l| l.trim() == "version: 2.0"),
+        "the spec the CLI names must say version 2.0"
+    );
+    let anchor = fs::read_to_string(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../PALACE-METHODOLOGY.md"
+    ))
+    .expect("PALACE-METHODOLOGY.md");
+    let line = anchor
+        .lines()
+        .find_map(|l| l.strip_prefix("> loci-core version:"))
+        .expect("anchor line");
+    let majmin = |v: &str| {
+        let v = v.trim().trim_end_matches("-candidate");
+        v.split(|c: char| c == '.' || c == '-')
+            .take(2)
+            .collect::<Vec<_>>()
+            .join(".")
+    };
+    assert_eq!(majmin(line), majmin(pkg), "anchor {line} vs CLI {pkg}");
+}

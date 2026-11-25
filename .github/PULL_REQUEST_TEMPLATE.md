@@ -21,10 +21,10 @@
 ## Release checklist
 
 - [ ] `CHANGELOG.md` updated with version entry at top
-- [ ] Version bumped in `loci-cli/Cargo.toml` (CLI) or `package.json` (extension) as appropriate
+- [ ] Version bumped on the one line (`loci-cli/Cargo.toml`, `package.json`, the `PALACE-METHODOLOGY.md` anchor) when the release calls for it
 - [ ] `pipeline/ROADMAP-TRACKER.md` status updated (🟡 → 🟢 on merge)
 - [ ] `landing/llms.txt` updated if integration is public-facing
-- [ ] Root `package.json` NOT bumped (monorepo scaffold — version is frozen)
+- [ ] Root `package.json` moves only with the one version line (nothing reads it)
 
 ## Security (privacy gate)
 

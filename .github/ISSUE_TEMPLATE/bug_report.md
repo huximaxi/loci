@@ -31,7 +31,7 @@ Paste exact commands, error messages, and screenshots if relevant.
 
 ## Environment
 
-- Loci component: <!-- CLI version / templates / website / extension -->
+- Loci component: <!-- CLI version / templates / website -->
 - Operating system + version:
 - Browser (if relevant):
 - AI client (if relevant): <!-- Claude Code, Claude web, Cursor, Goose, custom -->

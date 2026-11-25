@@ -57,7 +57,7 @@ workfolder.)
 | `--workfolder <path>` (alias `--palace`) | Workfolder path. Overrides `$LOCI_WORKFOLDER`, `$LOCI_PALACE` and the walk up. |
 | `--json` | Machine-readable output, one document on stdout. Accepted by every command; `init` ignores it (interactive). |
 | `--help`, `-h` | Help, exit 0. |
-| `--version`, `-V` | `loci <version>`, exit 0. |
+| `--version`, `-V` | `loci <version> (loci format <n>)`, exit 0. The first two words are `loci <version>`. |
 
 ## Commands
 

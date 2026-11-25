@@ -1,6 +1,6 @@
 [package]
 name = "loci-cli"
-version = "0.7.0-beta"
+version = "2.0.0-rc.1"
 edition = "2021"
 description = "Read your local workfolder from the terminal."
 license = "MIT"

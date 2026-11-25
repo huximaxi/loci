@@ -177,8 +177,8 @@ in the repository. When in doubt, add the entry; an over-documented changelog is
 cheaper than a silent surface change.
 
 Group entries under the standard headings (Added / Changed / Fixed / Removed /
-Notes). CLI and extension releases are versioned and tagged separately
-from the methodology line; keep their entries distinct.
+Notes). From 2.0 the methodology, the kit and the CLI share one version line, so one
+entry covers a change whichever of them it touches.
 
 ---
 
@@ -239,7 +239,8 @@ When a change is a release (not every merge is), tag it from the merge commit:
 
 - Annotated tag, minimum. Signed tag once a maintainer key is published.
 - Tag from the merged commit on `main`, named for the version it carries.
-- Methodology, CLI, and extension are tagged on their own version lines.
+- Methodology, kit and CLI are tagged on one version line (`vX.Y.Z`, `-rc.N` before it). `loci-wal`
+  keeps its own semver while `audit` is experimental.
 - A release-candidate tag stays forever. If `rc.2` ships tomorrow, `rc.1` remains
   in history. The trail of how a release reached final *is* the release-quality
   record. Never force-move a tag.
