@@ -124,7 +124,6 @@ Wait for a yes.
   type: crystal
   tier: "◈"
   created: [date]
-  author: [Name]
   ---
   # [four to six words from the more specific answer]
   [the specific answer]
@@ -174,7 +173,6 @@ Wait for a yes.
   type: crystal
   tier: "◈"
   created: [date]
-  author: [chosen name]
   role: greeter
   valid_until: growing
   ---

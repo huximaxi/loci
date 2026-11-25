@@ -45,6 +45,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   (a FIFO is never read), reads at most 64 KiB of a file crystal and 8 MiB of a `CLAUDE.md`,
   ignores a leading BOM, and follows symlinks the way room discovery does, reading a file reached
   by two paths once.
+- `templates/format-2.md` reserves two more key names, `author` and `promoted_from`, beside
+  `type: shard`, `address` and `signed_by`. A writer does not use them for anything else; a reader
+  still ignores them like any unknown key, so no reader changes. The two first-session crystals
+  in `AGENT-SETUP.md` and `templates/first-session-protocol.md` no longer write an `author:` line.
 
 ### Added
 - The workfolder has its own spellings, as aliases: `--workfolder` (the old `--palace` is the same
