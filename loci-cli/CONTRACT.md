@@ -9,7 +9,7 @@ If the two disagree, this page wins and the README is the bug.
 freeze: its labels and wording may change in any release, and so may the free-text `note` values.
 
 From 2.0 the commands, flags, exit codes and `--json` keys below are frozen until 3.0. A release may
-**add** a command, a flag, an optional argument or a `--json` key. It may not remove or rename one,
+**add** a command, a flag, an optional argument, a `--json` key or an exit code. It may not remove or rename one,
 or change what one means. Experimental commands (`audit`, `wal verify`, `recall`) are marked, and the freeze
 covers their shape only from the release that drops the mark.
 
@@ -34,7 +34,7 @@ found is exit 2. The workfolder spellings are canonical. The old ones (`--palace
 | `1` | I/O or unexpected error (unreadable file, malformed JSON input). |
 | `2` | Not found: no workfolder, no such crystal, no handover, no room. Nothing else. |
 | `3` | Bad input: a usage error (unknown flag or command, missing or malformed argument), an ambiguous slug, a removed flag (`rain --fire`), refusing to overwrite, a file over its size cap, `init` run without a terminal. Also `wal verify` when the bundle parses and does not verify (see its section). |
-| `4` | Ran, found problems: the command read your files and reports findings (added in 2.0.0-rc.2). Its findings are its output on stdout, and it writes no `loci:` line to stderr. Not an error: `1` stays "could not run". A script that treats any non-zero as failure is unaffected; one that tests for `1` to mean findings must test `4`. |
+| `4` | Ran, found problems: a command that read your files to the end and reports findings (added in 2.0.0-rc.2). Its findings are its output on stdout, and it writes no `loci:` line to stderr. Not an error: `1` stays "could not run". `wal verify` is not this: a bundle that does not verify stays `3`. A script that only tests for non-zero is unaffected; one that branches on the number (a `case` with a default for "could not run", or a test for `1` meaning findings) must handle `4`. |
 
 A usage error is 3, never 2. (Before 2.0 clap's own exit 2 made a mistyped flag look like a missing
 workfolder.)
@@ -174,6 +174,7 @@ Every command, grouped, with one example each. Alias: `loci commands`. Works wit
   run against the format 2 fixture workfolder with an empty home directory.
 - The exit code of each usage error, each not-found and each bad-input case above, and that errors
   leave stdout empty and `--help` and `--version` print to stdout.
+- This page's Exit codes table names every code from 0 to 4, and the code 4 row says what it means.
 - `wal verify` is run on a bundle that cannot verify, and must exit 3 with `result` `fail` on stdout.
   The passing path needs a signed bundle (the `loci-wal` tests cover minting and verifying), so the
   fixture test does not run it; `init` is interactive and is not run either.
