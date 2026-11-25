@@ -18,7 +18,7 @@ AI reads and writes like a small local database. It ships as a kit of plain-text
 any file-aware AI can run. What you settle once stays settled, in files you can read, move
 or delete. Local-first. No cloud, no accounts, no lock-in.
 
-The CLI in this repo (v0.7 beta) is an optional door into the workfolder. You do not need it
+The CLI in this repo (v2.0.0-rc.1) is an optional door into the workfolder. You do not need it
 to start.
 
 ## Start in plain markdown (the door)
@@ -74,9 +74,9 @@ Two ways, and the door is the first. The workfolder is the same underneath both.
 | Run mode | What it is |
 |---|---|
 | **Plain markdown** | The door. Clone `templates/`, point any file-aware AI at `PALACE.md`. No build. |
-| **CLI** | [`loci-cli/`](loci-cli/) (v0.7.0-beta, optional). A small Rust binary that reads your workfolder from the terminal: `loci status`, `loci crystals`, `loci read`, `loci handover`, `loci tokens`, `loci rain`, `loci init`. Mostly reads (`new` and `init` write); it never starts an agent. No network. No inference. See [loci-cli/README.md](loci-cli/README.md). |
+| **CLI** | [`loci-cli/`](loci-cli/) (v2.0.0-rc.1, optional). A small Rust binary that reads your workfolder from the terminal: `loci status`, `loci crystals`, `loci read`, `loci handover`, `loci tokens`, `loci rain`, `loci init`. Mostly reads (`new` and `init` write); it never starts an agent. No network. No inference. See [loci-cli/README.md](loci-cli/README.md). |
 
-The methodology version and full changelog: [PALACE-METHODOLOGY.md](PALACE-METHODOLOGY.md).
+One version line: the CLI, the templates kit and the methodology are all 2.0 (this release is `2.0.0-rc.1`; `loci --version` also prints the format it reads, loci format 2). The methodology version and full changelog: [PALACE-METHODOLOGY.md](PALACE-METHODOLOGY.md).
 
 ## Discoveries
 

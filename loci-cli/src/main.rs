@@ -23,7 +23,7 @@ mod tokens;
 #[derive(Parser)]
 #[command(
     name = "loci",
-    version,
+    version = concat!(env!("CARGO_PKG_VERSION"), " (loci format 2)"),
     about = "Read your local workfolder from the terminal.",
     long_about = "Read your local workfolder from the terminal.\n\n\
                   loci is a local AI topology: one workfolder your AI reads and writes.\n\

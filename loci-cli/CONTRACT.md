@@ -57,7 +57,7 @@ workfolder.)
 | `--workfolder <path>` (alias `--palace`) | Workfolder path. Overrides `$LOCI_WORKFOLDER`, `$LOCI_PALACE` and the walk up. |
 | `--json` | Machine-readable output, one document on stdout. Accepted by every command; `init` ignores it (interactive). |
 | `--help`, `-h` | Help, exit 0. |
-| `--version`, `-V` | `loci <version>`, exit 0. |
+| `--version`, `-V` | `loci <version> (loci format <n>)`, exit 0. The first two words are `loci <version>`. |
 
 ## Commands
 
@@ -141,7 +141,7 @@ stderr. Exit 1: unreadable or malformed bundle (nothing on stdout).
 ### `loci overview`
 
 Every command, grouped, with one example each. Alias: `loci commands`. Works with no workfolder.
-`--json` keys: `tool`, `version`, `palace`, `groups`, `doors`.
+`--json` keys: `tool`, `version` (the CLI version, without the format suffix), `palace`, `groups`, `doors`.
 
 ## What the tests hold
 

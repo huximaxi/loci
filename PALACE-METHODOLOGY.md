@@ -5,16 +5,28 @@
 
 # loci-core · workfolder methodology
 
-Workfolder methodology version tracker. The structural and intellectual core of loci, independent of the CLI and site versions.
+Workfolder methodology version tracker. The structural and intellectual core of loci, one version line with the CLI and the templates kit from 2.0.
 
 `loci-core` is the **cognitive substrate** of the workfolder: the templates, processes, and concepts that define how a workfolder works. The methodology is plain text and engine-agnostic. Any LLM with file access can run it. When you check for updates, this is the version you are comparing.
 
-> This document tracks the *methodology* line of loci-core: the plain-text templates, versioned independently of the apps.
+> This document tracks the *methodology* line of loci-core: the plain-text templates, on one version line with the CLI from 2.0.
 
-> loci-core version: 1.6-candidate
+> loci-core version: 2.0-candidate
 > stable: 1.2
 > status: candidate
-> updated: 2026-07-02
+> updated: 2026-11-25
+
+---
+
+## v2.0-candidate · 2026-11-25
+
+**One version line.** The methodology, the templates kit and the CLI now share one
+number. The methodology spent 1.0 to 1.6 on its own; the frozen crystal format
+(`templates/format-2.md`) changes how 1.x files are counted and read (legacy forms still read), so 2.0 says so. No methodology rule
+changed in this section: the number moved, the text did not. `stable` stays at 1.2
+until 2.0 has been used against a real workfolder and nothing was walked back.
+The anchor field is still named `loci-core version`: it names this methodology
+line, and the update checker parses it.
 
 ---
 
