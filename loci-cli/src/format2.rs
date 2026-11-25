@@ -124,6 +124,14 @@ pub struct Crystal {
     /// conformance oracle.
     #[serde(skip)]
     pub room: Option<String>,
+    /// 1-based line in `file` where the crystal starts: its glyph line in a container file, line
+    /// 1 (the opening `---`) for a file crystal. Not part of the conformance oracle.
+    #[serde(skip)]
+    pub line: usize,
+    /// 1-based last line the crystal spans: its last key line in a container file, the last line
+    /// of its fact paragraph (or of the heading, or of the frontmatter) for a file crystal.
+    #[serde(skip)]
+    pub end_line: usize,
 }
 
 impl Crystal {
@@ -141,6 +149,8 @@ impl Crystal {
             pinned_until: None,
             retired: None,
             room: None,
+            line: 0,
+            end_line: 0,
         }
     }
 
@@ -317,7 +327,8 @@ pub fn read_lines(text: &str, file: &str) -> (Vec<Crystal>, usize) {
     let mut notes = 0;
     let mut fence: Option<&str> = None;
     let mut open = false; // the last crystal still accepts key lines
-    for line in text.lines() {
+    for (ix, line) in text.lines().enumerate() {
+        let n = ix + 1;
         let t = line.trim_start();
         if let Some(f) = fence {
             if t.starts_with(f) {
@@ -335,14 +346,18 @@ pub fn read_lines(text: &str, file: &str) -> (Vec<Crystal>, usize) {
             open = false;
             continue;
         }
-        if let Some(c) = crystal_line(line, file) {
+        if let Some(mut c) = crystal_line(line, file) {
+            c.line = n;
+            c.end_line = n;
             out.push(c);
             open = true;
             continue;
         }
         if open {
             if let Some((k, v)) = key_line(line) {
-                out.last_mut().unwrap().apply_key(k, v);
+                let last = out.last_mut().unwrap();
+                last.apply_key(k, v);
+                last.end_line = n;
                 continue;
             }
         }
@@ -367,7 +382,9 @@ pub fn read_file_crystal(text: &str, file: &str) -> Option<Crystal> {
     }
     let mut fm: Vec<(String, String)> = Vec::new();
     let mut closed = false;
+    let mut consumed = 1; // lines read so far: the opening `---`
     for line in lines.by_ref() {
+        consumed += 1;
         if line.trim_end() == "---" {
             closed = true;
             break;
@@ -402,7 +419,9 @@ pub fn read_file_crystal(text: &str, file: &str) -> Option<Crystal> {
             .unwrap_or_default(),
     };
     let mut paragraph: Vec<&str> = Vec::new();
-    for l in body.iter().skip(heading.map_or(0, |i| i + 1)) {
+    // The span ends at the closing `---`, then at the heading, then at the last paragraph line.
+    let mut end_line = consumed + heading.map_or(0, |i| i + 1);
+    for (j, l) in body.iter().enumerate().skip(heading.map_or(0, |i| i + 1)) {
         if l.trim().is_empty() {
             if paragraph.is_empty() {
                 continue;
@@ -410,8 +429,11 @@ pub fn read_file_crystal(text: &str, file: &str) -> Option<Crystal> {
             break;
         }
         paragraph.push(l.trim());
+        end_line = consumed + j + 1;
     }
     let mut c = Crystal::new(file, Some(name), paragraph.join(" "), tier);
+    c.line = 1;
+    c.end_line = end_line;
     for (k, v) in &fm {
         c.apply_key(k, v);
     }
@@ -444,7 +466,7 @@ fn read_capped(path: &Path, cap: u64) -> Option<String> {
 /// Regular `.md` files under `dir`. Symlinks to files and directories are followed, as room
 /// discovery and the file count do; a directory already seen (by its real path) is not entered
 /// again, so a link back up the tree is read once; a file reached by two paths counts once. FIFOs, sockets and devices are never opened.
-fn md_files(dir: &Path, out: &mut Vec<std::path::PathBuf>) {
+pub(crate) fn md_files(dir: &Path, out: &mut Vec<std::path::PathBuf>) {
     let mut seen = std::collections::HashSet::new();
     let mut found = Vec::new();
     md_walk(dir, &mut found, &mut seen);
@@ -1252,5 +1274,73 @@ mod tests {
         let (c, notes) = read_lines(text, "CLAUDE.md");
         assert!(c.is_empty());
         assert_eq!(notes, 2);
+    }
+
+    #[test]
+    fn a_container_crystal_reports_its_line_and_the_end_of_its_key_block() {
+        let text = "# Title\n\n◈ A: one\nvalid_until: 2027-01-01\nsuperseded_by: B\n◆ B: two\n\n```\n◆ In fence: x\nvalid_until: x\n```\n◇ C: three\nnot a key\n";
+        let (c, _) = read_lines(text, "CLAUDE.md");
+        let spans: Vec<(&str, usize, usize)> = c
+            .iter()
+            .map(|c| (c.name.as_deref().unwrap(), c.line, c.end_line))
+            .collect();
+        assert_eq!(spans, vec![("A", 3, 5), ("B", 6, 6), ("C", 12, 12)]);
+    }
+
+    #[test]
+    fn a_file_crystal_spans_from_its_frontmatter_to_its_fact_paragraph() {
+        let with_body =
+            "---\ntype: crystal\ntier: working\n---\n# Name\n\nFirst line\nsecond line\n\nNot read\n";
+        let c = read_file_crystal(with_body, "garden/a.md").unwrap();
+        assert_eq!((c.line, c.end_line), (1, 8));
+        let heading_only = "---\ntype: crystal\n---\n# Name\n";
+        let c = read_file_crystal(heading_only, "garden/b.md").unwrap();
+        assert_eq!((c.line, c.end_line), (1, 4));
+        let frontmatter_only = "---\ntype: crystal\n---\n";
+        let c = read_file_crystal(frontmatter_only, "garden/c.md").unwrap();
+        assert_eq!((c.line, c.end_line), (1, 3));
+    }
+
+    /// The line numbers are real positions in the fixture files, and reading them leaves the
+    /// serialised crystal (the conformance oracle) unchanged.
+    #[test]
+    fn rooms_dir_crystals_carry_the_lines_of_their_files() {
+        let root = materialise("rooms-dir", "lines");
+        let reading = read(&root).unwrap();
+        let _ = fs::remove_dir_all(&root);
+        let span = |file: &str, name: &str| -> (usize, usize) {
+            let c = reading
+                .crystals
+                .iter()
+                .find(|c| c.file == file && c.name.as_deref() == Some(name))
+                .unwrap_or_else(|| panic!("no crystal {name} in {file}"));
+            (c.line, c.end_line)
+        };
+        let work = "rooms/work/CLAUDE.md";
+        assert_eq!(span(work, "Vendor"), (3, 3));
+        assert_eq!(span(work, "Privacy"), (5, 6));
+        assert_eq!(span(work, "Contract"), (7, 9));
+        assert_eq!(span(work, "Framing"), (10, 11));
+        assert_eq!(span(work, "Framing v2"), (12, 12));
+        assert_eq!(span(work, "Old rhythm"), (13, 14));
+        // The `→ Promoted` history line is not a key line: it ends the key block.
+        assert_eq!(span(work, "Promoted"), (16, 16));
+        assert_eq!(span("rooms/work/decision.md", "Database choice"), (1, 9));
+        assert_eq!(span("garden/first.md", "First fact"), (1, 9));
+        // Every crystal has a real, ordered span.
+        for c in &reading.crystals {
+            assert!(
+                c.line >= 1 && c.end_line >= c.line,
+                "{} {:?}: {}..{}",
+                c.file,
+                c.name,
+                c.line,
+                c.end_line
+            );
+        }
+        assert!(serde_json::to_value(&reading.crystals[0])
+            .unwrap()
+            .get("line")
+            .is_none());
     }
 }
