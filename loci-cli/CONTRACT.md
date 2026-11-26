@@ -34,7 +34,7 @@ found is exit 2. The workfolder spellings are canonical. The old ones (`--palace
 | `1` | I/O or unexpected error (unreadable file, malformed JSON input). |
 | `2` | Not found: no workfolder, no such crystal, no handover, no room. Nothing else. |
 | `3` | Bad input: a usage error (unknown flag or command, missing or malformed argument), an ambiguous slug, a removed flag (`rain --fire`), refusing to overwrite, a file over its size cap, `init` run without a terminal. Also `wal verify` when the bundle parses and does not verify (see its section). |
-| `4` | Ran, found problems: a command that read your files to the end and reports findings (added in 2.0.0-rc.2). Its findings are its output on stdout, and it writes no `loci:` line to stderr. Not an error: `1` stays "could not run". `wal verify` is not this: a bundle that does not verify stays `3`. A script that only tests for non-zero is unaffected; one that branches on the number (a `case` with a default for "could not run", or a test for `1` meaning findings) must handle `4`. |
+| `4` | Ran, found problems: a command that read your files to the end and found something that fails the run (added in 2.0.0-rc.2; for `loci check`, a `fail`: a `warn` exits 0). Its findings are its output on stdout, and it writes no `loci:` line to stderr. Not an error: `1` stays "could not run". `wal verify` is not this: a bundle that does not verify stays `3`. A script that only tests for non-zero is unaffected; one that branches on the number (a `case` with a default for "could not run", or a test for `1` meaning findings) must handle `4`. |
 
 A usage error is 3, never 2. (Before 2.0 clap's own exit 2 made a mistyped flag look like a missing
 workfolder.)
@@ -101,11 +101,12 @@ group of their own), `--as-of <YYYY-MM-DD>` (the date a rule compares against). 
 only: a plain folder of notes is exit 2.
 Exit 0: no finding of severity `fail`; a `warn` is printed and does not change the exit code. Exit 4:
 at least one `fail`; the findings are the output and stderr stays empty. New rules are additive, so a
-rule added (or moved up) at `fail` can turn an unchanged workfolder from 0 to 4: pin the version in
-CI, or read `findings` and act on `severity`. A rule added at `warn` cannot. Exit 2: no workfolder. Exit 3: a `--as-of` that is not a real date,
-a `--scope` that is not one of the two. Exit 1: a rule returned a finding without a usable
-`path:line`, which is a bug in loci, not in your files.
-Every run says how many rules ran and how many crystals were read, including `0 rules ran: nothing
+rule added (or moved up) at `fail` can turn an unchanged workfolder from 0 to 4, and one moved down
+to `warn` can turn a 4 into a 0: pin the version in CI, or read `findings` and act on `severity`. A
+rule added at `warn` cannot turn a 0 into a 4. Exit 2: no workfolder. Exit 3: a `--as-of` that is
+not a real date, a `--scope` that is not one of the two. Exit 1: a rule returned a finding without a
+usable `path:line`, which is a bug in loci, not in your files.
+Every run says how many rules ran, how many crystals were read and how many findings there are (and how many of those are `fail`), including `0 rules ran: nothing
 was checked`, and names each file it could not read in full (unreadable, not a regular file, or a
 root or room `CLAUDE.md` cut at 8 MiB), so a quiet run is never mistaken for a healthy one. Unread
 files do not change the exit code. Rules are registered one at a time; a rule ships only with a

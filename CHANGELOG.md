@@ -31,8 +31,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   by `loci check` instead of being skipped in silence.
 
 ### Changed
-- A new exit code, `4`: "ran, found problems". It is for commands that read your files and report findings
-  (`loci check`). `1` stays "could not run", `2` not found, `3` bad input, so
+- A new exit code, `4`: "ran, found problems". It is for a command that read your files and found
+  something that fails the run (`loci check`, on a `fail`; a `warn` exits 0). `1` stays "could not run", `2` not found, `3` bad input, so
   a script that treats any non-zero as failure is unaffected.
 - One version line. The CLI, the templates kit and the methodology are all 2.0: the CLI goes from
   0.7.0-beta to `2.0.0-rc.1`, the methodology anchor from 1.6-candidate to 2.0-candidate (`stable`

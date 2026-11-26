@@ -143,6 +143,9 @@ fn it_says_how_much_it_read_on_every_layout() {
     }
 }
 
+// No rule is registered yet, so every run here has no findings and this can only hold that such a run
+// exits 0 with nothing on stderr. The severity mapping itself is held by the unit test in check.rs;
+// this one gets its teeth when the first rule lands.
 #[test]
 fn the_exit_code_is_four_exactly_when_a_finding_is_a_fail_and_zero_otherwise() {
     let s = Scratch::new("exit");

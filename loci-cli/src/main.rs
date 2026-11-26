@@ -204,6 +204,8 @@ fn main() -> ExitCode {
 /// output). It is not an error: 1 stays "could not run".
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Outcome {
+    /// It ran to the end and nothing failed it. `loci check` also returns this when it only printed
+    /// `warn` findings.
     Clean,
     /// `loci check` returns this when any rule found a `fail` (a `warn` does not).
     Findings,

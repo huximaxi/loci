@@ -330,10 +330,16 @@ fn render_text(o: &Out) -> String {
         1 => "1 crystal".to_string(),
         n => format!("{n} crystals"),
     };
+    // Said beside the count, so a log that shows "3 findings" and a green exit explains itself.
+    let fails = o
+        .findings
+        .iter()
+        .filter(|f| f.severity.fails_the_run())
+        .count();
     let findings = match o.findings.len() {
         0 => "no findings".to_string(),
-        1 => "1 finding".to_string(),
-        n => format!("{n} findings"),
+        1 => format!("1 finding ({fails} fail)"),
+        n => format!("{n} findings ({fails} fail)"),
     };
     let _ = writeln!(t, "{rules}, {crystals} considered, {findings}.");
     if o.legacy_lines_not_counted > 0 {
@@ -1170,7 +1176,36 @@ mod tests {
         let t = render_text(&demo_out(&r, 5));
         assert!(t.starts_with("warn  demo.sees  two things [31m clash\n      rooms/work/CLAUDE.md:3\n      rooms/work/x.md:1\n\n"), "{t:?}");
         assert!(!t.contains('\u{1b}'));
-        assert!(t.contains("1 rule ran, 5 crystals considered, 1 finding."));
+        assert!(t.contains("1 rule ran, 5 crystals considered, 1 finding (0 fail)."));
+    }
+
+    #[test]
+    fn a_fail_prints_as_fail_and_the_footer_counts_the_fails_among_the_findings() {
+        let finding = |severity, rule| Finding {
+            rule,
+            severity,
+            message: "m".into(),
+            locations: vec![at("a.md", 1)],
+        };
+        let r = Report {
+            rules: vec![demo_run("demo.a", 1), demo_run("demo.b", 1)],
+            findings: vec![
+                finding(Severity::Fail, "demo.a"),
+                finding(Severity::Warn, "demo.b"),
+            ],
+        };
+        let t = render_text(&demo_out(&r, 2));
+        assert!(t.starts_with("fail  demo.a  m\n"), "{t:?}");
+        assert!(t.contains("\nwarn  demo.b  m\n"), "{t:?}");
+        assert!(
+            t.contains("2 rules ran, 2 crystals considered, 2 findings (1 fail)."),
+            "{t}"
+        );
+        let one = Report {
+            rules: vec![demo_run("demo.a", 1)],
+            findings: vec![finding(Severity::Fail, "demo.a")],
+        };
+        assert!(render_text(&demo_out(&one, 2)).contains("1 finding (1 fail)."));
     }
 
     fn keys(v: &Value) -> Vec<&str> {
@@ -1280,13 +1315,20 @@ mod tests {
         assert_eq!(g.report.findings.len(), 1, "the warn is reported");
         let warned = run_with(&[rule("demo.warns", always)], args(), true).unwrap();
         assert_eq!(warned, Outcome::Clean, "a warn alone does not fail the run");
-        // One `fail` among warns still fails it, in either rule order.
-        for rules in [
-            [rule("demo.warns", always), failing("demo.fails")],
-            [failing("demo.fails"), rule("demo.warns", always)],
-        ] {
-            let mixed = run_with(&rules, args(), true).unwrap();
-            assert_eq!(mixed, Outcome::Findings);
+        // One `fail` among warns still fails it, whether its finding sorts before or after the
+        // warn. The three share a location, so the rule id decides the order; the assert on the
+        // position keeps the loop honest.
+        for (fail_id, last) in [("demo.afails", false), ("demo.zfails", true)] {
+            for rules in [
+                [rule("demo.warns", always), failing(fail_id)],
+                [failing(fail_id), rule("demo.warns", always)],
+            ] {
+                let g = gather(&rules, args()).unwrap();
+                let fail_is_last = g.report.findings.last().unwrap().severity == Severity::Fail;
+                assert_eq!(fail_is_last, last, "{fail_id} sorts where its id says");
+                let mixed = run_with(&rules, args(), true).unwrap();
+                assert_eq!(mixed, Outcome::Findings, "{fail_id}");
+            }
         }
         // A `fail` rule that finds nothing is quiet.
         let silent = Rule {
