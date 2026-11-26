@@ -557,3 +557,26 @@ fn version_names_the_format_and_matches_the_methodology_anchor() {
     };
     assert_eq!(major(line), major(pkg), "anchor {line} vs CLI {pkg}");
 }
+
+/// The exit-code table in CONTRACT.md names every code the binary can return (0 to 4), so a
+/// script author finds "ran, found problems" (4) beside "could not run" (1).
+#[test]
+fn the_contract_names_every_exit_code() {
+    let doc = fs::read_to_string(concat!(env!("CARGO_MANIFEST_DIR"), "/CONTRACT.md"))
+        .expect("CONTRACT.md");
+    let table = doc
+        .split("## Exit codes")
+        .nth(1)
+        .and_then(|t| t.split("\n## ").next())
+        .expect("an Exit codes section");
+    for c in 0..=4 {
+        let row = table
+            .lines()
+            .find(|l| l.starts_with(&format!("| `{c}` |")))
+            .unwrap_or_else(|| panic!("CONTRACT.md Exit codes has no row for {c}"));
+        assert!(row.len() > 20, "the row for {c} says nothing: {row}");
+        if c == 4 {
+            assert!(row.contains("found problems"), "row 4 must say what 4 means");
+        }
+    }
+}
