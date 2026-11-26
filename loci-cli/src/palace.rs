@@ -248,8 +248,35 @@ fn walk_for_slug(dir: &Path, slug_lc: &str, hits: &mut Vec<PathBuf>) {
     }
 }
 
-/// Return the newest `.md` file under a path named like a handover.
-/// Convention: filename contains "HANDOVER" (any case) OR lives in a `handovers/` dir.
+/// Whether `name` has the word "template" in it: the name is cut at `-`, `_`, `.` and spaces, and
+/// one of the pieces (the first and the last included) is `template` or `templates`, in any ASCII
+/// case. `handover-template.md`, `template-handover.md` and `HANDOVER_TEMPLATE.md` count;
+/// `contemplate.md` does not, because it only contains the letters, and neither do
+/// `HandoverTemplate.md` (no separator) or `template2.md` (a digit glued on).
+fn says_template(name: &str) -> bool {
+    name.split(['-', '_', '.', ' '])
+        .any(|w| w.eq_ignore_ascii_case("template") || w.eq_ignore_ascii_case("templates"))
+}
+
+/// Whether a candidate replaces the best handover so far: it is newer, or it has the same
+/// modification time and the greater path (`PathBuf` order, directory by directory). The winner is
+/// then the maximum of (time, path), whatever order the disk lists the files in.
+fn beats(
+    modified: std::time::SystemTime,
+    path: &Path,
+    best: &(std::time::SystemTime, PathBuf),
+) -> bool {
+    modified > best.0 || (modified == best.0 && path > best.1.as_path())
+}
+
+/// Return the newest handover: an `.md` file with HANDOVER in its name (any case), or one that sits
+/// directly in a `handovers/` directory (any case). Hidden files and directories, `node_modules`,
+/// `target` and a directory named `templates` (any case) are not searched.
+/// A template is not a handover: a file with the word "template" in its name is skipped (see
+/// [`says_template`]), so a freshly copied `handover-template.md` cannot win on mtime. A real
+/// handover named that way, or kept under `templates/`, is skipped too and an older one is returned.
+/// Two files with the same mtime resolve to the greater path (see [`beats`]), so the answer does
+/// not depend on the order the disk lists them.
 pub fn latest_handover(p: &Palace) -> Option<PathBuf> {
     let mut best: Option<(std::time::SystemTime, PathBuf)> = None;
     let mut stack = vec![p.root.clone()];
@@ -264,11 +291,13 @@ pub fn latest_handover(p: &Palace) -> Option<PathBuf> {
             }
             let path = entry.path();
             if path.is_dir() {
-                stack.push(path);
+                if !name.eq_ignore_ascii_case("templates") {
+                    stack.push(path);
+                }
                 continue;
             }
             let is_md = path.extension().and_then(|e| e.to_str()) == Some("md");
-            if !is_md {
+            if !is_md || says_template(&name) {
                 continue;
             }
             let looks_like_handover = name.to_uppercase().contains("HANDOVER")
@@ -281,7 +310,7 @@ pub fn latest_handover(p: &Palace) -> Option<PathBuf> {
             if let Ok(meta) = entry.metadata() {
                 if let Ok(modified) = meta.modified() {
                     match &best {
-                        Some((t, _)) if modified <= *t => {}
+                        Some(b) if !beats(modified, &path, b) => {}
                         _ => best = Some((modified, path)),
                     }
                 }
@@ -309,6 +338,167 @@ mod tests {
         fs::create_dir_all(&r).unwrap();
         fs::write(r.join("CLAUDE.md"), "# room\n").unwrap();
         fs::write(r.join("note.md"), "crystal\n").unwrap();
+    }
+
+    /// Write `rel` under `root` with the given modification time.
+    fn stamped(root: &Path, rel: &str, t: std::time::SystemTime) -> PathBuf {
+        let path = root.join(rel);
+        fs::create_dir_all(path.parent().unwrap()).unwrap();
+        fs::write(&path, "# note\n").unwrap();
+        fs::File::options()
+            .write(true)
+            .open(&path)
+            .unwrap()
+            .set_modified(t)
+            .unwrap();
+        path
+    }
+
+    /// Like `stamped`, with the time given as an age in seconds (larger is older).
+    fn aged(root: &Path, rel: &str, age_secs: u64) -> PathBuf {
+        let t = std::time::SystemTime::now() - std::time::Duration::from_secs(age_secs);
+        stamped(root, rel, t)
+    }
+
+    fn workfolder(name: &str) -> (PathBuf, Palace) {
+        let root = scratch(name);
+        fs::write(root.join("PALACE.md"), "# workfolder\n").unwrap();
+        room(&root.join("_palace"), "ideas-room");
+        let p = validate(&root).expect("workfolder detected");
+        (root, p)
+    }
+
+    #[test]
+    fn a_newer_template_never_wins_over_the_real_handover() {
+        let (root, p) = workfolder("handover_template");
+        let real = aged(&root, "handovers/HANDOVER_2026-11-24.md", 3600);
+        // Newer than the handover, and named or placed like a handover. The first is caught by
+        // either rule, the second by the name rule alone; the directory rule has its own test.
+        aged(&root, "templates/handover-template.md", 10);
+        aged(&root, "handovers/HANDOVER-TEMPLATE.md", 20);
+        assert_eq!(latest_handover(&p), Some(real.clone()));
+
+        // With the real handover gone the templates alone are no handover.
+        fs::remove_file(&real).unwrap();
+        assert_eq!(latest_handover(&p), None);
+        let _ = fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn a_templates_directory_is_skipped_whatever_its_case() {
+        // Its own workfolder, so no lowercase `templates/` exists to absorb the name on a
+        // case-insensitive disk.
+        let (root, p) = workfolder("handover_template_case");
+        let real = aged(&root, "handovers/HANDOVER_2026-11-24.md", 3600);
+        aged(&root, "TEMPLATES/HANDOVER_blank.md", 30);
+        assert_eq!(latest_handover(&p), Some(real));
+        let _ = fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn the_newest_handover_wins_and_a_tie_resolves_to_the_later_path() {
+        let (root, p) = workfolder("handover_order");
+        aged(&root, "handovers/HANDOVER_2026-11-20.md", 7200);
+        let newer = aged(&root, "handovers/HANDOVER_2026-11-24.md", 60);
+        assert_eq!(latest_handover(&p), Some(newer));
+
+        // Same mtime, end to end: the later name wins. Whether this alone would catch a
+        // first-listed-wins walk depends on the order this disk lists the files in, so the tie
+        // rule is also tested directly, in `beats_is_newest_then_greatest_path`.
+        let (root2, p2) = workfolder("handover_tie");
+        let t = std::time::SystemTime::now() - std::time::Duration::from_secs(500);
+        stamped(&root2, "handovers/HANDOVER_2026-11-20.md", t);
+        stamped(&root2, "handovers/HANDOVER_2026-11-22.md", t);
+        let later = stamped(&root2, "handovers/HANDOVER_2026-11-24.md", t);
+        assert_eq!(latest_handover(&p2), Some(later));
+        let _ = fs::remove_dir_all(&root);
+        let _ = fs::remove_dir_all(&root2);
+    }
+
+    #[test]
+    fn beats_is_newest_then_greatest_path() {
+        use std::time::{Duration, SystemTime};
+        let t = SystemTime::now() - Duration::from_secs(500);
+        let older = t - Duration::from_secs(60);
+        let newer = t + Duration::from_secs(60);
+        let best = (t, PathBuf::from("/r/handovers/HANDOVER_2026-11-22.md"));
+        // A tie goes to the greater path and never to the earlier one, whichever is the best so far.
+        assert!(beats(
+            t,
+            Path::new("/r/handovers/HANDOVER_2026-11-24.md"),
+            &best
+        ));
+        assert!(!beats(
+            t,
+            Path::new("/r/handovers/HANDOVER_2026-11-20.md"),
+            &best
+        ));
+        // The same file again is not a replacement.
+        assert!(!beats(t, best.1.as_path(), &best));
+        // Time comes first, whatever the path.
+        assert!(beats(
+            newer,
+            Path::new("/r/handovers/HANDOVER_2026-11-01.md"),
+            &best
+        ));
+        assert!(!beats(
+            older,
+            Path::new("/r/handovers/HANDOVER_2026-11-30.md"),
+            &best
+        ));
+        // Across directories the paths are compared directory by directory: `a` sorts before `a-b`,
+        // although as plain text `/r/a/` sorts after `/r/a-b`.
+        let in_a = (t, PathBuf::from("/r/a/HANDOVER.md"));
+        assert!(beats(t, Path::new("/r/a-b/HANDOVER.md"), &in_a));
+        assert!(!beats(
+            t,
+            in_a.1.as_path(),
+            &(t, PathBuf::from("/r/a-b/HANDOVER.md"))
+        ));
+    }
+
+    #[test]
+    fn the_word_template_is_skipped_but_the_letters_are_not() {
+        for yes in [
+            "handover-template.md",
+            "HANDOVER-TEMPLATE.md",
+            "HANDOVER_templates.md",
+            "handover-annex.template.md",
+            "template-handover.md",
+            "handover template.md",
+        ] {
+            assert!(says_template(yes), "{yes}");
+        }
+        for no in [
+            "HANDOVER_2026-11-24.md",
+            "HANDOVER_contemplate.md",
+            "handover-templated.md",
+            "HANDOVER.md",
+            // The documented limits: no separator, or a digit glued on.
+            "HandoverTemplate.md",
+            "template2.md",
+        ] {
+            assert!(!says_template(no), "{no}");
+        }
+    }
+
+    #[test]
+    fn a_handover_that_only_contains_the_letters_is_still_found() {
+        let (root, p) = workfolder("handover_letters");
+        aged(&root, "handovers/HANDOVER_2026-11-20.md", 7200);
+        let newest = aged(&root, "handovers/HANDOVER_2026-11-26_contemplate.md", 30);
+        assert_eq!(latest_handover(&p), Some(newest));
+        let _ = fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn a_directory_that_only_contains_the_letters_is_still_searched() {
+        let (root, p) = workfolder("handover_dir_letters");
+        aged(&root, "handovers/HANDOVER_2026-11-20.md", 7200);
+        aged(&root, "templated/HANDOVER_2026-11-25.md", 600);
+        let newest = aged(&root, "contemplate/HANDOVER_2026-11-26.md", 30);
+        assert_eq!(latest_handover(&p), Some(newest));
+        let _ = fs::remove_dir_all(&root);
     }
 
     #[test]
