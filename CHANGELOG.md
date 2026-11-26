@@ -10,8 +10,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 - `loci check`: ask the workfolder whether it still agrees with itself. Read-only; findings come as
   `path:line`, and every run says how many rules ran, how many crystals were read and which files it
-  could not read in full, so a quiet run is not read as a healthy one. Exit `0` for nothing found,
-  `4` for a finding. `--scope room|workfolder` and `--as-of <date>` (the date a rule compares
+  could not read in full, so a quiet run is not read as a healthy one. Each finding is a `warn` or a
+  `fail`: exit `4` when there is a `fail`, exit `0` otherwise (a `warn` is printed, never fails the run). `--scope room|workfolder` and `--as-of <date>` (the date a rule compares
   against; the clock only fills its default). The command and its `--json` output are frozen from
   2.0; no rule is registered in this change, the rules land one at a time, each with a planted and a
   clean fixture and the `path:line` it must point at, which CI holds it to.

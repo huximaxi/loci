@@ -99,10 +99,10 @@ Flags: `--scope room|workfolder` (default `room`: how wide a rule compares cryst
 not compare across rooms ignores it; crystals outside any room, the root files and `garden/`, form one
 group of their own), `--as-of <YYYY-MM-DD>` (the date a rule compares against). It runs on a workfolder
 only: a plain folder of notes is exit 2.
-Exit 0: nothing found. Exit 4: at least one finding, whatever its severity; the findings are the
-output and stderr stays empty. Every severity exits 4 and new rules are additive, so a release that
-adds a rule can turn an unchanged workfolder from 0 to 4: pin the version in CI, or read
-`findings` and act on `severity`. Exit 2: no workfolder. Exit 3: a `--as-of` that is not a real date,
+Exit 0: no finding of severity `fail`; a `warn` is printed and does not change the exit code. Exit 4:
+at least one `fail`; the findings are the output and stderr stays empty. New rules are additive, so a
+rule added (or moved up) at `fail` can turn an unchanged workfolder from 0 to 4: pin the version in
+CI, or read `findings` and act on `severity`. A rule added at `warn` cannot. Exit 2: no workfolder. Exit 3: a `--as-of` that is not a real date,
 a `--scope` that is not one of the two. Exit 1: a rule returned a finding without a usable
 `path:line`, which is a bug in loci, not in your files.
 Every run says how many rules ran and how many crystals were read, including `0 rules ran: nothing

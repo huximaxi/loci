@@ -74,7 +74,7 @@ enum Cmd {
     ///
     /// Runs every rule over the workfolder and prints what it found, with how many rules ran,
     /// how many crystals were read and which files it could not read in full, so a quiet run is
-    /// not mistaken for a healthy one. Exit 0 when nothing was found, 4 when something was. It
+    /// not mistaken for a healthy one. Exit 4 when a rule found a `fail`; a `warn` is printed and the exit stays 0. It
     /// never edits a file, uses no model and no network, and reads the clock only to fill in
     /// the default of `--as-of` (UTC).
     Check {
@@ -205,7 +205,7 @@ fn main() -> ExitCode {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Outcome {
     Clean,
-    /// `loci check` returns this when any rule found something.
+    /// `loci check` returns this when any rule found a `fail` (a `warn` does not).
     Findings,
 }
 

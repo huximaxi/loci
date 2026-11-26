@@ -1,7 +1,7 @@
 //! `loci check` against the real binary, on the three format 2 workfolders. The rules themselves
 //! are tested where they land (each with its planted and clean fixture); this file holds what
-//! every run must do whichever rules are registered: say how much it checked, exit 0 exactly when
-//! it found nothing and 4 exactly when it found something, never write, and give the same output
+//! every run must do whichever rules are registered: say how much it checked, exit 4 exactly when
+//! it found a `fail` (a `warn` is printed and exits 0), never write, and give the same output
 //! twice.
 
 use serde_json::Value;
@@ -144,15 +144,19 @@ fn it_says_how_much_it_read_on_every_layout() {
 }
 
 #[test]
-fn the_exit_code_is_zero_exactly_when_nothing_was_found_and_four_exactly_when_something_was() {
+fn the_exit_code_is_four_exactly_when_a_finding_is_a_fail_and_zero_otherwise() {
     let s = Scratch::new("exit");
     for layout in LAYOUTS {
         let root = s.copy(layout);
         let o = s.check(&root, &["--json"]);
-        let found = !json(&o)["findings"].as_array().unwrap().is_empty();
+        let failed = json(&o)["findings"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|f| f["severity"] == "fail");
         assert_eq!(
             code(&o),
-            if found { 4 } else { 0 },
+            if failed { 4 } else { 0 },
             "{layout}: {}",
             stderr(&o)
         );

@@ -9,7 +9,8 @@
 //! returns hits. A rule never writes its own id or severity into a finding: the engine stamps
 //! both from the record, so a finding cannot claim to be another rule's. The engine also refuses a
 //! finding that has no usable `path:line`. Rule ids and the keys of the `--json` output are
-//! frozen from 2.0; new rule ids and new keys are additive.
+//! frozen from 2.0; new rule ids and new keys are additive. A `fail` finding makes the run exit 4;
+//! a `warn` is reported and the run still exits 0.
 //!
 //! **A rule must prove it can see.** Each rule ships a workfolder that makes it fire
 //! (`tests/fixtures/check/<id>/planted/`), one that does not (`.../clean/`) and an `expected.txt`
@@ -27,8 +28,10 @@ use crate::{Error, Outcome};
 use serde::Serialize;
 use std::path::PathBuf;
 
-/// How serious a finding is. Every finding makes the run exit 4 (`CONTRACT.md`); the severity says
-/// how much to trust it. A new rule starts at `warn`. More values may be added.
+/// How serious a finding is, and whether it fails the run (`CONTRACT.md`). A `fail` makes the run
+/// exit 4. A `warn` is printed and the run still exits 0, so a rule that may be wrong can ship
+/// without turning an unchanged workfolder from 0 to 4. More values may be added; each one must
+/// say which side of the exit it is on, in [`Severity::fails_the_run`], which has no wildcard arm.
 // No rule is registered yet, so neither variant is built outside the tests.
 #[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize)]
@@ -45,6 +48,14 @@ impl Severity {
         match self {
             Severity::Warn => "warn",
             Severity::Fail => "fail",
+        }
+    }
+
+    /// Whether a finding of this severity makes the run exit 4.
+    fn fails_the_run(self) -> bool {
+        match self {
+            Severity::Warn => false,
+            Severity::Fail => true,
         }
     }
 }
@@ -283,11 +294,13 @@ fn run_with(rules: &[Rule], args: Args, json: bool) -> Result<Outcome, Error> {
     } else {
         print!("{}", render_text(&out));
     }
-    Ok(if g.report.findings.is_empty() {
-        Outcome::Clean
-    } else {
-        Outcome::Findings
-    })
+    Ok(
+        if g.report.findings.iter().any(|f| f.severity.fails_the_run()) {
+            Outcome::Findings
+        } else {
+            Outcome::Clean
+        },
+    )
 }
 
 fn render_text(o: &Out) -> String {
@@ -1247,7 +1260,7 @@ mod tests {
     }
 
     #[test]
-    fn a_run_with_any_finding_is_the_findings_outcome_and_a_quiet_one_is_clean() {
+    fn only_a_fail_finding_is_the_findings_outcome_a_warn_or_a_quiet_run_is_clean() {
         let base = scratch("outcome");
         workfolder(&base, "◆ fine = ok\n");
         let args = || Args {
@@ -1255,8 +1268,32 @@ mod tests {
             scope: Scope::Room,
             as_of: Some("2026-11-24".into()),
         };
-        let found = run_with(&[rule("demo.always", always)], args(), true).unwrap();
+        let failing = |id: &'static str| Rule {
+            severity: Severity::Fail,
+            ..rule(id, always)
+        };
+        // A `fail` finding fails the run.
+        let found = run_with(&[failing("demo.fails")], args(), true).unwrap();
         assert_eq!(found, Outcome::Findings);
+        // A `warn` finding is reported and the run is still clean.
+        let g = gather(&[rule("demo.warns", always)], args()).unwrap();
+        assert_eq!(g.report.findings.len(), 1, "the warn is reported");
+        let warned = run_with(&[rule("demo.warns", always)], args(), true).unwrap();
+        assert_eq!(warned, Outcome::Clean, "a warn alone does not fail the run");
+        // One `fail` among warns still fails it, in either rule order.
+        for rules in [
+            [rule("demo.warns", always), failing("demo.fails")],
+            [failing("demo.fails"), rule("demo.warns", always)],
+        ] {
+            let mixed = run_with(&rules, args(), true).unwrap();
+            assert_eq!(mixed, Outcome::Findings);
+        }
+        // A `fail` rule that finds nothing is quiet.
+        let silent = Rule {
+            severity: Severity::Fail,
+            ..rule("demo.silent", never)
+        };
+        assert_eq!(run_with(&[silent], args(), true).unwrap(), Outcome::Clean);
         let quiet = run_with(&[rule("demo.never", never)], args(), true).unwrap();
         assert_eq!(quiet, Outcome::Clean);
         let bad = run_with(
