@@ -303,7 +303,7 @@ fn two_runs_are_byte_identical() {
 fn limit_and_room_narrow_the_results_without_changing_scores() {
     let s = Scratch::new("a_narrow");
     let root = s.copy(&fixture("rooms-dir"), "wf");
-    let all = s.recall(&root, "plain", &[]);
+    let all = s.recall(&root, "plain", &["--limit", "100"]);
     let top = s.recall(&root, "plain", &["--limit", "1"]);
     assert_eq!(results(&top).len(), 1);
     assert_eq!(results(&top)[0]["cite"], results(&all)[0]["cite"]);
@@ -594,6 +594,11 @@ fn g_words_match_whole_and_the_limits_are_visible() {
     assert_eq!(v["unmatched_tokens"][0], "arvizturo");
     let v = s.recall(&root, "házban", &[]);
     assert!(results(&v).is_empty());
+    // No Unicode normalisation either: a decomposed é (e + combining accent) does not match the
+    // precomposed one in the file.
+    let v = s.recall(&root, "cafe\u{301}", &[]);
+    assert!(results(&v).is_empty());
+    assert_eq!(v["unmatched_tokens"][0], "cafe");
 
     let v = s.recall(&root, "café", &[]);
     let paths: Vec<&str> = results(&v)
@@ -620,9 +625,277 @@ fn g_a_dotted_or_hyphenated_compound_finds_itself_and_its_parts() {
         let v = s.recall(&root, q, &[]);
         assert_eq!(cites(&v), vec!["v.md:1"], "query {q}");
     }
+    // `5.2` is not a compound that appears in the text (its parts `5` and `2` do), so the
+    // compound itself is named as found in no file.
     let v = s.recall(&root, "5.2", &[]);
+    let missed: Vec<&str> = v["unmatched_tokens"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|x| x.as_str().unwrap())
+        .collect();
+    assert_eq!(missed, vec!["5.2"]);
+}
+
+// ── what the review found: reads stay inside the root, text stays searchable ──
+
+#[test]
+fn a_workfolder_symlink_is_never_followed_and_its_target_is_never_read() {
+    let s = Scratch::new("sym_palace");
+    let root = s.copy(&fixture("rooms-dir"), "wf");
+    let before = s.recall(&root, "walrus", &[]);
+    let crystals_before = before["scope"]["crystals_read"].as_u64().unwrap();
+    let outside = s.base.join("outside/room");
+    fs::create_dir_all(&outside).unwrap();
+    fs::write(
+        outside.join("CLAUDE.md"),
+        "# Ghost\n\n◆ Ghost: the walrus keeps the books\n",
+    )
+    .unwrap();
+    std::os::unix::fs::symlink(&outside, root.join("rooms/ghost")).unwrap();
+    // A link to a whole tree must not be walked either.
+    std::os::unix::fs::symlink("/", root.join("rooms/everything")).unwrap();
+    let v = s.recall(&root, "walrus", &[]);
     assert!(
-        results(&v).is_empty() || v["unmatched_tokens"].as_array().unwrap().len() == 1,
-        "5.2 is not a compound that appears in the text"
+        results(&v).is_empty(),
+        "foreign text was read: {:?}",
+        cites(&v)
     );
+    assert_eq!(
+        v["scope"]["crystals_read"].as_u64().unwrap(),
+        crystals_before
+    );
+    assert_eq!(v["scope"]["skipped_symlinks"], 2);
+}
+
+#[test]
+fn a_symlink_to_a_file_does_not_change_the_state_of_the_file_it_points_at() {
+    let s = Scratch::new("sym_state");
+    let root = s.copy(&fixture("rooms-dir"), "wf");
+    let clean = s.recall(&root, "free text", &[]);
+    let hit = |v: &Value| -> (String, String) {
+        let r = results(v)
+            .iter()
+            .find(|r| r["path"] == "rooms/work/decision.md")
+            .expect("the body paragraph is a hit");
+        (
+            r["state"].as_str().unwrap().to_string(),
+            r["superseded_by"].as_str().unwrap().to_string(),
+        )
+    };
+    assert_eq!(hit(&clean).0, "superseded");
+    std::os::unix::fs::symlink("decision.md", root.join("rooms/work/aa-link.md")).unwrap();
+    let v = s.recall(&root, "free text", &[]);
+    assert_eq!(
+        hit(&v),
+        hit(&clean),
+        "the link changed the real file's state"
+    );
+    assert!(!cites(&v).iter().any(|c| c.contains("aa-link")));
+}
+
+#[test]
+fn a_root_marker_that_is_a_symlink_is_skipped_not_half_read() {
+    let s = Scratch::new("sym_marker");
+    let root = s.copy(&fixture("rooms-dir"), "wf");
+    let real = root.join("CLAUDE.md");
+    fs::rename(&real, s.base.join("moved.md")).unwrap();
+    std::os::unix::fs::symlink(s.base.join("moved.md"), &real).unwrap();
+    let v = s.recall(&root, "gardening", &[]);
+    assert!(results(&v).is_empty(), "{:?}", cites(&v));
+    assert!(v["scope"]["skipped_symlinks"].as_u64().unwrap() >= 1);
+}
+
+#[test]
+fn obsidian_block_list_tags_and_block_scalars_are_searchable() {
+    let s = Scratch::new("fm_blocks");
+    let root = s.base.join("notes");
+    fs::create_dir_all(&root).unwrap();
+    fs::write(
+        root.join("a.md"),
+        "---\ntags:\n  - hatchery\n  - \"seed bed\"\ncreated: 2026-11-01\n---\nbody\n",
+    )
+    .unwrap();
+    fs::write(
+        root.join("b.md"),
+        "---\ntitle: Plain\ndescription: >\n  the capybara line\n  and a second line\naliases: [moth]\n---\nbody\n",
+    )
+    .unwrap();
+    for (q, file) in [
+        ("hatchery", "a.md"),
+        ("bed", "a.md"),
+        ("capybara", "b.md"),
+        ("second", "b.md"),
+        ("moth", "b.md"),
+    ] {
+        let v = s.recall(&root, q, &[]);
+        assert_eq!(results(&v)[0]["path"], file, "query {q}");
+    }
+    // Dates stay unsearchable.
+    assert!(results(&s.recall(&root, "2026", &[])).is_empty());
+}
+
+#[test]
+fn a_leading_rule_above_prose_is_not_frontmatter() {
+    let s = Scratch::new("fm_rule");
+    let root = s.base.join("notes");
+    fs::create_dir_all(&root).unwrap();
+    fs::write(
+        root.join("deck.md"),
+        "---\nthe osprey nests on the mast\n---\nsecond slide\n",
+    )
+    .unwrap();
+    let v = s.recall(&root, "osprey", &[]);
+    assert_eq!(cites(&v), vec!["deck.md:1-4"]);
+    assert_eq!(v["scope"]["malformed_frontmatter"], 0);
+}
+
+#[test]
+fn what_a_hit_shows_is_the_line_that_matched() {
+    let s = Scratch::new("shown");
+    let root = s.base.join("notes");
+    fs::create_dir_all(&root).unwrap();
+    fs::write(
+        root.join("p.md"),
+        "first line about nothing\nsecond line about less\nthe pelican is on line three\nfourth\n",
+    )
+    .unwrap();
+    let v = s.recall(&root, "pelican", &[]);
+    assert_eq!(cites(&v), vec!["p.md:1-4"]);
+    assert_eq!(results(&v)[0]["text"], "the pelican is on line three");
+}
+
+#[test]
+fn terminal_control_sequences_in_a_note_never_reach_the_terminal() {
+    let s = Scratch::new("ctrl");
+    let root = s.base.join("notes");
+    fs::create_dir_all(&root).unwrap();
+    fs::write(
+        root.join("e.md"),
+        "\u{1b}[2J\u{1b}]0;owned\u{7}the heron lands\n",
+    )
+    .unwrap();
+    let o = s.run(&["recall", "heron", "--root", root.to_str().unwrap()]);
+    assert_eq!(code(&o), 0);
+    let text = stdout(&o);
+    assert!(text.contains("the heron lands"), "{text}");
+    assert!(
+        !text.chars().any(|c| c.is_control() && c != '\n'),
+        "a control character reached stdout: {text:?}"
+    );
+}
+
+#[test]
+fn an_unreadable_directory_is_counted_not_hidden() {
+    use std::os::unix::fs::PermissionsExt;
+    let s = Scratch::new("unreadable");
+    let root = s.copy(&setup("c/notes"), "notes");
+    let locked = root.join("locked");
+    fs::create_dir_all(&locked).unwrap();
+    fs::set_permissions(&locked, fs::Permissions::from_mode(0o000)).unwrap();
+    // A superuser reads it anyway; the count only has to hold where the directory really is closed.
+    let closed = fs::read_dir(&locked).is_err();
+    let v = s.recall(&root, "kettle", &[]);
+    fs::set_permissions(&locked, fs::Permissions::from_mode(0o755)).unwrap();
+    if closed {
+        assert_eq!(v["scope"]["not_read"]["unreadable"], 1);
+        assert_eq!(v["scope"]["not_read"]["total"], 1);
+    }
+    assert_eq!(v["scope"]["files_read"], 3);
+}
+
+#[test]
+fn a_blank_line_inside_a_block_scalar_does_not_end_it() {
+    let s = Scratch::new("fm_blank");
+    let root = s.base.join("notes");
+    fs::create_dir_all(&root).unwrap();
+    fs::write(
+        root.join("m.md"),
+        "---\ntitle: T\ndescription: |\n  first paragraph\n\n  capybarax second paragraph\n---\nbody\n",
+    )
+    .unwrap();
+    let v = s.recall(&root, "capybarax", &[]);
+    assert_eq!(cites(&v), vec!["m.md:1-7"]);
+}
+
+#[test]
+fn frontmatter_that_opens_with_a_comment_or_a_blank_line_is_frontmatter() {
+    let s = Scratch::new("fm_comment");
+    let root = s.base.join("notes");
+    fs::create_dir_all(&root).unwrap();
+    fs::write(
+        root.join("c.md"),
+        "---\n# generated by a tool\ntitle: zebrafrog\ncreated: 20261125\n---\nbody\n",
+    )
+    .unwrap();
+    fs::write(root.join("b.md"), "---\n\ntitle: wombatx\n---\nbody\n").unwrap();
+    assert_eq!(cites(&s.recall(&root, "zebrafrog", &[])), vec!["c.md:1-5"]);
+    assert_eq!(cites(&s.recall(&root, "wombatx", &[])), vec!["b.md:1-4"]);
+    // a date key is not text: it is not searchable
+    assert!(cites(&s.recall(&root, "20261125", &[])).is_empty());
+}
+
+#[test]
+fn a_long_line_shows_the_part_that_matched() {
+    let s = Scratch::new("long_line");
+    let root = s.base.join("notes");
+    fs::create_dir_all(&root).unwrap();
+    let line = format!(
+        "{}pelicanzz is here and so is the end",
+        "filler ".repeat(60)
+    );
+    fs::write(root.join("l.md"), format!("{line}\n")).unwrap();
+    let v = s.recall(&root, "pelicanzz", &[]);
+    let text = results(&v)[0]["text"].as_str().unwrap().to_string();
+    assert!(text.contains("pelicanzz"), "{text}");
+    assert!(text.chars().count() <= 161, "{}", text.chars().count());
+}
+
+#[test]
+fn bidi_overrides_and_zero_width_marks_never_reach_the_terminal() {
+    let s = Scratch::new("bidi");
+    let root = s.base.join("notes");
+    fs::create_dir_all(&root).unwrap();
+    fs::write(
+        root.join("b.md"),
+        "the egret \u{202e}gnirts\u{200b}x\u{2028}tail\n",
+    )
+    .unwrap();
+    let o = s.run(&["recall", "egret", "--root", root.to_str().unwrap()]);
+    assert_eq!(code(&o), 0);
+    let text = stdout(&o);
+    assert!(text.contains("the egret"), "{text}");
+    for bad in ['\u{202e}', '\u{200b}', '\u{2028}'] {
+        assert!(!text.contains(bad), "{bad:?} reached stdout: {text:?}");
+    }
+}
+
+#[test]
+fn one_file_cannot_carry_a_run_past_the_chunk_cap() {
+    let s = Scratch::new("chunk_cap");
+    let root = s.base.join("notes");
+    fs::create_dir_all(&root).unwrap();
+    // 349,000 one-letter paragraphs is just under 1 MiB: two such files are over 500,000 chunks.
+    let body = "x\n\n".repeat(349_000);
+    fs::write(root.join("a.md"), &body).unwrap();
+    fs::write(root.join("b.md"), &body).unwrap();
+    fs::write(root.join("c.md"), "the ibis\n").unwrap();
+    let v = s.recall(&root, "ibis", &[]);
+    assert_eq!(v["scope"]["truncated"], true);
+    assert!(v["scope"]["chunks"].as_u64().unwrap() <= 500_000);
+    let o = s.run(&["recall", "ibis", "--root", root.to_str().unwrap()]);
+    assert!(stdout(&o).contains("chunks"), "{}", stdout(&o));
+}
+
+#[test]
+fn the_file_cap_stops_the_walk_and_says_so() {
+    let s = Scratch::new("file_cap");
+    let root = s.base.join("notes");
+    fs::create_dir_all(&root).unwrap();
+    for i in 0..20_001 {
+        fs::write(root.join(format!("n{i:05}.md")), "x\n").unwrap();
+    }
+    let v = s.recall(&root, "x", &["--limit", "1"]);
+    assert_eq!(v["scope"]["truncated"], true);
+    assert_eq!(v["scope"]["files_read"], 20_000);
 }

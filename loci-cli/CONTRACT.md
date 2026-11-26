@@ -121,7 +121,13 @@ walk up from the current directory for a workfolder. A plain folder is never fou
 Exit 2: no root, an unknown `--room`. Exit 3: a query with no words, a `--as-of` that is not a real
 date, a `--limit` out of range. A query that matches nothing is exit 0 and says what it searched.
 Never reads outside the root, follows no symlink (counted), skips hidden directories, `node_modules`,
-`target` and `cron`, and counts every file it did not read.
+`target` and `cron`, and counts the `.md` files it could not read (over 1 MiB, not UTF-8, unreadable) and the
+directories and entries it could not list or inspect (it cannot tell whether those held notes). Only files ending `.md` are read. In a workfolder it reads nothing outside the root
+either: crystals come from the same walk, so a linked room is skipped like any link. Caps: 1 MiB per file,
+20,000 files and 500,000 chunks per run; past a cap the run stops (the last file is cut at the chunk
+cap) and says so. Text output never prints a control character, a bidi override, a zero-width mark or a
+line separator from a note; `--json` carries the text as it is, so read it with a program, not a terminal. No Unicode normalisation: a decomposed
+`é` does not match a precomposed one.
 Hit states: `current`, `due` (a real `valid_until` date on or before `--as-of`), `superseded`,
 `retired`, `none` (not a crystal). Order: state group, then score (two decimals), then recency, then
 path and line. Tokenizer `unicode-alnum-v1`: no stemming, no stopwords, no accent folding.
