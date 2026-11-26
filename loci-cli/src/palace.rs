@@ -250,6 +250,10 @@ fn walk_for_slug(dir: &Path, slug_lc: &str, hits: &mut Vec<PathBuf>) {
 
 /// Return the newest `.md` file under a path named like a handover.
 /// Convention: filename contains "HANDOVER" (any case) OR lives in a `handovers/` dir.
+/// A template is not a handover: nothing under a `templates/` directory counts, and neither does a
+/// file whose name says "template", so a freshly copied `handover-template.md` cannot win on mtime.
+/// Two files with the same mtime resolve to the later path, so the answer does not depend on the
+/// order the disk lists them.
 pub fn latest_handover(p: &Palace) -> Option<PathBuf> {
     let mut best: Option<(std::time::SystemTime, PathBuf)> = None;
     let mut stack = vec![p.root.clone()];
@@ -264,11 +268,13 @@ pub fn latest_handover(p: &Palace) -> Option<PathBuf> {
             }
             let path = entry.path();
             if path.is_dir() {
-                stack.push(path);
+                if !name.eq_ignore_ascii_case("templates") {
+                    stack.push(path);
+                }
                 continue;
             }
             let is_md = path.extension().and_then(|e| e.to_str()) == Some("md");
-            if !is_md {
+            if !is_md || name.to_lowercase().contains("template") {
                 continue;
             }
             let looks_like_handover = name.to_uppercase().contains("HANDOVER")
@@ -281,7 +287,7 @@ pub fn latest_handover(p: &Palace) -> Option<PathBuf> {
             if let Ok(meta) = entry.metadata() {
                 if let Ok(modified) = meta.modified() {
                     match &best {
-                        Some((t, _)) if modified <= *t => {}
+                        Some((t, b)) if modified < *t || (modified == *t && path <= *b) => {}
                         _ => best = Some((modified, path)),
                     }
                 }
@@ -309,6 +315,79 @@ mod tests {
         fs::create_dir_all(&r).unwrap();
         fs::write(r.join("CLAUDE.md"), "# room\n").unwrap();
         fs::write(r.join("note.md"), "crystal\n").unwrap();
+    }
+
+    /// Write `rel` under `root` with the given modification time.
+    fn stamped(root: &Path, rel: &str, t: std::time::SystemTime) -> PathBuf {
+        let path = root.join(rel);
+        fs::create_dir_all(path.parent().unwrap()).unwrap();
+        fs::write(&path, "# note\n").unwrap();
+        fs::File::options()
+            .write(true)
+            .open(&path)
+            .unwrap()
+            .set_modified(t)
+            .unwrap();
+        path
+    }
+
+    /// Like `stamped`, with the time given as an age in seconds (larger is older).
+    fn aged(root: &Path, rel: &str, age_secs: u64) -> PathBuf {
+        let t = std::time::SystemTime::now() - std::time::Duration::from_secs(age_secs);
+        stamped(root, rel, t)
+    }
+
+    fn workfolder(name: &str) -> (PathBuf, Palace) {
+        let root = scratch(name);
+        fs::write(root.join("PALACE.md"), "# workfolder\n").unwrap();
+        room(&root.join("_palace"), "ideas-room");
+        let p = validate(&root).expect("workfolder detected");
+        (root, p)
+    }
+
+    #[test]
+    fn a_newer_template_never_wins_over_the_real_handover() {
+        let (root, p) = workfolder("handover_template");
+        let real = aged(&root, "handovers/HANDOVER_2026-11-24.md", 3600);
+        // Newer than the handover, and named or placed like a handover.
+        aged(&root, "templates/handover-template.md", 10);
+        aged(&root, "handovers/HANDOVER-TEMPLATE.md", 20);
+        assert_eq!(latest_handover(&p), Some(real.clone()));
+
+        // With the real handover gone the templates alone are no handover.
+        fs::remove_file(&real).unwrap();
+        assert_eq!(latest_handover(&p), None);
+        let _ = fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn a_templates_directory_is_skipped_whatever_its_case() {
+        // Its own workfolder, so no lowercase `templates/` exists to absorb the name on a
+        // case-insensitive disk.
+        let (root, p) = workfolder("handover_template_case");
+        let real = aged(&root, "handovers/HANDOVER_2026-11-24.md", 3600);
+        aged(&root, "TEMPLATES/HANDOVER_blank.md", 30);
+        assert_eq!(latest_handover(&p), Some(real));
+        let _ = fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn the_newest_handover_wins_and_a_tie_resolves_to_the_later_path() {
+        let (root, p) = workfolder("handover_order");
+        aged(&root, "handovers/HANDOVER_2026-11-20.md", 7200);
+        let newer = aged(&root, "handovers/HANDOVER_2026-11-24.md", 60);
+        assert_eq!(latest_handover(&p), Some(newer));
+
+        // Same mtime: the later name wins, whatever order the disk lists them in.
+        let (root2, p2) = workfolder("handover_tie");
+        let t = std::time::SystemTime::now() - std::time::Duration::from_secs(500);
+        // Three files, so at least one earlier name can list last: two would pass on listing order.
+        stamped(&root2, "handovers/HANDOVER_2026-11-20.md", t);
+        stamped(&root2, "handovers/HANDOVER_2026-11-22.md", t);
+        let later = stamped(&root2, "handovers/HANDOVER_2026-11-24.md", t);
+        assert_eq!(latest_handover(&p2), Some(later));
+        let _ = fs::remove_dir_all(&root);
+        let _ = fs::remove_dir_all(&root2);
     }
 
     #[test]
