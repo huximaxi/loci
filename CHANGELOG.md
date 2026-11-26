@@ -15,9 +15,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   dropped.
 
 ### Fixed
-- `loci handover` no longer picks a template. A freshly copied `handover-template.md` (or anything under
-  a `templates/` directory) used to win on modification time. Files with equal times now resolve to
-  the later path, so the answer does not depend on directory order.
+- `loci handover` no longer picks a template. A freshly copied `handover-template.md`, or any
+  handover-named file under `templates/`, used to win on modification time. A directory named
+  `templates` (any case) is now not searched, and a file with the word `template` in its name is not
+  a handover (so a real handover named that way is skipped too). Files with equal times resolve to the
+  path that sorts last, so the answer does not depend on directory order.
 - `loci rain` looks for `garden/` at the workfolder root, where the spec and the first-session
   ceremony put it. With the `rooms/` layout it looked inside `rooms/` and always found no plants.
   A garden inside the scan root (`_palace/garden/`) is still read when the root garden holds no

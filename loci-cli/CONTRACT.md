@@ -86,7 +86,7 @@ Exit 2: no workfolder or no such crystal. Exit 3: the slug is in several rooms a
 
 ### `loci handover`
 
-Print the newest handover by modification time (a file named for a handover, or one in a `handovers/` directory; a `templates/` directory, or a file whose name contains "template", never counts, so a handover named that way is skipped too; equal times resolve to the later path). Exit 2: no workfolder, no handover.
+Print the newest handover by modification time. A handover is an `.md` file with HANDOVER in its name (any case) or one that sits directly in a `handovers/` directory. A directory named `templates` (any case) is not searched, and a file with the word `template` in its name (`handover-template.md`, `HANDOVER_TEMPLATE.md`; not `contemplate.md`) is not a handover, so a real handover named that way is skipped too. Equal times resolve to the path that sorts last. Exit 2: no workfolder, no handover.
 `--json` keys: `path`, `content`.
 
 ### `loci tokens`
