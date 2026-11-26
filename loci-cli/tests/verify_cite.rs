@@ -75,6 +75,42 @@ impl Scratch {
             .unwrap_or_else(|e| panic!("one JSON document ({e}): {}", stderr(&o)));
         (code(&o), v)
     }
+
+    /// `verify-cite <answer> --root <root>` in text mode, killed and failed when it is still going
+    /// after `secs` seconds. Output goes to a file, so a long listing cannot stall the child on a
+    /// full pipe while this waits. Returns the exit code and the text.
+    fn verify_bounded(&self, root: &Path, answer: &str, secs: u64) -> (Option<i32>, String) {
+        let a = self.answer(answer);
+        let out = self.base.join("bounded.out");
+        let mut child = Command::new(BIN)
+            .args([
+                "verify-cite",
+                a.to_str().unwrap(),
+                "--root",
+                root.to_str().unwrap(),
+            ])
+            .current_dir(self.base.join("cwd"))
+            .env("HOME", self.base.join("home"))
+            .env_remove("LOCI_PALACE")
+            .env_remove("LOCI_WORKFOLDER")
+            .stdout(std::process::Stdio::from(fs::File::create(&out).unwrap()))
+            .stderr(std::process::Stdio::null())
+            .spawn()
+            .expect("spawn loci");
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(secs);
+        loop {
+            if let Some(st) = child.try_wait().unwrap() {
+                let text = String::from_utf8_lossy(&fs::read(&out).unwrap()).to_string();
+                return (st.code(), text);
+            }
+            if std::time::Instant::now() > deadline {
+                let _ = child.kill();
+                let _ = child.wait();
+                panic!("verify-cite was still running after {secs} seconds");
+            }
+            std::thread::sleep(std::time::Duration::from_millis(25));
+        }
+    }
 }
 
 impl Drop for Scratch {
@@ -679,4 +715,141 @@ fn arithmetic_with_slashes_is_not_a_cite_and_a_link_to_a_real_file_is() {
     assert_eq!((c, v["counts"]["total"].as_u64()), (0, Some(0)));
     let (c, v) = s.verify(&root, "[Alpha](notes/alpha.md#L3 \"kettle\")\n");
     assert_eq!((c, statuses(&v)), (0, vec!["ok".to_string()]));
+}
+
+// ── the round trip with recall, and the edges of the answer file ───────────
+
+#[test]
+fn a_hidden_markdown_file_verifies_as_recall_reads_it_and_a_hidden_directory_does_not() {
+    let s = Scratch::new("hidden");
+    let root = s.copy(&setup("c"), "notes-root");
+    fs::write(root.join("notes/.draft.md"), "kept in the draft\n").unwrap();
+    fs::create_dir_all(root.join("notes/.stash")).unwrap();
+    fs::write(root.join("notes/.stash/kept.md"), "kept in the stash\n").unwrap();
+    // recall reads hidden files (it skips hidden directories), so the cite it prints must verify.
+    let o = s.run_env(
+        &["recall", "draft", "--root", root.to_str().unwrap()],
+        &[],
+        &s.base.join("cwd"),
+    );
+    let printed = String::from_utf8_lossy(&o.stdout).to_string();
+    assert!(printed.contains("cite: notes/.draft.md:1"), "{printed}");
+    let (c, v) = s.verify(
+        &root,
+        "notes/.draft.md:1 \"kept in the draft\"\nnotes/.stash/kept.md:1 \"kept in the stash\"\n",
+    );
+    assert_eq!(statuses(&v), ["ok", "not_in_corpus"]);
+    assert_eq!(c, 4);
+}
+
+#[test]
+fn an_empty_or_blank_claim_is_unclaimed_never_ok() {
+    let s = Scratch::new("emptyclaim");
+    let root = s.copy(&setup("c"), "notes-root");
+    let (c, v) = s.verify(
+        &root,
+        "notes/alpha.md:3 \"\"\nnotes/alpha.md:3 \"   \"\nnotes/alpha.md:3 “”\n",
+    );
+    assert_eq!(statuses(&v), ["unclaimed", "unclaimed", "unclaimed"]);
+    assert_eq!(c, 4);
+}
+
+#[test]
+fn a_byte_order_mark_on_the_answer_does_not_change_its_first_cite() {
+    let s = Scratch::new("bom");
+    let root = s.copy(&setup("c"), "notes-root");
+    let a = s.base.join("bom-answer.md");
+    let mut bytes = vec![0xEF, 0xBB, 0xBF];
+    bytes.extend_from_slice(b"notes/alpha.md:3 \"kettle\"\n");
+    fs::write(&a, bytes).unwrap();
+    let o = s.run_env(
+        &[
+            "verify-cite",
+            a.to_str().unwrap(),
+            "--root",
+            root.to_str().unwrap(),
+            "--json",
+        ],
+        &[],
+        &s.base.join("cwd"),
+    );
+    let v: Value = serde_json::from_slice(&o.stdout).expect("one JSON document");
+    assert_eq!((code(&o), statuses(&v)), (0, vec!["ok".to_string()]));
+    assert_eq!(v["cites"][0]["path"], "notes/alpha.md");
+}
+
+#[test]
+fn an_answer_of_exactly_one_mebibyte_is_read_and_one_byte_more_is_refused() {
+    let s = Scratch::new("anscap");
+    let root = s.copy(&setup("c"), "notes-root");
+    let a = s.base.join("big-answer.md");
+    let run = |s: &Scratch| {
+        s.run_env(
+            &[
+                "verify-cite",
+                a.to_str().unwrap(),
+                "--root",
+                root.to_str().unwrap(),
+            ],
+            &[],
+            &s.base.join("cwd"),
+        )
+    };
+    fs::write(&a, vec![b'x'; 1024 * 1024]).unwrap();
+    let o = run(&s);
+    assert_eq!(code(&o), 0, "{}", stderr(&o));
+    fs::write(&a, vec![b'x'; 1024 * 1024 + 1]).unwrap();
+    let o = run(&s);
+    assert_eq!(code(&o), 3);
+    assert!(o.stdout.is_empty());
+    assert!(stderr(&o).contains("over 1 MiB"), "{}", stderr(&o));
+}
+
+#[test]
+fn a_directory_or_a_pipe_named_like_a_note_is_no_file_and_never_opened() {
+    let s = Scratch::new("odd");
+    let root = s.copy(&setup("c"), "notes-root");
+    fs::create_dir_all(root.join("notes/folder.md")).unwrap();
+    let mut cites = String::from("notes/folder.md:1 \"x\"\n");
+    #[cfg(unix)]
+    {
+        let made = Command::new("mkfifo")
+            .arg(root.join("notes/pipe.md"))
+            .status();
+        if matches!(made, Ok(st) if st.success()) {
+            cites.push_str("notes/pipe.md:1 \"x\"\n");
+        }
+    }
+    let (code, text) = s.verify_bounded(&root, &cites, 10);
+    assert_eq!(code, Some(4));
+    assert_eq!(
+        text.lines().filter(|l| l.starts_with("no_file")).count(),
+        cites.lines().count(),
+        "{text}"
+    );
+}
+
+#[test]
+fn an_answer_built_to_be_slow_is_not_slow() {
+    let s = Scratch::new("slow");
+    let root = s.copy(&setup("c"), "notes-root");
+    // A file of 90,000 short lines, cited by 6,000 different ranges that each reach almost all of
+    // it, quoting a string that is not there. The text of those lines used to be rebuilt per cite.
+    let big: String = (0..90_000).map(|i| format!("line {i}\n")).collect();
+    fs::write(root.join("notes/big.md"), big).unwrap();
+    let wide: String = (0..6_000)
+        .map(|i| format!("notes/big.md:1-{} \"zzz\"\n", 89_000 + i % 1_000))
+        .collect();
+    let (code, text) = s.verify_bounded(&root, &wide, 30);
+    assert_eq!(code, Some(4));
+    assert!(text.contains("6000 cites: 0 ok, 6000 ungrounded"), "{text}");
+    // 50,000 openers on one line with no closer: each used to scan to the end of the line.
+    let openers = format!("{}\n", "notes/alpha.md:3 “".repeat(50_000));
+    let (code, text) = s.verify_bounded(&root, &openers, 30);
+    assert_eq!(code, Some(4));
+    assert!(
+        text.contains("50000 cites: 0 ok, 50000 ungrounded"),
+        "{}",
+        &text[text.len().saturating_sub(300)..]
+    );
 }

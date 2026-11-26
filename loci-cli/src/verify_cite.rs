@@ -138,18 +138,23 @@ fn path_before(c: &[char], at: usize) -> Option<String> {
     None
 }
 
-/// The first double-quoted span after `i`, with only spaces and `) ] ` : , -` between.
-fn claim_after(c: &[char], mut i: usize) -> (Option<String>, usize) {
+/// The first double-quoted span after `i`, with only spaces and `) ] ` : , -` between. `last` is
+/// where the last `"` and the last `”` of the line are, so an opening mark with nothing to close
+/// it is told at once: a line of openers costs its length once, not once per opener.
+fn claim_after(c: &[char], mut i: usize, last: [Option<usize>; 2]) -> (Option<String>, usize) {
     while i < c.len()
         && (c[i] == ' ' || c[i] == '\t' || matches!(c[i], ')' | ']' | '`' | ':' | ',' | '-'))
     {
         i += 1;
     }
-    let close = match c.get(i) {
-        Some('"') => '"',
-        Some('“') => '”',
+    let (close, kind) = match c.get(i) {
+        Some('"') => ('"', 0),
+        Some('“') => ('”', 1),
         _ => return (None, i.min(c.len())),
     };
+    if !last[kind].is_some_and(|l| l > i) {
+        return (None, i);
+    }
     if let Some(len) = c[i + 1..].iter().position(|&x| x == close) {
         let claim: String = c[i + 1..i + 1 + len].iter().collect();
         (Some(claim), i + len + 2)
@@ -162,6 +167,10 @@ fn find_cites(text: &str) -> Vec<Cite> {
     let mut out = Vec::new();
     for line in text.lines() {
         let c: Vec<char> = line.chars().collect();
+        let last = [
+            c.iter().rposition(|&x| x == '"'),
+            c.iter().rposition(|&x| x == '”'),
+        ];
         let mut i = 0;
         while i < c.len() {
             // S1 / S2: `:` then a number; S3: `#L` then a number.
@@ -187,7 +196,7 @@ fn find_cites(text: &str) -> Vec<Cite> {
             } else {
                 style
             };
-            let (claim, next) = claim_after(&c, after);
+            let (claim, next) = claim_after(&c, after, last);
             let from = c[..path_end].len() - path.chars().count();
             let shown: String = c[from..after].iter().collect();
             out.push(Cite {
@@ -236,12 +245,54 @@ impl Status {
     }
 }
 
-/// A corpus file that was read: its lines and its crystals.
+/// A corpus file that was read: its text and its crystals.
 struct Loaded {
     /// The path as the disk spells it, relative to the root.
     rel: String,
-    lines: Vec<String>,
+    flat: Flat,
     crystals: Vec<Crystal>,
+}
+
+/// A file's lines with every run of whitespace folded to one space, made once per file so that a
+/// cite costs one search and never a rebuild of the lines it cites (a hostile answer may cite the
+/// whole file thousands of times).
+struct Flat {
+    text: String,
+    /// Where line `i` (0-based) starts and ends in `text`. A blank line is empty, at the end of
+    /// what came before it.
+    from: Vec<usize>,
+    to: Vec<usize>,
+}
+
+impl Flat {
+    fn of(raw: &str) -> Flat {
+        let mut text = String::new();
+        let (mut from, mut to) = (Vec::new(), Vec::new());
+        for line in raw.lines() {
+            let folded = collapse(line);
+            if !folded.is_empty() {
+                if !text.is_empty() {
+                    text.push(' ');
+                }
+                from.push(text.len());
+                text.push_str(&folded);
+            } else {
+                from.push(text.len());
+            }
+            to.push(text.len());
+        }
+        Flat { text, from, to }
+    }
+
+    fn line_count(&self) -> usize {
+        self.from.len()
+    }
+
+    /// Lines `first` to `last` (1-based, both in range), collapsed and joined by one space: what
+    /// `collapse` makes of those lines joined by a space.
+    fn range(&self, first: usize, last: usize) -> &str {
+        self.text[self.from[first - 1]..self.to[last - 1]].trim_start()
+    }
 }
 
 enum Opened {
@@ -312,6 +363,31 @@ fn open(root: &Root, frame: &Frame, parts: &[String]) -> Opened {
             return Opened::Missing;
         }
         if last {
+            // The name as the disk spells it, so a cite that gets the case wrong is read as the
+            // file it reaches (same crystals, same stale warning) and counts as one file. It is
+            // settled before the file is read: a file under a skipped directory is refused unread.
+            let (Some(real), Some(base)) = (
+                fs::canonicalize(&cur).ok(),
+                fs::canonicalize(&root.path).ok(),
+            ) else {
+                return Opened::Unreadable("unreadable");
+            };
+            let Ok(under) = real.strip_prefix(&base) else {
+                return Opened::NotCorpus;
+            };
+            let names: Vec<String> = under
+                .components()
+                .map(|c| c.as_os_str().to_string_lossy().to_string())
+                .collect();
+            // Directories are skipped by name, files are not: a hidden `.md` file is in the corpus
+            // here exactly as `recall` reads it, and the cite `recall` prints for it must verify.
+            let skipped_above = names.split_last().is_some_and(|(_, dirs)| {
+                dirs.iter().any(|d| recall::skipped_dir(&d.to_lowercase()))
+            });
+            if skipped_above {
+                return Opened::NotCorpus;
+            }
+            let rel = names.join("/");
             let bytes = match recall::read_capped(&cur, &meta) {
                 Ok(Some(b)) => b,
                 Ok(None) => return Opened::Unreadable("over 1 MiB"),
@@ -321,31 +397,10 @@ fn open(root: &Root, frame: &Frame, parts: &[String]) -> Opened {
                 return Opened::Unreadable("not UTF-8");
             };
             let text = text.strip_prefix('\u{feff}').unwrap_or(&text).to_string();
-            // The name as the disk spells it, so a cite that gets the case wrong is read as the
-            // file it reaches (same crystals, same stale warning) and counts as one file.
-            let real = fs::canonicalize(&cur).ok();
-            let base = fs::canonicalize(&root.path).ok();
-            let rel = match (real, base) {
-                (Some(r), Some(b)) => match r.strip_prefix(&b) {
-                    Ok(rel) => rel
-                        .components()
-                        .map(|c| c.as_os_str().to_string_lossy().to_string())
-                        .collect::<Vec<_>>()
-                        .join("/"),
-                    Err(_) => return Opened::NotCorpus,
-                },
-                _ => return Opened::Unreadable("unreadable"),
-            };
-            if rel
-                .split('/')
-                .any(|d| recall::skipped_dir(&d.to_lowercase()))
-            {
-                return Opened::NotCorpus;
-            }
             let (crystals, _) = frame.crystals_in(&rel, &text);
             return Opened::File(Loaded {
                 rel,
-                lines: text.lines().map(str::to_string).collect(),
+                flat: Flat::of(&text),
                 crystals,
             });
         }
@@ -466,19 +521,19 @@ fn check(cites: Vec<Cite>, root: &Root, answer_file: &str) -> Out {
                 Opened::NotCorpus => Status::NotInCorpus,
                 Opened::Unreadable(_) => Status::Unreadable,
                 Opened::File(f) => {
-                    if c.end > f.lines.len() {
+                    if c.end > f.flat.line_count() {
                         Status::LineOutOfRange
                     } else {
                         match &c.claim {
                             None => Status::Unclaimed,
                             Some(claim) => {
                                 let want = collapse(claim);
-                                let have = collapse(&f.lines[c.start - 1..c.end].join(" "));
-                                if !want.is_empty() && have.contains(&want) {
+                                if want.is_empty() {
+                                    // Nothing was quoted: an empty string is in every line.
+                                    Status::Unclaimed
+                                } else if f.flat.range(c.start, c.end).contains(&want) {
                                     warning = stale(f, c.start, c.end);
                                     Status::Ok
-                                } else if want.is_empty() {
-                                    Status::Unclaimed
                                 } else {
                                     Status::ClaimNotFound
                                 }
@@ -722,6 +777,48 @@ mod tests {
     fn whitespace_runs_collapse_and_case_matters() {
         assert_eq!(collapse("a   b\t c"), "a b c");
         assert!(!collapse("We use postgres").contains("We use Postgres"));
+    }
+
+    #[test]
+    fn a_flat_range_is_what_collapsing_the_joined_lines_gives() {
+        let raw = "  a   b \n\n\tc\r\nd e\n   \nf\n";
+        let lines: Vec<&str> = raw.lines().collect();
+        let flat = Flat::of(raw);
+        assert_eq!(flat.line_count(), lines.len());
+        for first in 1..=lines.len() {
+            for last in first..=lines.len() {
+                assert_eq!(
+                    flat.range(first, last),
+                    collapse(&lines[first - 1..last].join(" ")),
+                    "lines {first}-{last}"
+                );
+            }
+        }
+        assert_eq!(Flat::of("").line_count(), 0);
+    }
+
+    #[test]
+    fn a_line_of_openers_that_never_close_costs_its_length_once() {
+        // Each opener used to scan to the end of the line for its closer: quadratic. Both kinds.
+        let t = std::time::Instant::now();
+        for (open, n) in [("“", 60_000), ("\"", 1)] {
+            let line = format!("{}\n", format!("a.md:1 {open}").repeat(n));
+            let cites = find_cites(&line);
+            assert_eq!(cites.len(), n);
+            assert!(cites.iter().all(|c| c.claim.is_none()));
+        }
+        assert!(t.elapsed().as_secs() < 10, "took {:?}", t.elapsed());
+    }
+
+    #[test]
+    fn an_opener_with_a_closer_after_it_still_takes_the_claim() {
+        let v = find_cites("a.md:1 “x” b.md:2 “never closed");
+        assert_eq!(v.len(), 2);
+        assert_eq!(v[0].claim.as_deref(), Some("x"));
+        assert!(v[1].claim.is_none());
+        // A straight quote closes only a straight quote, and a curly one only a curly one.
+        assert!(one("a.md:1 “x\"").claim.is_none());
+        assert!(one("a.md:1 \"x”").claim.is_none());
     }
 
     #[test]
