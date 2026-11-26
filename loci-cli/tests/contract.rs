@@ -136,6 +136,21 @@ fn every_json_command_emits_one_document_with_the_contract_keys() {
         (vec!["read", "decision"], vec!["slug", "path", "content"]),
         (vec!["handover"], vec!["path", "content"]),
         (
+            vec!["check"],
+            vec![
+                "palace",
+                "layout",
+                "scope",
+                "as_of",
+                "rules_run",
+                "crystals_considered",
+                "legacy_lines_not_counted",
+                "files_unread",
+                "rules",
+                "findings",
+            ],
+        ),
+        (
             vec!["tokens"],
             vec![
                 "state",
@@ -235,6 +250,8 @@ fn usage_errors_are_exit_3_on_stderr_with_empty_stdout() {
         vec!["reads", "--days", "x"],
         vec!["recall"],
         vec!["recall", "x", "--limit", "0"],
+        vec!["check", "--scope", "galaxy"],
+        vec!["check", "--as-of"],
         vec!["status", "--nope"],
         vec![],
     ] {
@@ -262,6 +279,10 @@ fn not_found_is_exit_2_and_nothing_else_is() {
     // No workfolder anywhere (empty cwd, no env). The walk climbs through the system temp dir, so
     // this assumes no ancestor of it is itself a workfolder.
     let o = w.run(&["status"]);
+    assert_eq!(code(&o), 2);
+    assert!(o.stdout.is_empty());
+    // `check` needs a workfolder too: it is not a plain-folder command.
+    let o = w.run(&["check"]);
     assert_eq!(code(&o), 2);
     assert!(o.stdout.is_empty());
     assert!(String::from_utf8_lossy(&o.stderr).starts_with("loci: "));
@@ -453,8 +474,8 @@ fn user_facing_text_says_workfolder_not_palace() {
     };
     let mut seen: Vec<(String, String)> = Vec::new();
     for cmd in [
-        "", "status", "crystals", "read", "handover", "tokens", "reads", "rain", "recall", "new", "init",
-        "audit", "overview",
+        "", "status", "crystals", "read", "handover", "check", "tokens", "reads", "rain", "recall",
+        "new", "init", "audit", "overview",
     ] {
         let mut args: Vec<&str> = Vec::new();
         if !cmd.is_empty() {
@@ -478,6 +499,7 @@ fn user_facing_text_says_workfolder_not_palace() {
         vec!["read", "decision"],
         vec!["rain"],
         vec!["handover"],
+        vec!["check"],
     ] {
         let o = w.with_palace(&args);
         seen.push((format!("{args:?}"), scrub(&o.stdout)));

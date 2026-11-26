@@ -89,6 +89,39 @@ Exit 2: no workfolder or no such crystal. Exit 3: the slug is in several rooms a
 Print the newest handover by modification time. Exit 2: no workfolder, no handover.
 `--json` keys: `path`, `content`.
 
+### `loci check`
+
+Ask the workfolder whether it still agrees with itself. Read-only: it never edits a file and uses no
+model and no network. It reads the clock only to fill in the default of `--as-of` (today, in UTC, so
+near midnight it can differ from your wall clock; pass `--as-of` to pin it). A finding is a
+proposal; the person decides.
+Flags: `--scope room|workfolder` (default `room`: how wide a rule compares crystals; a rule that does
+not compare across rooms ignores it; crystals outside any room, the root files and `garden/`, form one
+group of their own), `--as-of <YYYY-MM-DD>` (the date a rule compares against). It runs on a workfolder
+only: a plain folder of notes is exit 2.
+Exit 0: nothing found. Exit 4: at least one finding, whatever its severity; the findings are the
+output and stderr stays empty. Every severity exits 4 and new rules are additive, so a release that
+adds a rule can turn an unchanged workfolder from 0 to 4: pin the version in CI, or read
+`findings` and act on `severity`. Exit 2: no workfolder. Exit 3: a `--as-of` that is not a real date,
+a `--scope` that is not one of the two. Exit 1: a rule returned a finding without a usable
+`path:line`, which is a bug in loci, not in your files.
+Every run says how many rules ran and how many crystals were read, including `0 rules ran: nothing
+was checked`, and names each file it could not read in full (unreadable, not a regular file, or a
+root or room `CLAUDE.md` cut at 8 MiB), so a quiet run is never mistaken for a healthy one. Unread
+files do not change the exit code. Rules are registered one at a time; a rule ships only with a
+workfolder that makes it fire, one that does not, and the `path:line` its planted one must point at,
+held in CI.
+`--json` keys: `palace`, `layout`, `scope`, `as_of`, `rules_run`, `crystals_considered`,
+`legacy_lines_not_counted`, `files_unread` (root-relative paths), `rules`, `findings`. Each entry of
+`rules` is `id`, `severity`, `summary`, `finding_count`, in the order the rules run; each entry of
+`findings` is `rule`, `severity` (`warn` or `fail`), `message` and `locations`, a list of `path`
+(relative to the workfolder, `/`-separated) and `line` (1-based). Findings are ordered by their
+locations, then rule id, then message. `message` and `summary` are free text and are not frozen. JSON
+strings are not sanitised: a message may carry any character, and the text output is the one that
+hides control characters.
+Frozen from 2.0: the keys listed above, at every level, and every released rule id. Additive: new
+keys, new rules, new flags and new `severity` values.
+
 ### `loci tokens`
 
 Approximate state of the agent runtime's 5-hour window, read from local transcripts. Needs no
