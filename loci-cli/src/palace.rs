@@ -248,9 +248,11 @@ fn walk_for_slug(dir: &Path, slug_lc: &str, hits: &mut Vec<PathBuf>) {
     }
 }
 
-/// Whether `name` has the word "template" in it: one of the pieces between `-`, `_`, `.` or a
-/// space is `template` or `templates`, in any case. `handover-template.md` and `HANDOVER_TEMPLATE.md`
-/// count; `contemplate.md` does not, because it only contains the letters.
+/// Whether `name` has the word "template" in it: the name is cut at `-`, `_`, `.` and spaces, and
+/// one of the pieces (the first and the last included) is `template` or `templates`, in any ASCII
+/// case. `handover-template.md`, `template-handover.md` and `HANDOVER_TEMPLATE.md` count;
+/// `contemplate.md` does not, because it only contains the letters, and neither do
+/// `HandoverTemplate.md` (no separator) or `template2.md` (a digit glued on).
 fn says_template(name: &str) -> bool {
     name.split(['-', '_', '.', ' '])
         .any(|w| w.eq_ignore_ascii_case("template") || w.eq_ignore_ascii_case("templates"))
@@ -267,11 +269,12 @@ fn beats(
     modified > best.0 || (modified == best.0 && path > best.1.as_path())
 }
 
-/// Return the newest `.md` file under a path named like a handover.
-/// Convention: filename contains "HANDOVER" (any case) OR sits directly in a `handovers/` dir.
-/// A template is not a handover: a directory named `templates` (any case) is not searched, and a
-/// file with the word "template" in its name is skipped, so a freshly copied `handover-template.md`
-/// cannot win on mtime. A real handover named that way is skipped too.
+/// Return the newest handover: an `.md` file with HANDOVER in its name (any case), or one that sits
+/// directly in a `handovers/` directory (any case). Hidden files and directories, `node_modules`,
+/// `target` and a directory named `templates` (any case) are not searched.
+/// A template is not a handover: a file with the word "template" in its name is skipped (see
+/// [`says_template`]), so a freshly copied `handover-template.md` cannot win on mtime. A real
+/// handover named that way, or kept under `templates/`, is skipped too and an older one is returned.
 /// Two files with the same mtime resolve to the greater path (see [`beats`]), so the answer does
 /// not depend on the order the disk lists them.
 pub fn latest_handover(p: &Palace) -> Option<PathBuf> {
@@ -471,6 +474,9 @@ mod tests {
             "HANDOVER_contemplate.md",
             "handover-templated.md",
             "HANDOVER.md",
+            // The documented limits: no separator, or a digit glued on.
+            "HandoverTemplate.md",
+            "template2.md",
         ] {
             assert!(!says_template(no), "{no}");
         }
@@ -481,6 +487,16 @@ mod tests {
         let (root, p) = workfolder("handover_letters");
         aged(&root, "handovers/HANDOVER_2026-11-20.md", 7200);
         let newest = aged(&root, "handovers/HANDOVER_2026-11-26_contemplate.md", 30);
+        assert_eq!(latest_handover(&p), Some(newest));
+        let _ = fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn a_directory_that_only_contains_the_letters_is_still_searched() {
+        let (root, p) = workfolder("handover_dir_letters");
+        aged(&root, "handovers/HANDOVER_2026-11-20.md", 7200);
+        aged(&root, "templated/HANDOVER_2026-11-25.md", 600);
+        let newest = aged(&root, "contemplate/HANDOVER_2026-11-26.md", 30);
         assert_eq!(latest_handover(&p), Some(newest));
         let _ = fs::remove_dir_all(&root);
     }
