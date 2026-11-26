@@ -13,6 +13,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   due, superseded, retired, or not a crystal). Reads one root, follows no symlink, skips hidden
   directories, and counts the `.md` files and directories it could not read (too large, not UTF-8, unreadable). The JSON is not frozen until the mark is
   dropped.
+- `loci verify-cite <answer-file>` (experimental): check an answer's `path:line "quoted text"`
+  citations against the files, with no model. Each cite must name a corpus file, a line range that
+  exists and a quote that is on those lines; it reports presence, not support, and says so. Anything
+  outside the root, or not a corpus file, is reported without being opened, so the command is not a
+  way to read or find files that are not notes. Exit 0 when every cite holds, 4 when one does not.
 
 ### Fixed
 - `loci rain` looks for `garden/` at the workfolder root, where the spec and the first-session
@@ -22,9 +27,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 - A new exit code, `4`: "ran, found problems". It is for commands that read your files and report findings
-  (`loci check`, coming in this release). `1` stays "could not run", `2` not found, `3` bad input, so
-  a script that treats any non-zero as failure is unaffected. No command returns `4` yet; the code
-  and its row in `CONTRACT.md` land first.
+  (`loci verify-cite` first, `loci check` next). `1` stays "could not run", `2` not found, `3` bad
+  input, so a script that treats any non-zero as failure is unaffected.
 - One version line. The CLI, the templates kit and the methodology are all 2.0: the CLI goes from
   0.7.0-beta to `2.0.0-rc.1`, the methodology anchor from 1.6-candidate to 2.0-candidate (`stable`
   stays 1.2; the field is still `loci-core version`), and `package.json` follows the line. The
