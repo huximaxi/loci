@@ -281,6 +281,7 @@ fn not_found_is_exit_2_and_nothing_else_is() {
     let o = w.run(&["status"]);
     assert_eq!(code(&o), 2);
     assert!(o.stdout.is_empty());
+    assert!(String::from_utf8_lossy(&o.stderr).starts_with("loci: "));
     // `check` needs a workfolder too: it is not a plain-folder command.
     let o = w.run(&["check"]);
     assert_eq!(code(&o), 2);

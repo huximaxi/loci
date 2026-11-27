@@ -200,8 +200,8 @@ fn main() -> ExitCode {
 }
 
 /// What a command that ran to the end reports. `Findings` means it ran and found
-/// problems in the files it read (exit 4, nothing on stderr: the findings are its
-/// output). It is not an error: 1 stays "could not run".
+/// something that fails the run in the files it read (exit 4, nothing on stderr: the
+/// findings are its output). It is not an error: 1 stays "could not run".
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Outcome {
     /// It ran to the end and nothing failed it. `loci check` also returns this when it only printed
