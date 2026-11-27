@@ -602,7 +602,11 @@ fn check(cites: Vec<Cite>, root: &Root, answer_file: &str) -> Out {
 // ── output ───────────────────────────────────────────────────────────────
 
 fn scope_line(s: &Scope) -> String {
-    let mut line = format!("scope: {} files read", s.files_read);
+    let mut line = format!(
+        "scope: {} {} read",
+        s.files_read,
+        if s.files_read == 1 { "file" } else { "files" }
+    );
     if s.not_read.total > 0 {
         let mut why = Vec::new();
         if s.not_read.not_utf8 > 0 {
@@ -652,8 +656,15 @@ fn print_text(out: &Out) {
         p("0 cites found: nothing was verified".to_string());
     } else {
         p(format!(
-            "{} cites: {} ok, {} ungrounded",
-            out.counts.total, out.counts.ok, out.counts.ungrounded
+            "{} {}: {} ok, {} ungrounded",
+            out.counts.total,
+            if out.counts.total == 1 {
+                "cite"
+            } else {
+                "cites"
+            },
+            out.counts.ok,
+            out.counts.ungrounded
         ));
     }
     p("this checks that quoted strings are present, not that they support the answer".to_string());

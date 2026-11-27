@@ -97,7 +97,8 @@ enum Cmd {
     /// Every cite is looked up under one root (`--root PATH`, else `--workfolder`,
     /// `$LOCI_WORKFOLDER`, `$LOCI_PALACE`, or the workfolder you are inside). Exit 0 when every
     /// cite is grounded, 4 when any is not. Nothing outside the root is opened or named, and no
-    /// model is used. A cite with no quoted claim after it is reported as unclaimed.
+    /// model is used. A cite with no quoted claim after it is reported as unclaimed, and that
+    /// counts as ungrounded too (exit 4).
     VerifyCite {
         /// A file holding the answer to check.
         answer_file: PathBuf,
@@ -451,8 +452,8 @@ fn cmd_overview(palace_arg: Option<PathBuf>, json: bool) -> Result<(), Error> {
         println!("{gname}");
         for (n, usage) in *cmds {
             let about = brief(abouts.get(*n).map(|s| s.as_str()).unwrap_or(""), 64);
-            println!("  {n:<10} {about}");
-            println!("  {:<10}   e.g. {usage}", "");
+            println!("  {n:<11} {about}");
+            println!("  {:<11}   e.g. {usage}", "");
         }
         println!();
     }

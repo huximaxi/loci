@@ -329,6 +329,33 @@ fn text_output_ends_with_the_presence_not_support_line_and_the_scope_line() {
 }
 
 #[test]
+fn one_cite_and_one_file_read_say_so_in_the_singular() {
+    let s = Scratch::new("singular");
+    let root = s.base.join("one-note");
+    fs::create_dir_all(root.join("notes")).unwrap();
+    fs::write(
+        root.join("notes/a.md"),
+        "The kettle boils at the top of the hour.\n",
+    )
+    .unwrap();
+    let a = s.answer("notes/a.md:1 \"The kettle boils\"\n");
+    let o = s.run_env(
+        &[
+            "verify-cite",
+            a.to_str().unwrap(),
+            "--root",
+            root.to_str().unwrap(),
+        ],
+        &[],
+        &s.base.join("cwd"),
+    );
+    assert_eq!(code(&o), 0, "{}", stderr(&o));
+    let out = String::from_utf8_lossy(&o.stdout).to_string();
+    assert!(out.contains("1 cite: 1 ok, 0 ungrounded"), "{out}");
+    assert!(out.contains("scope: 1 file read"), "{out}");
+}
+
+#[test]
 fn the_output_is_the_same_every_run() {
     let s = Scratch::new("det");
     let root = s.copy(&fixture("rooms-dir"), "rooms-dir");
