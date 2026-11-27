@@ -30,7 +30,7 @@ const K1: f64 = 1.2;
 const B: f64 = 0.75;
 
 /// A file over this is counted as not read, never half-read.
-const MAX_FILE_BYTES: u64 = 1024 * 1024;
+pub(crate) const MAX_FILE_BYTES: u64 = 1024 * 1024;
 /// The walk stops after this many `.md` files, in walk order, and says so.
 const MAX_FILES: usize = 20_000;
 /// The walk stops after this many chunks, so a folder of one-character paragraphs cannot
@@ -58,9 +58,9 @@ pub struct Args {
 // ── roots ────────────────────────────────────────────────────────────────
 
 /// The folder a run reads, and the palace reading of it when it is one.
-struct Root {
-    path: PathBuf,
-    palace: Option<Palace>,
+pub(crate) struct Root {
+    pub(crate) path: PathBuf,
+    pub(crate) palace: Option<Palace>,
 }
 
 /// Which folder to read, first rule that applies: `--root` (any directory), `--workfolder`
@@ -69,7 +69,7 @@ struct Root {
 /// no directory is an error: the run does not fall back to the current directory. A plain folder
 /// is only ever read when it is named, never found by walking, so `$HOME` is not indexed by
 /// accident.
-fn resolve_root(
+pub(crate) fn resolve_root(
     root_flag: Option<PathBuf>,
     workfolder_flag: Option<PathBuf>,
     env_workfolder: Option<OsString>,
@@ -259,7 +259,7 @@ struct Corpus {
     scope: Scope,
 }
 
-fn rel_path(root: &Path, p: &Path) -> String {
+pub(crate) fn rel_path(root: &Path, p: &Path) -> String {
     p.strip_prefix(root)
         .unwrap_or(p)
         .components()
@@ -268,7 +268,7 @@ fn rel_path(root: &Path, p: &Path) -> String {
         .join("/")
 }
 
-fn layout_name(l: &Layout) -> &'static str {
+pub(crate) fn layout_name(l: &Layout) -> &'static str {
     match l {
         Layout::PalaceSubdir => "palace-subdir",
         Layout::RoomsDir => "rooms-dir",
@@ -276,7 +276,7 @@ fn layout_name(l: &Layout) -> &'static str {
     }
 }
 
-fn root_tag(path: &Path) -> String {
+pub(crate) fn root_tag(path: &Path) -> String {
     path.file_name()
         .map(|n| n.to_string_lossy().to_string())
         .or_else(|| {
@@ -286,6 +286,87 @@ fn root_tag(path: &Path) -> String {
         })
         .filter(|n| !n.is_empty())
         .unwrap_or_else(|| "root".to_string())
+}
+
+/// A directory the walk never enters: hidden, or one of the names the workfolder scan skips.
+/// `verify-cite` asks the same question, so a cite and a search agree on what is in the corpus.
+pub(crate) fn skipped_dir(name: &str) -> bool {
+    name.starts_with('.') || SKIP_DIRS.contains(&name)
+}
+
+/// Where a root keeps its rooms and which part of it a workfolder scans, worked out once, so the
+/// two commands that read a root agree on what a room is and which files hold crystals.
+pub(crate) struct Frame {
+    palace: bool,
+    /// (relative dir with a trailing `/`, room name)
+    room_dirs: Vec<(String, String)>,
+    /// `""` when the whole root is scanned.
+    scan_prefix: String,
+}
+
+impl Frame {
+    pub(crate) fn of(root: &Root) -> Frame {
+        let mut room_dirs: Vec<(String, String)> = Vec::new();
+        let mut scan_prefix = String::new();
+        if let Some(p) = &root.palace {
+            for r in palace::list_rooms(p) {
+                room_dirs.push((format!("{}/", rel_path(&p.root, &r.path)), r.name));
+            }
+            let s = rel_path(&p.root, &p.scan_root);
+            if !s.is_empty() {
+                scan_prefix = format!("{s}/");
+            }
+        }
+        Frame {
+            palace: root.palace.is_some(),
+            room_dirs,
+            scan_prefix,
+        }
+    }
+
+    /// The room whose directory holds this file.
+    pub(crate) fn room_of(&self, rel: &str) -> Option<String> {
+        self.room_dirs
+            .iter()
+            .find(|(prefix, _)| rel.starts_with(prefix.as_str()))
+            .map(|(_, n)| n.clone())
+    }
+
+    /// The crystals a file holds, each with its room, and how many glyph-less lines were passed
+    /// over. A crystal is a crystal line in a container file (a root marker, and in a workfolder
+    /// each room's `CLAUDE.md`) or a `type: crystal` file; in a workfolder a file crystal counts
+    /// only under the folder the layout scans (and `garden/`), as the reference reader does.
+    pub(crate) fn crystals_in(&self, rel: &str, text: &str) -> (Vec<Crystal>, usize) {
+        let name = rel.rsplit('/').next().unwrap_or(rel);
+        let container = if self.palace {
+            (!rel.contains('/') && palace::is_marker(name))
+                || self
+                    .room_dirs
+                    .iter()
+                    .any(|(prefix, _)| rel == format!("{prefix}CLAUDE.md"))
+        } else {
+            !rel.contains('/') && palace::is_marker(name)
+        };
+        let scanned =
+            !self.palace || rel.starts_with(&self.scan_prefix) || rel.starts_with("garden/");
+        let room = self.room_of(rel);
+        let mut found: Vec<Crystal> = Vec::new();
+        let mut legacy = 0;
+        if container {
+            let (c, n) = format2::read_lines(text, rel);
+            found.extend(c);
+            legacy = n;
+        }
+        if scanned {
+            if let Some(c) = format2::read_file_crystal(text, rel) {
+                found.push(c);
+            }
+        }
+        for c in &mut found {
+            c.room = room.clone();
+        }
+        (found, legacy)
+    }
 }
 
 /// Read what a root holds. One walk reads everything, so nothing outside the root is ever
@@ -313,17 +394,7 @@ fn build_corpus(root: &Root, qtokens: &[String]) -> Corpus {
 
     // Palace crystals, grouped by the file that holds them. Room membership comes with them.
     let mut crystals: Vec<Crystal> = Vec::new();
-    let mut room_dirs: Vec<(String, String)> = Vec::new(); // (relative dir with trailing /, name)
-    let mut scan_prefix = String::new(); // "" when the whole root is scanned
-    if let Some(p) = &root.palace {
-        for r in palace::list_rooms(p) {
-            room_dirs.push((format!("{}/", rel_path(&p.root, &r.path)), r.name));
-        }
-        let s = rel_path(&p.root, &p.scan_root);
-        if !s.is_empty() {
-            scan_prefix = format!("{s}/");
-        }
-    }
+    let frame = Frame::of(root);
 
     let mut files: Vec<FileMeta> = Vec::new();
     let mut chunks: Vec<Chunk> = Vec::new();
@@ -363,7 +434,7 @@ fn build_corpus(root: &Root, qtokens: &[String]) -> Corpus {
                 continue;
             }
             if meta.is_dir() {
-                if name.starts_with('.') || SKIP_DIRS.contains(&name.as_str()) {
+                if skipped_dir(&name) {
                     scope.skipped_dirs += 1;
                 } else {
                     subdirs.push(path);
@@ -408,38 +479,12 @@ fn build_corpus(root: &Root, qtokens: &[String]) -> Corpus {
             scope.files_read += 1;
             let rel = rel_path(&root.path, &path);
 
-            // The room whose directory holds this file.
-            let room = room_dirs
-                .iter()
-                .find(|(prefix, _)| rel.starts_with(prefix.as_str()))
-                .map(|(_, n)| n.clone());
-
-            // The crystals this file holds.
-            let container = if root.palace.is_some() {
-                (!rel.contains('/') && palace::is_marker(&name))
-                    || room_dirs
-                        .iter()
-                        .any(|(prefix, _)| rel == format!("{prefix}CLAUDE.md"))
-            } else {
-                !rel.contains('/') && palace::is_marker(&name)
-            };
-            let scanned = root.palace.is_none()
-                || rel.starts_with(&scan_prefix)
-                || rel.starts_with("garden/");
-            let mut found: Vec<Crystal> = Vec::new();
-            if container {
-                let (c, n) = format2::read_lines(text, &rel);
-                found.extend(c);
-                scope.legacy_lines_not_counted += n;
-            }
-            if scanned {
-                if let Some(c) = format2::read_file_crystal(text, &rel) {
-                    found.push(c);
-                }
-            }
+            // The room whose directory holds this file, and the crystals it holds.
+            let room = frame.room_of(&rel);
+            let (found, legacy) = frame.crystals_in(&rel, text);
+            scope.legacy_lines_not_counted += legacy;
             let mut mine: Vec<usize> = Vec::new();
-            for mut c in found {
-                c.room = room.clone();
+            for c in found {
                 mine.push(crystals.len());
                 crystals.push(c);
             }
@@ -494,7 +539,7 @@ fn counted(text: &str, qtokens: &[String]) -> (u32, Vec<u32>) {
 /// that what was opened is the same regular file (a file swapped for a link after the check is
 /// refused), and read at most the cap plus one byte so a file that grew is reported, not half-read.
 /// `Ok(None)` means over the cap.
-fn read_capped(path: &Path, meta: &fs::Metadata) -> std::io::Result<Option<Vec<u8>>> {
+pub(crate) fn read_capped(path: &Path, meta: &fs::Metadata) -> std::io::Result<Option<Vec<u8>>> {
     use std::io::Read;
     let f = fs::File::open(path)?;
     let now = f.metadata()?;
@@ -1097,7 +1142,7 @@ fn scope_line(s: &Scope) -> String {
 }
 
 /// A folder's text may hold terminal control sequences; they must not reach the terminal.
-fn plain(s: &str) -> String {
+pub(crate) fn plain(s: &str) -> String {
     s.chars()
         .map(|c| {
             if c.is_control() || is_invisible_format(c) {

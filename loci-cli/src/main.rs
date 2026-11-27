@@ -20,6 +20,7 @@ mod reads;
 mod recall;
 mod scaffold;
 mod tokens;
+mod verify_cite;
 
 #[derive(Parser)]
 #[command(
@@ -90,6 +91,20 @@ enum Cmd {
         /// Treat this day (YYYY-MM-DD) as today when deciding what is due.
         #[arg(long, value_name = "DATE")]
         as_of: Option<String>,
+    },
+    /// Check an answer's `path:line "quote"` citations against the files (experimental): is the quoted text there? Presence, not support.
+    ///
+    /// Every cite is looked up under one root (`--root PATH`, else `--workfolder`,
+    /// `$LOCI_WORKFOLDER`, `$LOCI_PALACE`, or the workfolder you are inside). Exit 0 when every
+    /// cite is grounded, 4 when any is not. Nothing outside the root is opened or named, and no
+    /// model is used. A cite with no quoted claim after it is reported as unclaimed, and that
+    /// counts as ungrounded too (exit 4).
+    VerifyCite {
+        /// A file holding the answer to check.
+        answer_file: PathBuf,
+        /// Read this folder, even if it is not a workfolder.
+        #[arg(long, value_name = "PATH")]
+        root: Option<PathBuf>,
     },
     /// Approximate agent-runtime session-window status (5h rolling) from local transcripts.
     Tokens,
@@ -189,8 +204,7 @@ fn main() -> ExitCode {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Outcome {
     Clean,
-    /// No command returns this yet; `loci check` is the first. The code and its tests land first.
-    #[allow(dead_code)]
+    /// `loci verify-cite` returns this when a cite is not grounded.
     Findings,
 }
 
@@ -231,6 +245,16 @@ fn run(cli: Cli) -> Result<Outcome, Error> {
             },
             cli.json,
         ),
+        Cmd::VerifyCite { answer_file, root } => {
+            return verify_cite::run(
+                verify_cite::Args {
+                    answer_file,
+                    root,
+                    workfolder: cli.palace,
+                },
+                cli.json,
+            )
+        }
         Cmd::Reads { days } => cmd_reads(cli.palace, days, cli.json),
         Cmd::Rain { fire } => cmd_rain(cli.palace, fire, cli.json),
         Cmd::New { path, force } => cmd_new(&path, force, cli.json),
@@ -262,6 +286,7 @@ const OVERVIEW_GROUPS: &[(&str, &[(&str, &str)])] = &[
             ("read", "loci read <slug>"),
             ("handover", "loci handover"),
             ("recall", "loci recall \"what did we decide about hosting\""),
+            ("verify-cite", "loci verify-cite answer.md"),
         ],
     ),
     (
@@ -427,8 +452,8 @@ fn cmd_overview(palace_arg: Option<PathBuf>, json: bool) -> Result<(), Error> {
         println!("{gname}");
         for (n, usage) in *cmds {
             let about = brief(abouts.get(*n).map(|s| s.as_str()).unwrap_or(""), 64);
-            println!("  {n:<10} {about}");
-            println!("  {:<10}   e.g. {usage}", "");
+            println!("  {n:<11} {about}");
+            println!("  {:<11}   e.g. {usage}", "");
         }
         println!();
     }

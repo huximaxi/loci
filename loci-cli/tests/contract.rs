@@ -113,6 +113,12 @@ fn want(list: &[&str]) -> Vec<String> {
     v
 }
 
+/// An answer whose two cites hold against the `rooms-dir` fixture.
+const ANSWER: &str = concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/tests/fixtures/grounding/answers/rooms-dir-good.md"
+);
+
 #[test]
 fn every_json_command_emits_one_document_with_the_contract_keys() {
     let w = World::new("json");
@@ -186,6 +192,10 @@ fn every_json_command_emits_one_document_with_the_contract_keys() {
             ],
         ),
         (
+            vec!["verify-cite", ANSWER],
+            vec!["answer_file", "scope", "cites", "counts", "verified"],
+        ),
+        (
             vec!["audit"],
             vec![
                 "wal",
@@ -235,6 +245,7 @@ fn usage_errors_are_exit_3_on_stderr_with_empty_stdout() {
         vec!["reads", "--days", "x"],
         vec!["recall"],
         vec!["recall", "x", "--limit", "0"],
+        vec!["verify-cite"],
         vec!["status", "--nope"],
         vec![],
     ] {
@@ -453,8 +464,20 @@ fn user_facing_text_says_workfolder_not_palace() {
     };
     let mut seen: Vec<(String, String)> = Vec::new();
     for cmd in [
-        "", "status", "crystals", "read", "handover", "tokens", "reads", "rain", "recall", "new", "init",
-        "audit", "overview",
+        "",
+        "status",
+        "crystals",
+        "read",
+        "handover",
+        "tokens",
+        "reads",
+        "rain",
+        "recall",
+        "verify-cite",
+        "new",
+        "init",
+        "audit",
+        "overview",
     ] {
         let mut args: Vec<&str> = Vec::new();
         if !cmd.is_empty() {

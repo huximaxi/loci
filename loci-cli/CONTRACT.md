@@ -10,7 +10,7 @@ freeze: its labels and wording may change in any release, and so may the free-te
 
 From 2.0 the commands, flags, exit codes and `--json` keys below are frozen until 3.0. A release may
 **add** a command, a flag, an optional argument, a `--json` key or an exit code. It may not remove or rename one,
-or change what one means. Experimental commands (`audit`, `wal verify`, `recall`) are marked, and the freeze
+or change what one means. Experimental commands (`audit`, `wal verify`, `recall`, `verify-cite`) are marked, and the freeze
 covers their shape only from the release that drops the mark.
 
 ## Resolving the workfolder
@@ -135,6 +135,36 @@ path and line. Tokenizer `unicode-alnum-v1`: no stemming, no stopwords, no accen
 `--json` keys: `query`, `query_tokens`, `unmatched_tokens`, `tokenizer`, `scoring`, `as_of`,
 `matching_chunks`, `scope`, `results`. The keys inside `scope` and `results` are not frozen until the
 mark is dropped.
+
+### `loci verify-cite`
+
+**Experimental.** Check an answer's citations against the files, with no model and no network. Argument:
+a file holding the answer. Flag: `--root <dir>`; the root is found as for `recall`. Every cite in the
+answer is `path:line "quoted claim"`: the file must be a corpus file (the `.md` files `recall` reads),
+the line range must exist, and the quote must be on those lines. **Presence only**: it does not show that
+the quote supports the sentence around it, and the last-but-one line of the text output says so.
+Cite forms: `path:N`, `path:N-M`; the same with an `L` before either number (`path:L10-L20`); a link
+anchor, bare or in a markdown link (`path#L10-L20`, `[Title](path#L10)`), with no percent-decoding, so a
+space ends the path. A path has no whitespace, quote, `#`, bracket, comma, semicolon or further `:`
+(the path is cut at the first of them), is at most 4096 characters, has a letter, and contains `/` or
+ends in `.md`, which keeps `10:30`, `3/4:5` and URLs out. The claim is the first double-quoted span
+(straight or curly) after the cite on the same line, with only spaces, tabs and the marks `) ] \` : , -`
+between: a word in between (`a.md:1 says "x"`) leaves the cite `unclaimed`. Matching collapses runs of whitespace, joins the cited lines with one space, and is a
+case-sensitive substring: no fuzzy matching and no Unicode normalisation.
+Statuses: `ok`, `unclaimed` (no quote after the cite), `no_file`, `not_in_corpus`, `outside_workfolder`,
+`line_out_of_range`, `bad_range`, `claim_not_found`, `unreadable`. A cite is folded without touching the
+disk; one that leaves the root is `outside_workfolder` and is never opened. A path that is not a `.md`
+file, or is under a hidden directory, `node_modules`, `target` or `cron` (compared in lower case), is
+`not_in_corpus` whether or not it exists, so the command is not a way to learn which other files lie under
+the root or what they hold. A symlink anywhere on the path is `not_in_corpus` and nothing is followed:
+that a link is there can be told from `no_file`, where it points cannot. A cite that spells the case of a
+name differently reaches the file the disk reaches, and is read as that file. `ok` carries `warning: "stale: superseded"` or
+`"stale: retired"` when any cited line is inside such a crystal (any overlap, so a wide range does not hide it); a stale cite is grounded.
+Exit 0: every cite is `ok` (and zero cites, which prints `nothing was verified`). Exit 4: at least one is
+not, an `unclaimed` cite included. Exit 2: no root. Exit 3: no answer file, it is not a regular file, it
+is over 1 MiB or not UTF-8.
+`--json` keys: `answer_file`, `scope`, `cites`, `counts`, `verified`. The keys inside `scope` and `cites`
+are not frozen until the mark is dropped.
 
 ### `loci new`
 
