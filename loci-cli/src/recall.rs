@@ -1097,7 +1097,7 @@ fn scope_line(s: &Scope) -> String {
 }
 
 /// A folder's text may hold terminal control sequences; they must not reach the terminal.
-fn plain(s: &str) -> String {
+pub(crate) fn plain(s: &str) -> String {
     s.chars()
         .map(|c| {
             if c.is_control() || is_invisible_format(c) {

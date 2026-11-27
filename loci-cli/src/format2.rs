@@ -449,18 +449,28 @@ fn skipped(name: &str) -> bool {
 const CONTAINER_CAP: u64 = 8 * 1024 * 1024;
 const FILE_CAP: u64 = 64 * 1024;
 
-/// Read at most `cap` bytes of a regular file as text. A leading BOM is dropped and bytes that are
-/// not UTF-8 read as U+FFFD. `None` when the path is not a regular file or cannot be opened.
-fn read_capped(path: &Path, cap: u64) -> Option<String> {
+/// Read at most `cap` bytes of a regular file as text, and say whether the file was longer than
+/// that. A leading BOM is dropped and bytes that are not UTF-8 read as U+FFFD. `None` when the path
+/// is not a regular file or cannot be opened. The kind is checked before the open, so a FIFO is
+/// never opened (an open on one blocks until something writes to it).
+fn read_capped(path: &Path, cap: u64) -> Option<(String, bool)> {
     use std::io::Read;
-    let f = fs::File::open(path).ok()?;
-    if !f.metadata().ok()?.is_file() {
+    if !fs::metadata(path).ok()?.is_file() {
         return None;
     }
+    let f = fs::File::open(path).ok()?;
+    let meta = f.metadata().ok()?;
+    if !meta.is_file() {
+        return None;
+    }
+    let cut = meta.len() > cap;
     let mut buf = Vec::new();
     f.take(cap).read_to_end(&mut buf).ok()?;
     let text = String::from_utf8_lossy(&buf);
-    Some(text.strip_prefix('\u{feff}').unwrap_or(&text).to_string())
+    Some((
+        text.strip_prefix('\u{feff}').unwrap_or(&text).to_string(),
+        cut,
+    ))
 }
 
 /// Regular `.md` files under `dir`. Symlinks to files and directories are followed, as room
@@ -519,6 +529,10 @@ pub struct Reading {
     pub documents: Vec<String>,
     /// Glyph-less bullets shaped like a legacy crystal (`- **Name** = fact`): read as notes.
     pub notes: usize,
+    /// Files that are there but were not read in full: not readable, not a regular file, or a
+    /// container (root file, room `CLAUDE.md`) longer than [`CONTAINER_CAP`]. Root-relative,
+    /// sorted. A reading that skipped something must say so; silence is not health.
+    pub unread: Vec<String>,
 }
 
 fn rel(root: &Path, p: &Path) -> String {
@@ -551,10 +565,18 @@ pub fn read_palace(p: &palace::Palace) -> Reading {
 
     let mut crystals = Vec::new();
     let mut notes = 0;
+    let mut unread = Vec::new();
     for c in containers.iter() {
-        let Some(text) = read_capped(c, CONTAINER_CAP) else {
+        let Some((text, cut)) = read_capped(c, CONTAINER_CAP) else {
+            // A marker that is not there is normal; one that is there and cannot be read is not.
+            if fs::symlink_metadata(c).is_ok() {
+                unread.push(rel(root, c));
+            }
             continue;
         };
+        if cut {
+            unread.push(rel(root, c));
+        }
         let (found, n) = read_lines(&text, &rel(root, c));
         crystals.extend(found);
         notes += n;
@@ -571,7 +593,15 @@ pub fn read_palace(p: &palace::Palace) -> Reading {
     let mut documents = Vec::new();
     for f in files {
         let name = f.file_name().unwrap().to_string_lossy().to_string();
-        let text = read_capped(&f, FILE_CAP).unwrap_or_default();
+        // A file crystal is read only as far as FILE_CAP, by design; a file that cannot be opened is
+        // not by design.
+        let text = match read_capped(&f, FILE_CAP) {
+            Some((text, _)) => text,
+            None => {
+                unread.push(rel(root, &f));
+                String::new()
+            }
+        };
         match read_file_crystal(&text, &rel(root, &f)) {
             Some(c) => crystals.push(c),
             None if palace::is_marker(&name) => {}
@@ -585,12 +615,15 @@ pub fn read_palace(p: &palace::Palace) -> Reading {
             .find(|r| c.file.starts_with(&format!("{}/", rel(root, &r.path))))
             .map(|r| r.name.clone());
     }
+    unread.sort();
+    unread.dedup();
     Reading {
         layout,
         rooms: rooms.into_iter().map(|r| r.name).collect(),
         crystals,
         documents,
         notes,
+        unread,
     }
 }
 
@@ -1361,5 +1394,71 @@ mod tests {
             .unwrap()
             .get("line")
             .is_none());
+    }
+
+    #[test]
+    fn a_file_longer_than_the_cap_says_so_and_a_missing_one_is_none() {
+        let d = scratch("cap");
+        fs::write(d.join("long.md"), "0123456789abcdef").unwrap();
+        fs::write(d.join("short.md"), "\u{feff}0123").unwrap();
+        let (text, cut) = read_capped(&d.join("long.md"), 10).unwrap();
+        assert_eq!((text.as_str(), cut), ("0123456789", true));
+        let (text, cut) = read_capped(&d.join("long.md"), 16).unwrap();
+        assert_eq!(
+            (text.as_str(), cut),
+            ("0123456789abcdef", false),
+            "exactly the cap is not cut"
+        );
+        let (text, cut) = read_capped(&d.join("short.md"), 10).unwrap();
+        assert_eq!((text.as_str(), cut), ("0123", false), "the BOM is dropped");
+        assert!(read_capped(&d.join("nope.md"), 10).is_none());
+        assert!(read_capped(&d, 10).is_none(), "a directory is not read");
+        let _ = fs::remove_dir_all(&d);
+    }
+
+    /// An open on a FIFO blocks until a writer appears, so the reader must not open one.
+    #[cfg(unix)]
+    #[test]
+    fn a_fifo_is_never_opened() {
+        let d = scratch("fifo");
+        let fifo = d.join("CLAUDE.md");
+        let made = std::process::Command::new("mkfifo").arg(&fifo).status();
+        if !matches!(made, Ok(s) if s.success()) {
+            return; // no mkfifo here: nothing to prove
+        }
+        let (tx, rx) = std::sync::mpsc::channel();
+        let path = fifo.clone();
+        std::thread::spawn(move || {
+            let _ = tx.send(read_capped(&path, 1024).is_none());
+        });
+        let answered = rx.recv_timeout(std::time::Duration::from_secs(10));
+        assert_eq!(
+            answered,
+            Ok(true),
+            "read_capped blocked on a FIFO or read it"
+        );
+        let _ = fs::remove_dir_all(&d);
+    }
+
+    #[test]
+    fn a_reading_names_what_it_could_not_read_in_full() {
+        let d = scratch("unread");
+        fs::write(d.join("WORKFOLDER.md"), "# w\n").unwrap();
+        fs::create_dir_all(d.join("rooms/work")).unwrap();
+        fs::write(d.join("rooms/work/CLAUDE.md"), "◆ a = fine\n").unwrap();
+        let p = palace::validate(&d).unwrap();
+        assert!(
+            read_palace(&p).unread.is_empty(),
+            "a normal workfolder reads whole"
+        );
+        // A dangling link in place of a container: it is there, and it cannot be read.
+        #[cfg(unix)]
+        {
+            std::os::unix::fs::symlink(d.join("gone.md"), d.join("CLAUDE.md")).unwrap();
+            let r = read_palace(&p);
+            assert_eq!(r.unread, vec!["CLAUDE.md".to_string()]);
+            assert_eq!(r.crystals.len(), 1, "everything else was still read");
+        }
+        let _ = fs::remove_dir_all(&d);
     }
 }

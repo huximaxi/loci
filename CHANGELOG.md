@@ -8,6 +8,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- `loci check`: ask the workfolder whether it still agrees with itself. Read-only; findings come as
+  `path:line`, and every run says how many rules ran, how many crystals were read and which files it
+  could not read in full, so a quiet run is not read as a healthy one. Each finding is a `warn` or a
+  `fail`: exit `4` when there is a `fail`, exit `0` otherwise (a `warn` is printed, never fails the run). `--scope room|workfolder` and `--as-of <date>` (the date a rule compares
+  against; the clock only fills its default). The command and its `--json` output are frozen from
+  2.0; no rule is registered in this change, the rules land one at a time, each with a planted and a
+  clean fixture and the `path:line` it must point at, which CI holds it to.
 - `loci recall <query>` (experimental): ask your files a question with no model and no network. BM25
   over a workfolder or any folder of notes, each hit a `path:line` with its crystal state (current,
   due, superseded, retired, or not a crystal). Reads one root, follows no symlink, skips hidden
@@ -19,12 +26,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   ceremony put it. With the `rooms/` layout it looked inside `rooms/` and always found no plants.
   A garden inside the scan root (`_palace/garden/`) is still read when the root garden holds no
   `plants/` or `.rain/` and the older one does.
+- Reading a workfolder no longer hangs when a root file or a room's `CLAUDE.md` is a FIFO: the kind of
+  a file is checked before it is opened. A file that is there but cannot be read in full is now listed
+  by `loci check` instead of being skipped in silence.
 
 ### Changed
-- A new exit code, `4`: "ran, found problems". It is for commands that read your files and report findings
-  (`loci check`, coming in this release). `1` stays "could not run", `2` not found, `3` bad input, so
-  a script that treats any non-zero as failure is unaffected. No command returns `4` yet; the code
-  and its row in `CONTRACT.md` land first.
+- A new exit code, `4`: "ran, found problems". It is for a command that read your files and found
+  something that fails the run (`loci check`, on a `fail`; a `warn` exits 0). `1` stays "could not run", `2` not found, `3` bad input, so
+  a script that treats any non-zero as failure is unaffected.
 - One version line. The CLI, the templates kit and the methodology are all 2.0: the CLI goes from
   0.7.0-beta to `2.0.0-rc.1`, the methodology anchor from 1.6-candidate to 2.0-candidate (`stable`
   stays 1.2; the field is still `loci-core version`), and `package.json` follows the line. The

@@ -14,6 +14,7 @@ use std::path::{Path, PathBuf};
 use loci_wal::{ChainError, EgressClass, Frame, ProofBundle, Wal};
 use std::process::ExitCode;
 
+mod check;
 mod format2;
 mod palace;
 mod reads;
@@ -69,6 +70,21 @@ enum Cmd {
     },
     /// Print the most recent handover (by mtime).
     Handover,
+    /// Ask the workfolder whether it still agrees with itself: findings as `path:line`. Read-only.
+    ///
+    /// Runs every rule over the workfolder and prints what it found, with how many rules ran,
+    /// how many crystals were read and which files it could not read in full, so a quiet run is
+    /// not mistaken for a healthy one. Exit 4 when a rule found a `fail`; a `warn` is printed and the exit stays 0. It
+    /// never edits a file, uses no model and no network, and reads the clock only to fill in
+    /// the default of `--as-of` (UTC).
+    Check {
+        /// How wide to compare crystals: within a room (default) or across the workfolder.
+        #[arg(long, value_enum, default_value_t = check::Scope::Room)]
+        scope: check::Scope,
+        /// Treat this day (YYYY-MM-DD) as today when a rule compares against a date.
+        #[arg(long, value_name = "DATE")]
+        as_of: Option<String>,
+    },
     /// Ask the workfolder a question, no model (experimental): BM25 over every markdown file, results marked current, due, superseded or retired.
     ///
     /// Reads one root: `--root PATH` (any folder of markdown), else `--workfolder`,
@@ -184,13 +200,14 @@ fn main() -> ExitCode {
 }
 
 /// What a command that ran to the end reports. `Findings` means it ran and found
-/// problems in the files it read (exit 4, nothing on stderr: the findings are its
-/// output). It is not an error: 1 stays "could not run".
+/// something that fails the run in the files it read (exit 4, nothing on stderr: the
+/// findings are its output). It is not an error: 1 stays "could not run".
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Outcome {
+    /// It ran to the end and nothing failed it. `loci check` also returns this when it only printed
+    /// `warn` findings.
     Clean,
-    /// No command returns this yet; `loci check` is the first. The code and its tests land first.
-    #[allow(dead_code)]
+    /// `loci check` returns this when any rule found a `fail` (a `warn` does not).
     Findings,
 }
 
@@ -213,6 +230,16 @@ fn run(cli: Cli) -> Result<Outcome, Error> {
         Cmd::Crystals { room } => cmd_crystals(cli.palace, room, cli.json),
         Cmd::Read { slug, room } => cmd_read(cli.palace, &slug, room.as_deref(), cli.json),
         Cmd::Handover => cmd_handover(cli.palace, cli.json),
+        Cmd::Check { scope, as_of } => {
+            return check::run(
+                check::Args {
+                    workfolder: cli.palace,
+                    scope,
+                    as_of,
+                },
+                cli.json,
+            )
+        }
         Cmd::Tokens => cmd_tokens(cli.json),
         Cmd::Recall {
             query,
@@ -261,6 +288,7 @@ const OVERVIEW_GROUPS: &[(&str, &[(&str, &str)])] = &[
             ("crystals", "loci crystals --room soul"),
             ("read", "loci read <slug>"),
             ("handover", "loci handover"),
+            ("check", "loci check --scope workfolder"),
             ("recall", "loci recall \"what did we decide about hosting\""),
         ],
     ),

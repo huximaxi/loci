@@ -34,7 +34,7 @@ found is exit 2. The workfolder spellings are canonical. The old ones (`--palace
 | `1` | I/O or unexpected error (unreadable file, malformed JSON input). |
 | `2` | Not found: no workfolder, no such crystal, no handover, no room. Nothing else. |
 | `3` | Bad input: a usage error (unknown flag or command, missing or malformed argument), an ambiguous slug, a removed flag (`rain --fire`), refusing to overwrite, a file over its size cap, `init` run without a terminal. Also `wal verify` when the bundle parses and does not verify (see its section). |
-| `4` | Ran, found problems: a command that read your files to the end and reports findings (added in 2.0.0-rc.2). Its findings are its output on stdout, and it writes no `loci:` line to stderr. Not an error: `1` stays "could not run". `wal verify` is not this: a bundle that does not verify stays `3`. A script that only tests for non-zero is unaffected; one that branches on the number (a `case` with a default for "could not run", or a test for `1` meaning findings) must handle `4`. |
+| `4` | Ran, found problems: a command that read your files to the end and found something that fails the run (added in 2.0.0-rc.2; for `loci check`, a `fail`: a `warn` exits 0). Its findings are its output on stdout, and it writes no `loci:` line to stderr. Not an error: `1` stays "could not run". `wal verify` is not this: a bundle that does not verify stays `3`. A script that only tests for non-zero is unaffected; one that branches on the number (a `case` with a default for "could not run", or a test for `1` meaning findings) must handle `4`. |
 
 A usage error is 3, never 2. (Before 2.0 clap's own exit 2 made a mistyped flag look like a missing
 workfolder.)
@@ -88,6 +88,40 @@ Exit 2: no workfolder or no such crystal. Exit 3: the slug is in several rooms a
 
 Print the newest handover by modification time. Exit 2: no workfolder, no handover.
 `--json` keys: `path`, `content`.
+
+### `loci check`
+
+Ask the workfolder whether it still agrees with itself. Read-only: it never edits a file and uses no
+model and no network. It reads the clock only to fill in the default of `--as-of` (today, in UTC, so
+near midnight it can differ from your wall clock; pass `--as-of` to pin it). A finding is a
+proposal; the person decides.
+Flags: `--scope room|workfolder` (default `room`: how wide a rule compares crystals; a rule that does
+not compare across rooms ignores it; crystals outside any room, the root files and `garden/`, form one
+group of their own), `--as-of <YYYY-MM-DD>` (the date a rule compares against). It runs on a workfolder
+only: a plain folder of notes is exit 2.
+Exit 0: no finding of severity `fail`; a `warn` is printed and does not change the exit code. Exit 4:
+at least one `fail`; the findings are the output and stderr stays empty. New rules are additive, so a
+rule added (or moved up) at `fail` can turn an unchanged workfolder from 0 to 4, and one moved down
+to `warn` can turn a 4 into a 0: pin the version in CI, or read `findings` and act on `severity`. A
+rule added at `warn` cannot turn a 0 into a 4. Exit 2: no workfolder. Exit 3: a `--as-of` that is
+not a real date, a `--scope` that is not one of the two. Exit 1: a rule returned a finding without a
+usable `path:line`, which is a bug in loci, not in your files.
+Every run says how many rules ran, how many crystals were read and how many findings there are (and how many of those are `fail`), including `0 rules ran: nothing
+was checked`, and names each file it could not read in full (unreadable, not a regular file, or a
+root or room `CLAUDE.md` cut at 8 MiB), so a quiet run is never mistaken for a healthy one. Unread
+files do not change the exit code. Rules are registered one at a time; a rule ships only with a
+workfolder that makes it fire, one that does not, and the `path:line` its planted one must point at,
+held in CI.
+`--json` keys: `palace`, `layout`, `scope`, `as_of`, `rules_run`, `crystals_considered`,
+`legacy_lines_not_counted`, `files_unread` (root-relative paths), `rules`, `findings`. Each entry of
+`rules` is `id`, `severity`, `summary`, `finding_count`, in the order the rules run; each entry of
+`findings` is `rule`, `severity` (`warn` or `fail`), `message` and `locations`, a list of `path`
+(relative to the workfolder, `/`-separated) and `line` (1-based). Findings are ordered by their
+locations, then rule id, then message. `message` and `summary` are free text and are not frozen. JSON
+strings are not sanitised: a message may carry any character, and the text output is the one that
+hides control characters.
+Frozen from 2.0: the keys listed above, at every level, and every released rule id. Additive: new
+keys, new rules, new flags and new `severity` values.
 
 ### `loci tokens`
 

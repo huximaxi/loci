@@ -73,6 +73,7 @@ nothing is printed about the other, so unset it (or use `--workfolder`) for a pe
 | `loci read <slug>` | Print a crystal's contents |
 | `loci read <slug> --room <name>` | Disambiguate when the same slug lives in two rooms |
 | `loci handover` | Print the most recent handover by mtime |
+| `loci check` | Ask the workfolder whether it still agrees with itself: findings as `path:line`, and how many rules ran and crystals were read. Read-only; exit 4 when a rule found a `fail`, and a `warn` is printed with exit 0. `--scope room\|workfolder` and `--as-of <YYYY-MM-DD>` |
 | `loci tokens` | Approximate status of your agent runtime's 5-hour session window, read from local transcripts (timing, not quota) |
 | `loci reads` | How often your agent read the workfolder: user turns followed by a read, counts only, from local transcripts. `--days <n>` (default 7) |
 | `loci recall <query>` | Ask the files a question, no model, no network (experimental): BM25 ranked hits as `path:line`, each with its crystal state (current, due, superseded, retired). `--root <dir>` reads any folder of notes; `--limit`, `--room`, `--as-of` narrow it |
@@ -115,11 +116,11 @@ crate docs for the exact guarantees.
 
 | Code | Meaning |
 |---|---|
-| `0` | Clean |
+| `0` | Clean (for `loci check`: no `fail` finding; a `warn` is printed and still exits 0) |
 | `1` | I/O or unexpected error |
 | `2` | Workfolder or crystal not found (nothing else) |
 | `3` | Bad input: a usage error (unknown flag or command, missing argument), an ambiguous slug |
-| `4` | Ran, found problems: the command read your files and its findings are its output (not an error) |
+| `4` | Ran, found problems: the command read your files and a finding failed the run (for `loci check`, a `fail`); the findings are its output, not an error |
 
 Errors go to stderr and leave stdout empty, with or without `--json`. The full contract, with each
 command's flags and `--json` keys, is [`CONTRACT.md`](CONTRACT.md); tests hold it.
